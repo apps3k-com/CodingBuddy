@@ -27,6 +27,7 @@
 		8BAA8BFE2FD8BB0B006C0D80 /* EnvVarBuddy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EnvVarBuddy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BAA8C0D2FD8BB0C006C0D80 /* EnvVarBuddyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EnvVarBuddyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BAA8C172FD8BB0C006C0D80 /* EnvVarBuddyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EnvVarBuddyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8BAACF0000000000000000C1 /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Version.xcconfig; path = Configs/Version.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +76,7 @@
 		8BAA8BF52FD8BB0B006C0D80 = {
 			isa = PBXGroup;
 			children = (
+				8BAACF0000000000000000C1 /* Version.xcconfig */,
 				8BAA8C002FD8BB0B006C0D80 /* EnvVarBuddy */,
 				8BAA8C102FD8BB0C006C0D80 /* EnvVarBuddyTests */,
 				8BAA8C1A2FD8BB0C006C0D80 /* EnvVarBuddyUITests */,
@@ -391,6 +393,7 @@
 		};
 		8BAA8C222FD8BB0C006C0D80 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8BAACF0000000000000000C1 /* Version.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -407,7 +410,6 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = apps3k.EnvVarBuddy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -422,6 +424,7 @@
 		};
 		8BAA8C232FD8BB0C006C0D80 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8BAACF0000000000000000C1 /* Version.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -438,7 +441,6 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = apps3k.EnvVarBuddy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;

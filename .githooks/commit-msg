@@ -1,0 +1,18 @@
+#!/bin/sh
+# Enforces Conventional Commits — release-please derives versions from these.
+# Activate once per clone: ./scripts/setup.sh
+
+MSG_FILE="$1"
+FIRST_LINE=$(head -n 1 "$MSG_FILE")
+
+# Merge commits and fixups are exempt.
+case "$FIRST_LINE" in
+  Merge\ *|Revert\ *|fixup!\ *|squash!\ *) exit 0 ;;
+esac
+
+if ! echo "$FIRST_LINE" | grep -qE '^(feat|fix|docs|chore|ci|refactor|test|perf|build|style|revert)(\([a-z0-9_-]+\))?!?: .+'; then
+  echo "✖ Commit message must follow Conventional Commits:" >&2
+  echo "    feat: …  fix: …  docs: …  chore: …  (optional scope, '!' for breaking)" >&2
+  echo "  Got: $FIRST_LINE" >&2
+  exit 1
+fi

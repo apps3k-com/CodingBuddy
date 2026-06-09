@@ -1,0 +1,9 @@
+#!/bin/sh
+# Pre-push gate: feature-flag registry and docs must be consistent.
+# Activate once per clone: ./scripts/setup.sh
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+"$REPO_ROOT/scripts/check-feature-flags.sh" || {
+  echo "✖ Push blocked: fix the feature-flag registry first (see above)." >&2
+  exit 1
+}
