@@ -25,15 +25,15 @@ struct ShellConfigWriter {
         var errorDescription: String? {
             switch self {
             case .fileChangedExternally:
-                "Die Datei wurde extern geändert. Bitte erneut versuchen."
+                String(localized: "The file was changed externally. Please try again.")
             case .lineNotEditable:
-                "Diese Zeile ist zu komplex und wird von EnvVarBuddy nicht verändert."
+                String(localized: "This line is too complex and is left untouched by EnvVarBuddy.")
             case .invalidName(let name):
-                "„\(name)“ ist kein gültiger Variablenname."
+                String(localized: "“\(name)” is not a valid variable name.")
             case .unrepresentableValue:
-                "Der Wert enthält eine Quote-Kombination, die nicht sicher geschrieben werden kann."
+                String(localized: "The value contains a quote combination that cannot be written safely.")
             case .commandSubstitutionNotAllowed:
-                "Werte mit Command Substitution ($(…) oder `…`) werden nicht unterstützt."
+                String(localized: "Values with command substitution ($(…) or `…`) are not supported.")
             }
         }
     }

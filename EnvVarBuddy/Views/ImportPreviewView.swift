@@ -41,7 +41,7 @@ struct ImportPreviewView: View {
                         if store.variables.contains(where: { $0.name == entry.name }) {
                             Image(systemName: "exclamationmark.triangle")
                                 .foregroundStyle(.orange)
-                                .help("„\(entry.name)“ ist bereits definiert.")
+                                .help("“\(entry.name)” is already defined.")
                         }
                     }
                 }
@@ -50,16 +50,16 @@ struct ImportPreviewView: View {
             Divider()
 
             HStack {
-                Picker("Ziel:", selection: $targetFile) {
+                Picker("Target:", selection: $targetFile) {
                     ForEach(ShellConfigFile.allCases) { file in
                         Text(file.rawValue).tag(file)
                     }
                 }
                 .fixedSize()
                 Spacer()
-                Button("Abbrechen", role: .cancel) { dismiss() }
+                Button("Cancel", role: .cancel) { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                Button("\(selectedIDs.count) importieren") { importSelected() }
+                Button("Import \(selectedIDs.count)") { importSelected() }
                     .keyboardShortcut(.defaultAction)
                     .buttonStyle(.borderedProminent)
                     .disabled(selectedIDs.isEmpty)

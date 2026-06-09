@@ -58,10 +58,10 @@ struct VariableEditorView: View {
 
     private var valueProblem: String? {
         if ShellQuoting.containsCommandSubstitution(rawValue) {
-            return "Command Substitution ($(…) oder `…`) wird nicht unterstützt."
+            return String(localized: "Command substitution ($(…) or `…`) is not supported.")
         }
         if ShellQuoting.bestQuoting(for: rawValue, preferred: .double) == nil {
-            return "Diese Quote-Kombination kann nicht sicher geschrieben werden."
+            return String(localized: "This quote combination cannot be written safely.")
         }
         return nil
     }
@@ -69,7 +69,7 @@ struct VariableEditorView: View {
     private var duplicateHint: String? {
         guard isNew, nameIsValid,
               let existing = store.variables.first(where: { $0.name == name }) else { return nil }
-        return "„\(name)“ ist bereits in \(existing.file.rawValue) definiert — es gilt die letzte Zuweisung in der Ladereihenfolge."
+        return String(localized: "“\(name)” is already defined in \(existing.file.rawValue) — the last assignment in load order wins.")
     }
 
     private var canSave: Bool {
@@ -83,7 +83,7 @@ struct VariableEditorView: View {
                     TextField("Name", text: $name)
                         .monospaced()
                     if !name.isEmpty && !nameIsValid {
-                        ValidationHint("Namen bestehen aus Buchstaben, Ziffern und _ und beginnen nicht mit einer Ziffer.")
+                        ValidationHint(String(localized: "Names consist of letters, digits and _ and must not start with a digit."))
                     }
                     if let duplicateHint {
                         ValidationHint(duplicateHint, severity: .info)
@@ -94,33 +94,33 @@ struct VariableEditorView: View {
                     if editAsList {
                         PathEditorView(rawValue: $rawValue)
                     } else {
-                        TextField("Wert", text: $rawValue, axis: .vertical)
+                        TextField("Value", text: $rawValue, axis: .vertical)
                             .monospaced()
                             .lineLimit(1...4)
                     }
                     if rawValue.contains(":") || editAsList {
-                        Toggle("Als Liste bearbeiten (PATH-Stil)", isOn: $editAsList)
+                        Toggle("Edit as list (PATH-style)", isOn: $editAsList)
                             .toggleStyle(.checkbox)
                     }
                     if let valueProblem {
                         ValidationHint(valueProblem)
                     }
                 } footer: {
-                    Text("Der Wert wird wortwörtlich geschrieben — $VARIABLEN bleiben unausgewertet erhalten.")
+                    Text("The value is written verbatim — $VARIABLES remain unexpanded.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
 
                 Section {
                     if isNew {
-                        Picker("Datei", selection: $targetFile) {
+                        Picker("File", selection: $targetFile) {
                             ForEach(ShellConfigFile.allCases) { file in
                                 Text(file.rawValue).tag(file)
                             }
                         }
                     } else {
-                        LabeledContent("Datei", value: targetFile.rawValue)
-                        Toggle("Mit export für Kindprozesse sichtbar", isOn: $exported)
+                        LabeledContent("File", value: targetFile.rawValue)
+                        Toggle("Visible to child processes (export)", isOn: $exported)
                     }
                 }
             }
@@ -129,12 +129,12 @@ struct VariableEditorView: View {
             Divider()
 
             HStack {
-                Text(isNew ? "Neue Variable" : "Variable bearbeiten")
+                (isNew ? Text("New Variable") : Text("Edit Variable"))
                     .foregroundStyle(.secondary)
                 Spacer()
-                Button("Abbrechen", role: .cancel) { dismiss() }
+                Button("Cancel", role: .cancel) { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                Button("Sichern") { save() }
+                Button("Save") { save() }
                     .keyboardShortcut(.defaultAction)
                     .buttonStyle(.borderedProminent)
                     .disabled(!canSave)

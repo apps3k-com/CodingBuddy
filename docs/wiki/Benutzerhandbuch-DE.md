@@ -33,6 +33,13 @@ Vor jeder Änderung schreibt EnvVarBuddy ein Backup mit Zeitstempel nach
 - **Aus .env importieren…** liest eine dotenv-Datei, zeigt eine Vorschau zur Auswahl der Einträge (Duplikate werden markiert) und hängt sie an den verwalteten Block einer Datei deiner Wahl an.
 - **Sichtbare als .env exportieren…** schreibt die aktuell angezeigten Variablen in eine `.env`-Datei.
 
+## Einstellungen
+
+Öffne **EnvVarBuddy → Einstellungen…** (⌘,):
+
+- **Sprache** — System, English oder Deutsch. Wird nach einem Neustart der App wirksam.
+- **Erscheinungsbild** — Auto (folgt dem System), Hell oder Dunkel.
+
 ## Live-Aktualisierung
 
 EnvVarBuddy beobachtet deine Dotfiles. Änderungen aus Terminal oder Editor erscheinen innerhalb von Sekundenbruchteilen in der App.

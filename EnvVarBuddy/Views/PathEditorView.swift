@@ -30,7 +30,7 @@ struct PathEditorView: View {
                 HStack {
                     Image(systemName: "line.3.horizontal")
                         .foregroundStyle(.tertiary)
-                    TextField("Eintrag", text: $segment.text)
+                    TextField("Entry", text: $segment.text)
                         .monospaced()
                         .textFieldStyle(.plain)
                     Button {
@@ -40,7 +40,7 @@ struct PathEditorView: View {
                             .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
-                    .help("Eintrag entfernen")
+                    .help("Remove entry")
                 }
             }
             .onMove { source, destination in
@@ -49,7 +49,7 @@ struct PathEditorView: View {
         }
         .frame(minHeight: 140)
 
-        Button("Eintrag hinzufügen", systemImage: "plus") {
+        Button("Add Entry", systemImage: "plus") {
             segments.append(Segment(text: ""))
         }
         .buttonStyle(.borderless)
