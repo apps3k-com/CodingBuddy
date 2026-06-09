@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, beta]
+
+jobs:
+  build-and-test:
+    # Xcode 26 is required (deployment target macOS 26).
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          xcodebuild -project EnvVarBuddy.xcodeproj -scheme EnvVarBuddy \
+            -configuration Debug build \
+            CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=NO
+
+      - name: Unit tests
+        run: |
+          xcodebuild test -project EnvVarBuddy.xcodeproj -scheme EnvVarBuddy \
+            -destination 'platform=macOS' -only-testing:EnvVarBuddyTests \
+            CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=NO

@@ -1,0 +1,56 @@
+name: Enforce conventions
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  conventional-pr-title:
+    name: PR title is a Conventional Commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          # Squash merges turn the PR title into the commit release-please reads.
+          if ! echo "$TITLE" | grep -qE '^(feat|fix|docs|chore|ci|refactor|test|perf|build|style|revert)(\([a-z0-9_-]+\))?!?: .+'; then
+            echo "::error::PR title must follow Conventional Commits, e.g. 'feat: add grouped view'. Got: $TITLE"
+            exit 1
+          fi
+
+  feature-flag-registry:
+    name: Feature flags are documented
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check FeatureFlags.swift against docs/FEATURE_FLAGS.md
+        run: ./scripts/check-feature-flags.sh
+
+  docs-updated:
+    name: Wiki sources updated for user-visible changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require docs/wiki changes alongside app changes
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          echo "$CHANGED"
+          if echo "$CHANGED" | grep -qE '^EnvVarBuddy/.*\.(swift|xcstrings)$'; then
+            if echo "$CHANGED" | grep -qE '^docs/(wiki/|FEATURE_FLAGS\.md)'; then
+              echo "App change ships with documentation updates — OK."
+            elif echo "$PR_BODY" | grep -qiE '(^|\s)Docs:\s*none(\s|$)'; then
+              echo "PR declares 'Docs: none' — OK."
+            else
+              echo "::error::App code changed but neither docs/wiki/ nor docs/FEATURE_FLAGS.md was updated. Update the wiki sources (EN + DE) or declare 'Docs: none' in the PR description."
+              exit 1
+            fi
+          else
+            echo "No app code changes — OK."
+          fi
