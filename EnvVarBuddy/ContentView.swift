@@ -8,6 +8,7 @@ import SwiftUI
 enum SidebarScope: Hashable {
     case all
     case file(ShellConfigFile)
+    case mcpAuth
 
     var file: ShellConfigFile? {
         if case .file(let file) = self { return file }
@@ -18,12 +19,14 @@ enum SidebarScope: Hashable {
         switch self {
         case .all: String(localized: "All Variables")
         case .file(let file): file.rawValue
+        case .mcpAuth: "MCP Auth"
         }
     }
 }
 
 struct ContentView: View {
     @State private var store = EnvStore()
+    @State private var mcpAuthStore = MCPAuthStore()
     @State private var secrets = SecretsGuard()
     @State private var scope: SidebarScope? = .all
 
@@ -40,10 +43,26 @@ struct ContentView: View {
                             .tag(SidebarScope.file(file))
                     }
                 }
+                if FeatureFlag.mcpAuthManager.isEnabled {
+                    Section("Credentials") {
+                        Label {
+                            Text(verbatim: "MCP Auth")
+                        } icon: {
+                            Image(systemName: "key.radiowaves.forward")
+                        }
+                        .foregroundStyle(mcpAuthStore.rootExists ? .primary : .secondary)
+                        .badge(mcpAuthStore.entries.count)
+                        .tag(SidebarScope.mcpAuth)
+                    }
+                }
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 210)
         } detail: {
-            VariableListView(store: store, secrets: secrets, scope: scope ?? .all)
+            if scope == .mcpAuth {
+                MCPAuthListView(store: mcpAuthStore, secrets: secrets)
+            } else {
+                VariableListView(store: store, secrets: secrets, scope: scope ?? .all)
+            }
         }
         .alert(
             "Error",
