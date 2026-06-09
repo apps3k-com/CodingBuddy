@@ -31,8 +31,10 @@ struct VariableListView: View {
         let scoped = store.variables(in: scope.file)
         guard !searchText.isEmpty else { return scoped }
         return scoped.filter {
+            // Masked values are excluded from value search: matching them
+            // would confirm a secret's presence without authentication.
             $0.name.localizedCaseInsensitiveContains(searchText)
-                || $0.rawValue.localizedCaseInsensitiveContains(searchText)
+                || (!isMasked($0) && $0.rawValue.localizedCaseInsensitiveContains(searchText))
         }
     }
 
