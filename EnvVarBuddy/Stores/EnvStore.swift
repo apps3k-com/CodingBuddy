@@ -79,6 +79,10 @@ final class EnvStore {
     }
 
     private func perform(_ mutation: () throws -> Void) {
+        // A debounced reload queued by an earlier watcher event would fire
+        // after our own synchronous reload and do the same work again.
+        pendingReload?.cancel()
+        pendingReload = nil
         do {
             try mutation()
             lastError = nil

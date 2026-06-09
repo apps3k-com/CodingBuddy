@@ -50,6 +50,7 @@ final class SecretsGuard {
 
     private func unlock() {
         pendingRelock?.cancel()
+        pendingRelock = nil
 
         let stored = UserDefaults.standard.double(forKey: Self.unlockDurationKey)
         let duration = stored == 0 ? Self.defaultUnlockDuration : stored
