@@ -46,6 +46,16 @@ Variables whose names look like credentials (`GITHUB_TOKEN`, `AWS_SECRET_ACCESS_
 - The unlock expires automatically — configure the duration in *Settings → Security* (1/5/15 minutes or until quit). The lock button re-masks immediately.
 - Copying a value or line, editing, and `.env` export of masked variables all require authentication first.
 
+## MCP credentials (~/.mcp-auth)
+
+The **Credentials → MCP Auth** sidebar section manages the OAuth cache that `mcp-remote` keeps for remote MCP servers — the directory you previously had to wipe with `rm -rf ~/.mcp-auth`.
+
+- Each entry is one server. EnvVarBuddy resolves the cryptic file hashes back to server URLs by matching them against your Claude configuration (`~/.claude.json`, Claude Desktop config); unresolved entries show their hash plus the OAuth scope as a hint.
+- The **status column** shows whether the access token is still active (with its estimated expiry), expired, or the entry is incomplete (a login that never finished).
+- **Reset Entry…** moves just that server's files to the **Trash** — surgical, reversible, and the next connection simply re-runs the OAuth flow. **Reset All…** does the same for everything (the GUI equivalent of `rm -rf ~/.mcp-auth`, but undoable).
+- **View Files…** (or double-click) opens the credential files with all token values masked. After authenticating with Touch ID or your password you can edit the raw JSON; invalid JSON is rejected on save.
+- No app restart is needed: the view live-reloads when `mcp-remote` rewrites the files.
+
 ## Settings
 
 Open **EnvVarBuddy → Settings…** (⌘,):

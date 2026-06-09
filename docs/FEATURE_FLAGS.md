@@ -59,3 +59,10 @@ regression could be disabled via local override.
 
 Import variables from `.env` files (with preview) and export the visible
 variables as `.env`.
+
+### `mcpAuthManager` — maturity: stable
+
+Manages the `~/.mcp-auth` credential cache of `mcp-remote`-connected MCP
+servers: lists entries with server resolution (md5 of configured URLs) and
+token status, resets single servers or everything to the Trash, and edits the
+raw credential JSON after Touch ID / password authentication.
