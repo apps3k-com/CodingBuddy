@@ -12,6 +12,7 @@ struct VariableListView: View {
     var secrets: SecretsGuard
     var scope: SidebarScope
 
+    @AppStorage("groupOverriddenVariables") private var groupOverridden = false
     @State private var searchText = ""
     @State private var selection: EnvVariable.ID?
     @State private var editorMode: VariableEditorView.Mode?
@@ -34,8 +35,32 @@ struct VariableListView: View {
         }
     }
 
+    /// One group per variable name: the assignment that takes effect as the
+    /// parent, shadowed assignments (newest first) as children.
+    private struct VariableGroup: Identifiable {
+        var effective: EnvVariable
+        var overridden: [EnvVariable]
+        var id: EnvVariable.ID { effective.id }
+    }
+
+    private var groups: [VariableGroup] {
+        Dictionary(grouping: filtered, by: \.name).values
+            .compactMap { assignments in
+                let ordered = assignments.sorted {
+                    ($0.file.loadOrder, $0.lineIndex) < ($1.file.loadOrder, $1.lineIndex)
+                }
+                guard let effective = ordered.last else { return nil }
+                return VariableGroup(effective: effective, overridden: ordered.dropLast().reversed())
+            }
+            .sorted { $0.effective.name < $1.effective.name }
+    }
+
+    private var isGrouping: Bool {
+        FeatureFlag.groupedOverridesView.isEnabled && groupOverridden
+    }
+
     var body: some View {
-        Table(filtered, selection: $selection) {
+        Table(of: EnvVariable.self, selection: $selection) {
             TableColumn("Name") { variable in
                 HStack(spacing: 6) {
                     Text(variable.name)
@@ -73,6 +98,20 @@ struct VariableListView: View {
                     .foregroundStyle(.secondary)
             }
             .width(min: 70, ideal: 90)
+        } rows: {
+            if isGrouping {
+                ForEach(groups) { group in
+                    if group.overridden.isEmpty {
+                        TableRow(group.effective)
+                    } else {
+                        DisclosureTableRow(group.effective) {
+                            ForEach(group.overridden) { TableRow($0) }
+                        }
+                    }
+                }
+            } else {
+                ForEach(filtered) { TableRow($0) }
+            }
         }
         .contextMenu(forSelectionType: EnvVariable.ID.self) { ids in
             if let variable = variable(for: ids.first) {
@@ -100,6 +139,12 @@ struct VariableListView: View {
                     editorMode = .new(scope.file ?? .zshrc)
                 }
                 .help("Add a new variable")
+            }
+            if FeatureFlag.groupedOverridesView.isEnabled {
+                ToolbarItem {
+                    Toggle("Group overridden", systemImage: "list.bullet.indent", isOn: $groupOverridden)
+                        .help("Show overridden assignments grouped under the effective one")
+                }
             }
             if FeatureFlag.envImportExport.isEnabled {
                 ToolbarItem {
