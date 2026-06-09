@@ -53,7 +53,7 @@ struct VariableEditorView: View {
     }
 
     private var nameIsValid: Bool {
-        name.wholeMatch(of: #/[A-Za-z_][A-Za-z0-9_]*/#) != nil
+        (try? ShellConfigWriter.validateName(name)) != nil
     }
 
     private var valueProblem: String? {
@@ -69,7 +69,7 @@ struct VariableEditorView: View {
     private var duplicateHint: String? {
         guard isNew, nameIsValid,
               let existing = store.variables.first(where: { $0.name == name }) else { return nil }
-        return "„\(name)“ ist bereits in \(existing.file.displayName) definiert — es gilt die letzte Zuweisung in der Ladereihenfolge."
+        return "„\(name)“ ist bereits in \(existing.file.rawValue) definiert — es gilt die letzte Zuweisung in der Ladereihenfolge."
     }
 
     private var canSave: Bool {
@@ -100,8 +100,7 @@ struct VariableEditorView: View {
                     }
                     if rawValue.contains(":") || editAsList {
                         Toggle("Als Liste bearbeiten (PATH-Stil)", isOn: $editAsList)
-                            .toggleStyle(.switch)
-                            .controlSize(.small)
+                            .toggleStyle(.checkbox)
                     }
                     if let valueProblem {
                         ValidationHint(valueProblem)
@@ -116,11 +115,11 @@ struct VariableEditorView: View {
                     if isNew {
                         Picker("Datei", selection: $targetFile) {
                             ForEach(ShellConfigFile.allCases) { file in
-                                Text(file.displayName).tag(file)
+                                Text(file.rawValue).tag(file)
                             }
                         }
                     } else {
-                        LabeledContent("Datei", value: targetFile.displayName)
+                        LabeledContent("Datei", value: targetFile.rawValue)
                         Toggle("Mit export für Kindprozesse sichtbar", isOn: $exported)
                     }
                 }
@@ -148,7 +147,7 @@ struct VariableEditorView: View {
     private func save() {
         switch mode {
         case .new:
-            store.add(name: name, rawValue: rawValue, to: targetFile)
+            store.addAll([(name: name, rawValue: rawValue)], to: targetFile)
         case .edit(let variable):
             store.update(variable, name: name, rawValue: rawValue, exported: exported)
         }

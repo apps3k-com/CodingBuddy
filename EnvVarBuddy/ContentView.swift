@@ -17,7 +17,7 @@ enum SidebarScope: Hashable {
     var title: String {
         switch self {
         case .all: "Alle Variablen"
-        case .file(let file): file.displayName
+        case .file(let file): file.rawValue
         }
     }
 }
@@ -33,7 +33,7 @@ struct ContentView: View {
                     .tag(SidebarScope.all)
                 Section("Dateien") {
                     ForEach(ShellConfigFile.allCases) { file in
-                        Label(file.displayName, systemImage: "doc.text")
+                        Label(file.rawValue, systemImage: "doc.text")
                             .foregroundStyle(store.existingFiles.contains(file) ? .primary : .secondary)
                             .badge(store.variables(in: file).count)
                             .tag(SidebarScope.file(file))

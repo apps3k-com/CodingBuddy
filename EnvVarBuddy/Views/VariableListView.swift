@@ -61,7 +61,7 @@ struct VariableListView: View {
             }
 
             TableColumn("Quelle") { variable in
-                Text(variable.file.displayName)
+                Text(variable.file.rawValue)
                     .foregroundStyle(.secondary)
             }
             .width(min: 70, ideal: 90)
@@ -116,7 +116,7 @@ struct VariableListView: View {
         }
         .fileImporter(
             isPresented: $isImporting,
-            allowedContentTypes: [.item]
+            allowedContentTypes: [EnvFileCodec.contentType, .plainText]
         ) { result in
             switch result {
             case .success(let url):
@@ -132,7 +132,7 @@ struct VariableListView: View {
             VariableEditorView(store: store, mode: mode)
         }
         .confirmationDialog(
-            "„\(pendingDeletion?.name ?? "")“ aus \(pendingDeletion?.file.displayName ?? "") löschen?",
+            "„\(pendingDeletion?.name ?? "")“ aus \(pendingDeletion?.file.rawValue ?? "") löschen?",
             isPresented: Binding(
                 get: { pendingDeletion != nil },
                 set: { if !$0 { pendingDeletion = nil } }
