@@ -12,6 +12,7 @@ struct VariableListView: View {
     var secrets: SecretsGuard
     var scope: SidebarScope
 
+    @Environment(MenuActions.self) private var menuActions
     @AppStorage("groupOverriddenVariables") private var groupOverridden = false
     @State private var searchText = ""
     @State private var selection: EnvVariable.ID?
@@ -214,6 +215,12 @@ struct VariableListView: View {
             }
         } message: {
             Text("A backup of the file is written automatically before the change.")
+        }
+        .onChange(of: menuActions.importRequest) {
+            if FeatureFlag.envImportExport.isEnabled { isImporting = true }
+        }
+        .onChange(of: menuActions.exportRequest) {
+            if FeatureFlag.envImportExport.isEnabled { requestExport() }
         }
         .overlay {
             if filtered.isEmpty {
