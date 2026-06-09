@@ -24,6 +24,7 @@ enum SidebarScope: Hashable {
 
 struct ContentView: View {
     @State private var store = EnvStore()
+    @State private var secrets = SecretsGuard()
     @State private var scope: SidebarScope? = .all
 
     var body: some View {
@@ -42,7 +43,7 @@ struct ContentView: View {
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 210)
         } detail: {
-            VariableListView(store: store, scope: scope ?? .all)
+            VariableListView(store: store, secrets: secrets, scope: scope ?? .all)
         }
         .alert(
             "Error",

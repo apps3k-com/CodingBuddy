@@ -33,12 +33,21 @@ Before every change EnvVarBuddy writes a timestamped backup to
 - **Import from .env…** reads a dotenv file, shows a preview where you pick the entries (duplicates are flagged), and appends them to the managed block of a file of your choice.
 - **Export visible as .env…** writes the variables currently shown in the table to a `.env` file.
 
+## Secrets stay masked
+
+Variables whose names look like credentials (`GITHUB_TOKEN`, `AWS_SECRET_ACCESS_KEY`, anything with `TOKEN`, `KEY`, `SECRET`, `PASSWORD`, `AUTH`, …) show `••••••••` instead of their value.
+
+- Click the **lock button** in the toolbar (or just try to edit/copy a masked value) and authenticate with **Touch ID or your account password** to reveal them.
+- The unlock expires automatically — configure the duration in *Settings → Security* (1/5/15 minutes or until quit). The lock button re-masks immediately.
+- Copying a value or line, editing, and `.env` export of masked variables all require authentication first.
+
 ## Settings
 
 Open **EnvVarBuddy → Settings…** (⌘,):
 
 - **Language** — System, English or Deutsch. Takes effect after relaunching the app.
 - **Appearance** — Auto (follow the system), Light or Dark.
+- **Security** — how long secrets stay revealed after authenticating.
 
 ## Live reload
 

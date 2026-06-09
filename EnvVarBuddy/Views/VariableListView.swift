@@ -9,6 +9,7 @@ import UniformTypeIdentifiers
 
 struct VariableListView: View {
     var store: EnvStore
+    var secrets: SecretsGuard
     var scope: SidebarScope
 
     @State private var searchText = ""
@@ -52,12 +53,19 @@ struct VariableListView: View {
             .width(min: 140, ideal: 220)
 
             TableColumn("Value") { variable in
-                Text(variable.rawValue)
-                    .monospaced()
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                    .foregroundStyle(.secondary)
-                    .help(variable.rawValue)
+                if isMasked(variable) {
+                    Text(verbatim: "••••••••")
+                        .monospaced()
+                        .foregroundStyle(.secondary)
+                        .help("Authenticate to reveal this value.")
+                } else {
+                    Text(variable.rawValue)
+                        .monospaced()
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .foregroundStyle(.secondary)
+                        .help(variable.rawValue)
+                }
             }
 
             TableColumn("Source") { variable in
@@ -68,19 +76,19 @@ struct VariableListView: View {
         }
         .contextMenu(forSelectionType: EnvVariable.ID.self) { ids in
             if let variable = variable(for: ids.first) {
-                Button("Edit…") { editorMode = .edit(variable) }
+                Button("Edit…") { edit(variable) }
                     .disabled(!variable.isEditable)
                 Divider()
                 Button("Copy Name") { copy(variable.name) }
-                Button("Copy Value") { copy(variable.rawValue) }
-                Button("Copy Line") { copy(variable.sourceLine) }
+                Button("Copy Value") { copyValue(of: variable) }
+                Button("Copy Line") { copyLine(of: variable) }
                 Divider()
                 Button("Delete…", role: .destructive) { pendingDeletion = variable }
                     .disabled(!variable.isEditable)
             }
         } primaryAction: { ids in
-            if let variable = variable(for: ids.first), variable.isEditable {
-                editorMode = .edit(variable)
+            if let variable = variable(for: ids.first) {
+                edit(variable)
             }
         }
         .searchable(text: $searchText, prompt: "Search variables")
@@ -97,12 +105,26 @@ struct VariableListView: View {
                 ToolbarItem {
                     Menu {
                         Button("Import from .env…") { isImporting = true }
-                        Button("Export visible as .env…") { isExporting = true }
+                        Button("Export visible as .env…") { requestExport() }
                             .disabled(filtered.allSatisfy { !$0.isEditable })
                     } label: {
                         Label("Import/Export", systemImage: "square.and.arrow.up.on.square")
                     }
                     .help("Import or export .env files")
+                }
+            }
+            if FeatureFlag.secretsProtection.isEnabled,
+               store.variables.contains(where: { SecretDetector.isSensitive(name: $0.name) }) {
+                ToolbarItem {
+                    if secrets.isUnlocked {
+                        Button("Hide secrets", systemImage: "lock.open") { secrets.lock() }
+                            .help("Hide secrets")
+                    } else {
+                        Button("Reveal secrets", systemImage: "lock") {
+                            Task { _ = await secrets.requestUnlock() }
+                        }
+                        .help("Reveal secrets")
+                    }
                 }
             }
         }
@@ -165,6 +187,51 @@ struct VariableListView: View {
 
     private func variable(for id: EnvVariable.ID?) -> EnvVariable? {
         filtered.first { $0.id == id }
+    }
+
+    // MARK: - Secrets gating
+
+    private func isProtected(_ variable: EnvVariable) -> Bool {
+        FeatureFlag.secretsProtection.isEnabled && SecretDetector.isSensitive(name: variable.name)
+    }
+
+    private func isMasked(_ variable: EnvVariable) -> Bool {
+        isProtected(variable) && !secrets.isUnlocked
+    }
+
+    /// Runs `action` immediately, or after successful authentication when the
+    /// variable's value is currently masked.
+    private func withUnlockIfNeeded(for variable: EnvVariable, _ action: @escaping @MainActor () -> Void) {
+        guard isMasked(variable) else {
+            action()
+            return
+        }
+        Task {
+            if await secrets.requestUnlock() { action() }
+        }
+    }
+
+    private func edit(_ variable: EnvVariable) {
+        guard variable.isEditable else { return }
+        withUnlockIfNeeded(for: variable) { editorMode = .edit(variable) }
+    }
+
+    private func copyValue(of variable: EnvVariable) {
+        withUnlockIfNeeded(for: variable) { copy(variable.rawValue) }
+    }
+
+    private func copyLine(of variable: EnvVariable) {
+        withUnlockIfNeeded(for: variable) { copy(variable.sourceLine) }
+    }
+
+    /// Exporting reveals values in the written file — authenticate first when
+    /// any visible variable is masked.
+    private func requestExport() {
+        if let masked = filtered.first(where: { isMasked($0) }) {
+            withUnlockIfNeeded(for: masked) { isExporting = true }
+        } else {
+            isExporting = true
+        }
     }
 
     private func readImportFile(at url: URL) {
