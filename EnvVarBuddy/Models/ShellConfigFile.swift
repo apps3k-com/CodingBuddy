@@ -15,8 +15,6 @@ enum ShellConfigFile: String, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
-    var displayName: String { rawValue }
-
     /// Position in zsh's load order; files with a higher value load later and
     /// override assignments from earlier files.
     var loadOrder: Int { Self.allCases.firstIndex(of: self) ?? 0 }

@@ -52,7 +52,7 @@ struct ImportPreviewView: View {
             HStack {
                 Picker("Ziel:", selection: $targetFile) {
                     ForEach(ShellConfigFile.allCases) { file in
-                        Text(file.displayName).tag(file)
+                        Text(file.rawValue).tag(file)
                     }
                 }
                 .fixedSize()

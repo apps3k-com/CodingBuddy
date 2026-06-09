@@ -57,12 +57,6 @@ final class EnvStore {
 
     // MARK: - Mutations
 
-    func add(name: String, rawValue: String, to file: ShellConfigFile) {
-        perform {
-            try writer.addVariables([(name: name, rawValue: rawValue)], to: file.url(in: homeDirectory))
-        }
-    }
-
     func addAll(_ entries: [(name: String, rawValue: String)], to file: ShellConfigFile) {
         perform {
             try writer.addVariables(entries, to: file.url(in: homeDirectory))
@@ -110,10 +104,7 @@ final class EnvStore {
 
     /// True when another assignment of the same name takes effect instead.
     func isOverridden(_ variable: EnvVariable) -> Bool {
-        guard variables.contains(where: { $0.name == variable.name && $0.id != variable.id }) else {
-            return false
-        }
-        return effectiveVariable(named: variable.name)?.id != variable.id
+        effectiveVariable(named: variable.name)?.id != variable.id
     }
 
     // MARK: - File watching

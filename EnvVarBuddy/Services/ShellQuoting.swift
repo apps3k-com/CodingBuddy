@@ -6,8 +6,9 @@
 import Foundation
 
 /// Rules for which raw value texts can sit verbatim inside a given quoting
-/// style without changing the meaning of the line.
-enum ShellQuoting {
+/// style without changing the meaning of the line. Pure value logic — opted
+/// out of the project's MainActor default isolation.
+nonisolated enum ShellQuoting {
 
     /// Characters that are safe in an unquoted assignment value. Conservative
     /// on purpose: anything outside this set forces quotes (or read-only when
