@@ -218,6 +218,12 @@ struct VariableListView: View {
         } message: {
             Text("A backup of the file is written automatically before the change.")
         }
+        .onChange(of: store.variables) { oldVariables, newVariables in
+            // Reloads rebuild the list with fresh line indices; re-resolve the
+            // selected id so the selection survives shifting lines.
+            let resolved = SelectionResolver.resolve(selection, from: oldVariables, in: newVariables)
+            if resolved != selection { selection = resolved }
+        }
         .onChange(of: menuActions.importRequest) {
             if FeatureFlag.envImportExport.isEnabled { isImporting = true }
         }
