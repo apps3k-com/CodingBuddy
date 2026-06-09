@@ -401,6 +401,26 @@
         }
       }
     },
+    "Group overridden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überschriebene gruppieren"
+          }
+        }
+      }
+    },
+    "Show overridden assignments grouped under the effective one" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überschriebene Zuweisungen unter der wirksamen gruppieren"
+          }
+        }
+      }
+    },
     "General" : {
       "localizations" : {
         "de" : {

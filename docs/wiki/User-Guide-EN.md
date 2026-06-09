@@ -8,6 +8,7 @@ EnvVarBuddy is a native macOS app for managing the environment variables that li
 - The **table** lists name, value and source file. Use the search field (⌘F) to filter by name or value.
 - A 🔒 **lock icon** marks complex lines (command substitution like `$(date)`, multi-assignments like `export A=1 B=2`). EnvVarBuddy shows them honestly but never rewrites them — edit those in your editor of choice.
 - An orange **overridden** badge means a later assignment wins: zsh loads `.zshenv → .zprofile → .zshrc`, and within a file the last assignment of a name takes effect.
+- The **Group overridden** toolbar toggle collapses duplicates: the effective assignment becomes the parent row and shadowed assignments expand beneath it.
 
 ## Editing
 
