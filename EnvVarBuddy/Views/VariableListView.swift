@@ -5,6 +5,7 @@
 
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct VariableListView: View {
     var store: EnvStore
@@ -14,6 +15,14 @@ struct VariableListView: View {
     @State private var selection: EnvVariable.ID?
     @State private var editorMode: VariableEditorView.Mode?
     @State private var pendingDeletion: EnvVariable?
+    @State private var isExporting = false
+    @State private var isImporting = false
+    @State private var importPayload: ImportPayload?
+
+    private struct ImportPayload: Identifiable {
+        let id = UUID()
+        var entries: [EnvFileEntry]
+    }
 
     private var filtered: [EnvVariable] {
         let scoped = store.variables(in: scope.file)
@@ -84,6 +93,40 @@ struct VariableListView: View {
                 }
                 .help("Neue Variable anlegen")
             }
+            ToolbarItem {
+                Menu {
+                    Button("Aus .env importieren…") { isImporting = true }
+                    Button("Sichtbare als .env exportieren…") { isExporting = true }
+                        .disabled(filtered.allSatisfy { !$0.isEditable })
+                } label: {
+                    Label("Import/Export", systemImage: "square.and.arrow.up.on.square")
+                }
+                .help(".env-Dateien importieren oder exportieren")
+            }
+        }
+        .fileExporter(
+            isPresented: $isExporting,
+            document: EnvFileDocument(text: EnvFileCodec.encode(filtered)),
+            contentType: EnvFileCodec.contentType,
+            defaultFilename: "variables.env"
+        ) { result in
+            if case .failure(let error) = result {
+                store.lastError = error.localizedDescription
+            }
+        }
+        .fileImporter(
+            isPresented: $isImporting,
+            allowedContentTypes: [.item]
+        ) { result in
+            switch result {
+            case .success(let url):
+                readImportFile(at: url)
+            case .failure(let error):
+                store.lastError = error.localizedDescription
+            }
+        }
+        .sheet(item: $importPayload) { payload in
+            ImportPreviewView(store: store, entries: payload.entries)
         }
         .sheet(item: $editorMode) { mode in
             VariableEditorView(store: store, mode: mode)
@@ -120,6 +163,19 @@ struct VariableListView: View {
 
     private func variable(for id: EnvVariable.ID?) -> EnvVariable? {
         filtered.first { $0.id == id }
+    }
+
+    private func readImportFile(at url: URL) {
+        guard let content = try? String(contentsOf: url, encoding: .utf8) else {
+            store.lastError = "Die Datei konnte nicht gelesen werden."
+            return
+        }
+        let entries = EnvFileCodec.decode(content)
+        if entries.isEmpty {
+            store.lastError = "In der Datei wurden keine Variablen gefunden."
+        } else {
+            importPayload = ImportPayload(entries: entries)
+        }
     }
 
     private func copy(_ string: String) {
