@@ -69,28 +69,14 @@ struct ShellConfigWriter {
         try write(lines: lines, to: fileURL)
     }
 
+    /// Deleting removes the line outright; the pre-write backup preserves the
+    /// history, so no commented-out remains accumulate in the file.
     func deleteVariable(_ variable: EnvVariable, at fileURL: URL) throws {
         guard variable.isEditable else { throw WriteError.lineNotEditable }
         var lines = try loadLines(at: fileURL)
         try verify(variable, against: lines)
-
-        if let replacement = deletionReplacement(forRemovedLine: lines[variable.lineIndex]) {
-            lines[variable.lineIndex] = replacement
-        } else {
-            lines.remove(at: variable.lineIndex)
-        }
-
+        lines.remove(at: variable.lineIndex)
         try write(lines: lines, to: fileURL)
-    }
-
-    /// LEARNING SPOT — Löschstrategie (siehe Plan).
-    /// Rückgabe nil: Zeile wird ersatzlos entfernt (sauber; das Backup hält die
-    /// Historie). Rückgabe eines Strings: die Zeile wird stattdessen ersetzt,
-    /// z.B. auskommentiert ("# removed by EnvVarBuddy: …"), so bleibt die
-    /// Historie direkt in der Datei sichtbar — kostet aber Lesbarkeit.
-    func deletionReplacement(forRemovedLine line: String) -> String? {
-        // TODO(user): Strategie wählen — nil (hart löschen) oder Kommentar-String.
-        nil
     }
 
     /// Appends new variables to the managed EnvVarBuddy block, creating the
