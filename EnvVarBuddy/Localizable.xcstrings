@@ -351,6 +351,26 @@
         }
       }
     },
+    "Documentation (Wiki)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentation (Wiki)"
+          }
+        }
+      }
+    },
+    "EnvVarBuddy Help" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EnvVarBuddy-Hilfe"
+          }
+        }
+      }
+    },
     "Entry" : {
       "localizations" : {
         "de" : {

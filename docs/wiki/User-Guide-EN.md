@@ -31,8 +31,12 @@ Before every change EnvVarBuddy writes a timestamped backup to
 
 ## Import & export
 
-- **Import from .env…** reads a dotenv file, shows a preview where you pick the entries (duplicates are flagged), and appends them to the managed block of a file of your choice.
-- **Export visible as .env…** writes the variables currently shown in the table to a `.env` file.
+- **Import from .env…** (File menu or toolbar, ⇧⌘I) reads a dotenv file, shows a preview where you pick the entries (duplicates are flagged), and appends them to the managed block of a file of your choice.
+- **Export visible as .env…** (File menu or toolbar, ⇧⌘E) writes the variables currently shown in the table to a `.env` file.
+
+## Help menu
+
+**Help → EnvVarBuddy Help** (⌘?) opens this documentation in your app language — the German Benutzerhandbuch when the app runs in German, this guide otherwise. **Help → Documentation (Wiki)** opens the full wiki.
 
 ## Secrets stay masked
 
