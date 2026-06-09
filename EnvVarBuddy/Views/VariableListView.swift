@@ -42,7 +42,7 @@ struct VariableListView: View {
                     if !variable.isEditable {
                         Image(systemName: "lock.fill")
                             .foregroundStyle(.tertiary)
-                            .help("Komplexe Zeile — EnvVarBuddy zeigt sie nur an und verändert sie nicht.")
+                            .help("Complex line — EnvVarBuddy only displays it and never modifies it.")
                     }
                     if store.isOverridden(variable) {
                         OverriddenBadge()
@@ -51,7 +51,7 @@ struct VariableListView: View {
             }
             .width(min: 140, ideal: 220)
 
-            TableColumn("Wert") { variable in
+            TableColumn("Value") { variable in
                 Text(variable.rawValue)
                     .monospaced()
                     .lineLimit(1)
@@ -60,7 +60,7 @@ struct VariableListView: View {
                     .help(variable.rawValue)
             }
 
-            TableColumn("Quelle") { variable in
+            TableColumn("Source") { variable in
                 Text(variable.file.rawValue)
                     .foregroundStyle(.secondary)
             }
@@ -68,14 +68,14 @@ struct VariableListView: View {
         }
         .contextMenu(forSelectionType: EnvVariable.ID.self) { ids in
             if let variable = variable(for: ids.first) {
-                Button("Bearbeiten…") { editorMode = .edit(variable) }
+                Button("Edit…") { editorMode = .edit(variable) }
                     .disabled(!variable.isEditable)
                 Divider()
-                Button("Name kopieren") { copy(variable.name) }
-                Button("Wert kopieren") { copy(variable.rawValue) }
-                Button("Zeile kopieren") { copy(variable.sourceLine) }
+                Button("Copy Name") { copy(variable.name) }
+                Button("Copy Value") { copy(variable.rawValue) }
+                Button("Copy Line") { copy(variable.sourceLine) }
                 Divider()
-                Button("Löschen…", role: .destructive) { pendingDeletion = variable }
+                Button("Delete…", role: .destructive) { pendingDeletion = variable }
                     .disabled(!variable.isEditable)
             }
         } primaryAction: { ids in
@@ -83,25 +83,27 @@ struct VariableListView: View {
                 editorMode = .edit(variable)
             }
         }
-        .searchable(text: $searchText, prompt: "Variablen durchsuchen")
+        .searchable(text: $searchText, prompt: "Search variables")
         .navigationTitle(scope.title)
-        .navigationSubtitle("\(filtered.count) Variablen")
+        .navigationSubtitle(Text("\(filtered.count) variables"))
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button("Neue Variable", systemImage: "plus") {
+                Button("New Variable", systemImage: "plus") {
                     editorMode = .new(scope.file ?? .zshrc)
                 }
-                .help("Neue Variable anlegen")
+                .help("Add a new variable")
             }
-            ToolbarItem {
-                Menu {
-                    Button("Aus .env importieren…") { isImporting = true }
-                    Button("Sichtbare als .env exportieren…") { isExporting = true }
-                        .disabled(filtered.allSatisfy { !$0.isEditable })
-                } label: {
-                    Label("Import/Export", systemImage: "square.and.arrow.up.on.square")
+            if FeatureFlag.envImportExport.isEnabled {
+                ToolbarItem {
+                    Menu {
+                        Button("Import from .env…") { isImporting = true }
+                        Button("Export visible as .env…") { isExporting = true }
+                            .disabled(filtered.allSatisfy { !$0.isEditable })
+                    } label: {
+                        Label("Import/Export", systemImage: "square.and.arrow.up.on.square")
+                    }
+                    .help("Import or export .env files")
                 }
-                .help(".env-Dateien importieren oder exportieren")
             }
         }
         .fileExporter(
@@ -132,27 +134,27 @@ struct VariableListView: View {
             VariableEditorView(store: store, mode: mode)
         }
         .confirmationDialog(
-            "„\(pendingDeletion?.name ?? "")“ aus \(pendingDeletion?.file.rawValue ?? "") löschen?",
+            "Delete “\(pendingDeletion?.name ?? "")” from \(pendingDeletion?.file.rawValue ?? "")?",
             isPresented: Binding(
                 get: { pendingDeletion != nil },
                 set: { if !$0 { pendingDeletion = nil } }
             ),
             titleVisibility: .visible
         ) {
-            Button("Löschen", role: .destructive) {
+            Button("Delete", role: .destructive) {
                 if let variable = pendingDeletion { store.delete(variable) }
                 pendingDeletion = nil
             }
         } message: {
-            Text("Vor dem Schreiben wird automatisch ein Backup der Datei angelegt.")
+            Text("A backup of the file is written automatically before the change.")
         }
         .overlay {
             if filtered.isEmpty {
                 if searchText.isEmpty {
                     ContentUnavailableView(
-                        "Keine Variablen",
+                        "No Variables",
                         systemImage: "shippingbox",
-                        description: Text("Mit ＋ legst du die erste Variable an.")
+                        description: Text("Use ＋ to add your first variable.")
                     )
                 } else {
                     ContentUnavailableView.search(text: searchText)
@@ -167,12 +169,12 @@ struct VariableListView: View {
 
     private func readImportFile(at url: URL) {
         guard let content = try? String(contentsOf: url, encoding: .utf8) else {
-            store.lastError = "Die Datei konnte nicht gelesen werden."
+            store.lastError = String(localized: "The file could not be read.")
             return
         }
         let entries = EnvFileCodec.decode(content)
         if entries.isEmpty {
-            store.lastError = "In der Datei wurden keine Variablen gefunden."
+            store.lastError = String(localized: "No variables were found in the file.")
         } else {
             importPayload = ImportPayload(entries: entries)
         }
@@ -186,12 +188,12 @@ struct VariableListView: View {
 
 private struct OverriddenBadge: View {
     var body: some View {
-        Text("überschrieben")
+        Text("overridden")
             .font(.caption2)
             .padding(.horizontal, 6)
             .padding(.vertical, 1)
             .background(.orange.opacity(0.18), in: Capsule())
             .foregroundStyle(.orange)
-            .help("Eine spätere Zuweisung überschreibt diesen Wert in neuen Terminal-Sessions.")
+            .help("A later assignment overrides this value in new terminal sessions.")
     }
 }

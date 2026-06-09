@@ -16,7 +16,7 @@ enum SidebarScope: Hashable {
 
     var title: String {
         switch self {
-        case .all: "Alle Variablen"
+        case .all: String(localized: "All Variables")
         case .file(let file): file.rawValue
         }
     }
@@ -29,9 +29,9 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             List(selection: $scope) {
-                Label("Alle Variablen", systemImage: "list.bullet")
+                Label("All Variables", systemImage: "list.bullet")
                     .tag(SidebarScope.all)
-                Section("Dateien") {
+                Section("Files") {
                     ForEach(ShellConfigFile.allCases) { file in
                         Label(file.rawValue, systemImage: "doc.text")
                             .foregroundStyle(store.existingFiles.contains(file) ? .primary : .secondary)
@@ -45,7 +45,7 @@ struct ContentView: View {
             VariableListView(store: store, scope: scope ?? .all)
         }
         .alert(
-            "Fehler",
+            "Error",
             isPresented: Binding(
                 get: { store.lastError != nil },
                 set: { if !$0 { store.lastError = nil } }
