@@ -18,6 +18,15 @@ jobs:
             echo "::error::PR title must follow Conventional Commits, e.g. 'feat: add grouped view'. Got: $TITLE"
             exit 1
           fi
+          # Release PRs from release-please carry no work item.
+          if echo "$TITLE" | grep -qE '^chore\(main\): release'; then
+            exit 0
+          fi
+          # The squash commit must reference its Plane work item(s).
+          if ! echo "$TITLE" | grep -qE 'COBUD-[0-9]+'; then
+            echo "::error::PR title must reference a Plane work item, e.g. 'feat: add codex section (COBUD-6)'. Got: $TITLE"
+            exit 1
+          fi
 
   feature-flag-registry:
     name: Feature flags are documented

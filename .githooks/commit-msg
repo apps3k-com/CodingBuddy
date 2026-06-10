@@ -16,3 +16,16 @@ if ! echo "$FIRST_LINE" | grep -qE '^(feat|fix|docs|chore|ci|refactor|test|perf|
   echo "  Got: $FIRST_LINE" >&2
   exit 1
 fi
+
+# Release-please's release commits carry no work item.
+case "$FIRST_LINE" in
+  chore\(main\):\ release*) exit 0 ;;
+esac
+
+# Every commit references the Plane work item(s) it contains or relates to.
+if ! grep -qE 'COBUD-[0-9]+' "$MSG_FILE"; then
+  echo "✖ Commit message must reference at least one Plane work item (COBUD-<n>):" >&2
+  echo "    feat: add codex section (COBUD-6)" >&2
+  echo "  Project: https://app.plane.so/apps3k/projects/703acd2a-ef88-4165-8394-34b2cc48a6ab/issues" >&2
+  exit 1
+fi
