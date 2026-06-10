@@ -130,4 +130,19 @@ struct ParserTests {
         #expect(variables[1].lineIndex == 4)
         #expect(variables[1].file == .zshrc)
     }
+
+    // MARK: - Plain env files (no zsh semantics)
+
+    @Test func assignmentsParseDotenvContentWithComments() {
+        let variables = ShellConfigParser.assignments(in: """
+        # comment
+        APPS3K_MCP_AUTH_TOKEN=secret
+
+        QUOTED="a b"
+        """)
+        #expect(variables.map(\.name) == ["APPS3K_MCP_AUTH_TOKEN", "QUOTED"])
+        #expect(variables[0].lineIndex == 1)
+        #expect(variables[0].sourceLine == "APPS3K_MCP_AUTH_TOKEN=secret")
+        #expect(variables[1].rawValue == "a b")
+    }
 }

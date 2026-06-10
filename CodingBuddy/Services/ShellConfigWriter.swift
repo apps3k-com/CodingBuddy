@@ -45,13 +45,13 @@ struct ShellConfigWriter {
     // MARK: - Mutations
 
     func updateVariable(
-        _ variable: EnvVariable,
+        _ variable: some EnvAssignmentLine,
         newName: String,
         newRawValue: String,
         exported: Bool,
         at fileURL: URL
     ) throws {
-        guard variable.isEditable else { throw WriteError.lineNotEditable }
+        guard variable.assignment.isEditable else { throw WriteError.lineNotEditable }
         try Self.validateName(newName)
         try Self.validateValue(newRawValue)
         guard let quoting = ShellQuoting.bestQuoting(for: newRawValue, preferred: variable.assignment.quoting) else {
@@ -75,17 +75,28 @@ struct ShellConfigWriter {
 
     /// Deleting removes the line outright; the pre-write backup preserves the
     /// history, so no commented-out remains accumulate in the file.
-    func deleteVariable(_ variable: EnvVariable, at fileURL: URL) throws {
-        guard variable.isEditable else { throw WriteError.lineNotEditable }
+    func deleteVariable(_ variable: some EnvAssignmentLine, at fileURL: URL) throws {
+        guard variable.assignment.isEditable else { throw WriteError.lineNotEditable }
         var lines = try loadLines(at: fileURL)
         try verify(variable, against: lines)
         lines.remove(at: variable.lineIndex)
         try write(lines: lines, to: fileURL)
     }
 
+    /// How new assignments are rendered: zsh dotfiles get `export`, dotenv
+    /// files plain `NAME=value` lines.
+    enum ExportStyle {
+        case export
+        case none
+    }
+
     /// Appends new variables to the managed CodingBuddy block, creating the
     /// block — and the file itself — when missing.
-    func addVariables(_ entries: [(name: String, rawValue: String)], to fileURL: URL) throws {
+    func addVariables(
+        _ entries: [(name: String, rawValue: String)],
+        to fileURL: URL,
+        exportStyle: ExportStyle = .export
+    ) throws {
         let rendered: [String] = try entries.map { entry in
             try Self.validateName(entry.name)
             try Self.validateValue(entry.rawValue)
@@ -93,7 +104,7 @@ struct ShellConfigWriter {
                 throw WriteError.unrepresentableValue
             }
             return ParsedAssignment(
-                prefix: "", exportToken: "export ", name: entry.name,
+                prefix: "", exportToken: exportStyle == .export ? "export " : "", name: entry.name,
                 rawValue: entry.rawValue, quoting: quoting, suffix: "", isEditable: true
             ).rendered
         }
@@ -141,75 +152,17 @@ struct ShellConfigWriter {
         return content.components(separatedBy: "\n")
     }
 
-    private func verify(_ variable: EnvVariable, against lines: [String]) throws {
+    private func verify(_ variable: some EnvAssignmentLine, against lines: [String]) throws {
         guard variable.lineIndex < lines.count,
               lines[variable.lineIndex] == variable.sourceLine else {
             throw WriteError.fileChangedExternally
         }
     }
 
-    /// Joins and writes the lines. No-ops when nothing changed; otherwise
-    /// backs up the current file, then writes atomically to the symlink
-    /// target, restoring its POSIX permissions afterwards.
+    /// Joins and writes the lines through the shared write-safety machinery
+    /// (no-op when unchanged, backup, atomic, symlink-safe, permissions).
     private func write(lines: [String], to fileURL: URL) throws {
-        let fileManager = FileManager.default
-        let resolved = fileURL.resolvingSymlinksInPath()
-        let newContent = lines.joined(separator: "\n")
-
-        let exists = fileManager.fileExists(atPath: resolved.path)
-        if exists, try String(contentsOf: resolved, encoding: .utf8) == newContent {
-            return
-        }
-
-        var permissions: Any?
-        if exists {
-            permissions = (try? fileManager.attributesOfItem(atPath: resolved.path))?[.posixPermissions]
-            try backUp(resolved)
-        }
-
-        try newContent.write(to: resolved, atomically: true, encoding: .utf8)
-
-        if let permissions {
-            try? fileManager.setAttributes([.posixPermissions: permissions], ofItemAtPath: resolved.path)
-        }
-    }
-
-    // MARK: - Backups
-
-    private static let timestampFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd-HHmmss-SSS"
-        return formatter
-    }()
-
-    private func backUp(_ resolved: URL) throws {
-        let fileManager = FileManager.default
-        try fileManager.createDirectory(at: backupDirectory, withIntermediateDirectories: true)
-
-        // ".zshrc" → "zshrc" so backups are not hidden files.
-        let baseName = String(resolved.lastPathComponent.drop(while: { $0 == "." }))
-        let stamp = Self.timestampFormatter.string(from: Date())
-        var target = backupDirectory.appendingPathComponent("\(baseName)-\(stamp)")
-        var counter = 1
-        while fileManager.fileExists(atPath: target.path) {
-            target = backupDirectory.appendingPathComponent("\(baseName)-\(stamp)-\(counter)")
-            counter += 1
-        }
-        try fileManager.copyItem(at: resolved, to: target)
-        pruneBackups(baseName: baseName)
-    }
-
-    private func pruneBackups(baseName: String) {
-        let fileManager = FileManager.default
-        guard let entries = try? fileManager.contentsOfDirectory(at: backupDirectory, includingPropertiesForKeys: nil) else {
-            return
-        }
-        let backups = entries
-            .filter { $0.lastPathComponent.hasPrefix("\(baseName)-") }
-            .sorted { $0.lastPathComponent < $1.lastPathComponent }
-        for stale in backups.dropLast(backupRetention) {
-            try? fileManager.removeItem(at: stale)
-        }
+        try SafeFileWriter(backupDirectory: backupDirectory, backupRetention: backupRetention)
+            .write(lines.joined(separator: "\n"), to: fileURL)
     }
 }

@@ -65,7 +65,7 @@ struct MCPAuthTests {
         #expect(resolved.displayName == serverURL)
         #expect(resolved.scope == "read write")
         #expect(resolved.files.count == 3)
-        #expect(resolved.status == .active)
+        #expect(resolved.status == .active(expiry: resolved.accessTokenExpiry))
         #expect(try #require(resolved.accessTokenExpiry) > Date())
 
         let incomplete = try #require(entries.first { $0.hash.hasPrefix("abab") })
@@ -73,7 +73,7 @@ struct MCPAuthTests {
         #expect(incomplete.status == .incomplete)
 
         let expired = try #require(entries.first { $0.hash.hasPrefix("cdcd") })
-        #expect(expired.status == .expired)
+        #expect(expired.status == .expired(try #require(expired.accessTokenExpiry)))
     }
 
     @Test func configuredServerURLsAreFoundInClaudeConfig() throws {

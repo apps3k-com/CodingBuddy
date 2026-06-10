@@ -32,12 +32,6 @@ nonisolated struct MCPAuthFile: Identifiable, Hashable {
 /// All credential files that `mcp-remote` stores for one MCP server. The
 /// directory layout is `~/.mcp-auth/mcp-remote-<version>/<md5(serverURL)>_<kind>`.
 nonisolated struct MCPAuthEntry: Identifiable, Hashable {
-    enum Status {
-        case active
-        case expired
-        case incomplete
-    }
-
     let hash: String
     let versionDirectory: String
     var files: [MCPAuthFile]
@@ -59,9 +53,9 @@ nonisolated struct MCPAuthEntry: Identifiable, Hashable {
         files.contains { $0.kind == .tokens }
     }
 
-    var status: Status {
+    var status: TokenStatus {
         guard hasTokens else { return .incomplete }
-        if let accessTokenExpiry, accessTokenExpiry < Date() { return .expired }
-        return .active
+        if let accessTokenExpiry, accessTokenExpiry < Date() { return .expired(accessTokenExpiry) }
+        return .active(expiry: accessTokenExpiry)
     }
 }

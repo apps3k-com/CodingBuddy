@@ -19,8 +19,10 @@ final class EnvStore {
     var lastError: String?
 
     private let writer: ShellConfigWriter
-    @ObservationIgnored private var watchers: [FileWatcher] = []
-    @ObservationIgnored private var pendingReload: DispatchWorkItem?
+    @ObservationIgnored private lazy var monitor = FileChangeMonitor { [weak self] in
+        self?.reload()
+        self?.startWatching()
+    }
 
     init(
         homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser,
@@ -87,8 +89,7 @@ final class EnvStore {
     private func perform(_ mutation: () throws -> Void) {
         // A debounced reload queued by an earlier watcher event would fire
         // after our own synchronous reload and do the same work again.
-        pendingReload?.cancel()
-        pendingReload = nil
+        monitor.cancelPending()
         do {
             try mutation()
             lastError = nil
@@ -120,31 +121,7 @@ final class EnvStore {
     // MARK: - File watching
 
     private func startWatching() {
-        watchers.forEach { $0.cancel() }
-        watchers = []
-
-        let onChange: @MainActor () -> Void = { [weak self] in self?.scheduleReload() }
-
         // The home directory watcher catches files being created or removed.
-        if let watcher = FileWatcher(url: homeDirectory, onChange: onChange) {
-            watchers.append(watcher)
-        }
-        for file in existingFiles {
-            if let watcher = FileWatcher(url: file.url(in: homeDirectory), onChange: onChange) {
-                watchers.append(watcher)
-            }
-        }
-    }
-
-    private func scheduleReload() {
-        pendingReload?.cancel()
-        let work = DispatchWorkItem { [weak self] in
-            MainActor.assumeIsolated {
-                self?.reload()
-                self?.startWatching()
-            }
-        }
-        pendingReload = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: work)
+        monitor.watch([homeDirectory] + existingFiles.map { $0.url(in: homeDirectory) })
     }
 }

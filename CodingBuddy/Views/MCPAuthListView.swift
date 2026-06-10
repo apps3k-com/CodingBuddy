@@ -36,7 +36,7 @@ struct MCPAuthListView: View {
             .width(min: 220, ideal: 300)
 
             TableColumn("Status") { entry in
-                StatusBadge(entry: entry)
+                TokenStatusBadge(status: entry.status)
             }
             .width(min: 120, ideal: 170)
 
@@ -128,31 +128,5 @@ struct MCPAuthListView: View {
 
     private func entry(for id: MCPAuthEntry.ID?) -> MCPAuthEntry? {
         store.entries.first { $0.id == id }
-    }
-}
-
-private struct StatusBadge: View {
-    let entry: MCPAuthEntry
-
-    var body: some View {
-        switch entry.status {
-        case .active:
-            VStack(alignment: .leading, spacing: 1) {
-                Text("Active")
-                    .foregroundStyle(.green)
-                if let expiry = entry.accessTokenExpiry {
-                    Text("expires \(expiry, format: .relative(presentation: .named))")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        case .expired:
-            Text("Access token expired")
-                .foregroundStyle(.orange)
-                .help("The server may refresh the session automatically; reset the entry if it is stuck.")
-        case .incomplete:
-            Text("Incomplete (no tokens)")
-                .foregroundStyle(.secondary)
-        }
     }
 }

@@ -11,6 +11,17 @@ import Foundation
 /// is surfaced read-only and preserved verbatim by the writer.
 nonisolated enum ShellConfigParser {
 
+    /// Parses a plain env file (dotenv style, e.g. `~/.codex/mcp.env`) into
+    /// line-addressed assignments — dotenv lines are a subset of shell
+    /// assignments, so the grammar is shared.
+    static func assignments(in content: String) -> [EnvFileVariable] {
+        content.components(separatedBy: "\n").enumerated().compactMap { index, line in
+            parseLine(line).map {
+                EnvFileVariable(assignment: $0, lineIndex: index, sourceLine: line)
+            }
+        }
+    }
+
     static func variables(in content: String, file: ShellConfigFile) -> [EnvVariable] {
         content.components(separatedBy: "\n").enumerated().compactMap { index, line in
             parseLine(line).map {

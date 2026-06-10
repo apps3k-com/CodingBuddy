@@ -291,4 +291,21 @@ struct WriterTests {
         #expect(text.contains("# <<< CodingBuddy <<<"))
         #expect(!text.contains("EnvVarBuddy"))
     }
+
+    // MARK: - Export style (dotenv files)
+
+    @Test func addVariablesWithoutExportStyleWritesPlainAssignments() throws {
+        let dir = try makeTempDir()
+        let url = dir.appendingPathComponent("mcp.env")
+        try "# codex env\nEXISTING=1\n".write(to: url, atomically: true, encoding: .utf8)
+
+        try makeWriter(in: dir).addVariables(
+            [(name: "NEW_TOKEN", rawValue: "abc")], to: url, exportStyle: .none
+        )
+
+        let text = try content(of: url)
+        #expect(text.contains("NEW_TOKEN=\"abc\""))
+        #expect(!text.contains("export NEW_TOKEN"))
+        #expect(text.contains("# codex env"))
+    }
 }
