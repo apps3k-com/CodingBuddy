@@ -113,6 +113,11 @@ final class MCPAuthStore {
         watchedURLs += Set(entries.map(\.versionDirectory)).map {
             rootDirectory.appendingPathComponent($0, isDirectory: true)
         }
+        // The cache may not exist yet — watch the parent so the first OAuth
+        // flow creating ~/.mcp-auth triggers a reload.
+        if !rootExists {
+            watchedURLs.append(rootDirectory.deletingLastPathComponent())
+        }
         monitor.watch(watchedURLs)
     }
 }

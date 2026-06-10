@@ -41,10 +41,12 @@ nonisolated struct SafeFileWriter {
 
         try content.write(to: resolved, atomically: true, encoding: .utf8)
 
+        // Permission failures must surface: a credential file silently left
+        // world-readable would defeat the createMode guarantee.
         if let permissions {
-            try? fileManager.setAttributes([.posixPermissions: permissions], ofItemAtPath: resolved.path)
+            try fileManager.setAttributes([.posixPermissions: permissions], ofItemAtPath: resolved.path)
         } else if let createMode {
-            try? fileManager.setAttributes([.posixPermissions: createMode], ofItemAtPath: resolved.path)
+            try fileManager.setAttributes([.posixPermissions: createMode], ofItemAtPath: resolved.path)
         }
     }
 
