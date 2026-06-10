@@ -121,6 +121,16 @@
         }
       }
     },
+    "Add a new variable to mcp.env" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neue Variable in mcp.env anlegen"
+          }
+        }
+      }
+    },
     "All Variables" : {
       "localizations" : {
         "de" : {
@@ -161,6 +171,16 @@
         }
       }
     },
+    "Bearer token environment variable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bearer-Token-Umgebungsvariable"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "de" : {
@@ -177,6 +197,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Schließen"
+          }
+        }
+      }
+    },
+    "CodingBuddy Help" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy-Hilfe"
           }
         }
       }
@@ -251,6 +281,16 @@
         }
       }
     },
+    "Define…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Definieren …"
+          }
+        }
+      }
+    },
     "Delete" : {
       "localizations" : {
         "de" : {
@@ -267,6 +307,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "„%1$@“ aus %2$@ löschen?"
+          }
+        }
+      }
+    },
+    "Delete “%@” from mcp.env?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%@“ aus mcp.env löschen?"
           }
         }
       }
@@ -337,16 +387,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eintrag"
-          }
-        }
-      }
-    },
-    "CodingBuddy Help" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy-Hilfe"
           }
         }
       }
@@ -501,6 +541,16 @@
         }
       }
     },
+    "MCP servers from config.toml (read-only)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP-Server aus config.toml (nur lesend)"
+          }
+        }
+      }
+    },
     "Move all MCP credentials to the Trash" : {
       "localizations" : {
         "de" : {
@@ -571,6 +621,16 @@
         }
       }
     },
+    "No Codex configuration" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Codex-Konfiguration"
+          }
+        }
+      }
+    },
     "No MCP credentials" : {
       "localizations" : {
         "de" : {
@@ -617,6 +677,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Referenced by MCP servers but not defined in mcp.env:" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Von MCP-Servern referenziert, aber nicht in mcp.env definiert:"
           }
         }
       }
@@ -987,6 +1057,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "geheime Werte anzuzeigen"
+          }
+        }
+      }
+    },
+    "~/.codex does not exist — Codex has not been set up on this Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~/.codex existiert nicht — Codex ist auf diesem Mac nicht eingerichtet."
           }
         }
       }
