@@ -33,6 +33,7 @@ struct ContentView: View {
     @State private var codexStore = CodexStore()
     @State private var claudeCodeStore = ClaudeCodeStore()
     @State private var cursorStore = CursorStore()
+    @State private var craftStore = CraftAgentStore()
     @State private var secrets = SecretsGuard()
     @State private var scope: SidebarScope? = .all
     @State private var showSettings = false
@@ -88,6 +89,8 @@ struct ContentView: View {
                 ClaudeCodeView(store: claudeCodeStore, secrets: secrets)
             case .aiTool(.cursor):
                 CursorView(store: cursorStore, secrets: secrets)
+            case .aiTool(.craftAgents):
+                CraftAgentView(store: craftStore)
             default:
                 VariableListView(store: store, secrets: secrets, scope: scope ?? .all)
             }
@@ -119,6 +122,7 @@ struct ContentView: View {
         case .codex: codexStore.directoryExists
         case .claudeCode: claudeCodeStore.directoryExists
         case .cursor: cursorStore.directoryExists
+        case .craftAgents: craftStore.directoryExists
         }
     }
 
@@ -127,6 +131,7 @@ struct ContentView: View {
         case .codex: codexStore.variables.count
         case .claudeCode: claudeCodeStore.envEntries.count
         case .cursor: cursorStore.envEntries.count
+        case .craftAgents: craftStore.secretFiles.count + (craftStore.encryptedStore != nil ? 1 : 0)
         }
     }
 }
