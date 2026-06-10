@@ -158,4 +158,30 @@ struct ClaudeCodeStoreTests {
         #expect(store.envEntries.isEmpty)
         #expect(store.servers.isEmpty)
     }
+
+    @Test func duplicateProjectServersDeduplicateWithLocalPrecedence() throws {
+        let home = try makeHome(settings: settingsFixture)
+        let project = try makeTempDir()
+        // Same name in .mcp.json and in ~/.claude.json's project scope:
+        try #"{ "mcpServers": { "shared": { "command": "from-mcp-json" } } }"#.write(
+            to: project.appendingPathComponent(".mcp.json"), atomically: true, encoding: .utf8)
+        let claudeJSON = """
+        {
+          "projects": {
+            "\(project.path)": {
+              "mcpServers": { "shared": { "command": "from-claude-json" } }
+            }
+          }
+        }
+        """
+        try claudeJSON.write(
+            to: home.appendingPathComponent(".claude.json"), atomically: true, encoding: .utf8)
+
+        let store = makeStore(home: home)
+
+        let shared = store.servers.filter { $0.name == "shared" }
+        #expect(shared.count == 1)
+        #expect(shared.first?.command == "from-claude-json")
+        #expect(Set(store.servers.map(\.id)).count == store.servers.count)
+    }
 }

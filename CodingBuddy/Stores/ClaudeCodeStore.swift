@@ -115,15 +115,21 @@ final class ClaudeCodeStore {
         }
         for (path, value) in (root["projects"] as? [String: Any]) ?? [:] {
             guard FileManager.default.fileExists(atPath: path) else { continue }
+            var projectServers: [MCPServerConfig] = []
             if let project = value as? [String: Any],
                let mcpServers = project["mcpServers"] as? [String: Any] {
-                result += MCPServersJSONReader.servers(fromDictionary: mcpServers, scope: path)
+                projectServers = MCPServersJSONReader.servers(fromDictionary: mcpServers, scope: path)
             }
-            // Versionable project-scope definitions live next to the project.
+            // Versionable definitions live next to the project (.mcp.json).
+            // Claude Code's precedence is local > project, so a name defined
+            // in ~/.claude.json wins — and Identifiable ids stay unique.
+            let localNames = Set(projectServers.map(\.name))
             let mcpJSON = URL(fileURLWithPath: path).appendingPathComponent(".mcp.json")
             if let text = try? String(contentsOf: mcpJSON, encoding: .utf8) {
-                result += MCPServersJSONReader.servers(inDocument: text, scope: path)
+                projectServers += MCPServersJSONReader.servers(inDocument: text, scope: path)
+                    .filter { !localNames.contains($0.name) }
             }
+            result += projectServers
         }
         return result.sorted { ($0.scope, $0.name) < ($1.scope, $1.name) }
     }
