@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.5.0...v0.6.0) (2026-06-10)
+
+
+### Features
+
+* add Claude Code section with env editing and MCP overview (COBUD-8) ([#31](https://github.com/apps3k-com/CodingBuddy/issues/31)) ([e31e796](https://github.com/apps3k-com/CodingBuddy/commit/e31e7966d94a8659098038e5839f87aa8791aa76))
+* add Craft Agents section with discovery, expiry and resets (COBUD-10) ([#33](https://github.com/apps3k-com/CodingBuddy/issues/33)) ([292dc97](https://github.com/apps3k-com/CodingBuddy/commit/292dc9790e812edacf2b11fc3c7869994bf127e4))
+* add Cursor section with mcp.json env editing (COBUD-9) ([#32](https://github.com/apps3k-com/CodingBuddy/issues/32)) ([35d2bbd](https://github.com/apps3k-com/CodingBuddy/commit/35d2bbd4b939a77de7f23c05fcfe511de439f519))
+* add structure-preserving JSONPatcher service (COBUD-7) ([15e0381](https://github.com/apps3k-com/CodingBuddy/commit/15e038145a012058cb12eff8fd34eb47a243a7a6))
+
 ## [0.5.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.4.0...v0.5.0) (2026-06-10)
 
 
