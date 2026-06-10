@@ -13,7 +13,10 @@ nonisolated enum ShellQuoting {
     /// Characters that are safe in an unquoted assignment value. Conservative
     /// on purpose: anything outside this set forces quotes (or read-only when
     /// parsing existing lines).
-    static func isUnquotedSafe(_ character: Character) -> Bool {
+    /// Explicitly nonisolated (despite the enum-level annotation): Xcode's
+    /// live-issue pipeline misses the type-level opt-out when this is passed
+    /// as an unapplied reference and reports spurious MainActor warnings.
+    nonisolated static func isUnquotedSafe(_ character: Character) -> Bool {
         if character.isLetter || character.isNumber { return true }
         return "_./:$~^+,@%={}-".contains(character)
     }
@@ -23,7 +26,7 @@ nonisolated enum ShellQuoting {
     static func isValid(raw: String, for quoting: ValueQuoting) -> Bool {
         switch quoting {
         case .none:
-            return raw.allSatisfy(isUnquotedSafe)
+            return raw.allSatisfy { isUnquotedSafe($0) }
         case .single:
             return !raw.contains("'")
         case .double:
