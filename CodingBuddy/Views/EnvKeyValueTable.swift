@@ -15,6 +15,8 @@ struct EnvKeyValueTable: View {
         var name: String
         var value: String
         var isEditable = true
+        /// Optional origin shown under the name (e.g. "settings.json").
+        var sourceLabel: String?
     }
 
     var rows: [Row]
@@ -27,13 +29,20 @@ struct EnvKeyValueTable: View {
     var body: some View {
         Table(rows, selection: $selection) {
             TableColumn("Name") { row in
-                HStack(spacing: 6) {
-                    Text(verbatim: row.name)
-                        .fontWeight(.medium)
-                    if !row.isEditable {
-                        Image(systemName: "lock.fill")
-                            .foregroundStyle(.tertiary)
-                            .help("Complex line — CodingBuddy only displays it and never modifies it.")
+                VStack(alignment: .leading, spacing: 1) {
+                    HStack(spacing: 6) {
+                        Text(verbatim: row.name)
+                            .fontWeight(.medium)
+                        if !row.isEditable {
+                            Image(systemName: "lock.fill")
+                                .foregroundStyle(.tertiary)
+                                .help("Complex line — CodingBuddy only displays it and never modifies it.")
+                        }
+                    }
+                    if let sourceLabel = row.sourceLabel {
+                        Text(verbatim: sourceLabel)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }

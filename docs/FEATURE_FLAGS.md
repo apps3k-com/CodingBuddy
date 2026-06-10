@@ -50,6 +50,13 @@ Codex section in the sidebar: edit the variables in `~/.codex/mcp.env`
 `config.toml` reference which environment variables — including a warning for
 referenced-but-undefined names.
 
+### `aiToolsClaudeCode` — maturity: alpha
+
+Claude Code section in the sidebar: edit the `env` blocks of
+`~/.claude/settings.json` and `settings.local.json` (value-precise JSON
+patching, masked secrets, automatic backups) and see the MCP servers from
+`~/.claude.json` and the projects' `.mcp.json` files — read-only.
+
 ### `hideOverriddenVariables` — maturity: stable
 
 Toolbar toggle that hides assignments shadowed by a later one (zsh load

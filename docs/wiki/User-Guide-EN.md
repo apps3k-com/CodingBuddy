@@ -68,6 +68,13 @@ The **Codex** sidebar entry (alpha) manages OpenAI Codex's environment file:
 - **MCP servers** — a read-only overview from `~/.codex/config.toml`: which server references which environment variable (`bearer_token_env_var`, `env_vars`).
 - **Missing-variable warning** — when a server references a variable that `mcp.env` does not define, CodingBuddy shows a warning with a one-click **Define…** shortcut. That answers the classic "where does Codex read this token from?" question.
 
+### Claude Code
+
+The **Claude Code** entry (alpha) manages Claude Code's configuration:
+
+- **`env` blocks** from `~/.claude/settings.json` and `settings.local.json` — edit, add and delete variables. CodingBuddy patches only the affected value (the rest of the file stays byte-for-byte, no reordering), writes a backup first, and refuses the write if Claude Code changed the file in the meantime.
+- **MCP servers** — a read-only overview from `~/.claude.json` (user scope and existing projects) and the projects' `.mcp.json` files, with their referenced env/header keys.
+
 ## Settings
 
 Open **CodingBuddy → Settings…** (⌘,). The settings appear as a panel attached to the main window; close them with **Done** before continuing to work in the app.
