@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.0](https://github.com/apps3k-com/EnvVarBuddy/compare/v0.3.0...v0.4.0) (2026-06-10)
+
+
+### Features
+
+* hide overridden variables instead of grouping them ([#18](https://github.com/apps3k-com/EnvVarBuddy/issues/18)) ([ac7a6d5](https://github.com/apps3k-com/EnvVarBuddy/commit/ac7a6d59b716afd3588320302ab790cdd0923ddc))
+
+
+### Bug Fixes
+
+* mark pure model and parser types nonisolated ([#15](https://github.com/apps3k-com/EnvVarBuddy/issues/15)) ([1d567ff](https://github.com/apps3k-com/EnvVarBuddy/commit/1d567ff727a0c5748fffef4346f81b361f2a9758))
+* present settings as a sheet over the main window ([#19](https://github.com/apps3k-com/EnvVarBuddy/issues/19)) ([81b9225](https://github.com/apps3k-com/EnvVarBuddy/commit/81b9225647fe451470dce77d87f7e6c0e341544d))
+* reset to the system appearance when switching back to Auto ([#17](https://github.com/apps3k-com/EnvVarBuddy/issues/17)) ([db86bfa](https://github.com/apps3k-com/EnvVarBuddy/commit/db86bfad4d88a30e1e57ff4b5e8950d191f4c69d))
+* silence spurious MainActor warnings on isUnquotedSafe in Xcode ([#20](https://github.com/apps3k-com/EnvVarBuddy/issues/20)) ([0317510](https://github.com/apps3k-com/EnvVarBuddy/commit/0317510617f04c730d2bf4fb96bfdcd2200d2209))
+* unify the settings sheet background ([#21](https://github.com/apps3k-com/EnvVarBuddy/issues/21)) ([b7913ec](https://github.com/apps3k-com/EnvVarBuddy/commit/b7913ec2f5202937958cd1c9c4093cacf02a7507))
+
 ## [0.3.0](https://github.com/apps3k-com/EnvVarBuddy/compare/v0.2.0...v0.3.0) (2026-06-10)
 
 
