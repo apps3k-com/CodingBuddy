@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0](https://github.com/apps3k-com/EnvVarBuddy/compare/v0.2.0...v0.3.0) (2026-06-10)
+
+
+### Features
+
+* manage MCP auth credentials (~/.mcp-auth) in the app ([#13](https://github.com/apps3k-com/EnvVarBuddy/issues/13)) ([af0245f](https://github.com/apps3k-com/EnvVarBuddy/commit/af0245f94f3f1429b216ca28c86b1b36908247dc))
+
+
+### Bug Fixes
+
+* address correctness review findings ([#11](https://github.com/apps3k-com/EnvVarBuddy/issues/11)) ([3172b93](https://github.com/apps3k-com/EnvVarBuddy/commit/3172b93398153bc4c3472eafedadb23e8226fe07))
+* keep table selection when the variable list reloads ([#14](https://github.com/apps3k-com/EnvVarBuddy/issues/14)) ([64a6a1a](https://github.com/apps3k-com/EnvVarBuddy/commit/64a6a1ade67c48d5827bba7b14ac558a9d2d40a7))
+
 ## [0.2.0](https://github.com/apps3k-com/EnvVarBuddy/compare/v0.1.0...v0.2.0) (2026-06-09)
 
 
