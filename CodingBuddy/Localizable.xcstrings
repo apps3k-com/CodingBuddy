@@ -133,6 +133,16 @@
         }
       }
     },
+    "Add a new variable to a server's env object" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neue Variable im env-Objekt eines Servers anlegen"
+          }
+        }
+      }
+    },
     "Add a new variable to mcp.env" : {
       "localizations" : {
         "de" : {
@@ -673,6 +683,16 @@
         }
       }
     },
+    "No Cursor configuration" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Cursor-Konfiguration"
+          }
+        }
+      }
+    },
     "No MCP credentials" : {
       "localizations" : {
         "de" : {
@@ -719,6 +739,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Only text values can be edited." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur Textwerte können bearbeitet werden."
           }
         }
       }
@@ -893,6 +923,36 @@
         }
       }
     },
+    "The change could not be applied safely — the file is left untouched." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Änderung konnte nicht sicher angewendet werden — die Datei bleibt unangetastet."
+          }
+        }
+      }
+    },
+    "The entry was not found in the file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Eintrag wurde in der Datei nicht gefunden."
+          }
+        }
+      }
+    },
+    "The file contains duplicate keys — it is left untouched." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei enthält doppelte Schlüssel — sie bleibt unangetastet."
+          }
+        }
+      }
+    },
     "The file could not be read." : {
       "localizations" : {
         "de" : {
@@ -909,6 +969,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Die Datei hat keinen „env“-Abschnitt — lege ihn zuerst in Claude Code an."
+          }
+        }
+      }
+    },
+    "The file is not valid JSON." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei ist kein gültiges JSON."
           }
         }
       }
@@ -979,6 +1049,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Diese Quote-Kombination kann nicht sicher geschrieben werden."
+          }
+        }
+      }
+    },
+    "This server has no “env” object — add one in Cursor first." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Server hat kein „env“-Objekt — lege es zuerst in Cursor an."
           }
         }
       }
@@ -1129,6 +1209,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "~/.codex existiert nicht — Codex ist auf diesem Mac nicht eingerichtet."
+          }
+        }
+      }
+    },
+    "~/.cursor does not exist — Cursor has not been set up on this Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~/.cursor existiert nicht — Cursor ist auf diesem Mac nicht eingerichtet."
           }
         }
       }

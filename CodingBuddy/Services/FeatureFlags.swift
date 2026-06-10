@@ -45,6 +45,7 @@ nonisolated enum ReleaseChannel: String, Sendable {
 nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
     case aiToolsCodex
     case aiToolsClaudeCode
+    case aiToolsCursor
     case hideOverriddenVariables
     case secretsProtection
     case envImportExport
@@ -56,6 +57,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
         switch self {
         case .aiToolsCodex: .alpha
         case .aiToolsClaudeCode: .alpha
+        case .aiToolsCursor: .alpha
         // Stable from the start: it replaces the retired groupedOverridesView
         // feature, which already shipped stable.
         case .hideOverriddenVariables: .stable

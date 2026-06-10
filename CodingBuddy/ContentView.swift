@@ -32,6 +32,7 @@ struct ContentView: View {
     @State private var mcpAuthStore = MCPAuthStore()
     @State private var codexStore = CodexStore()
     @State private var claudeCodeStore = ClaudeCodeStore()
+    @State private var cursorStore = CursorStore()
     @State private var secrets = SecretsGuard()
     @State private var scope: SidebarScope? = .all
     @State private var showSettings = false
@@ -85,6 +86,8 @@ struct ContentView: View {
                 CodexView(store: codexStore, secrets: secrets)
             case .aiTool(.claudeCode):
                 ClaudeCodeView(store: claudeCodeStore, secrets: secrets)
+            case .aiTool(.cursor):
+                CursorView(store: cursorStore, secrets: secrets)
             default:
                 VariableListView(store: store, secrets: secrets, scope: scope ?? .all)
             }
@@ -115,6 +118,7 @@ struct ContentView: View {
         switch tool {
         case .codex: codexStore.directoryExists
         case .claudeCode: claudeCodeStore.directoryExists
+        case .cursor: cursorStore.directoryExists
         }
     }
 
@@ -122,6 +126,7 @@ struct ContentView: View {
         switch tool {
         case .codex: codexStore.variables.count
         case .claudeCode: claudeCodeStore.envEntries.count
+        case .cursor: cursorStore.envEntries.count
         }
     }
 }

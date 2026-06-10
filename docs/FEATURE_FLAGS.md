@@ -57,6 +57,12 @@ Claude Code section in the sidebar: edit the `env` blocks of
 patching, masked secrets, automatic backups) and see the MCP servers from
 `~/.claude.json` and the projects' `.mcp.json` files — read-only.
 
+### `aiToolsCursor` — maturity: alpha
+
+Cursor section in the sidebar: edit the per-server `env` values in
+`~/.cursor/mcp.json` (value-precise JSON patching, masked secrets, automatic
+backups); the server list itself is read-only.
+
 ### `hideOverriddenVariables` — maturity: stable
 
 Toolbar toggle that hides assignments shadowed by a later one (zsh load

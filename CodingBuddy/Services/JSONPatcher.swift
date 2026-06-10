@@ -13,12 +13,27 @@ import Foundation
 /// nothing is returned).
 nonisolated enum JSONPatcher {
 
-    enum PatchError: Error, Equatable {
+    enum PatchError: LocalizedError, Equatable {
         case malformedJSON
         case pathNotFound
         case notAString
         case duplicateKey
         case verificationFailed
+
+        var errorDescription: String? {
+            switch self {
+            case .malformedJSON:
+                String(localized: "The file is not valid JSON.")
+            case .pathNotFound:
+                String(localized: "The entry was not found in the file.")
+            case .notAString:
+                String(localized: "Only text values can be edited.")
+            case .duplicateKey:
+                String(localized: "The file contains duplicate keys — it is left untouched.")
+            case .verificationFailed:
+                String(localized: "The change could not be applied safely — the file is left untouched.")
+            }
+        }
     }
 
     // MARK: - Operations

@@ -10,6 +10,7 @@ import Foundation
 nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable {
     case codex
     case claudeCode
+    case cursor
 
     var id: String { rawValue }
 
@@ -18,6 +19,7 @@ nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .codex: "Codex"
         case .claudeCode: "Claude Code"
+        case .cursor: "Cursor"
         }
     }
 
@@ -25,6 +27,7 @@ nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .codex: "terminal"
         case .claudeCode: "bubble.left.and.bubble.right"
+        case .cursor: "cursorarrow"
         }
     }
 
@@ -32,6 +35,7 @@ nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .codex: .aiToolsCodex
         case .claudeCode: .aiToolsClaudeCode
+        case .cursor: .aiToolsCursor
         }
     }
 }
