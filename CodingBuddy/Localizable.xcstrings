@@ -743,6 +743,16 @@
         }
       }
     },
+    "Only text values can be edited." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur Textwerte können bearbeitet werden."
+          }
+        }
+      }
+    },
     "Referenced by MCP servers but not defined in mcp.env:" : {
       "localizations" : {
         "de" : {
@@ -913,6 +923,36 @@
         }
       }
     },
+    "The change could not be applied safely — the file is left untouched." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Änderung konnte nicht sicher angewendet werden — die Datei bleibt unangetastet."
+          }
+        }
+      }
+    },
+    "The entry was not found in the file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Eintrag wurde in der Datei nicht gefunden."
+          }
+        }
+      }
+    },
+    "The file contains duplicate keys — it is left untouched." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei enthält doppelte Schlüssel — sie bleibt unangetastet."
+          }
+        }
+      }
+    },
     "The file could not be read." : {
       "localizations" : {
         "de" : {
@@ -929,6 +969,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Die Datei hat keinen „env“-Abschnitt — lege ihn zuerst in Claude Code an."
+          }
+        }
+      }
+    },
+    "The file is not valid JSON." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei ist kein gültiges JSON."
           }
         }
       }
