@@ -41,6 +41,10 @@ Deep documentation lives in the [wiki](https://github.com/apps3k-com/EnvVarBuddy
 - Keep states current while working: `Todo` → `In Progress` (branch started) → `PR open`
   (PR created) → `In Review` (squash-merged, awaiting user verification) → `Done` (user
   confirmed) → `Deployed` (shipped in a release). Use `Re-opened` for bounce-backs.
+- After opening a PR, set up a monitor and wait for the automated reviews (CodeRabbit,
+  cubic). Handle **every finding individually**: verify it, then either fix it or reject
+  it with a reasoned reply **in the review thread** — the reviewers learn from replies.
+  A PR may only be merged once CI is green and every finding is fixed or answered.
 
 ## Build & test
 

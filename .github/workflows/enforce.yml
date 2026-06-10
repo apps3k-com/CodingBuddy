@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
 
+permissions:
+  contents: read
+
 jobs:
   conventional-pr-title:
     name: PR title is a Conventional Commit
@@ -18,8 +21,9 @@ jobs:
             echo "::error::PR title must follow Conventional Commits, e.g. 'feat: add grouped view'. Got: $TITLE"
             exit 1
           fi
-          # Release PRs from release-please carry no work item.
-          if echo "$TITLE" | grep -qE '^chore\(main\): release'; then
+          # Release PRs from release-please carry no work item. Tight match:
+          # only real version titles bypass, incl. prereleases on beta.
+          if echo "$TITLE" | grep -qE '^chore\((main|beta)\): release [0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.]+)?$'; then
             exit 0
           fi
           # The squash commit must reference its Plane work item(s).
