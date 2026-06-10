@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.4.0...v0.5.0) (2026-06-10)
+
+
+### Features
+
+* rename app to CodingBuddy (COBUD-4) ([#24](https://github.com/apps3k-com/CodingBuddy/issues/24)) ([860b730](https://github.com/apps3k-com/CodingBuddy/commit/860b730539b0dd1285969a727fa37b743338fbe5))
+
 ## [0.4.0](https://github.com/apps3k-com/EnvVarBuddy/compare/v0.3.0...v0.4.0) (2026-06-10)
 
 
