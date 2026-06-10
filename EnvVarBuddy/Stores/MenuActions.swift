@@ -28,7 +28,7 @@ nonisolated enum HelpDestination {
     }
 
     var url: URL {
-        let base = "https://github.com/apps3k-com/EnvVarBuddy/wiki"
+        let base = "https://github.com/apps3k-com/CodingBuddy/wiki"
         switch self {
         case .userGuide:
             let page = Self.isGerman ? "Benutzerhandbuch-DE" : "User-Guide-EN"

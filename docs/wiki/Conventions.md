@@ -1,6 +1,6 @@
 # Conventions
 
-The authoritative short versions live in the repo: [CLAUDE.md](https://github.com/apps3k-com/EnvVarBuddy/blob/main/CLAUDE.md) (agent rules) and [CONTRIBUTING.md](https://github.com/apps3k-com/EnvVarBuddy/blob/main/CONTRIBUTING.md) (workflow). This page is the human-readable summary.
+The authoritative short versions live in the repo: [CLAUDE.md](https://github.com/apps3k-com/CodingBuddy/blob/main/CLAUDE.md) (agent rules) and [CONTRIBUTING.md](https://github.com/apps3k-com/CodingBuddy/blob/main/CONTRIBUTING.md) (workflow). This page is the human-readable summary.
 
 ## Code
 

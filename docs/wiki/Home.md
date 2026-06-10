@@ -1,6 +1,6 @@
-# EnvVarBuddy — Documentation
+# CodingBuddy — Documentation
 
-**Single source of truth for all EnvVarBuddy documentation.** The wiki is generated: pages live in the main repo under [`docs/wiki/`](https://github.com/apps3k-com/EnvVarBuddy/tree/main/docs/wiki) and are synced here automatically on every merge to `main`. **Do not edit wiki pages directly — changes get overwritten.**
+**Single source of truth for all CodingBuddy documentation.** The wiki is generated: pages live in the main repo under [`docs/wiki/`](https://github.com/apps3k-com/CodingBuddy/tree/main/docs/wiki) and are synced here automatically on every merge to `main`. **Do not edit wiki pages directly — changes get overwritten.**
 
 ## How this is organized
 

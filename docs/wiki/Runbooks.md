@@ -24,7 +24,7 @@ defaults delete apps3k.EnvVarBuddy flag.<name>            # back to channel defa
 
 ## Wiki out of sync
 
-The wiki is overwritten from `docs/wiki/` on every merge to `main`. If someone edited the wiki directly and the edit was lost: recover it from the wiki's git history (`git clone https://github.com/apps3k-com/EnvVarBuddy.wiki.git`) and re-apply it as a PR against `docs/wiki/`.
+The wiki is overwritten from `docs/wiki/` on every merge to `main`. If someone edited the wiki directly and the edit was lost: recover it from the wiki's git history (`git clone https://github.com/apps3k-com/CodingBuddy.wiki.git`) and re-apply it as a PR against `docs/wiki/`.
 
 ## Release PR not appearing
 

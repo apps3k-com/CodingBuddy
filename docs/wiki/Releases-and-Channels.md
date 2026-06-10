@@ -18,7 +18,7 @@ Versions are derived from Conventional Commits: `feat:` → minor, `fix:` → pa
 | **beta** | `beta` branch | `x.y.z-beta.n` prerelease tags | early testers |
 | **stable** | `main` | `x.y.z` tags | everyone |
 
-The running app derives its channel from the build itself — Debug ⇒ alpha, a `-beta` marketing version ⇒ beta, otherwise stable. Features gate on the channel via [feature flags](https://github.com/apps3k-com/EnvVarBuddy/blob/main/docs/FEATURE_FLAGS.md).
+The running app derives its channel from the build itself — Debug ⇒ alpha, a `-beta` marketing version ⇒ beta, otherwise stable. Features gate on the channel via [feature flags](https://github.com/apps3k-com/CodingBuddy/blob/main/docs/FEATURE_FLAGS.md).
 
 ## Cutting a beta
 

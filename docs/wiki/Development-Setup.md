@@ -8,8 +8,8 @@
 ## First run
 
 ```bash
-git clone https://github.com/apps3k-com/EnvVarBuddy.git
-cd EnvVarBuddy
+git clone https://github.com/apps3k-com/CodingBuddy.git
+cd CodingBuddy
 ./scripts/setup.sh          # activates git hooks (commit-msg, pre-push)
 open EnvVarBuddy.xcodeproj
 ```

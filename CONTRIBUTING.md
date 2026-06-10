@@ -1,4 +1,4 @@
-# Contributing to EnvVarBuddy
+# Contributing to CodingBuddy
 
 ## Branch workflow
 
