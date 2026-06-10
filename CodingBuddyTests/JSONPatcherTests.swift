@@ -70,11 +70,14 @@ struct JSONPatcherTests {
     }
 
     @Test func unicodeEscapedKeysAreMatched() throws {
-        let doc = #"{ "env": { "TOKEN": "old" } }"#
+        // "TOKEN" written as \uXXXX escapes — the scanner must compare
+        // decoded keys, and the patch must leave the escaped key bytes alone.
+        let doc = #"{ "env": { "\u0054\u004F\u004B\u0045\u004E": "old" } }"#
         let patched = try JSONPatcher.replaceString(in: doc, at: ["env", "TOKEN"], with: "new")
         let parsed = try #require(try JSONSerialization.jsonObject(with: Data(patched.utf8)) as? [String: Any])
         let env = try #require(parsed["env"] as? [String: String])
         #expect(env["TOKEN"] == "new")
+        #expect(patched.contains(#"\u0054"#))
     }
 
     // MARK: - insertPair
