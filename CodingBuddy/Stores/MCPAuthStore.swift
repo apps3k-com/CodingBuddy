@@ -19,8 +19,10 @@ final class MCPAuthStore {
     private(set) var rootExists = false
     var lastError: String?
 
-    @ObservationIgnored private var watchers: [FileWatcher] = []
-    @ObservationIgnored private var pendingReload: DispatchWorkItem?
+    @ObservationIgnored private lazy var monitor = FileChangeMonitor { [weak self] in
+        self?.reload()
+        self?.startWatching()
+    }
 
     init(
         rootDirectory: URL? = nil,
@@ -93,8 +95,7 @@ final class MCPAuthStore {
     }
 
     private func perform(_ mutation: () throws -> Void) {
-        pendingReload?.cancel()
-        pendingReload = nil
+        monitor.cancelPending()
         do {
             try mutation()
             lastError = nil
@@ -108,30 +109,10 @@ final class MCPAuthStore {
     // MARK: - File watching
 
     private func startWatching() {
-        watchers.forEach { $0.cancel() }
-        watchers = []
-
-        let onChange: @MainActor () -> Void = { [weak self] in self?.scheduleReload() }
         var watchedURLs = [rootDirectory]
         watchedURLs += Set(entries.map(\.versionDirectory)).map {
             rootDirectory.appendingPathComponent($0, isDirectory: true)
         }
-        for url in watchedURLs {
-            if let watcher = FileWatcher(url: url, onChange: onChange) {
-                watchers.append(watcher)
-            }
-        }
-    }
-
-    private func scheduleReload() {
-        pendingReload?.cancel()
-        let work = DispatchWorkItem { [weak self] in
-            MainActor.assumeIsolated {
-                self?.reload()
-                self?.startWatching()
-            }
-        }
-        pendingReload = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: work)
+        monitor.watch(watchedURLs)
     }
 }
