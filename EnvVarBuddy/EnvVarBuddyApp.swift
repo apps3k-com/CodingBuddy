@@ -10,6 +10,7 @@ import SwiftUI
 struct EnvVarBuddyApp: App {
     @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.auto.rawValue
     @State private var menuActions = MenuActions()
+    @Environment(\.openWindow) private var openWindow
 
     var body: some Scene {
         // A single-window utility: `Window` prevents a second instance whose
@@ -23,6 +24,16 @@ struct EnvVarBuddyApp: App {
         }
         .defaultSize(width: 820, height: 520)
         .commands {
+            // Settings open as a sheet over the main window (instead of the
+            // separate window a `Settings` scene would create), so the menu
+            // item is provided manually.
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings…") {
+                    openWindow(id: "main")
+                    menuActions.settingsRequest += 1
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
             CommandGroup(replacing: .importExport) {
                 if FeatureFlag.envImportExport.isEnabled {
                     Button("Import from .env…") { menuActions.importRequest += 1 }
@@ -40,10 +51,6 @@ struct EnvVarBuddyApp: App {
                     NSWorkspace.shared.open(HelpDestination.wiki.url)
                 }
             }
-        }
-
-        Settings {
-            SettingsView()
         }
     }
 }

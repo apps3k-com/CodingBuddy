@@ -25,10 +25,12 @@ enum SidebarScope: Hashable {
 }
 
 struct ContentView: View {
+    @Environment(MenuActions.self) private var menuActions
     @State private var store = EnvStore()
     @State private var mcpAuthStore = MCPAuthStore()
     @State private var secrets = SecretsGuard()
     @State private var scope: SidebarScope? = .all
+    @State private var showSettings = false
 
     var body: some View {
         NavigationSplitView {
@@ -63,6 +65,12 @@ struct ContentView: View {
             } else {
                 VariableListView(store: store, secrets: secrets, scope: scope ?? .all)
             }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
+        }
+        .onChange(of: menuActions.settingsRequest) {
+            showSettings = true
         }
         .alert(
             "Error",

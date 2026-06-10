@@ -12,6 +12,7 @@ import Observation
 final class MenuActions {
     var importRequest = 0
     var exportRequest = 0
+    var settingsRequest = 0
 }
 
 /// Wiki pages opened from the Help menu, mirrored per app language.
