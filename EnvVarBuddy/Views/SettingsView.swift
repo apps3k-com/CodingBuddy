@@ -5,22 +5,37 @@
 
 import SwiftUI
 
+/// Presented as a sheet over the main window — window-modal on purpose, so
+/// it neither spawns a second window nor leaves the app interactive behind it.
 struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
     @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.auto.rawValue
     @AppStorage("appLanguage") private var languageRaw = AppLanguage.system.rawValue
     @AppStorage(SecretsGuard.unlockDurationKey) private var unlockDuration = SecretsGuard.defaultUnlockDuration
 
     var body: some View {
-        TabView {
-            Tab("General", systemImage: "gearshape") {
-                generalPane
+        VStack(spacing: 0) {
+            TabView {
+                Tab("General", systemImage: "gearshape") {
+                    generalPane
+                }
+                Tab("Security", systemImage: "lock.shield") {
+                    securityPane
+                }
             }
-            Tab("Security", systemImage: "lock.shield") {
-                securityPane
+            .scenePadding()
+
+            Divider()
+
+            HStack {
+                Spacer()
+                Button("Done") { dismiss() }
+                    .keyboardShortcut(.defaultAction)
+                    .buttonStyle(.borderedProminent)
             }
+            .padding(12)
         }
-        .scenePadding()
-        .frame(width: 440)
+        .frame(width: 440, height: 400)
     }
 
     private var securityPane: some View {

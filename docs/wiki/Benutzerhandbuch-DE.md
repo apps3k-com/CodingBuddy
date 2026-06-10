@@ -58,7 +58,7 @@ Der Sidebar-Bereich **Zugangsdaten → MCP Auth** verwaltet den OAuth-Cache, den
 
 ## Einstellungen
 
-Öffne **EnvVarBuddy → Einstellungen…** (⌘,):
+Öffne **EnvVarBuddy → Einstellungen…** (⌘,). Die Einstellungen erscheinen als Panel direkt am Hauptfenster; schließe sie mit **Fertig**, um in der App weiterzuarbeiten.
 
 - **Sprache** — System, English oder Deutsch. Wird nach einem Neustart der App wirksam.
 - **Erscheinungsbild** — Auto (folgt dem System), Hell oder Dunkel.

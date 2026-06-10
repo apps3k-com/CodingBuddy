@@ -58,7 +58,7 @@ The **Credentials → MCP Auth** sidebar section manages the OAuth cache that `m
 
 ## Settings
 
-Open **EnvVarBuddy → Settings…** (⌘,):
+Open **EnvVarBuddy → Settings…** (⌘,). The settings appear as a panel attached to the main window; close them with **Done** before continuing to work in the app.
 
 - **Language** — System, English or Deutsch. Takes effect after relaunching the app.
 - **Appearance** — Auto (follow the system), Light or Dark.
