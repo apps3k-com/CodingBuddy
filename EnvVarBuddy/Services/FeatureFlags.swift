@@ -43,7 +43,7 @@ nonisolated enum ReleaseChannel: String, Sendable {
 /// and CI): every case has a `### \`flagName\`` section in
 /// docs/FEATURE_FLAGS.md, and vice versa.
 nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
-    case groupedOverridesView
+    case hideOverriddenVariables
     case secretsProtection
     case envImportExport
     case mcpAuthManager
@@ -52,7 +52,9 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
     /// alpha builds only, `.beta` means alpha + beta, `.stable` means everyone.
     var maturity: ReleaseChannel {
         switch self {
-        case .groupedOverridesView: .stable
+        // Stable from the start: it replaces the retired groupedOverridesView
+        // feature, which already shipped stable.
+        case .hideOverriddenVariables: .stable
         case .secretsProtection: .stable
         case .envImportExport: .stable
         case .mcpAuthManager: .stable

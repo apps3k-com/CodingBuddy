@@ -32,8 +32,8 @@ builds see everything, stable builds only mature features.
 Any flag can be forced on or off for testing:
 
 ```bash
-defaults write apps3k.EnvVarBuddy flag.groupedOverridesView -bool YES
-defaults delete apps3k.EnvVarBuddy flag.groupedOverridesView   # back to channel default
+defaults write apps3k.EnvVarBuddy flag.hideOverriddenVariables -bool YES
+defaults delete apps3k.EnvVarBuddy flag.hideOverriddenVariables   # back to channel default
 ```
 
 ## Enforcement
@@ -43,10 +43,12 @@ in code without a `### \`flagName\`` section in this file, or vice versa.
 
 ## Registry
 
-### `groupedOverridesView` — maturity: stable
+### `hideOverriddenVariables` — maturity: stable
 
-Grouped display of overridden variables: the effective assignment is shown as
-the parent row, shadowed assignments expand beneath it.
+Toolbar toggle that hides assignments shadowed by a later one (zsh load
+order), so only the effective values stay visible; the `.env` export follows
+the visible set. Replaces the retired `groupedOverridesView` feature and is
+therefore stable from the start.
 
 ### `secretsProtection` — maturity: stable
 

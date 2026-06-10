@@ -50,9 +50,15 @@ final class EnvStore {
         existingFiles = existing
     }
 
-    func variables(in file: ShellConfigFile?) -> [EnvVariable] {
-        guard let file else { return variables }
-        return variables.filter { $0.file == file }
+    /// Variables of one file (or all). With `hidingOverridden`, assignments
+    /// shadowed by a later one (zsh load order, see `effectiveVariable`) are
+    /// dropped — also inside a single-file scope, where an assignment can be
+    /// overridden by a later file.
+    func variables(in file: ShellConfigFile?, hidingOverridden: Bool = false) -> [EnvVariable] {
+        var scoped = variables
+        if let file { scoped = scoped.filter { $0.file == file } }
+        if hidingOverridden { scoped = scoped.filter { !isOverridden($0) } }
+        return scoped
     }
 
     // MARK: - Mutations

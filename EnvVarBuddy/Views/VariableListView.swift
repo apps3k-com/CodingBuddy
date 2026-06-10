@@ -13,7 +13,7 @@ struct VariableListView: View {
     var scope: SidebarScope
 
     @Environment(MenuActions.self) private var menuActions
-    @AppStorage("groupOverriddenVariables") private var groupOverridden = false
+    @AppStorage("hideOverriddenVariables") private var hideOverridden = false
     @State private var searchText = ""
     @State private var selection: EnvVariable.ID?
     @State private var editorMode: VariableEditorView.Mode?
@@ -27,8 +27,13 @@ struct VariableListView: View {
         var entries: [EnvFileEntry]
     }
 
+    private var isHiding: Bool {
+        FeatureFlag.hideOverriddenVariables.isEnabled && hideOverridden
+    }
+
+    /// What the table shows — and exactly what the .env export writes.
     private var filtered: [EnvVariable] {
-        let scoped = store.variables(in: scope.file)
+        let scoped = store.variables(in: scope.file, hidingOverridden: isHiding)
         guard !searchText.isEmpty else { return scoped }
         return scoped.filter {
             // Masked values are excluded from value search: matching them
@@ -36,30 +41,6 @@ struct VariableListView: View {
             $0.name.localizedCaseInsensitiveContains(searchText)
                 || (!isMasked($0) && $0.rawValue.localizedCaseInsensitiveContains(searchText))
         }
-    }
-
-    /// One group per variable name: the assignment that takes effect as the
-    /// parent, shadowed assignments (newest first) as children.
-    private struct VariableGroup: Identifiable {
-        var effective: EnvVariable
-        var overridden: [EnvVariable]
-        var id: EnvVariable.ID { effective.id }
-    }
-
-    private var groups: [VariableGroup] {
-        Dictionary(grouping: filtered, by: \.name).values
-            .compactMap { assignments in
-                let ordered = assignments.sorted {
-                    ($0.file.loadOrder, $0.lineIndex) < ($1.file.loadOrder, $1.lineIndex)
-                }
-                guard let effective = ordered.last else { return nil }
-                return VariableGroup(effective: effective, overridden: ordered.dropLast().reversed())
-            }
-            .sorted { $0.effective.name < $1.effective.name }
-    }
-
-    private var isGrouping: Bool {
-        FeatureFlag.groupedOverridesView.isEnabled && groupOverridden
     }
 
     var body: some View {
@@ -102,19 +83,7 @@ struct VariableListView: View {
             }
             .width(min: 70, ideal: 90)
         } rows: {
-            if isGrouping {
-                ForEach(groups) { group in
-                    if group.overridden.isEmpty {
-                        TableRow(group.effective)
-                    } else {
-                        DisclosureTableRow(group.effective) {
-                            ForEach(group.overridden) { TableRow($0) }
-                        }
-                    }
-                }
-            } else {
-                ForEach(filtered) { TableRow($0) }
-            }
+            ForEach(filtered) { TableRow($0) }
         }
         .contextMenu(forSelectionType: EnvVariable.ID.self) { ids in
             if let variable = variable(for: ids.first) {
@@ -143,10 +112,10 @@ struct VariableListView: View {
                 }
                 .help("Add a new variable")
             }
-            if FeatureFlag.groupedOverridesView.isEnabled {
+            if FeatureFlag.hideOverriddenVariables.isEnabled {
                 ToolbarItem {
-                    Toggle("Group overridden", systemImage: "list.bullet.indent", isOn: $groupOverridden)
-                        .help("Show overridden assignments grouped under the effective one")
+                    Toggle("Hide overridden", systemImage: "eye.slash", isOn: $hideOverridden)
+                        .help("Show only the assignments that take effect — the .env export then also includes only these")
                 }
             }
             if FeatureFlag.envImportExport.isEnabled {
