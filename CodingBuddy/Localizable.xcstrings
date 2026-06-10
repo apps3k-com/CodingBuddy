@@ -1,0 +1,1036 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld files" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Dateien"
+          }
+        }
+      }
+    },
+    "%lld servers" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Server"
+          }
+        }
+      }
+    },
+    "%lld variables" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Variablen"
+          }
+        }
+      }
+    },
+    "1 minute" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Minute"
+          }
+        }
+      }
+    },
+    "15 minutes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 Minuten"
+          }
+        }
+      }
+    },
+    "5 minutes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 Minuten"
+          }
+        }
+      }
+    },
+    "A backup of the file is written automatically before the change." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vor der Änderung wird automatisch ein Backup der Datei angelegt."
+          }
+        }
+      }
+    },
+    "A later assignment overrides this value in new terminal sessions." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine spätere Zuweisung überschreibt diesen Wert in neuen Terminal-Sessions."
+          }
+        }
+      }
+    },
+    "Access token expired" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Access-Token abgelaufen"
+          }
+        }
+      }
+    },
+    "Active" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiv"
+          }
+        }
+      }
+    },
+    "Add Entry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintrag hinzufügen"
+          }
+        }
+      }
+    },
+    "Add a new variable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neue Variable anlegen"
+          }
+        }
+      }
+    },
+    "All Variables" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Variablen"
+          }
+        }
+      }
+    },
+    "Appearance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erscheinungsbild"
+          }
+        }
+      }
+    },
+    "Authenticate to reveal this value." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Anzeigen authentifizieren."
+          }
+        }
+      }
+    },
+    "Auto" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbrechen"
+          }
+        }
+      }
+    },
+    "Close" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schließen"
+          }
+        }
+      }
+    },
+    "Command substitution ($(…) or `…`) is not supported." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Command Substitution ($(…) oder `…`) wird nicht unterstützt."
+          }
+        }
+      }
+    },
+    "Complex line — CodingBuddy only displays it and never modifies it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Komplexe Zeile — CodingBuddy zeigt sie nur an und verändert sie nicht."
+          }
+        }
+      }
+    },
+    "Copy Line" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeile kopieren"
+          }
+        }
+      }
+    },
+    "Copy Name" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name kopieren"
+          }
+        }
+      }
+    },
+    "Copy Value" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wert kopieren"
+          }
+        }
+      }
+    },
+    "Credentials" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugangsdaten"
+          }
+        }
+      }
+    },
+    "Dark" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dunkel"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen"
+          }
+        }
+      }
+    },
+    "Delete “%@” from %@?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%1$@“ aus %2$@ löschen?"
+          }
+        }
+      }
+    },
+    "Delete…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen…"
+          }
+        }
+      }
+    },
+    "Documentation (Wiki)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentation (Wiki)"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fertig"
+          }
+        }
+      }
+    },
+    "Edit Variable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variable bearbeiten"
+          }
+        }
+      }
+    },
+    "Edit as list (PATH-style)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als Liste bearbeiten (PATH-Stil)"
+          }
+        }
+      }
+    },
+    "Edit…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bearbeiten…"
+          }
+        }
+      }
+    },
+    "Entry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintrag"
+          }
+        }
+      }
+    },
+    "CodingBuddy Help" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy-Hilfe"
+          }
+        }
+      }
+    },
+    "Error" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehler"
+          }
+        }
+      }
+    },
+    "Export visible as .env…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sichtbare als .env exportieren…"
+          }
+        }
+      }
+    },
+    "File" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datei"
+          }
+        }
+      }
+    },
+    "Files" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dateien"
+          }
+        }
+      }
+    },
+    "General" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allgemein"
+          }
+        }
+      }
+    },
+    "Hide overridden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überschriebene ausblenden"
+          }
+        }
+      }
+    },
+    "Hide secrets" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geheimnisse verbergen"
+          }
+        }
+      }
+    },
+    "Import %lld" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld importieren"
+          }
+        }
+      }
+    },
+    "Import from .env…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus .env importieren…"
+          }
+        }
+      }
+    },
+    "Import or export .env files" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ".env-Dateien importieren oder exportieren"
+          }
+        }
+      }
+    },
+    "Import/Export" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import/Export"
+          }
+        }
+      }
+    },
+    "Incomplete (no tokens)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unvollständig (keine Tokens)"
+          }
+        }
+      }
+    },
+    "Keep secrets revealed for" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geheimnisse sichtbar lassen für"
+          }
+        }
+      }
+    },
+    "Language" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprache"
+          }
+        }
+      }
+    },
+    "Light" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hell"
+          }
+        }
+      }
+    },
+    "Move all MCP credentials to the Trash" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle MCP-Zugangsdaten in den Papierkorb legen"
+          }
+        }
+      }
+    },
+    "Move all MCP credentials to the Trash? Every connected server will ask you to log in again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle MCP-Zugangsdaten in den Papierkorb legen? Jeder verbundene Server fragt danach neu nach dem Login."
+          }
+        }
+      }
+    },
+    "Move the credentials for “%@” to the Trash?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugangsdaten für „%@“ in den Papierkorb legen?"
+          }
+        }
+      }
+    },
+    "Move to Trash" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In den Papierkorb legen"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        }
+      }
+    },
+    "Names consist of letters, digits and _ and must not start with a digit." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Namen bestehen aus Buchstaben, Ziffern und _ und beginnen nicht mit einer Ziffer."
+          }
+        }
+      }
+    },
+    "New Variable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neue Variable"
+          }
+        }
+      }
+    },
+    "No MCP credentials" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine MCP-Zugangsdaten"
+          }
+        }
+      }
+    },
+    "No Variables" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Variablen"
+          }
+        }
+      }
+    },
+    "No variables were found in the file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In der Datei wurden keine Variablen gefunden."
+          }
+        }
+      }
+    },
+    "Not valid JSON — the file was not saved." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein gültiges JSON — die Datei wurde nicht gespeichert."
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Remove entry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintrag entfernen"
+          }
+        }
+      }
+    },
+    "Reset All…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles zurücksetzen…"
+          }
+        }
+      }
+    },
+    "Reset Entry…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintrag zurücksetzen…"
+          }
+        }
+      }
+    },
+    "Reveal secrets" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geheimnisse anzeigen"
+          }
+        }
+      }
+    },
+    "Save" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sichern"
+          }
+        }
+      }
+    },
+    "Search variables" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variablen durchsuchen"
+          }
+        }
+      }
+    },
+    "Security" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sicherheit"
+          }
+        }
+      }
+    },
+    "Server" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Server"
+          }
+        }
+      }
+    },
+    "Settings…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen …"
+          }
+        }
+      }
+    },
+    "Show in Finder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Finder zeigen"
+          }
+        }
+      }
+    },
+    "Show only the assignments that take effect — the .env export then also includes only these" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt nur die wirksamen Zuweisungen — der .env-Export enthält dann ebenfalls nur diese"
+          }
+        }
+      }
+    },
+    "Source" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelle"
+          }
+        }
+      }
+    },
+    "Status" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
+          }
+        }
+      }
+    },
+    "System" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System"
+          }
+        }
+      }
+    },
+    "Takes effect after relaunching CodingBuddy." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird nach einem Neustart von CodingBuddy wirksam."
+          }
+        }
+      }
+    },
+    "Target:" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziel:"
+          }
+        }
+      }
+    },
+    "The file could not be read." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei konnte nicht gelesen werden."
+          }
+        }
+      }
+    },
+    "The file was changed externally. Please try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei wurde extern geändert. Bitte erneut versuchen."
+          }
+        }
+      }
+    },
+    "The next connection will trigger a fresh OAuth login." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die nächste Verbindung startet einen neuen OAuth-Login."
+          }
+        }
+      }
+    },
+    "The server may refresh the session automatically; reset the entry if it is stuck." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Server kann die Session automatisch erneuern; setze den Eintrag zurück, wenn sie festhängt."
+          }
+        }
+      }
+    },
+    "The value contains a quote combination that cannot be written safely." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Wert enthält eine Quote-Kombination, die nicht sicher geschrieben werden kann."
+          }
+        }
+      }
+    },
+    "The value is written verbatim — $VARIABLES remain unexpanded." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Wert wird wortwörtlich geschrieben — $VARIABLEN bleiben unausgewertet erhalten."
+          }
+        }
+      }
+    },
+    "This line is too complex and is left untouched by CodingBuddy." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Zeile ist zu komplex und wird von CodingBuddy nicht verändert."
+          }
+        }
+      }
+    },
+    "This quote combination cannot be written safely." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Quote-Kombination kann nicht sicher geschrieben werden."
+          }
+        }
+      }
+    },
+    "Token values are masked until you authenticate." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token-Werte bleiben maskiert, bis du dich authentifizierst."
+          }
+        }
+      }
+    },
+    "Unlock to view and edit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Ansehen und Bearbeiten entsperren"
+          }
+        }
+      }
+    },
+    "Until quit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bis zum Beenden"
+          }
+        }
+      }
+    },
+    "Use ＋ to add your first variable." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit ＋ legst du die erste Variable an."
+          }
+        }
+      }
+    },
+    "Value" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wert"
+          }
+        }
+      }
+    },
+    "Values that look like secrets (TOKEN, KEY, PASSWORD, …) are masked until you authenticate with Touch ID or your password." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Werte, die wie Geheimnisse aussehen (TOKEN, KEY, PASSWORD, …), bleiben maskiert, bis du dich mit Touch ID oder Passwort authentifizierst."
+          }
+        }
+      }
+    },
+    "Values with command substitution ($(…) or `…`) are not supported." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Werte mit Command Substitution ($(…) oder `…`) werden nicht unterstützt."
+          }
+        }
+      }
+    },
+    "Version" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version"
+          }
+        }
+      }
+    },
+    "View Files…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dateien ansehen…"
+          }
+        }
+      }
+    },
+    "Visible to child processes (export)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für Kindprozesse sichtbar (export)"
+          }
+        }
+      }
+    },
+    "expires %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "läuft ab %@"
+          }
+        }
+      }
+    },
+    "overridden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "überschrieben"
+          }
+        }
+      }
+    },
+    "reveal secret values" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "geheime Werte anzuzeigen"
+          }
+        }
+      }
+    },
+    "~/.mcp-auth does not exist — nothing to manage." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~/.mcp-auth existiert nicht — nichts zu verwalten."
+          }
+        }
+      }
+    },
+    "“%@” is already defined in %@ — the last assignment in load order wins." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%1$@“ ist bereits in %2$@ definiert — es gilt die letzte Zuweisung in der Ladereihenfolge."
+          }
+        }
+      }
+    },
+    "“%@” is already defined." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%@“ ist bereits definiert."
+          }
+        }
+      }
+    },
+    "“%@” is not a valid variable name." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%@“ ist kein gültiger Variablenname."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -41,7 +41,7 @@ zsh load order for interactive login shells: `.zshenv → .zprofile → .zshrc`.
 New variables (and `.env` imports) are appended inside a marker block at the end of the chosen file, keeping hand-written content and app-written content visibly separate:
 
 ```bash
-# >>> EnvVarBuddy >>>
+# >>> CodingBuddy >>>
 export MY_VAR="value"
-# <<< EnvVarBuddy <<<
+# <<< CodingBuddy <<<
 ```

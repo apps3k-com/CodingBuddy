@@ -28,25 +28,25 @@ A tidy, native macOS app for managing the environment variables that otherwise l
 git clone https://github.com/apps3k-com/CodingBuddy.git
 cd CodingBuddy
 ./scripts/setup.sh        # activates the repo's git hooks (contributors)
-open EnvVarBuddy.xcodeproj
+open CodingBuddy.xcodeproj
 ```
 
 Or from the command line:
 
 ```bash
-xcodebuild -project EnvVarBuddy.xcodeproj -scheme EnvVarBuddy -configuration Release build
+xcodebuild -project CodingBuddy.xcodeproj -scheme CodingBuddy -configuration Release build
 ```
 
-The app is intentionally **not sandboxed**: it reads and writes your zsh dotfiles directly. Every mutation is preceded by a backup in `~/Library/Application Support/EnvVarBuddy/Backups/`.
+The app is intentionally **not sandboxed**: it reads and writes your zsh dotfiles directly. Every mutation is preceded by a backup in `~/Library/Application Support/CodingBuddy/Backups/`.
 
 ## Safety model (the short version)
 
 CodingBuddy decomposes each assignment into `prefix + export + NAME = quoting + value + suffix` so that editable lines reproduce **byte-for-byte**. Anything it cannot reproduce exactly — `$(command substitution)`, `export A=1 B=2`, unclosed quotes — is shown read-only and left untouched on disk. New variables go into a clearly marked managed block:
 
 ```bash
-# >>> EnvVarBuddy >>>
+# >>> CodingBuddy >>>
 export MY_VAR="value"
-# <<< EnvVarBuddy <<<
+# <<< CodingBuddy <<<
 ```
 
 ## Documentation

@@ -26,7 +26,7 @@ feat!: ... / BREAKING CHANGE: ...   → major bump
 
 - `CHANGELOG.md`
 - `version.txt`
-- `MARKETING_VERSION` in `EnvVarBuddy.xcodeproj/project.pbxproj`
+- `MARKETING_VERSION` in `CodingBuddy.xcodeproj/project.pbxproj`
 
 Merging the release PR tags the release. **Never bump versions by hand.**
 
@@ -44,9 +44,9 @@ See [docs/FEATURE_FLAGS.md](docs/FEATURE_FLAGS.md) for how features gate on chan
 
 A PR that changes app code must:
 
-1. **Build and pass tests** (`EnvVarBuddyTests`).
+1. **Build and pass tests** (`CodingBuddyTests`).
 2. **Carry conventional commits** (hook + CI check on the PR title).
-3. **Register feature flags**: every flag in `EnvVarBuddy/Services/FeatureFlags.swift` has a section in `docs/FEATURE_FLAGS.md` and vice versa (checked by `scripts/check-feature-flags.sh`).
+3. **Register feature flags**: every flag in `CodingBuddy/Services/FeatureFlags.swift` has a section in `docs/FEATURE_FLAGS.md` and vice versa (checked by `scripts/check-feature-flags.sh`).
 4. **Update the documentation**: user-visible changes touch the wiki sources under `docs/wiki/` (both `User-Guide-EN.md` and `Benutzerhandbuch-DE.md`) in the same PR. The wiki is synced from `docs/wiki/` to the GitHub wiki automatically on merge. PRs without user-visible changes declare `Docs: none` in the PR description.
 5. **Localize**: new user-facing strings exist in `Localizable.xcstrings` with a German translation.
 

@@ -27,7 +27,7 @@ Deep documentation lives in the [wiki](https://github.com/apps3k-com/CodingBuddy
 
 ### Workflow
 - Feature branches off `main`; Conventional Commits (enforced by hooks/CI); squash-merge PRs.
-- Every new feature sits behind a flag in `EnvVarBuddy/Services/FeatureFlags.swift` and is documented in `docs/FEATURE_FLAGS.md`.
+- Every new feature sits behind a flag in `CodingBuddy/Services/FeatureFlags.swift` and is documented in `docs/FEATURE_FLAGS.md`.
 - User-visible changes update the wiki sources under `docs/wiki/` (EN + DE) in the same PR.
 
 ### Project management (Plane) — source of truth
@@ -49,9 +49,9 @@ Deep documentation lives in the [wiki](https://github.com/apps3k-com/CodingBuddy
 ## Build & test
 
 ```bash
-xcodebuild -project EnvVarBuddy.xcodeproj -scheme EnvVarBuddy build
-xcodebuild test -project EnvVarBuddy.xcodeproj -scheme EnvVarBuddy \
-  -destination 'platform=macOS' -only-testing:EnvVarBuddyTests
+xcodebuild -project CodingBuddy.xcodeproj -scheme CodingBuddy build
+xcodebuild test -project CodingBuddy.xcodeproj -scheme CodingBuddy \
+  -destination 'platform=macOS' -only-testing:CodingBuddyTests
 ./scripts/setup.sh   # once per clone: activates the git hooks
 ```
 
