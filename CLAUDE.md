@@ -30,6 +30,22 @@ Deep documentation lives in the [wiki](https://github.com/apps3k-com/EnvVarBuddy
 - Every new feature sits behind a flag in `EnvVarBuddy/Services/FeatureFlags.swift` and is documented in `docs/FEATURE_FLAGS.md`.
 - User-visible changes update the wiki sources under `docs/wiki/` (EN + DE) in the same PR.
 
+### Project management (Plane) — source of truth
+- All work is tracked in the Plane project **CodingBuddy** (identifier `COBUD`):
+  https://app.plane.so/apps3k/projects/703acd2a-ef88-4165-8394-34b2cc48a6ab/issues
+- No work without a work item: every change starts from (or first creates) a COBUD item.
+  New ideas, findings and bugs become backlog/intake items instead of getting lost.
+- **Every commit message and PR title references the work item(s) it contains or relates
+  to** — `fix: keep selection (COBUD-12)` or `(COBUD-12, COBUD-13)`. Enforced by the
+  commit-msg hook and CI; release-please commits (`chore(main): release …`) are exempt.
+- Keep states current while working: `Todo` → `In Progress` (branch started) → `PR open`
+  (PR created) → `In Review` (squash-merged, awaiting user verification) → `Done` (user
+  confirmed) → `Deployed` (shipped in a release). Use `Re-opened` for bounce-backs.
+- After opening a PR, set up a monitor and wait for the automated reviews (CodeRabbit,
+  cubic). Handle **every finding individually**: verify it, then either fix it or reject
+  it with a reasoned reply **in the review thread** — the reviewers learn from replies.
+  A PR may only be merged once CI is green and every finding is fixed or answered.
+
 ## Build & test
 
 ```bash
