@@ -59,7 +59,7 @@ nonisolated enum ShellConfigParser {
             } else {
                 assignment.rawValue = String(rest)
             }
-            if !assignment.rawValue.allSatisfy(ShellQuoting.isUnquotedSafe) {
+            if !assignment.rawValue.allSatisfy({ ShellQuoting.isUnquotedSafe($0) }) {
                 return readOnly(assignment, rawValue: assignment.rawValue)
             }
         }
