@@ -3,6 +3,7 @@
 //  EnvVarBuddy
 //
 
+import AppKit
 import SwiftUI
 
 /// Appearance preference stored in UserDefaults ("appearanceMode").
@@ -12,12 +13,19 @@ nonisolated enum AppearanceMode: String, CaseIterable {
     case dark
 
     /// nil means "follow the system appearance".
-    var colorScheme: ColorScheme? {
+    var nsAppearance: NSAppearance? {
         switch self {
         case .auto: nil
-        case .light: .light
-        case .dark: .dark
+        case .light: NSAppearance(named: .aqua)
+        case .dark: NSAppearance(named: .darkAqua)
         }
+    }
+
+    /// Applies the preference app-wide. `NSApp.appearance` (unlike
+    /// `preferredColorScheme`) resets every window to the system appearance
+    /// when set back to nil.
+    @MainActor func apply() {
+        NSApp.appearance = nsAppearance
     }
 }
 

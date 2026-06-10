@@ -68,6 +68,11 @@ struct SettingsView: View {
         .onChange(of: languageRaw) {
             AppLanguage(rawValue: languageRaw)?.apply()
         }
+        // Applied here as well: the main window (and its onChange) may be
+        // closed while the user switches the appearance in Settings.
+        .onChange(of: appearanceRaw) {
+            AppearanceMode(rawValue: appearanceRaw)?.apply()
+        }
     }
 }
 
