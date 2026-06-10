@@ -14,12 +14,12 @@ jobs:
 
       - name: Build
         run: |
-          xcodebuild -project EnvVarBuddy.xcodeproj -scheme EnvVarBuddy \
+          xcodebuild -project CodingBuddy.xcodeproj -scheme CodingBuddy \
             -configuration Debug build \
             CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=NO
 
       - name: Unit tests
         run: |
-          xcodebuild test -project EnvVarBuddy.xcodeproj -scheme EnvVarBuddy \
-            -destination 'platform=macOS' -only-testing:EnvVarBuddyTests \
+          xcodebuild test -project CodingBuddy.xcodeproj -scheme CodingBuddy \
+            -destination 'platform=macOS' -only-testing:CodingBuddyTests \
             CODE_SIGN_IDENTITY=- CODE_SIGNING_ALLOWED=NO

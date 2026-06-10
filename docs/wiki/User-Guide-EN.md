@@ -16,10 +16,12 @@ CodingBuddy is a native macOS app for managing the environment variables that li
 - **＋** in the toolbar adds a new variable. New variables are written into a clearly marked block at the end of the chosen file:
 
   ```bash
-  # >>> EnvVarBuddy >>>
+  # >>> CodingBuddy >>>
   export MY_VAR="value"
-  # <<< EnvVarBuddy <<<
+  # <<< CodingBuddy <<<
   ```
+
+  Blocks created before the rename (`# >>> EnvVarBuddy >>>`) are still recognized and reused.
 
 - **Values with `:`** (like `PATH`) offer *Edit as list*: reorder, add and remove segments by drag & drop.
 - **Delete** (right-click → *Delete…*) removes the line after confirmation.
@@ -27,7 +29,7 @@ CodingBuddy is a native macOS app for managing the environment variables that li
 ## Safety net
 
 Before every change CodingBuddy writes a timestamped backup to
-`~/Library/Application Support/EnvVarBuddy/Backups/` (the last 20 per file are kept). Writes are atomic, follow symlinks (dotfile managers stay intact) and preserve file permissions. If a file changed outside the app mid-edit, the write is refused and the view reloads.
+`~/Library/Application Support/CodingBuddy/Backups/` (the last 20 per file are kept). Writes are atomic, follow symlinks (dotfile managers stay intact) and preserve file permissions. If a file changed outside the app mid-edit, the write is refused and the view reloads.
 
 ## Import & export
 
@@ -36,7 +38,7 @@ Before every change CodingBuddy writes a timestamped backup to
 
 ## Help menu
 
-**Help → EnvVarBuddy Help** (⌘?) opens this documentation in your app language — the German Benutzerhandbuch when the app runs in German, this guide otherwise. **Help → Documentation (Wiki)** opens the full wiki.
+**Help → CodingBuddy Help** (⌘?) opens this documentation in your app language — the German Benutzerhandbuch when the app runs in German, this guide otherwise. **Help → Documentation (Wiki)** opens the full wiki.
 
 ## Secrets stay masked
 
@@ -58,7 +60,7 @@ The **Credentials → MCP Auth** sidebar section manages the OAuth cache that `m
 
 ## Settings
 
-Open **EnvVarBuddy → Settings…** (⌘,). The settings appear as a panel attached to the main window; close them with **Done** before continuing to work in the app.
+Open **CodingBuddy → Settings…** (⌘,). The settings appear as a panel attached to the main window; close them with **Done** before continuing to work in the app.
 
 - **Language** — System, English or Deutsch. Takes effect after relaunching the app.
 - **Appearance** — Auto (follow the system), Light or Dark.
@@ -75,4 +77,4 @@ CodingBuddy watches your dotfiles. Edits made in a terminal or editor show up in
 | A variable doesn't show up | Only `~/.zshenv`, `~/.zprofile`, `~/.zshrc` are read — not `.bashrc` or files sourced from elsewhere. |
 | A row has a lock icon | The line is too complex to rewrite safely. Edit it in a text editor. |
 | "The file was changed externally" | Something else modified the dotfile while you edited. The app reloaded — just redo the edit. |
-| Restore an old state | Copy the backup from `~/Library/Application Support/EnvVarBuddy/Backups/` over the dotfile. |
+| Restore an old state | Copy the backup from `~/Library/Application Support/CodingBuddy/Backups/` over the dotfile. |

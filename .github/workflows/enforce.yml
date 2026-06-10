@@ -55,7 +55,7 @@ jobs:
         run: |
           CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
           echo "$CHANGED"
-          if echo "$CHANGED" | grep -qE '^EnvVarBuddy/.*\.(swift|xcstrings)$'; then
+          if echo "$CHANGED" | grep -qE '^CodingBuddy/.*\.(swift|xcstrings)$'; then
             if echo "$CHANGED" | grep -qE '^docs/(wiki/|FEATURE_FLAGS\.md)'; then
               echo "App change ships with documentation updates — OK."
             elif echo "$PR_BODY" | grep -qiE '(^|\s)Docs:\s*none(\s|$)'; then

@@ -16,10 +16,12 @@ CodingBuddy ist eine native macOS-App zur Verwaltung der Environment Variables i
 - **＋** in der Toolbar legt eine neue Variable an. Neue Variablen landen in einem klar markierten Block am Ende der gewählten Datei:
 
   ```bash
-  # >>> EnvVarBuddy >>>
+  # >>> CodingBuddy >>>
   export MY_VAR="value"
-  # <<< EnvVarBuddy <<<
+  # <<< CodingBuddy <<<
   ```
+
+  Blöcke aus der Zeit vor der Umbenennung (`# >>> EnvVarBuddy >>>`) werden weiterhin erkannt und wiederverwendet.
 
 - **Werte mit `:`** (wie `PATH`) bieten *Als Liste bearbeiten*: Einträge umsortieren, hinzufügen und entfernen.
 - **Löschen** (Rechtsklick → *Löschen…*) entfernt die Zeile nach Rückfrage.
@@ -27,7 +29,7 @@ CodingBuddy ist eine native macOS-App zur Verwaltung der Environment Variables i
 ## Sicherheitsnetz
 
 Vor jeder Änderung schreibt CodingBuddy ein Backup mit Zeitstempel nach
-`~/Library/Application Support/EnvVarBuddy/Backups/` (die letzten 20 pro Datei bleiben erhalten). Geschrieben wird atomar, symlink-sicher (Dotfile-Manager bleiben intakt) und unter Erhalt der Dateirechte. Wurde die Datei währenddessen extern geändert, wird der Schreibvorgang verweigert und die Ansicht neu geladen.
+`~/Library/Application Support/CodingBuddy/Backups/` (die letzten 20 pro Datei bleiben erhalten). Geschrieben wird atomar, symlink-sicher (Dotfile-Manager bleiben intakt) und unter Erhalt der Dateirechte. Wurde die Datei währenddessen extern geändert, wird der Schreibvorgang verweigert und die Ansicht neu geladen.
 
 ## Import & Export
 
@@ -36,7 +38,7 @@ Vor jeder Änderung schreibt CodingBuddy ein Backup mit Zeitstempel nach
 
 ## Hilfe-Menü
 
-**Hilfe → EnvVarBuddy-Hilfe** (⌘?) öffnet diese Dokumentation in deiner App-Sprache — das deutsche Benutzerhandbuch, wenn die App auf Deutsch läuft, sonst den englischen Guide. **Hilfe → Dokumentation (Wiki)** öffnet das vollständige Wiki.
+**Hilfe → CodingBuddy-Hilfe** (⌘?) öffnet diese Dokumentation in deiner App-Sprache — das deutsche Benutzerhandbuch, wenn die App auf Deutsch läuft, sonst den englischen Guide. **Hilfe → Dokumentation (Wiki)** öffnet das vollständige Wiki.
 
 ## Geheimnisse bleiben maskiert
 
@@ -58,7 +60,7 @@ Der Sidebar-Bereich **Zugangsdaten → MCP Auth** verwaltet den OAuth-Cache, den
 
 ## Einstellungen
 
-Öffne **EnvVarBuddy → Einstellungen…** (⌘,). Die Einstellungen erscheinen als Panel direkt am Hauptfenster; schließe sie mit **Fertig**, um in der App weiterzuarbeiten.
+Öffne **CodingBuddy → Einstellungen…** (⌘,). Die Einstellungen erscheinen als Panel direkt am Hauptfenster; schließe sie mit **Fertig**, um in der App weiterzuarbeiten.
 
 - **Sprache** — System, English oder Deutsch. Wird nach einem Neustart der App wirksam.
 - **Erscheinungsbild** — Auto (folgt dem System), Hell oder Dunkel.
@@ -75,4 +77,4 @@ CodingBuddy beobachtet deine Dotfiles. Änderungen aus Terminal oder Editor ersc
 | Eine Variable erscheint nicht | Gelesen werden nur `~/.zshenv`, `~/.zprofile`, `~/.zshrc` — nicht `.bashrc` oder anderswo gesourcte Dateien. |
 | Eine Zeile hat ein Schloss-Symbol | Die Zeile ist zu komplex, um sie sicher umzuschreiben. Bearbeite sie im Texteditor. |
 | „Die Datei wurde extern geändert" | Etwas anderes hat die Dotfile während der Bearbeitung verändert. Die App hat neu geladen — einfach erneut speichern. |
-| Alten Stand wiederherstellen | Backup aus `~/Library/Application Support/EnvVarBuddy/Backups/` über die Dotfile kopieren. |
+| Alten Stand wiederherstellen | Backup aus `~/Library/Application Support/CodingBuddy/Backups/` über die Dotfile kopieren. |

@@ -4,7 +4,7 @@
 set -e
 
 cd "$(dirname "$0")/.."
-FLAGS_FILE="EnvVarBuddy/Services/FeatureFlags.swift"
+FLAGS_FILE="CodingBuddy/Services/FeatureFlags.swift"
 DOCS_FILE="docs/FEATURE_FLAGS.md"
 
 if [ ! -f "$FLAGS_FILE" ] && [ ! -f "$DOCS_FILE" ]; then

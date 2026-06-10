@@ -1,7 +1,7 @@
 # Feature flags & release channels
 
 CodingBuddy ships through three channels. Features are introduced behind a flag
-in [`EnvVarBuddy/Services/FeatureFlags.swift`](../EnvVarBuddy/Services/FeatureFlags.swift)
+in [`CodingBuddy/Services/FeatureFlags.swift`](../CodingBuddy/Services/FeatureFlags.swift)
 and promoted as they mature.
 
 ## Channels
@@ -32,8 +32,8 @@ builds see everything, stable builds only mature features.
 Any flag can be forced on or off for testing:
 
 ```bash
-defaults write apps3k.EnvVarBuddy flag.hideOverriddenVariables -bool YES
-defaults delete apps3k.EnvVarBuddy flag.hideOverriddenVariables   # back to channel default
+defaults write apps3k.CodingBuddy flag.hideOverriddenVariables -bool YES
+defaults delete apps3k.CodingBuddy flag.hideOverriddenVariables   # back to channel default
 ```
 
 ## Enforcement

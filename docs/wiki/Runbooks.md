@@ -3,8 +3,8 @@
 ## Restore a dotfile from backup
 
 ```bash
-ls -t ~/Library/Application\ Support/EnvVarBuddy/Backups/zshrc-*
-cp ~/Library/Application\ Support/EnvVarBuddy/Backups/zshrc-<timestamp> ~/.zshrc
+ls -t ~/Library/Application\ Support/CodingBuddy/Backups/zshrc-*
+cp ~/Library/Application\ Support/CodingBuddy/Backups/zshrc-<timestamp> ~/.zshrc
 ```
 
 Backups are plain copies of the pre-write state; the newest 20 per file are kept.
@@ -12,14 +12,14 @@ Backups are plain copies of the pre-write state; the newest 20 per file are kept
 ## Reset app settings
 
 ```bash
-defaults delete apps3k.EnvVarBuddy
+defaults delete apps3k.CodingBuddy
 ```
 
 ## Force a feature flag locally
 
 ```bash
-defaults write apps3k.EnvVarBuddy flag.<name> -bool YES   # or NO
-defaults delete apps3k.EnvVarBuddy flag.<name>            # back to channel default
+defaults write apps3k.CodingBuddy flag.<name> -bool YES   # or NO
+defaults delete apps3k.CodingBuddy flag.<name>            # back to channel default
 ```
 
 ## Wiki out of sync
