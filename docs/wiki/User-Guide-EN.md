@@ -79,6 +79,14 @@ The **Claude Code** entry (alpha) manages Claude Code's configuration:
 
 The **Cursor** entry (alpha) manages `~/.cursor/mcp.json`: the per-server `env` values are editable (masked, value-precise patching with backups and external-change protection); the server list itself is read-only.
 
+### Craft Agents
+
+The **Craft Agents** entry (alpha) shows what the Craft Agents app stores in `~/.craft-agent/` — strictly read-only:
+
+- **LLM connections** from `config.json`.
+- **Token files** under `secrets/` with their expiry status; each can be reset individually (moved to the Trash — the next connection triggers a fresh login).
+- **The encrypted credential store** (`credentials.enc`): CodingBuddy shows size and age but never opens it; a reset moves it to the Trash, after which every Craft connector asks to log in again.
+
 ## Settings
 
 Open **CodingBuddy → Settings…** (⌘,). The settings appear as a panel attached to the main window; close them with **Done** before continuing to work in the app.

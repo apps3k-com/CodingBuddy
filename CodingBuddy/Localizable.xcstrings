@@ -263,6 +263,16 @@
         }
       }
     },
+    "Connector credentials, encrypted by Craft — CodingBuddy never opens this file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connector-Zugangsdaten, von Craft verschlüsselt — CodingBuddy öffnet diese Datei nie."
+          }
+        }
+      }
+    },
     "Copy Line" : {
       "localizations" : {
         "de" : {
@@ -413,6 +423,16 @@
         }
       }
     },
+    "Encrypted credential store" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verschlüsselter Credential-Speicher"
+          }
+        }
+      }
+    },
     "Entry" : {
       "localizations" : {
         "de" : {
@@ -553,6 +573,16 @@
         }
       }
     },
+    "LLM connections" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LLM-Verbindungen"
+          }
+        }
+      }
+    },
     "Language" : {
       "localizations" : {
         "de" : {
@@ -623,12 +653,32 @@
         }
       }
     },
+    "Move the encrypted credential store to the Trash? Every Craft connector will ask you to log in again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verschlüsselten Credential-Speicher in den Papierkorb legen? Jeder Craft-Connector verlangt danach eine neue Anmeldung."
+          }
+        }
+      }
+    },
     "Move to Trash" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "In den Papierkorb legen"
+          }
+        }
+      }
+    },
+    "Move “%@” to the Trash?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%@“ in den Papierkorb legen?"
           }
         }
       }
@@ -679,6 +729,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keine Codex-Konfiguration"
+          }
+        }
+      }
+    },
+    "No Craft Agents configuration" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Craft-Agents-Konfiguration"
+          }
+        }
+      }
+    },
+    "No Craft credentials" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Craft-Zugangsdaten"
           }
         }
       }
@@ -789,6 +859,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eintrag zurücksetzen…"
+          }
+        }
+      }
+    },
+    "Reset…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurücksetzen …"
           }
         }
       }
@@ -1063,6 +1143,16 @@
         }
       }
     },
+    "Token files" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token-Dateien"
+          }
+        }
+      }
+    },
     "Token values are masked until you authenticate." : {
       "localizations" : {
         "de" : {
@@ -1209,6 +1299,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "~/.codex existiert nicht — Codex ist auf diesem Mac nicht eingerichtet."
+          }
+        }
+      }
+    },
+    "~/.craft-agent does not exist — Craft Agents has not been set up on this Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~/.craft-agent existiert nicht — Craft Agents ist auf diesem Mac nicht eingerichtet."
           }
         }
       }

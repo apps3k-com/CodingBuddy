@@ -11,6 +11,7 @@ nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable {
     case codex
     case claudeCode
     case cursor
+    case craftAgents
 
     var id: String { rawValue }
 
@@ -20,6 +21,7 @@ nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable {
         case .codex: "Codex"
         case .claudeCode: "Claude Code"
         case .cursor: "Cursor"
+        case .craftAgents: "Craft Agents"
         }
     }
 
@@ -28,6 +30,7 @@ nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable {
         case .codex: "terminal"
         case .claudeCode: "bubble.left.and.bubble.right"
         case .cursor: "cursorarrow"
+        case .craftAgents: "sparkles"
         }
     }
 
@@ -36,6 +39,7 @@ nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable {
         case .codex: .aiToolsCodex
         case .claudeCode: .aiToolsClaudeCode
         case .cursor: .aiToolsCursor
+        case .craftAgents: .aiToolsCraftAgent
         }
     }
 }

@@ -79,6 +79,14 @@ Der Eintrag **Claude Code** (Alpha) verwaltet die Claude-Code-Konfiguration:
 
 Der Eintrag **Cursor** (Alpha) verwaltet `~/.cursor/mcp.json`: die `env`-Werte pro Server sind editierbar (maskiert, wertgenaues Patchen mit Backups und Schutz vor externen Änderungen); die Serverliste selbst ist nur lesend.
 
+### Craft Agents
+
+Der Eintrag **Craft Agents** (Alpha) zeigt, was die Craft-Agents-App in `~/.craft-agent/` speichert — strikt nur lesend:
+
+- **LLM-Verbindungen** aus `config.json`.
+- **Token-Dateien** unter `secrets/` mit Ablaufstatus; jede lässt sich einzeln zurücksetzen (Papierkorb — die nächste Verbindung löst einen frischen Login aus).
+- **Der verschlüsselte Credential-Speicher** (`credentials.enc`): CodingBuddy zeigt Größe und Alter, öffnet die Datei aber nie; ein Reset legt sie in den Papierkorb, danach verlangt jeder Craft-Connector eine neue Anmeldung.
+
 ## Einstellungen
 
 Öffne **CodingBuddy → Einstellungen…** (⌘,). Die Einstellungen erscheinen als Panel direkt am Hauptfenster; schließe sie mit **Fertig**, um in der App weiterzuarbeiten.
