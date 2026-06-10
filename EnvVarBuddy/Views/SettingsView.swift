@@ -8,22 +8,40 @@ import SwiftUI
 /// Presented as a sheet over the main window — window-modal on purpose, so
 /// it neither spawns a second window nor leaves the app interactive behind it.
 struct SettingsView: View {
+    private enum Pane: Hashable {
+        case general
+        case security
+    }
+
     @Environment(\.dismiss) private var dismiss
+    @State private var pane: Pane = .general
     @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.auto.rawValue
     @AppStorage("appLanguage") private var languageRaw = AppLanguage.system.rawValue
     @AppStorage(SecretsGuard.unlockDurationKey) private var unlockDuration = SecretsGuard.defaultUnlockDuration
 
     var body: some View {
+        // No TabView here: inside a sheet it draws its own bordered box,
+        // which clashes with the grouped form and the sheet background.
         VStack(spacing: 0) {
-            TabView {
-                Tab("General", systemImage: "gearshape") {
-                    generalPane
-                }
-                Tab("Security", systemImage: "lock.shield") {
-                    securityPane
+            Picker(selection: $pane) {
+                Text("General").tag(Pane.general)
+                Text("Security").tag(Pane.security)
+            } label: {
+                EmptyView()
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .fixedSize()
+            .padding(.top, 16)
+
+            Group {
+                switch pane {
+                case .general: generalPane
+                case .security: securityPane
                 }
             }
-            .scenePadding()
+            .scrollContentBackground(.hidden)
+            .frame(maxHeight: .infinity, alignment: .top)
 
             Divider()
 
