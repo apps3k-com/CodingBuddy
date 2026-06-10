@@ -18,10 +18,14 @@ struct CodingBuddyApp: App {
         LegacyMigration.run()
     }
 
+    /// Product name — a proper noun, deliberately exempt from the String
+    /// Catalog (passing a `String` value avoids LocalizedStringKey extraction).
+    private static let productName = "CodingBuddy"
+
     var body: some Scene {
         // A single-window utility: `Window` prevents a second instance whose
         // file watchers and writes would race against the first one.
-        Window("CodingBuddy", id: "main") {
+        Window(Self.productName, id: "main") {
             ContentView()
                 .environment(menuActions)
                 .onChange(of: appearanceRaw, initial: true) {

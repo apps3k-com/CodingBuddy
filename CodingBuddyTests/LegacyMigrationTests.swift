@@ -58,6 +58,17 @@ struct LegacyMigrationTests {
         #expect(try String(contentsOf: migrated, encoding: .utf8) == "backup")
     }
 
+    @Test func doesNothingWhenLegacyDirectoryIsAbsent() throws {
+        let support = try makeTempDir()
+        let old = support.appendingPathComponent("EnvVarBuddy", isDirectory: true)
+        let new = support.appendingPathComponent("CodingBuddy", isDirectory: true)
+
+        LegacyMigration.migrateSupportDirectory(from: old, to: new)
+
+        #expect(!FileManager.default.fileExists(atPath: old.path))
+        #expect(!FileManager.default.fileExists(atPath: new.path))
+    }
+
     @Test func leavesEverythingWhenTargetExists() throws {
         let support = try makeTempDir()
         let old = support.appendingPathComponent("EnvVarBuddy", isDirectory: true)
