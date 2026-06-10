@@ -11,6 +11,8 @@ import Foundation
 struct ShellConfigWriter {
     var backupDirectory: URL
     var backupRetention = 20
+    /// POSIX mode for files this writer creates (credential env files use 0o600).
+    var createMode: Int?
 
     static let managedBlockBegin = "# >>> CodingBuddy >>>"
     static let managedBlockEnd = "# <<< CodingBuddy <<<"
@@ -162,7 +164,7 @@ struct ShellConfigWriter {
     /// Joins and writes the lines through the shared write-safety machinery
     /// (no-op when unchanged, backup, atomic, symlink-safe, permissions).
     private func write(lines: [String], to fileURL: URL) throws {
-        try SafeFileWriter(backupDirectory: backupDirectory, backupRetention: backupRetention)
+        try SafeFileWriter(backupDirectory: backupDirectory, backupRetention: backupRetention, createMode: createMode)
             .write(lines.joined(separator: "\n"), to: fileURL)
     }
 }

@@ -58,6 +58,16 @@ The **Credentials → MCP Auth** sidebar section manages the OAuth cache that `m
 - **View Files…** (or double-click) opens the credential files with all token values masked. After authenticating with Touch ID or your password you can edit the raw JSON; invalid JSON is rejected on save.
 - No app restart is needed: the view live-reloads when `mcp-remote` rewrites the files.
 
+## AI tools
+
+### Codex
+
+The **Codex** sidebar entry (alpha) manages OpenAI Codex's environment file:
+
+- **`~/.codex/mcp.env`** — the variables Codex loads (e.g. bearer tokens for MCP servers). Edit, add and delete entries like dotfile variables; secret-looking values are masked, comments in the file are preserved, and the file keeps its restrictive `600` permissions. Backups are written like for dotfiles.
+- **MCP servers** — a read-only overview from `~/.codex/config.toml`: which server references which environment variable (`bearer_token_env_var`, `env_vars`).
+- **Missing-variable warning** — when a server references a variable that `mcp.env` does not define, CodingBuddy shows a warning with a one-click **Define…** shortcut. That answers the classic "where does Codex read this token from?" question.
+
 ## Settings
 
 Open **CodingBuddy → Settings…** (⌘,). The settings appear as a panel attached to the main window; close them with **Done** before continuing to work in the app.

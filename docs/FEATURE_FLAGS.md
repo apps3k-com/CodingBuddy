@@ -43,6 +43,13 @@ in code without a `### \`flagName\`` section in this file, or vice versa.
 
 ## Registry
 
+### `aiToolsCodex` — maturity: alpha
+
+Codex section in the sidebar: edit the variables in `~/.codex/mcp.env`
+(values masked, file kept at mode 600) and see which MCP servers in
+`config.toml` reference which environment variables — including a warning for
+referenced-but-undefined names.
+
 ### `hideOverriddenVariables` — maturity: stable
 
 Toolbar toggle that hides assignments shadowed by a later one (zsh load

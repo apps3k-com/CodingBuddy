@@ -9,6 +9,7 @@ enum SidebarScope: Hashable {
     case all
     case file(ShellConfigFile)
     case mcpAuth
+    case aiTool(AITool)
 
     var file: ShellConfigFile? {
         if case .file(let file) = self { return file }
@@ -20,6 +21,7 @@ enum SidebarScope: Hashable {
         case .all: String(localized: "All Variables")
         case .file(let file): file.rawValue
         case .mcpAuth: "MCP Auth"
+        case .aiTool(let tool): tool.displayName
         }
     }
 }
@@ -28,6 +30,7 @@ struct ContentView: View {
     @Environment(MenuActions.self) private var menuActions
     @State private var store = EnvStore()
     @State private var mcpAuthStore = MCPAuthStore()
+    @State private var codexStore = CodexStore()
     @State private var secrets = SecretsGuard()
     @State private var scope: SidebarScope? = .all
     @State private var showSettings = false
@@ -45,6 +48,20 @@ struct ContentView: View {
                             .tag(SidebarScope.file(file))
                     }
                 }
+                if AITool.allCases.contains(where: { $0.featureFlag.isEnabled }) {
+                    Section("AI Tools") {
+                        ForEach(AITool.allCases.filter { $0.featureFlag.isEnabled }) { tool in
+                            Label {
+                                Text(verbatim: tool.displayName)
+                            } icon: {
+                                Image(systemName: tool.systemImage)
+                            }
+                            .foregroundStyle(toolExists(tool) ? .primary : .secondary)
+                            .badge(toolBadgeCount(tool))
+                            .tag(SidebarScope.aiTool(tool))
+                        }
+                    }
+                }
                 if FeatureFlag.mcpAuthManager.isEnabled {
                     Section("Credentials") {
                         Label {
@@ -60,9 +77,12 @@ struct ContentView: View {
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 210)
         } detail: {
-            if scope == .mcpAuth {
+            switch scope {
+            case .mcpAuth:
                 MCPAuthListView(store: mcpAuthStore, secrets: secrets)
-            } else {
+            case .aiTool(.codex):
+                CodexView(store: codexStore, secrets: secrets)
+            default:
                 VariableListView(store: store, secrets: secrets, scope: scope ?? .all)
             }
         }
@@ -85,6 +105,18 @@ struct ContentView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(store.lastError ?? "")
+        }
+    }
+
+    private func toolExists(_ tool: AITool) -> Bool {
+        switch tool {
+        case .codex: codexStore.directoryExists
+        }
+    }
+
+    private func toolBadgeCount(_ tool: AITool) -> Int {
+        switch tool {
+        case .codex: codexStore.variables.count
         }
     }
 }
