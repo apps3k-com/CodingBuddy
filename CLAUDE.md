@@ -45,6 +45,9 @@ Deep documentation lives in the [wiki](https://github.com/apps3k-com/CodingBuddy
   cubic). Handle **every finding individually**: verify it, then either fix it or reject
   it with a reasoned reply **in the review thread** — the reviewers learn from replies.
   A PR may only be merged once CI is green and every finding is fixed or answered.
+- Memorable learnings from development, research and review feedback are stored via the
+  **apps3k-memory MCP** (`memory_store`, tagged `codingbuddy`): gotchas, decisions,
+  research findings, recurring review feedback — not routine facts the repo records anyway.
 
 ## Build & test
 
