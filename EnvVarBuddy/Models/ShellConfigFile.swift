@@ -8,7 +8,7 @@ import Foundation
 /// The zsh startup files managed by the app, ordered by zsh load order for an
 /// interactive login shell: .zshenv → .zprofile → .zshrc. Later files win when
 /// the same variable is assigned in more than one of them.
-enum ShellConfigFile: String, CaseIterable, Identifiable, Hashable {
+nonisolated enum ShellConfigFile: String, CaseIterable, Identifiable, Hashable {
     case zshenv = ".zshenv"
     case zprofile = ".zprofile"
     case zshrc = ".zshrc"

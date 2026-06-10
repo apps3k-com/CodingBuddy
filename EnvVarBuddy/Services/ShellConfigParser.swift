@@ -9,7 +9,7 @@ import Foundation
 /// considered editable; anything that could change meaning when rewritten
 /// (command substitution, multi-assignments, unclosed quotes, trailing code)
 /// is surfaced read-only and preserved verbatim by the writer.
-enum ShellConfigParser {
+nonisolated enum ShellConfigParser {
 
     static func variables(in content: String, file: ShellConfigFile) -> [EnvVariable] {
         content.components(separatedBy: "\n").enumerated().compactMap { index, line in
