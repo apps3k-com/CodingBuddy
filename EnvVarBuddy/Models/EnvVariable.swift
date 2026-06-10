@@ -6,7 +6,7 @@
 import Foundation
 
 /// Quoting style of a value as written in the shell file.
-enum ValueQuoting: Equatable, Hashable {
+nonisolated enum ValueQuoting: Equatable, Hashable {
     case none
     case double
     case single
@@ -23,7 +23,7 @@ enum ValueQuoting: Equatable, Hashable {
 /// A single `NAME=value` assignment, decomposed so the original line can be
 /// reproduced byte-for-byte. `rawValue` is the text between the quotes exactly
 /// as written — no unescaping, no `$VAR` expansion.
-struct ParsedAssignment: Equatable, Hashable {
+nonisolated struct ParsedAssignment: Equatable, Hashable {
     /// Leading whitespace before the assignment.
     var prefix: String
     /// The `export` keyword including its trailing whitespace, or "" if absent.
@@ -48,7 +48,7 @@ struct ParsedAssignment: Equatable, Hashable {
 }
 
 /// One variable assignment found in a shell config file.
-struct EnvVariable: Identifiable, Equatable, Hashable {
+nonisolated struct EnvVariable: Identifiable, Equatable, Hashable {
     var assignment: ParsedAssignment
     var file: ShellConfigFile
     /// 0-based line index in the file at parse time. The writer re-validates
