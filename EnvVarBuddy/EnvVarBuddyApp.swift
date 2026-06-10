@@ -30,7 +30,7 @@ struct EnvVarBuddyApp: App {
             CommandGroup(replacing: .appSettings) {
                 Button("Settings…") {
                     openWindow(id: "main")
-                    menuActions.settingsRequest += 1
+                    menuActions.settingsRequested = true
                 }
                 .keyboardShortcut(",", modifiers: .command)
             }

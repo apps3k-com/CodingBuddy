@@ -12,7 +12,10 @@ import Observation
 final class MenuActions {
     var importRequest = 0
     var exportRequest = 0
-    var settingsRequest = 0
+    /// Consumed (reset to false) by the view when it presents the sheet — a
+    /// counter would be missed when the main window is created right before
+    /// the request, because onChange baselines on the already-bumped value.
+    var settingsRequested = false
 }
 
 /// Wiki pages opened from the Help menu, mirrored per app language.

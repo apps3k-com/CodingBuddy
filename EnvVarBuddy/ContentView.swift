@@ -69,8 +69,11 @@ struct ContentView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
-        .onChange(of: menuActions.settingsRequest) {
-            showSettings = true
+        .onChange(of: menuActions.settingsRequested, initial: true) {
+            if menuActions.settingsRequested {
+                showSettings = true
+                menuActions.settingsRequested = false
+            }
         }
         .alert(
             "Error",
