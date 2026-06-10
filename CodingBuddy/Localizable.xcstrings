@@ -133,6 +133,16 @@
         }
       }
     },
+    "Add a new variable to a server's env object" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neue Variable im env-Objekt eines Servers anlegen"
+          }
+        }
+      }
+    },
     "Add a new variable to mcp.env" : {
       "localizations" : {
         "de" : {
@@ -673,6 +683,16 @@
         }
       }
     },
+    "No Cursor configuration" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Cursor-Konfiguration"
+          }
+        }
+      }
+    },
     "No MCP credentials" : {
       "localizations" : {
         "de" : {
@@ -983,6 +1003,16 @@
         }
       }
     },
+    "This server has no “env” object — add one in Cursor first." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Server hat kein „env“-Objekt — lege es zuerst in Cursor an."
+          }
+        }
+      }
+    },
     "Token values are masked until you authenticate." : {
       "localizations" : {
         "de" : {
@@ -1129,6 +1159,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "~/.codex existiert nicht — Codex ist auf diesem Mac nicht eingerichtet."
+          }
+        }
+      }
+    },
+    "~/.cursor does not exist — Cursor has not been set up on this Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~/.cursor existiert nicht — Cursor ist auf diesem Mac nicht eingerichtet."
           }
         }
       }
