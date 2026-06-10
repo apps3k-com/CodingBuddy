@@ -9,6 +9,7 @@ import Foundation
 /// corresponding sections ship (Claude Code, Cursor, Craft Agents follow).
 nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable {
     case codex
+    case claudeCode
 
     var id: String { rawValue }
 
@@ -16,18 +17,21 @@ nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable {
     var displayName: String {
         switch self {
         case .codex: "Codex"
+        case .claudeCode: "Claude Code"
         }
     }
 
     var systemImage: String {
         switch self {
         case .codex: "terminal"
+        case .claudeCode: "bubble.left.and.bubble.right"
         }
     }
 
     var featureFlag: FeatureFlag {
         switch self {
         case .codex: .aiToolsCodex
+        case .claudeCode: .aiToolsClaudeCode
         }
     }
 }
