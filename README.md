@@ -1,7 +1,7 @@
-# EnvVarBuddy
+# CodingBuddy
 
-[![Release](https://img.shields.io/github/v/release/apps3k-com/EnvVarBuddy?include_prereleases)](https://github.com/apps3k-com/EnvVarBuddy/releases)
-[![CI](https://github.com/apps3k-com/EnvVarBuddy/actions/workflows/ci.yml/badge.svg)](https://github.com/apps3k-com/EnvVarBuddy/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/apps3k-com/CodingBuddy?include_prereleases)](https://github.com/apps3k-com/CodingBuddy/releases)
+[![CI](https://github.com/apps3k-com/CodingBuddy/actions/workflows/ci.yml/badge.svg)](https://github.com/apps3k-com/CodingBuddy/actions/workflows/ci.yml)
 
 A tidy, native macOS app for managing the environment variables that otherwise live buried in your zsh dotfiles — no more hand-editing `~/.zshrc` in the terminal.
 
@@ -25,8 +25,8 @@ A tidy, native macOS app for managing the environment variables that otherwise l
 ## Build & run
 
 ```bash
-git clone https://github.com/apps3k-com/EnvVarBuddy.git
-cd EnvVarBuddy
+git clone https://github.com/apps3k-com/CodingBuddy.git
+cd CodingBuddy
 ./scripts/setup.sh        # activates the repo's git hooks (contributors)
 open EnvVarBuddy.xcodeproj
 ```
@@ -41,7 +41,7 @@ The app is intentionally **not sandboxed**: it reads and writes your zsh dotfile
 
 ## Safety model (the short version)
 
-EnvVarBuddy decomposes each assignment into `prefix + export + NAME = quoting + value + suffix` so that editable lines reproduce **byte-for-byte**. Anything it cannot reproduce exactly — `$(command substitution)`, `export A=1 B=2`, unclosed quotes — is shown read-only and left untouched on disk. New variables go into a clearly marked managed block:
+CodingBuddy decomposes each assignment into `prefix + export + NAME = quoting + value + suffix` so that editable lines reproduce **byte-for-byte**. Anything it cannot reproduce exactly — `$(command substitution)`, `export A=1 B=2`, unclosed quotes — is shown read-only and left untouched on disk. New variables go into a clearly marked managed block:
 
 ```bash
 # >>> EnvVarBuddy >>>
@@ -53,9 +53,9 @@ export MY_VAR="value"
 
 | | |
 |---|---|
-| 📘 [User Guide (EN)](https://github.com/apps3k-com/EnvVarBuddy/wiki/User-Guide-EN) | End-user documentation |
-| 📘 [Benutzerhandbuch (DE)](https://github.com/apps3k-com/EnvVarBuddy/wiki/Benutzerhandbuch-DE) | Endbenutzer-Dokumentation |
-| 🔧 [Architecture](https://github.com/apps3k-com/EnvVarBuddy/wiki/Architecture) | Technical deep-dive |
+| 📘 [User Guide (EN)](https://github.com/apps3k-com/CodingBuddy/wiki/User-Guide-EN) | End-user documentation |
+| 📘 [Benutzerhandbuch (DE)](https://github.com/apps3k-com/CodingBuddy/wiki/Benutzerhandbuch-DE) | Endbenutzer-Dokumentation |
+| 🔧 [Architecture](https://github.com/apps3k-com/CodingBuddy/wiki/Architecture) | Technical deep-dive |
 | 🚩 [Feature flags](docs/FEATURE_FLAGS.md) | Alpha/beta/stable channel concept |
 
 ## Contributing

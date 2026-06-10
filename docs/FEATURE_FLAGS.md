@@ -1,6 +1,6 @@
 # Feature flags & release channels
 
-EnvVarBuddy ships through three channels. Features are introduced behind a flag
+CodingBuddy ships through three channels. Features are introduced behind a flag
 in [`EnvVarBuddy/Services/FeatureFlags.swift`](../EnvVarBuddy/Services/FeatureFlags.swift)
 and promoted as they mature.
 

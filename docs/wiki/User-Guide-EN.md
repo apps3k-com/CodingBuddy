@@ -1,12 +1,12 @@
 # User Guide (EN)
 
-EnvVarBuddy is a native macOS app for managing the environment variables that live in your zsh dotfiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`) — without opening a terminal.
+CodingBuddy is a native macOS app for managing the environment variables that live in your zsh dotfiles (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`) — without opening a terminal.
 
 ## Browsing variables
 
 - The **sidebar** shows *All variables* plus one entry per dotfile with a count badge. Files that don't exist yet are dimmed; adding a variable to one creates it.
 - The **table** lists name, value and source file. Use the search field (⌘F) to filter by name or value.
-- A 🔒 **lock icon** marks complex lines (command substitution like `$(date)`, multi-assignments like `export A=1 B=2`). EnvVarBuddy shows them honestly but never rewrites them — edit those in your editor of choice.
+- A 🔒 **lock icon** marks complex lines (command substitution like `$(date)`, multi-assignments like `export A=1 B=2`). CodingBuddy shows them honestly but never rewrites them — edit those in your editor of choice.
 - An orange **overridden** badge means a later assignment wins: zsh loads `.zshenv → .zprofile → .zshrc`, and within a file the last assignment of a name takes effect.
 - The **Hide overridden** toolbar toggle (eye icon) hides the shadowed assignments so only the values that actually take effect remain visible — the list keeps its file/line order. The *.env export* exports what you see, so it then contains only the effective assignments.
 
@@ -26,7 +26,7 @@ EnvVarBuddy is a native macOS app for managing the environment variables that li
 
 ## Safety net
 
-Before every change EnvVarBuddy writes a timestamped backup to
+Before every change CodingBuddy writes a timestamped backup to
 `~/Library/Application Support/EnvVarBuddy/Backups/` (the last 20 per file are kept). Writes are atomic, follow symlinks (dotfile managers stay intact) and preserve file permissions. If a file changed outside the app mid-edit, the write is refused and the view reloads.
 
 ## Import & export
@@ -50,7 +50,7 @@ Variables whose names look like credentials (`GITHUB_TOKEN`, `AWS_SECRET_ACCESS_
 
 The **Credentials → MCP Auth** sidebar section manages the OAuth cache that `mcp-remote` keeps for remote MCP servers — the directory you previously had to wipe with `rm -rf ~/.mcp-auth`.
 
-- Each entry is one server. EnvVarBuddy resolves the cryptic file hashes back to server URLs by matching them against your Claude configuration (`~/.claude.json`, Claude Desktop config); unresolved entries show their hash plus the OAuth scope as a hint.
+- Each entry is one server. CodingBuddy resolves the cryptic file hashes back to server URLs by matching them against your Claude configuration (`~/.claude.json`, Claude Desktop config); unresolved entries show their hash plus the OAuth scope as a hint.
 - The **status column** shows whether the access token is still active (with its estimated expiry), expired, or the entry is incomplete (a login that never finished).
 - **Reset Entry…** moves just that server's files to the **Trash** — surgical, reversible, and the next connection simply re-runs the OAuth flow. **Reset All…** does the same for everything (the GUI equivalent of `rm -rf ~/.mcp-auth`, but undoable).
 - **View Files…** (or double-click) opens the credential files with all token values masked. After authenticating with Touch ID or your password you can edit the raw JSON; invalid JSON is rejected on save.
@@ -66,7 +66,7 @@ Open **EnvVarBuddy → Settings…** (⌘,). The settings appear as a panel atta
 
 ## Live reload
 
-EnvVarBuddy watches your dotfiles. Edits made in a terminal or editor show up in the app within a fraction of a second.
+CodingBuddy watches your dotfiles. Edits made in a terminal or editor show up in the app within a fraction of a second.
 
 ## Troubleshooting
 
