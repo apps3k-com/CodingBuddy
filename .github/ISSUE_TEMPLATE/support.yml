@@ -1,0 +1,35 @@
+name: 🆘 Support
+description: Externally submitted support requests
+type: Support
+projects: ["apps3k-com/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for help requests and questions. For a reproducible defect, use the **Bug** form instead.
+  - type: textarea
+    id: request
+    attributes:
+      label: Request / question
+      description: What do you need help with?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to achieve, and what have you already tried?
+    validations:
+      required: true
+  - type: textarea
+    id: affected
+    attributes:
+      label: Who / what is affected
+      description: Account, environment, scope of impact.
+    validations:
+      required: true
+  - type: input
+    id: links
+    attributes:
+      label: Relevant links
+      description: Dashboards, tickets, screenshots, prior threads.

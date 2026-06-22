@@ -1,0 +1,51 @@
+name: ✅ Task
+description: A specific piece of work
+type: Task
+projects: ["apps3k-com/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A Task is a concrete, shippable unit of work. Write it so an agent can pick it up and
+        know exactly when it is **done**. If it belongs to an Epic, link the parent below and add
+        it as a sub-issue of that Epic.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What needs to be done, in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / why
+      description: Background, motivation, links to related issues or docs.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: A checklist that defines "done". Each item must be objectively verifiable.
+      placeholder: |
+        - [ ] …
+        - [ ] …
+    validations:
+      required: true
+  - type: input
+    id: parent
+    attributes:
+      label: Parent Epic
+      description: Issue number of the parent Epic, if any.
+      placeholder: "#123"
+  - type: input
+    id: module
+    attributes:
+      label: Module / area
+      placeholder: e.g. picking, auth, api-connector
+  - type: textarea
+    id: out
+    attributes:
+      label: Out of scope
+      description: Anything explicitly NOT part of this task.
