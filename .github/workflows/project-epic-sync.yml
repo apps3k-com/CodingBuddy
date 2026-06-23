@@ -1,0 +1,68 @@
+# Propagate sub-issue progress to the parent Epic (GitHub Projects has no native
+# parent/child status sync). See scripts/github/project-sync.mjs and docs/github-projects.md.
+#
+# Setup per repo (see docs/ADOPTION.md):
+#   vars.PROJECT_OWNER          org that owns the Project (e.g. apps3k-com)
+#   vars.PROJECT_NUMBER         Project number (e.g. 1)
+#   vars.PROJECT_SYNC_APP_ID    GitHub App id (App needs Issues:RW + Projects:RW)
+#   secrets.PROJECT_SYNC_APP_PRIVATE_KEY   the App's private key
+# The default GITHUB_TOKEN cannot touch Projects, hence the GitHub App token.
+name: Project Epic Sync
+
+on:
+  issues:
+    types: [closed, reopened]
+  schedule:
+    # Catch-all: Actions cannot trigger on Project field edits, so a poll covers
+    # "sub-issue left Backlog → Epic In Progress". Adjust cadence as needed.
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: project-epic-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    # Skip in repos that copied the template but haven't configured the Project yet.
+    if: ${{ vars.PROJECT_NUMBER != '' }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false # job only reads code to run the script; no git ops follow
+
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        id: app-token
+        with:
+          app-id: ${{ vars.PROJECT_SYNC_APP_ID }}
+          private-key: ${{ secrets.PROJECT_SYNC_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          # Least privilege: scope repo-level perms to THIS repo (org-level Projects
+          # perms still apply). github.repository (owner/repo) is set on every trigger
+          # incl. schedule. If Epics span repos, add them to this list.
+          repositories: ${{ github.repository }}
+          # Scope the minted token to exactly what project-sync.mjs needs (not the App's
+          # full installed permission set): read code, read/write issues (close/reopen),
+          # read/write org Projects (status field).
+          permission-contents: read
+          permission-issues: write
+          permission-organization-projects: write
+
+      - name: Reconcile epics
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PROJECT_OWNER: ${{ vars.PROJECT_OWNER || github.repository_owner }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}
+          EVENT_NAME: ${{ github.event_name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ "$EVENT_NAME" = "issues" ]; then
+            node scripts/github/project-sync.mjs --issue "$ISSUE_NUMBER" --repo "$REPO"
+          else
+            node scripts/github/project-sync.mjs --all
+          fi

@@ -1,0 +1,67 @@
+name: Feature
+description: A request, idea, or new functionality
+type: Feature
+projects: ["apps3k-com/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the **user problem** first, then the proposed solution. Feature visibility is
+        controlled by GrowthBook — note the flag key if one is planned.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / user need
+      description: What can't the user do today, and why does it matter?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What should happen. Keep it outcome-focused, not implementation detail.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: A checklist that defines "done".
+      placeholder: |
+        - [ ] …
+        - [ ] …
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: input
+    id: flag
+    attributes:
+      label: GrowthBook feature flag
+      description: Planned flag key, if the feature ships behind a flag.
+      placeholder: e.g. picking-v2
+  - type: input
+    id: parent
+    attributes:
+      label: Parent Epic
+      placeholder: "#123"
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      description: Choose the related module.
+      options:
+        # >>> module-options — generated from .github/modules.yaml by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< module-options
+  - type: dropdown
+    id: product
+    attributes:
+      label: Product
+      description: Product this belongs to (used for cross-repo boards).
+      options:
+        # >>> product-options — generated from the PRODUCTS org variable by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< product-options

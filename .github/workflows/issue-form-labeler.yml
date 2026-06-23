@@ -1,0 +1,55 @@
+name: Label issues from form
+# Applies module:<selection> / product:<selection> labels from the issue-form dropdowns, so
+# (cross-repo) Project boards can filter/group by them. Reconciles on edit: stale module:/
+# product: labels are removed and the current selections re-applied. Only labels that already
+# exist in the repo (the allowlist created by the sync workflow) are applied — labels are never
+# created from parsed issue input.
+on:
+  issues:
+    types: [opened, edited]
+
+concurrency:
+  group: issue-form-labeler-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  label:
+    name: Apply module/product labels
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # actions/checkout
+      issues: write # add/remove issue labels
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - name: Reconcile labels from the form
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          set -euo pipefail
+          mapfile -t WANT < <(node scripts/github/apply-form-labels.mjs)
+          # Allowlist = every label that already exists in the repo (paginated — no cap), created
+          # by issue-form-options-sync from .github/modules.yaml / the PRODUCTS variable. A value
+          # parsed from issue input is never turned into a new label.
+          mapfile -t EXISTING < <(gh api --paginate "repos/$REPO/labels" --jq '.[].name')
+          exists() { local x; for x in "${EXISTING[@]:-}"; do [ "$x" = "$1" ] && return 0; done; return 1; }
+          # Reconcile on edit: remove the current module:/product: labels. Failures are surfaced
+          # (no `|| true`) so stale/missing routing labels can't pass silently.
+          mapfile -t HAVE < <(gh issue view "$ISSUE_NUMBER" --repo "$REPO" --json labels \
+            --jq '.labels[].name | select(startswith("module:") or startswith("product:"))')
+          for l in "${HAVE[@]:-}"; do
+            if [ -n "$l" ]; then gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "$l"; fi
+          done
+          # Apply only allowlisted (already-existing) labels.
+          for l in "${WANT[@]:-}"; do
+            if [ -z "$l" ]; then continue; fi
+            if exists "$l"; then
+              gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label "$l"
+            else
+              echo "skip: '$l' is not a known repo label (labels are not created from issue input)"
+            fi
+          done

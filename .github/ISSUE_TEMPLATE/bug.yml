@@ -1,0 +1,93 @@
+name: Bug
+description: An unexpected problem or behavior
+type: Bug
+projects: ["apps3k-com/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fill every required field so an agent or maintainer can **reproduce and verify the fix**
+        without follow-up questions. Work is linked from a PR with `Closes #<this issue>`.
+        Priority / Size / Status are set on the Project after creation — not here.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences — what is broken?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered, minimal, deterministic.
+      placeholder: |
+        1. Go to …
+        2. Click …
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - production
+        - staging
+        - local / dev
+        - unknown
+    validations:
+      required: true
+  - type: dropdown
+    id: regression
+    attributes:
+      label: Regression?
+      description: Did this work in a previous version?
+      options:
+        - "No / unknown"
+        - "Yes — worked before"
+    validations:
+      required: true
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      description: Choose the related module.
+      options:
+        # >>> module-options — generated from .github/modules.yaml by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< module-options
+  - type: dropdown
+    id: product
+    attributes:
+      label: Product
+      description: Product this belongs to (used for cross-repo boards).
+      options:
+        # >>> product-options — generated from the PRODUCTS org variable by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< product-options
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Logs, Sentry link, request IDs, screenshots.
+      render: shell
+  - type: checkboxes
+    id: pre
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues for a duplicate
+          required: true

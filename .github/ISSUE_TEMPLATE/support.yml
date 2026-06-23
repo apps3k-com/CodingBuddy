@@ -1,0 +1,67 @@
+name: Support
+description: Externally submitted support requests
+type: Support
+projects: ["apps3k-com/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for help requests and questions. For a reproducible defect, use the **Bug** form instead.
+  - type: textarea
+    id: request
+    attributes:
+      label: Request / question
+      description: What do you need help with?
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: Name / handle (optional)
+      description: Optional. Share only what you are comfortable posting publicly.
+    validations:
+      required: false
+  - type: input
+    id: email
+    attributes:
+      label: Email (optional)
+      description: Optional — how we can reach you. Do not include sensitive personal data.
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to achieve, and what have you already tried?
+    validations:
+      required: true
+  - type: textarea
+    id: affected
+    attributes:
+      label: Who / what is affected
+      description: Account, environment, scope of impact.
+    validations:
+      required: true
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      description: Choose the related module.
+      options:
+        # >>> module-options — generated from .github/modules.yaml by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< module-options
+  - type: dropdown
+    id: product
+    attributes:
+      label: Product
+      description: Product this request relates to (used for cross-repo boards).
+      options:
+        # >>> product-options — generated from the PRODUCTS org variable by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< product-options
+  - type: input
+    id: links
+    attributes:
+      label: Relevant links
+      description: Dashboards, tickets, screenshots, prior threads.

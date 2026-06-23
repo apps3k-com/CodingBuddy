@@ -1,0 +1,69 @@
+name: Epic
+description: Parent issue defining the overall goal for a group of connected issues
+type: Epic
+projects: ["apps3k-com/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        An Epic groups related work. Create the child Tasks/Features as **sub-issues** of this Epic.
+        The `project-epic-sync` workflow then moves the Epic to *In Progress* when a sub-issue leaves
+        Backlog, and closes the Epic when all sub-issues are done.
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal / outcome
+      description: The high-level objective and a measurable success signal.
+    validations:
+      required: true
+  - type: textarea
+    id: background
+    attributes:
+      label: Background / why now
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: In scope
+    validations:
+      required: true
+  - type: textarea
+    id: breakdown
+    attributes:
+      label: Initial breakdown
+      description: First pass at the child issues — each becomes a sub-issue of this Epic.
+      placeholder: |
+        - [ ] Task: …
+        - [ ] Feature: …
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      description: How we know the whole Epic is complete.
+    validations:
+      required: true
+  - type: textarea
+    id: out
+    attributes:
+      label: Out of scope
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      description: Choose the related module.
+      options:
+        # >>> module-options — generated from .github/modules.yaml by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< module-options
+  - type: dropdown
+    id: product
+    attributes:
+      label: Product
+      description: Product this belongs to (used for cross-repo boards).
+      options:
+        # >>> product-options — generated from the PRODUCTS org variable by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< product-options
