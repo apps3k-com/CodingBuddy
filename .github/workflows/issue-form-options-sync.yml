@@ -1,0 +1,44 @@
+name: Sync issue-form options
+# Regenerates the Module/Product dropdown options in .github/ISSUE_TEMPLATE/*.yml and ensures
+# the matching module:* / product:* labels exist. Sources of truth: .github/modules.yaml
+# (modules, per repo) and the PRODUCTS org variable (products, org-wide). See docs/github-projects.md.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/modules.yaml" # regenerate as soon as the module list changes
+  workflow_dispatch: {}
+  schedule:
+    - cron: "17 6 * * 1" # weekly catch-up for PRODUCTS org-variable changes (no native trigger)
+
+concurrency:
+  group: issue-form-options-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write # commit the regenerated forms
+  issues: write # create module:* / product:* labels
+
+jobs:
+  sync:
+    name: Sync dropdown options + ensure labels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Generate options + ensure labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PRODUCTS: ${{ vars.PRODUCTS }}
+        run: node scripts/github/sync-issue-form-options.mjs
+      - name: Commit regenerated forms
+        run: |
+          if [ -n "$(git status --porcelain .github/ISSUE_TEMPLATE)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .github/ISSUE_TEMPLATE
+            git commit -m "chore(issue-forms): sync Module/Product dropdown options"
+            git push
+          else
+            echo "No changes."
+          fi

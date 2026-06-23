@@ -1,0 +1,42 @@
+name: Label issues from form
+# Applies module:<selection> / product:<selection> labels from the issue-form dropdowns, so
+# (cross-repo) Project boards can filter/group by them. Reconciles on edit: stale module:/
+# product: labels are removed and the current selections re-applied.
+on:
+  issues:
+    types: [opened, edited]
+
+concurrency:
+  group: issue-form-labeler-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+permissions:
+  issues: write
+
+jobs:
+  label:
+    name: Apply module/product labels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Reconcile labels from the form
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          set -euo pipefail
+          mapfile -t WANT < <(node scripts/github/apply-form-labels.mjs)
+          # Remove any existing module:/product: labels (reconcile on edit).
+          mapfile -t HAVE < <(gh issue view "$ISSUE_NUMBER" --repo "$REPO" --json labels \
+            --jq '.labels[].name | select(startswith("module:") or startswith("product:"))')
+          for l in "${HAVE[@]:-}"; do
+            [ -n "$l" ] && gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "$l" || true
+          done
+          # Apply the current selections (label is created by the sync workflow; --force here is a safety net).
+          for l in "${WANT[@]:-}"; do
+            [ -z "$l" ] && continue
+            gh label create "$l" --repo "$REPO" --color EDEDED --force >/dev/null 2>&1 || true
+            gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label "$l" || true
+          done

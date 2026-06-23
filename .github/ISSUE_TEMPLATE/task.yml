@@ -1,4 +1,4 @@
-name: ✅ Task
+name: Task
 description: A specific piece of work
 type: Task
 projects: ["apps3k-com/1"]
@@ -39,11 +39,24 @@ body:
       label: Parent Epic
       description: Issue number of the parent Epic, if any.
       placeholder: "#123"
-  - type: input
+  - type: dropdown
     id: module
     attributes:
-      label: Module / area
-      placeholder: e.g. picking, auth, api-connector
+      label: Module
+      description: Choose the related module.
+      options:
+        # >>> module-options — generated from .github/modules.yaml by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< module-options
+  - type: dropdown
+    id: product
+    attributes:
+      label: Product
+      description: Product this belongs to (used for cross-repo boards).
+      options:
+        # >>> product-options — generated from the PRODUCTS org variable by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< product-options
   - type: textarea
     id: out
     attributes:

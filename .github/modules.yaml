@@ -1,0 +1,15 @@
+# Modules of THIS repo — the single source of truth for the `Module` dropdown in the issue
+# forms (.github/ISSUE_TEMPLATE/) and the `module:*` labels. The issue-form-options-sync
+# workflow regenerates both from this file on every push to it.
+#
+# Change modules via a PR (versioned + reviewed). To restrict who may change them, add this
+# file to CODEOWNERS, e.g.:  /.github/modules.yaml  @apps3k-com/maintainers
+#
+# One module name per line, lowercase-kebab. Keep the list tight; this is a controlled
+# vocabulary, not free text. Uncomment / add entries under `modules:`.
+modules:
+  # - picking
+  # - packing
+  # - auth
+  # - api-connector
+  # - configurator

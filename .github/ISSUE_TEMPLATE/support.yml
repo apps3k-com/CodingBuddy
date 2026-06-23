@@ -1,4 +1,4 @@
-name: 🆘 Support
+name: Support
 description: Externally submitted support requests
 type: Support
 projects: ["apps3k-com/1"]
@@ -12,6 +12,20 @@ body:
     attributes:
       label: Request / question
       description: What do you need help with?
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: Your name
+      description: Please enter your name.
+    validations:
+      required: true
+  - type: input
+    id: email
+    attributes:
+      label: Email
+      description: Please provide your email address.
     validations:
       required: true
   - type: textarea
@@ -28,6 +42,24 @@ body:
       description: Account, environment, scope of impact.
     validations:
       required: true
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      description: Choose the related module.
+      options:
+        # >>> module-options — generated from .github/modules.yaml by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< module-options
+  - type: dropdown
+    id: product
+    attributes:
+      label: Product
+      description: Product this request relates to (used for cross-repo boards).
+      options:
+        # >>> product-options — generated from the PRODUCTS org variable by the issue-form-options-sync workflow; do not edit by hand
+        - "n/a"
+        # <<< product-options
   - type: input
     id: links
     attributes:
