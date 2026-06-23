@@ -32,22 +32,23 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t WANT < <(node scripts/github/apply-form-labels.mjs)
-          # Allowlist = labels that already exist in the repo (created by issue-form-options-sync
-          # from .github/modules.yaml / the PRODUCTS variable). Never create a label from parsed
-          # issue input — only apply known labels; skip anything unknown.
-          mapfile -t EXISTING < <(gh label list --repo "$REPO" --limit 500 --json name --jq '.[].name')
+          # Allowlist = every label that already exists in the repo (paginated — no cap), created
+          # by issue-form-options-sync from .github/modules.yaml / the PRODUCTS variable. A value
+          # parsed from issue input is never turned into a new label.
+          mapfile -t EXISTING < <(gh api --paginate "repos/$REPO/labels" --jq '.[].name')
           exists() { local x; for x in "${EXISTING[@]:-}"; do [ "$x" = "$1" ] && return 0; done; return 1; }
-          # Remove current module:/product: labels first (reconcile on edit).
+          # Reconcile on edit: remove the current module:/product: labels. Failures are surfaced
+          # (no `|| true`) so stale/missing routing labels can't pass silently.
           mapfile -t HAVE < <(gh issue view "$ISSUE_NUMBER" --repo "$REPO" --json labels \
             --jq '.labels[].name | select(startswith("module:") or startswith("product:"))')
           for l in "${HAVE[@]:-}"; do
-            [ -n "$l" ] && gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "$l" || true
+            if [ -n "$l" ]; then gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "$l"; fi
           done
           # Apply only allowlisted (already-existing) labels.
           for l in "${WANT[@]:-}"; do
-            [ -z "$l" ] && continue
+            if [ -z "$l" ]; then continue; fi
             if exists "$l"; then
-              gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label "$l" || true
+              gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label "$l"
             else
               echo "skip: '$l' is not a known repo label (labels are not created from issue input)"
             fi
