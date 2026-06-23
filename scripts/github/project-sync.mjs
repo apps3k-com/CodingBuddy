@@ -43,7 +43,7 @@ function graphql(query, vars = {}) {
     if (v === undefined || v === null) continue;
     args.push(typeof v === 'number' ? '-F' : '-f', `${k}=${v}`);
   }
-  const out = execFileSync('gh', args, { encoding: 'utf8' });
+  const out = execFileSync('gh', args, { encoding: 'utf8', timeout: 60000 });
   const json = JSON.parse(out);
   if (json.errors) throw new Error(json.errors.map((e) => e.message).join('; '));
   return json.data;
@@ -72,8 +72,8 @@ function fetchIssue(owner, repo, number) {
       parent { number issueType { name } repository { owner { login } name } }
       subIssues(first:100){ totalCount nodes {
         number state
-        projectItems(first:20){ nodes { project { id } fieldValueByName(name:$field){ ${STATUS_FRAGMENT} } } } } }
-      projectItems(first:20){ nodes { id project { id } fieldValueByName(name:$field){ ${STATUS_FRAGMENT} } } }
+        projectItems(first:100){ nodes { project { id } fieldValueByName(name:$field){ ${STATUS_FRAGMENT} } } } } }
+      projectItems(first:100){ nodes { id project { id } fieldValueByName(name:$field){ ${STATUS_FRAGMENT} } } }
     } } }`;
   return graphql(q, { owner, repo, number, field: CFG.statusField }).repository?.issue;
 }
@@ -118,6 +118,13 @@ function reconcileEpic(project, epic, dry) {
   }
 
   const { itemId, status } = itemInProject(epic, project.id);
+  // Critical: only ever mutate an Epic that is actually an item in the TARGET project.
+  // In --issue mode the touched (parent) Epic may not be in the configured project at all;
+  // closing/reopening or restatusing it then would corrupt unrelated work.
+  if (!itemId) {
+    console.log('    epic is not an item in the target project — skipping');
+    return;
+  }
   const backlog = CFG.backlog.toLowerCase();
   const allClosed = children.every((c) => c.state === 'CLOSED');
   const anyStarted = children.some((c) => {

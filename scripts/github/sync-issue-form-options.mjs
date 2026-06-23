@@ -18,13 +18,17 @@ const DIR = '.github/ISSUE_TEMPLATE';
 const MODULES_FILE = '.github/modules.yaml';
 const REPO = process.env.REPO;
 
-/** Read the simple `modules:` list from .github/modules.yaml (dependency-free parser). */
+/** Read the simple `modules:` list from .github/modules.yaml (dependency-free parser).
+ *  A MISSING file means "no modules configured yet" (return []); any other read error is
+ *  fatal — silently emptying the dropdown on a transient/permission error would corrupt the
+ *  taxonomy. */
 function readModules(path) {
   let text;
   try {
     text = readFileSync(path, 'utf8');
-  } catch {
-    return [];
+  } catch (err) {
+    if (err && err.code === 'ENOENT') return [];
+    throw err;
   }
   const out = [];
   let inBlock = false;
@@ -55,39 +59,58 @@ function optionBlock(values) {
   return opts.map((v) => `        - ${JSON.stringify(v)}`).join('\n');
 }
 
-/** Replace the lines between the `# >>> <key>-options` / `# <<< <key>-options` markers. */
+/** Replace the lines between the `# >>> <key>-options` / `# <<< <key>-options` markers.
+ *  Returns { out, found } so the caller can flag a form that is missing its marker block. */
 function replaceMarked(text, key, values) {
   const re = new RegExp(`( *# >>> ${key}-options[^\\n]*\\n)[\\s\\S]*?( *# <<< ${key}-options)`, 'g');
-  return text.replace(re, (_m, start, end) => `${start}${optionBlock(values)}\n${end}`);
+  let found = false;
+  const out = text.replace(re, (_m, start, end) => {
+    found = true;
+    return `${start}${optionBlock(values)}\n${end}`;
+  });
+  return { out, found };
 }
 
 const changed = [];
+const missingMarkers = [];
 for (const f of readdirSync(DIR).filter((f) => f.endsWith('.yml') && f !== 'config.yml')) {
   const p = `${DIR}/${f}`;
   const orig = readFileSync(p, 'utf8');
-  let out = replaceMarked(orig, 'module', modules);
-  out = replaceMarked(out, 'product', products);
-  if (out !== orig) {
-    writeFileSync(p, out);
+  const mod = replaceMarked(orig, 'module', modules);
+  const prod = replaceMarked(mod.out, 'product', products);
+  if (!mod.found) missingMarkers.push(`${f} (module)`);
+  if (!prod.found) missingMarkers.push(`${f} (product)`);
+  if (prod.out !== orig) {
+    writeFileSync(p, prod.out);
     changed.push(f);
   }
 }
 console.log(`Modules: [${modules.join(', ')}] · Products: [${products.join(', ')}]`);
 console.log(`Dropdown options updated in: ${changed.join(', ') || '(no change)'}`);
+if (missingMarkers.length) {
+  // A form without the marker block would silently never receive options — fail loudly.
+  console.error(`ERROR: missing option marker block in: ${missingMarkers.join(', ')}`);
+  process.exitCode = 1;
+}
 
-/** Ensure a label exists for every value (idempotent via --force). Requires gh + issues:write. */
+/** Ensure a label exists for every value (idempotent via --force). Requires gh + issues:write.
+ *  Returns the number of failures so the caller can surface them (never silently swallowed). */
 function ensureLabels(prefix, values, color) {
+  let failed = 0;
   for (const v of values) {
     const name = `${prefix}:${v}`;
     try {
       execFileSync('gh', ['label', 'create', name, '--repo', REPO, '--color', color,
-        '--description', `${prefix}: ${v}`, '--force'], { stdio: 'ignore' });
+        '--description', `${prefix}: ${v}`, '--force'], { stdio: 'ignore', timeout: 30000 });
     } catch {
-      console.error(`warn: could not ensure label ${name}`);
+      console.error(`ERROR: could not ensure label ${name}`);
+      failed += 1;
     }
   }
+  return failed;
 }
 if (REPO) {
-  ensureLabels('module', modules, '8250DF'); // module:* hue (matches the prior convention)
-  ensureLabels('product', products, '1D76DB'); // product:* hue
+  const failed = ensureLabels('module', modules, '8250DF') // module:* hue (prior convention)
+    + ensureLabels('product', products, '1D76DB'); // product:* hue
+  if (failed > 0) process.exitCode = 1; // surface label-sync failures (CI must not go green)
 }

@@ -45,6 +45,12 @@ jobs:
           # perms still apply). github.repository (owner/repo) is set on every trigger
           # incl. schedule. If Epics span repos, add them to this list.
           repositories: ${{ github.repository }}
+          # Scope the minted token to exactly what project-sync.mjs needs (not the App's
+          # full installed permission set): read code, read/write issues (close/reopen),
+          # read/write org Projects (status field).
+          permission-contents: read
+          permission-issues: write
+          permission-organization-projects: write
 
       - name: Reconcile epics
         env:

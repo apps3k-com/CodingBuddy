@@ -3,6 +3,10 @@
 // to apply, one per line: `module:<value>` / `product:<value>`. Placeholders / empty answers
 // ("n/a", "_No response_", "none") are skipped. The workflow reconciles these onto the issue.
 //
+// NOTE: this only PROPOSES labels. The labeler workflow validates each against the repo's
+// allowlist (labels that already exist, created by issue-form-options-sync) and applies only
+// known labels — a value parsed from issue input is never turned into a new label.
+//
 // Env: ISSUE_BODY (the rendered issue body).
 const body = process.env.ISSUE_BODY || '';
 

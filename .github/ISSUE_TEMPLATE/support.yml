@@ -24,10 +24,10 @@ body:
   - type: input
     id: email
     attributes:
-      label: Email
-      description: Please provide your email address.
+      label: Email (optional)
+      description: Optional — how we can reach you. Do not include sensitive personal data.
     validations:
-      required: true
+      required: false
   - type: textarea
     id: context
     attributes:
