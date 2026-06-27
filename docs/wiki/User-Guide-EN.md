@@ -73,6 +73,17 @@ The **Agent Doctor** entry (alpha) is a read-only health check for local agent s
 
 v1 limits: Agent Doctor does not test network reachability, restart agent processes, apply auto-fixes, or show secret values.
 
+### Agent Context
+
+The **Agent Context** entry (alpha, under Inventory) is a read-only inspector for one repository folder. It helps you see which instruction and setup files an agent would likely pick up before you start a coding session.
+
+- Choose a repository folder; CodingBuddy remembers the last selected folder.
+- The table checks a fixed allowlist: `AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, `.mcp.json`, `.codex` project config and obvious developer documentation such as `README.md`, `CONTRIBUTING.md` and development setup docs.
+- Signals highlight missing `AGENTS.md` or `CLAUDE.md`, both governance files being present, empty files, unusually large files and project-local MCP/Codex configuration.
+- Use **Open File** or **Reveal in Finder** for native follow-up. The inspector never edits these files.
+
+v1 limits: Agent Context is deterministic discovery only. It does not recurse through the repository, compare policy text semantically, decide which rule wins, or run natural-language analysis over instructions.
+
 ### MCP Inventory
 
 The **MCP Inventory** entry (alpha) is a read-only table of MCP servers discovered across Codex, Claude Code and Cursor.

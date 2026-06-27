@@ -10,6 +10,7 @@ enum SidebarScope: Hashable {
     case file(ShellConfigFile)
     case mcpAuth
     case agentDoctor
+    case agentContextInspector
     case mcpServerInventory
     case aiTool(AITool)
 
@@ -24,6 +25,7 @@ enum SidebarScope: Hashable {
         case .file(let file): file.rawValue
         case .mcpAuth: "MCP Auth"
         case .agentDoctor: String(localized: "Agent Doctor")
+        case .agentContextInspector: String(localized: "Agent Context")
         case .mcpServerInventory: String(localized: "MCP Inventory")
         case .aiTool(let tool): tool.displayName
         }
@@ -39,6 +41,8 @@ struct ContentView: View {
     @State private var cursorStore = CursorStore()
     @State private var craftStore = CraftAgentStore()
     @State private var agentDoctorStore: AgentDoctorStore? = FeatureFlag.agentDoctor.isEnabled ? AgentDoctorStore() : nil
+    @State private var agentContextInspectorStore: AgentContextInspectorStore? =
+        FeatureFlag.agentContextInspector.isEnabled ? AgentContextInspectorStore() : nil
     @State private var mcpServerInventoryStore: MCPServerInventoryStore? =
         FeatureFlag.mcpServerInventory.isEnabled ? MCPServerInventoryStore() : nil
     @State private var secrets = SecretsGuard()
@@ -94,14 +98,22 @@ struct ContentView: View {
                         agentDoctorStore.reload()
                     }
                 }
-                if let mcpServerInventoryStore {
+                if agentContextInspectorStore != nil || mcpServerInventoryStore != nil {
                     Section("Inventory") {
-                        Label("MCP Inventory", systemImage: "server.rack")
-                            .badge(mcpServerInventoryStore.count)
-                            .tag(SidebarScope.mcpServerInventory)
+                        if let agentContextInspectorStore {
+                            Label("Agent Context", systemImage: "text.book.closed")
+                                .badge(agentContextInspectorStore.problemCount)
+                                .tag(SidebarScope.agentContextInspector)
+                        }
+                        if let mcpServerInventoryStore {
+                            Label("MCP Inventory", systemImage: "server.rack")
+                                .badge(mcpServerInventoryStore.count)
+                                .tag(SidebarScope.mcpServerInventory)
+                        }
                     }
                     .onAppear {
-                        mcpServerInventoryStore.reload()
+                        agentContextInspectorStore?.reload()
+                        mcpServerInventoryStore?.reload()
                     }
                 }
             }
@@ -113,6 +125,12 @@ struct ContentView: View {
             case .agentDoctor:
                 if let agentDoctorStore {
                     AgentDoctorView(store: agentDoctorStore)
+                } else {
+                    VariableListView(store: store, secrets: secrets, scope: .all)
+                }
+            case .agentContextInspector:
+                if let agentContextInspectorStore {
+                    AgentContextInspectorView(store: agentContextInspectorStore)
                 } else {
                     VariableListView(store: store, secrets: secrets, scope: .all)
                 }

@@ -153,6 +153,66 @@
         }
       }
     },
+    "Agent Context" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent Context"
+          }
+        }
+      }
+    },
+    "Both governance files present" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beide Governance-Dateien vorhanden"
+          }
+        }
+      }
+    },
+    "Choose Folder..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordner auswählen..."
+          }
+        }
+      }
+    },
+    "Choose a repository folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Ordner auswählen"
+          }
+        }
+      }
+    },
+    "Choose a repository folder to inspect agent context files." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Repository-Ordner aus, um Agent-Kontextdateien zu prüfen."
+          }
+        }
+      }
+    },
+    "Choose repository folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Ordner auswählen"
+          }
+        }
+      }
+    },
     "Claude Code" : {
       "localizations" : {
         "de" : {
@@ -169,6 +229,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Codex"
+          }
+        }
+      }
+    },
+    "Codex Config" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex-Konfiguration"
+          }
+        }
+      }
+    },
+    "Codex project config present" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex-Projektkonfiguration vorhanden"
+          }
+        }
+      }
+    },
+    "Context" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontext"
+          }
+        }
+      }
+    },
+    "Cursor Rules" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cursor-Regeln"
           }
         }
       }
@@ -523,6 +623,26 @@
         }
       }
     },
+    "Directory" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordner"
+          }
+        }
+      }
+    },
+    "Documentation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentation"
+          }
+        }
+      }
+    },
     "Documentation (Wiki)" : {
       "localizations" : {
         "de" : {
@@ -579,6 +699,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verschlüsselter Credential-Speicher"
+          }
+        }
+      }
+    },
+    "Empty file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leere Datei"
           }
         }
       }
@@ -649,6 +779,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Allgemein"
+          }
+        }
+      }
+    },
+    "Governance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Governance"
           }
         }
       }
@@ -763,6 +903,16 @@
         }
       }
     },
+    "Large file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Große Datei"
+          }
+        }
+      }
+    },
     "Language" : {
       "localizations" : {
         "de" : {
@@ -779,6 +929,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hell"
+          }
+        }
+      }
+    },
+    "MCP Config" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP-Konfiguration"
           }
         }
       }
@@ -963,6 +1123,26 @@
         }
       }
     },
+    "No repository selected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Repository ausgewählt"
+          }
+        }
+      }
+    },
+    "No signals" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Signale"
+          }
+        }
+      }
+    },
     "MCP Auth" : {
       "localizations" : {
         "de" : {
@@ -1109,6 +1289,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Diagnosen aktualisieren"
+          }
+        }
+      }
+    },
+    "Refresh context files" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontextdateien aktualisieren"
           }
         }
       }
@@ -1753,12 +1943,52 @@
         }
       }
     },
+    "Missing" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehlt"
+          }
+        }
+      }
+    },
+    "Missing AGENTS.md" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AGENTS.md fehlt"
+          }
+        }
+      }
+    },
+    "Missing CLAUDE.md" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CLAUDE.md fehlt"
+          }
+        }
+      }
+    },
     "Missing in mcp.env" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fehlt in mcp.env"
+          }
+        }
+      }
+    },
+    "Modified" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geändert"
           }
         }
       }
@@ -1803,12 +2033,32 @@
         }
       }
     },
+    "Open File" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datei öffnen"
+          }
+        }
+      }
+    },
     "Open the Codex environment editor for the selected missing variable" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Codex-Environment-Editor für die ausgewählte fehlende Variable öffnen"
+          }
+        }
+      }
+    },
+    "Open the selected context file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewählte Kontextdatei öffnen"
           }
         }
       }
@@ -1833,12 +2083,42 @@
         }
       }
     },
+    "Project MCP config present" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projekt-MCP-Konfiguration vorhanden"
+          }
+        }
+      }
+    },
     "Refresh inventory" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inventar aktualisieren"
+          }
+        }
+      }
+    },
+    "Reveal in Finder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Finder anzeigen"
+          }
+        }
+      }
+    },
+    "Reveal the selected context file in Finder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewählte Kontextdatei im Finder anzeigen"
           }
         }
       }
@@ -1873,6 +2153,66 @@
         }
       }
     },
+    "Search context files" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontextdateien suchen"
+          }
+        }
+      }
+    },
+    "Signals" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signale"
+          }
+        }
+      }
+    },
+    "Size" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Größe"
+          }
+        }
+      }
+    },
+    "State" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
+          }
+        }
+      }
+    },
+    "Symlink" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Symlink"
+          }
+        }
+      }
+    },
+    "Symlink target not inspected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Symlink-Ziel nicht geprüft"
+          }
+        }
+      }
+    },
     "Transport" : {
       "localizations" : {
         "de" : {
@@ -1893,12 +2233,42 @@
         }
       }
     },
+    "Try a different file, warning, or path." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche es mit einer anderen Datei, Warnung oder einem anderen Pfad."
+          }
+        }
+      }
+    },
     "Unknown" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unbekannt"
+          }
+        }
+      }
+    },
+    "Unexpected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unerwartet"
+          }
+        }
+      }
+    },
+    "Unexpected file type" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unerwarteter Dateityp"
           }
         }
       }

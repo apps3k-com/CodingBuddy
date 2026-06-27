@@ -52,6 +52,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
     case envImportExport
     case mcpAuthManager
     case agentDoctor
+    case agentContextInspector
     case mcpServerInventory
 
     /// The most stable channel in which the feature is active. `.alpha` means
@@ -69,6 +70,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
         case .envImportExport: .stable
         case .mcpAuthManager: .stable
         case .agentDoctor: .alpha
+        case .agentContextInspector: .alpha
         case .mcpServerInventory: .alpha
         }
     }
