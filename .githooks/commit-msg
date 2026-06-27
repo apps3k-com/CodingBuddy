@@ -22,13 +22,5 @@ if echo "$FIRST_LINE" | grep -qE '^chore\((main|beta)\): release [0-9]+\.[0-9]+\
   exit 0
 fi
 
-# Every commit references the Plane work item(s) it contains or relates to.
-# Strip the scissors section (git commit -v diff) and comment lines first —
-# otherwise a COBUD-<n> inside the diff or template comments would pass.
-MESSAGE_BODY=$(sed -e '/^# ------------------------ >8 ------------------------$/,$d' -e '/^#/d' "$MSG_FILE")
-if ! echo "$MESSAGE_BODY" | grep -qE 'COBUD-[0-9]+'; then
-  echo "✖ Commit message must reference at least one Plane work item (COBUD-<n>):" >&2
-  echo "    feat: add codex section (COBUD-6)" >&2
-  echo "  Project: https://app.plane.so/apps3k/projects/703acd2a-ef88-4165-8394-34b2cc48a6ab/issues" >&2
-  exit 1
-fi
+# Work-item linking is enforced on the PR (the PR body closes its GitHub issue with
+# `Closes #N`), not on each commit. See .github/workflows/enforce.yml.

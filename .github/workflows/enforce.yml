@@ -15,6 +15,7 @@ jobs:
       - name: Check title
         env:
           TITLE: ${{ github.event.pull_request.title }}
+          BODY: ${{ github.event.pull_request.body }}
         run: |
           # Squash merges turn the PR title into the commit release-please reads.
           if ! echo "$TITLE" | grep -qE '^(feat|fix|docs|chore|ci|refactor|test|perf|build|style|revert)(\([a-z0-9_-]+\))?!?: .+'; then
@@ -26,9 +27,9 @@ jobs:
           if echo "$TITLE" | grep -qE '^chore\((main|beta)\): release [0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.]+)?$'; then
             exit 0
           fi
-          # The squash commit must reference its Plane work item(s).
-          if ! echo "$TITLE" | grep -qE 'COBUD-[0-9]+'; then
-            echo "::error::PR title must reference a Plane work item, e.g. 'feat: add codex section (COBUD-6)'. Got: $TITLE"
+          # The PR must link its GitHub issue with a closing keyword (Closes #N).
+          if ! printf '%s\n' "$BODY" | grep -qiE '(^|[^[:alnum:]_])(close[sd]?|fix(e[sd])?|resolve[sd]?)[[:space:]]+#[0-9]+([^[:alnum:]_]|$)'; then
+            echo "::error::PR body must link its issue with a closing keyword, e.g. 'Closes #12'."
             exit 1
           fi
 
