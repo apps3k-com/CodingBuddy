@@ -157,15 +157,14 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
         var result: [String] = []
         var redactNext = false
         for arg in args {
-            if looksAbsoluteURL(arg) {
-                result.append(sanitizedURL(arg))
+            if redactNext {
+                result.append("••••••••")
                 redactNext = false
                 continue
             }
 
-            if redactNext {
-                result.append("••••••••")
-                redactNext = false
+            if looksAbsoluteURL(arg) {
+                result.append(sanitizedURL(arg))
                 continue
             }
 

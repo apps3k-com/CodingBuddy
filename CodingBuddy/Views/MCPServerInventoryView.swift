@@ -24,7 +24,7 @@ struct MCPServerInventoryView: View {
 
     /// Selected row object, if the table selection still exists.
     private var selectedItem: MCPServerInventoryItem? {
-        selection.flatMap { id in store.items.first { $0.id == id } }
+        selection.flatMap { id in filteredItems.first { $0.id == id } }
     }
 
     /// Selected tool when CodingBuddy has an existing editor for that inventory row.

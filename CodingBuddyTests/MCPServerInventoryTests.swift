@@ -138,7 +138,7 @@ struct MCPServerInventoryTests {
               "args": [
                 "--api-key=secret-value",
                 "--token",
-                "next-secret",
+                "https://secret-token.example/mcp?token=next-secret",
                 "https://user:password@example.com/mcp?token=query-secret#fragment",
                 "--endpoint=https://user:password@api.example/mcp?token=query-secret"
               ]
@@ -155,6 +155,7 @@ struct MCPServerInventoryTests {
         #expect(item.summary.contains("--endpoint=https://api.example/mcp"))
         #expect(!item.summary.contains("secret-value"))
         #expect(!item.summary.contains("next-secret"))
+        #expect(!item.summary.contains("secret-token.example"))
         #expect(!item.summary.contains("password"))
         #expect(!item.summary.contains("query-secret"))
     }
