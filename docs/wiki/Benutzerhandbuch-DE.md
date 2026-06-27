@@ -65,6 +65,7 @@ Der Sidebar-Bereich **Zugangsdaten → MCP Auth** verwaltet den OAuth-Cache, den
 Der Seitenleisten-Eintrag **Agent Doctor** (Alpha) ist ein Nur-Lese-Gesundheitscheck für die lokale Agent-Einrichtung. Er markiert:
 
 - Fehlende Tool-Verzeichnisse.
+- Fehlende verwaltete zsh-Startdateien (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`).
 - Ungültige JSON-Konfigurationsdateien.
 - Codex-MCP-Umgebungsvariablen, die in der Konfiguration referenziert werden, aber in `~/.codex/mcp.env` fehlen.
 - Credential-Dateien mit zu offenen Dateirechten.

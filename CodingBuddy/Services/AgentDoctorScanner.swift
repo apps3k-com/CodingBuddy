@@ -10,17 +10,18 @@ import Foundation
 /// The scanner is deliberately deterministic: it inspects files CodingBuddy
 /// already understands and returns metadata-only findings. It never executes
 /// tools, probes networks, or reads secret values into diagnostic text.
-nonisolated struct AgentDoctorScanner {
+nonisolated struct AgentDoctorScanner: Sendable {
     /// Home directory whose dot-directories should be inspected.
     let homeDirectory: URL
 
     /// Filesystem access used for deterministic local inspection.
-    private let fileManager = FileManager.default
+    private var fileManager: FileManager { .default }
 
     /// Runs all v1 Agent Doctor checks in stable, UI-friendly order.
     func diagnostics() -> [AgentDiagnostic] {
         var diagnostics: [AgentDiagnostic] = []
         diagnostics += directoryDiagnostics()
+        diagnostics += zshDiagnostics()
         diagnostics += codexDiagnostics()
         diagnostics += jsonDiagnostics()
         diagnostics += mcpAuthDiagnostics()
@@ -65,6 +66,22 @@ nonisolated struct AgentDoctorScanner {
                 ? nil
                 : .missingDirectory(tool: tool, path: url.path)
         }
+    }
+
+    /// Reports missing zsh startup state for the files CodingBuddy manages.
+    private func zshDiagnostics() -> [AgentDiagnostic] {
+        let files = ShellConfigFile.allCases.map { ($0, $0.url(in: homeDirectory)) }
+        let hasStartupFile = files.contains { _, url in
+            isFile(url)
+        }
+        guard !hasStartupFile else { return [] }
+
+        return [
+            .missingZshStartupFiles(
+                homePath: homeDirectory.path,
+                files: ShellConfigFile.allCases.map(\.rawValue).joined(separator: ", ")
+            ),
+        ]
     }
 
     /// Reports Codex env-file permission and referenced-variable issues.
@@ -141,6 +158,12 @@ nonisolated struct AgentDoctorScanner {
     private func isDirectory(_ url: URL) -> Bool {
         var isDirectory: ObjCBool = false
         return fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) && isDirectory.boolValue
+    }
+
+    /// Returns true only when the path exists and is not a directory.
+    private func isFile(_ url: URL) -> Bool {
+        var isDirectory: ObjCBool = false
+        return fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) && !isDirectory.boolValue
     }
 
     /// Checks credential-bearing MCP Auth files for owner-only permissions.

@@ -65,6 +65,7 @@ The **Credentials → MCP Auth** sidebar section manages the OAuth cache that `m
 The **Agent Doctor** entry (alpha) is a read-only health check for local agent setup. It flags:
 
 - Missing tool directories.
+- Missing managed zsh startup files (`~/.zshenv`, `~/.zprofile`, `~/.zshrc`).
 - Invalid JSON configuration files.
 - Codex MCP environment variables referenced by config but missing from `~/.codex/mcp.env`.
 - Credential files whose permissions are too open.

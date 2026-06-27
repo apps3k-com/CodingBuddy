@@ -21,10 +21,18 @@ final class AgentDoctorStore {
     /// Read-only scanner that produces the current diagnostic snapshot.
     @ObservationIgnored private let scanner: AgentDoctorScanner
 
+    /// Current background reload, cancelled when a newer reload starts.
+    @ObservationIgnored private var reloadTask: Task<Void, Never>?
+
     /// Creates a store for one home directory without scanning it immediately.
     init(homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser) {
         self.homeDirectory = homeDirectory
         self.scanner = AgentDoctorScanner(homeDirectory: homeDirectory)
+    }
+
+    /// Cancels any pending background reload when the store is released.
+    deinit {
+        reloadTask?.cancel()
     }
 
     /// Number of actionable findings, excluding purely informational notices.
@@ -34,6 +42,14 @@ final class AgentDoctorStore {
 
     /// Re-runs all Agent Doctor checks and replaces the diagnostics snapshot.
     func reload() {
-        diagnostics = scanner.diagnostics()
+        reloadTask?.cancel()
+        let scanner = scanner
+        reloadTask = Task {
+            let diagnostics = await Task.detached(priority: .userInitiated) {
+                scanner.diagnostics()
+            }.value
+            guard !Task.isCancelled else { return }
+            self.diagnostics = diagnostics
+        }
     }
 }

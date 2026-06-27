@@ -18,6 +18,16 @@ struct AgentDoctorTests {
         return dir
     }
 
+    private func waitForDiagnostics(in store: AgentDoctorStore) async throws -> [AgentDiagnostic] {
+        for _ in 0..<100 {
+            if !store.diagnostics.isEmpty {
+                return store.diagnostics
+            }
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+        return store.diagnostics
+    }
+
     @Test func reportsMissingToolDirectories() throws {
         let home = try makeTempDir()
 
@@ -28,6 +38,28 @@ struct AgentDoctorTests {
         #expect(diagnostics.contains(.missingDirectory(tool: .cursor, path: home.appendingPathComponent(".cursor").path)))
         #expect(diagnostics.contains(.missingDirectory(tool: .craftAgents, path: home.appendingPathComponent(".craft-agent").path)))
         #expect(diagnostics.contains(.missingDirectory(tool: .mcpAuth, path: home.appendingPathComponent(".mcp-auth").path)))
+    }
+
+    @Test func reportsMissingZshStartupFiles() throws {
+        let home = try makeTempDir()
+
+        let diagnostics = AgentDoctorScanner(homeDirectory: home).diagnostics()
+
+        #expect(diagnostics.contains(.missingZshStartupFiles(
+            homePath: home.path,
+            files: ".zshenv, .zprofile, .zshrc"
+        )))
+    }
+
+    @Test func existingZshStartupFileSuppressesMissingZshDiagnostic() throws {
+        let home = try makeTempDir()
+        try "export TOKEN=value\n".write(to: ShellConfigFile.zshrc.url(in: home), atomically: true, encoding: .utf8)
+
+        let diagnostics = AgentDoctorScanner(homeDirectory: home).diagnostics()
+
+        #expect(!diagnostics.contains {
+            $0.code == .missingZshStartupFiles && $0.tool == .zsh
+        })
     }
 
     @Test func reportsToolDirectoryPathsThatAreRegularFiles() throws {
@@ -103,15 +135,16 @@ struct AgentDoctorTests {
         })
     }
 
-    @Test func storeDoesNotScanUntilReload() throws {
+    @Test func storeDoesNotScanUntilReload() async throws {
         let home = try makeTempDir()
         let store = AgentDoctorStore(homeDirectory: home)
 
         #expect(store.diagnostics.isEmpty)
 
         store.reload()
+        let diagnostics = try await waitForDiagnostics(in: store)
 
-        #expect(store.diagnostics.contains(.missingDirectory(
+        #expect(diagnostics.contains(.missingDirectory(
             tool: .codex,
             path: home.appendingPathComponent(".codex").path
         )))

@@ -153,6 +153,26 @@
         }
       }
     },
+    "Claude Code" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code"
+          }
+        }
+      }
+    },
+    "Codex" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex"
+          }
+        }
+      }
+    },
     "Add Entry" : {
       "localizations" : {
         "de" : {
@@ -373,6 +393,16 @@
         }
       }
     },
+    "CodingBuddy did not find any managed zsh startup file in this home directory." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat in diesem Home-Verzeichnis keine verwaltete zsh-Startdatei gefunden."
+          }
+        }
+      }
+    },
     "Configuration directory missing" : {
       "localizations" : {
         "de" : {
@@ -399,6 +429,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktueller Modus ist %@; erwartet wird %@."
+          }
+        }
+      }
+    },
+    "Craft Agents" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Craft Agents"
+          }
+        }
+      }
+    },
+    "Create a zsh startup file or add your first variable in CodingBuddy." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lege eine zsh-Startdatei an oder füge deine erste Variable in CodingBuddy hinzu."
+          }
+        }
+      }
+    },
+    "Cursor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cursor"
           }
         }
       }
@@ -903,6 +963,16 @@
         }
       }
     },
+    "MCP Auth" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP Auth"
+          }
+        }
+      }
+    },
     "No MCP credentials" : {
       "localizations" : {
         "de" : {
@@ -919,6 +989,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keine Variablen"
+          }
+        }
+      }
+    },
+    "No zsh startup files found" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine zsh-Startdateien gefunden"
           }
         }
       }
@@ -1629,6 +1709,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "~/.mcp-auth existiert nicht — nichts zu verwalten."
+          }
+        }
+      }
+    },
+    "zsh" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zsh"
           }
         }
       }

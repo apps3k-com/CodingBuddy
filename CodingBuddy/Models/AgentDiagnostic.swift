@@ -33,12 +33,12 @@ nonisolated enum AgentDiagnosticTool: String, CaseIterable, Sendable {
     /// Human-readable product name for table labels and navigation badges.
     var displayName: String {
         switch self {
-        case .zsh: "zsh"
-        case .codex: "Codex"
-        case .claudeCode: "Claude Code"
-        case .cursor: "Cursor"
-        case .craftAgents: "Craft Agents"
-        case .mcpAuth: "MCP Auth"
+        case .zsh: String(localized: "zsh")
+        case .codex: String(localized: "Codex")
+        case .claudeCode: String(localized: "Claude Code")
+        case .cursor: String(localized: "Cursor")
+        case .craftAgents: String(localized: "Craft Agents")
+        case .mcpAuth: String(localized: "MCP Auth")
         }
     }
 }
@@ -47,6 +47,8 @@ nonisolated enum AgentDiagnosticTool: String, CaseIterable, Sendable {
 nonisolated enum AgentDiagnosticCode: String, CaseIterable, Sendable {
     /// Expected tool configuration directory is absent.
     case missingDirectory
+    /// None of the zsh startup files managed by CodingBuddy exist.
+    case missingZshStartupFiles
     /// A JSON configuration file exists but cannot be parsed as JSON.
     case invalidConfigFile
     /// A config references an environment variable that its environment file does not define.
@@ -95,6 +97,20 @@ nonisolated struct AgentDiagnostic: Identifiable, Equatable, Hashable, Sendable 
             source: path,
             subject: nil,
             suggestion: String(localized: "Set up the tool first, then refresh Agent Doctor.")
+        )
+    }
+
+    /// Creates an informational finding when no managed zsh startup file exists.
+    static func missingZshStartupFiles(homePath: String, files: String) -> AgentDiagnostic {
+        AgentDiagnostic(
+            code: .missingZshStartupFiles,
+            severity: .info,
+            tool: .zsh,
+            title: String(localized: "No zsh startup files found"),
+            detail: String(localized: "CodingBuddy did not find any managed zsh startup file in this home directory."),
+            source: homePath,
+            subject: files,
+            suggestion: String(localized: "Create a zsh startup file or add your first variable in CodingBuddy.")
         )
     }
 

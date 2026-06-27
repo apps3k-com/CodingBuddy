@@ -98,9 +98,10 @@ raw credential JSON after Touch ID / password authentication.
 ### `agentDoctor` — maturity: alpha
 
 Read-only diagnostics for local agent setup. It checks missing tool
-directories, invalid JSON configuration files, Codex MCP environment variables
-referenced by config but missing from `~/.codex/mcp.env`, credential files with
-unsafe permissions, and expired or incomplete MCP Auth entries.
+directories, missing managed zsh startup files, invalid JSON configuration
+files, Codex MCP environment variables referenced by config but missing from
+`~/.codex/mcp.env`, credential files with unsafe permissions, and expired or
+incomplete MCP Auth entries.
 
 v1 only reports findings: no network reachability checks, process restarts,
 auto-fixes, or secret value display.
