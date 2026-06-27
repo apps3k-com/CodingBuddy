@@ -1,4 +1,4 @@
-# CLAUDE.md — CodingBuddy
+# AGENTS.md — CodingBuddy
 
 Native macOS app (SwiftUI) for managing environment variables in zsh dotfiles.
 Deep documentation lives in the [wiki](https://github.com/apps3k-com/CodingBuddy/wiki) — this file stays slim.

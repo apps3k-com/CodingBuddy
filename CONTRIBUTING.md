@@ -20,6 +20,10 @@ feat!: ... / BREAKING CHANGE: ...   → major bump
 
 `feat` bumps the minor version, `fix` the patch version. The `commit-msg` hook rejects anything else — run `./scripts/setup.sh` once per clone to activate the hooks.
 
+## Project tracking
+
+All work starts as a GitHub issue in the org Project. Use native sub-issues for work that belongs under an Epic. The PR body must link the issue with a GitHub closing keyword such as `Closes #12`; this is what CI enforces and what lets GitHub close the issue and advance the Project status on merge. Individual commits may include `(#12)`, but issue linking is intentionally checked at PR level.
+
 ## Releases (release-please)
 
 [release-please](https://github.com/googleapis/release-please) runs on every push to `main`. It maintains a release PR that collects the changelog and bumps:
@@ -46,9 +50,10 @@ A PR that changes app code must:
 
 1. **Build and pass tests** (`CodingBuddyTests`).
 2. **Carry conventional commits** (hook + CI check on the PR title).
-3. **Register feature flags**: every flag in `CodingBuddy/Services/FeatureFlags.swift` has a section in `docs/FEATURE_FLAGS.md` and vice versa (checked by `scripts/check-feature-flags.sh`).
-4. **Update the documentation**: user-visible changes touch the wiki sources under `docs/wiki/` (both `User-Guide-EN.md` and `Benutzerhandbuch-DE.md`) in the same PR. The wiki is synced from `docs/wiki/` to the GitHub wiki automatically on merge. PRs without user-visible changes declare `Docs: none` in the PR description.
-5. **Localize**: new user-facing strings exist in `Localizable.xcstrings` with a German translation.
+3. **Link its GitHub issue** with a closing keyword in the PR body, e.g. `Closes #12`.
+4. **Register feature flags**: every flag in `CodingBuddy/Services/FeatureFlags.swift` has a section in `docs/FEATURE_FLAGS.md` and vice versa (checked by `scripts/check-feature-flags.sh`).
+5. **Update the documentation**: user-visible changes touch the wiki sources under `docs/wiki/` (both `User-Guide-EN.md` and `Benutzerhandbuch-DE.md`) in the same PR. The wiki is synced from `docs/wiki/` to the GitHub wiki automatically on merge. PRs without user-visible changes declare `Docs: none` in the PR description.
+6. **Localize**: new user-facing strings exist in `Localizable.xcstrings` with a German translation.
 
 ## Code rules
 
