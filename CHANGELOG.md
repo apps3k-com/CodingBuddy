@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.7.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.6.0...v0.7.0) (2026-06-23)
+
+
+### Features
+
+* **github:** add structured issue forms for the five org issue types ([1444ebd](https://github.com/apps3k-com/CodingBuddy/commit/1444ebd720f09414cda9e7050b550f4571c90a58))
+* **issue-forms:** structured issue forms + module/product sync (workflow-template[#20](https://github.com/apps3k-com/CodingBuddy/issues/20)) ([52b612e](https://github.com/apps3k-com/CodingBuddy/commit/52b612e0bf5fe42687c75a1a01c9b976e5ea9525))
+* **issue-forms:** structured issue forms + module/product sync (workflow-template[#20](https://github.com/apps3k-com/CodingBuddy/issues/20)) ([bd7a635](https://github.com/apps3k-com/CodingBuddy/commit/bd7a6350d65ee9be5147dff7295cb4ee64ad93c9))
+* **projects:** add Epic↔sub-issue sync + finalize issue-form automation ([b8fe8ed](https://github.com/apps3k-com/CodingBuddy/commit/b8fe8ed300826a640d1f330d4311aa04f27f3dad))
+
+
+### Bug Fixes
+
+* **automation:** harden issue-form + epic-sync per CodeRabbit review ([b0e4884](https://github.com/apps3k-com/CodingBuddy/commit/b0e48845257daf12a26b65ac672c1729b4dbc63a))
+* **automation:** paginate label allowlist, surface label failures, name optional ([bf0c50f](https://github.com/apps3k-com/CodingBuddy/commit/bf0c50f046bda8a97175cb7eb08d1bf098209dcd))
+
 ## [0.6.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.5.0...v0.6.0) (2026-06-10)
 
 
