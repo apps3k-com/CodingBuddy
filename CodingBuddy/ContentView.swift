@@ -10,6 +10,7 @@ enum SidebarScope: Hashable {
     case file(ShellConfigFile)
     case mcpAuth
     case agentDoctor
+    case mcpServerInventory
     case aiTool(AITool)
 
     var file: ShellConfigFile? {
@@ -23,6 +24,7 @@ enum SidebarScope: Hashable {
         case .file(let file): file.rawValue
         case .mcpAuth: "MCP Auth"
         case .agentDoctor: String(localized: "Agent Doctor")
+        case .mcpServerInventory: String(localized: "MCP Inventory")
         case .aiTool(let tool): tool.displayName
         }
     }
@@ -37,6 +39,8 @@ struct ContentView: View {
     @State private var cursorStore = CursorStore()
     @State private var craftStore = CraftAgentStore()
     @State private var agentDoctorStore: AgentDoctorStore? = FeatureFlag.agentDoctor.isEnabled ? AgentDoctorStore() : nil
+    @State private var mcpServerInventoryStore: MCPServerInventoryStore? =
+        FeatureFlag.mcpServerInventory.isEnabled ? MCPServerInventoryStore() : nil
     @State private var secrets = SecretsGuard()
     @State private var scope: SidebarScope? = .all
     @State private var showSettings = false
@@ -90,6 +94,16 @@ struct ContentView: View {
                         agentDoctorStore.reload()
                     }
                 }
+                if let mcpServerInventoryStore {
+                    Section("Inventory") {
+                        Label("MCP Inventory", systemImage: "server.rack")
+                            .badge(mcpServerInventoryStore.count)
+                            .tag(SidebarScope.mcpServerInventory)
+                    }
+                    .onAppear {
+                        mcpServerInventoryStore.reload()
+                    }
+                }
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 210)
         } detail: {
@@ -99,6 +113,14 @@ struct ContentView: View {
             case .agentDoctor:
                 if let agentDoctorStore {
                     AgentDoctorView(store: agentDoctorStore)
+                } else {
+                    VariableListView(store: store, secrets: secrets, scope: .all)
+                }
+            case .mcpServerInventory:
+                if let mcpServerInventoryStore {
+                    MCPServerInventoryView(store: mcpServerInventoryStore) { tool in
+                        scope = .aiTool(tool)
+                    }
                 } else {
                     VariableListView(store: store, secrets: secrets, scope: .all)
                 }

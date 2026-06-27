@@ -21,6 +21,7 @@ nonisolated enum MCPServersJSONReader {
             guard let server = value as? [String: Any] else { return nil }
             return MCPServerConfig(
                 name: name,
+                type: server["type"] as? String,
                 url: server["url"] as? String,
                 command: server["command"] as? String,
                 args: (server["args"] as? [String]) ?? [],

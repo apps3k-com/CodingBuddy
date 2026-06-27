@@ -7,7 +7,7 @@ import Foundation
 
 /// AI coding tools with their own sidebar section. Cases are added as the
 /// corresponding sections ship (Claude Code, Cursor, Craft Agents follow).
-nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable {
+nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable, Sendable {
     case codex
     case claudeCode
     case cursor

@@ -105,3 +105,15 @@ incomplete MCP Auth entries.
 
 v1 only reports findings: no network reachability checks, process restarts,
 auto-fixes, or secret value display.
+
+### `mcpServerInventory` — maturity: alpha
+
+Read-only inventory of MCP server definitions across Codex, Claude Code, and
+Cursor. It normalizes server name, source tool, scope/project path, transport,
+safe command or URL summary, referenced environment variable names, header keys,
+source file, and Codex variables that are referenced but missing from
+`~/.codex/mcp.env`.
+
+v1 does not edit, install, or probe MCP servers and never displays secret
+values from environment blocks, URL credentials, query strings, or token-like
+command arguments.

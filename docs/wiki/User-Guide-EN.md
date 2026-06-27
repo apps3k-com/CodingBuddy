@@ -73,6 +73,17 @@ The **Agent Doctor** entry (alpha) is a read-only health check for local agent s
 
 v1 limits: Agent Doctor does not test network reachability, restart agent processes, apply auto-fixes, or show secret values.
 
+### MCP Inventory
+
+The **MCP Inventory** entry (alpha) is a read-only table of MCP servers discovered across Codex, Claude Code and Cursor.
+
+- It shows source tool, server name, scope or project path, transport, a safe command or URL summary, referenced environment variable names, header keys and source file.
+- Search filters by server name, tool, scope, command or URL summary, and environment variable name.
+- Codex servers that reference variables missing from `~/.codex/mcp.env` are highlighted. Use **Open Tool** to jump from a selected Codex, Claude Code or Cursor row to the existing tool editor.
+- Secret values are never shown: URL user info, query strings, fragments and token-like command arguments are redacted.
+
+v1 limits: MCP Inventory does not edit, install, or network-test servers. Claude Code and Cursor rows show configured `env` and header keys only; they do not infer missing variables from command text.
+
 ### Codex
 
 The **Codex** sidebar entry (alpha) manages OpenAI Codex's environment file:

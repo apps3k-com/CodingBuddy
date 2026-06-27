@@ -39,6 +39,7 @@ struct MCPServersJSONReaderTests {
         #expect(shopify?.scope == "user")
 
         let linear = servers.first { $0.name == "linear" }
+        #expect(linear?.type == "http")
         #expect(linear?.url == "https://mcp.linear.app/mcp")
         #expect(linear?.headerKeys == ["Authorization"])
     }

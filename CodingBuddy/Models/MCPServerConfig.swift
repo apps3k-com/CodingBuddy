@@ -9,6 +9,8 @@ import Foundation
 /// (`~/.claude.json`, `.mcp.json`) and Cursor (`~/.cursor/mcp.json`).
 nonisolated struct MCPServerConfig: Identifiable, Equatable, Hashable {
     var name: String
+    /// Optional transport hint from JSON, e.g. `http` or `stdio`.
+    var type: String?
     var url: String?
     var command: String?
     var args: [String] = []
