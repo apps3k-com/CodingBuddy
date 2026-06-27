@@ -1663,6 +1663,266 @@
         }
       }
     },
+    "CodingBuddy did not find any MCP server definitions for Codex, Claude Code, or Cursor." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat keine MCP-Serverdefinitionen für Codex, Claude Code oder Cursor gefunden."
+          }
+        }
+      }
+    },
+    "Command / URL" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Befehl / URL"
+          }
+        }
+      }
+    },
+    "Defined by server config" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durch Serverkonfiguration definiert"
+          }
+        }
+      }
+    },
+    "Env Vars" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Env-Variablen"
+          }
+        }
+      }
+    },
+    "Headers:" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Header:"
+          }
+        }
+      }
+    },
+    "HTTP" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTP"
+          }
+        }
+      }
+    },
+    "Inventory" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventar"
+          }
+        }
+      }
+    },
+    "Invalid URL" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungültige URL"
+          }
+        }
+      }
+    },
+    "MCP Inventory" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP Inventory"
+          }
+        }
+      }
+    },
+    "Missing in mcp.env" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehlt in mcp.env"
+          }
+        }
+      }
+    },
+    "No MCP servers" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine MCP-Server"
+          }
+        }
+      }
+    },
+    "No Results" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Ergebnisse"
+          }
+        }
+      }
+    },
+    "No env vars" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Env-Variablen"
+          }
+        }
+      }
+    },
+    "Open Codex" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex öffnen"
+          }
+        }
+      }
+    },
+    "Open the Codex environment editor for the selected missing variable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex-Environment-Editor für die ausgewählte fehlende Variable öffnen"
+          }
+        }
+      }
+    },
+    "Open the selected tool editor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editor für das ausgewählte Tool öffnen"
+          }
+        }
+      }
+    },
+    "Open Tool" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tool öffnen"
+          }
+        }
+      }
+    },
+    "Refresh inventory" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventar aktualisieren"
+          }
+        }
+      }
+    },
+    "SSE" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSE"
+          }
+        }
+      }
+    },
+    "Scope" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scope"
+          }
+        }
+      }
+    },
+    "Search MCP servers" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP-Server suchen"
+          }
+        }
+      }
+    },
+    "Transport" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transport"
+          }
+        }
+      }
+    },
+    "Try a different server, tool, scope, or environment variable name." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche es mit einem anderen Server, Tool, Scope oder Environment-Variable-Namen."
+          }
+        }
+      }
+    },
+    "Unknown" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unbekannt"
+          }
+        }
+      }
+    },
+    "User" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benutzer"
+          }
+        }
+      }
+    },
+    "stdio" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "stdio"
+          }
+        }
+      }
+    },
     "~/.claude does not exist — Claude Code has not been set up on this Mac." : {
       "localizations" : {
         "de" : {
