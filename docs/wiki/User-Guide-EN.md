@@ -80,7 +80,7 @@ The **Agent Context** entry (alpha, under Inventory) is a read-only inspector fo
 - Choose a repository folder; CodingBuddy remembers the last selected folder.
 - The table checks a fixed allowlist: `AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, `.mcp.json`, `.codex` project config and obvious developer documentation such as `README.md`, `CONTRIBUTING.md` and development setup docs.
 - Signals highlight missing `AGENTS.md` or `CLAUDE.md`, both governance files being present, empty files, unusually large files and project-local MCP/Codex configuration.
-- Use **Open File** or **Reveal in Finder** for native follow-up. The inspector never edits these files.
+- Use **Open** or **Reveal in Finder** for native follow-up. The inspector never edits these files.
 
 v1 limits: Agent Context is deterministic discovery only. It does not recurse through the repository, compare policy text semantically, decide which rule wins, or run natural-language analysis over instructions.
 

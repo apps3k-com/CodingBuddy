@@ -57,7 +57,7 @@ struct AgentContextInspectorView: View {
         .searchable(text: $searchText, prompt: "Search context files")
         .contextMenu(forSelectionType: AgentContextItem.ID.self) { ids in
             if let item = item(for: ids.first), item.exists {
-                Button("Open File") { open(item) }
+                Button("Open") { open(item) }
                 Button("Reveal in Finder") { reveal(item) }
             }
         } primaryAction: { ids in
@@ -67,12 +67,12 @@ struct AgentContextInspectorView: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                Button("Open File", systemImage: "doc") {
+                Button("Open", systemImage: "doc") {
                     if let selectedItem {
                         open(selectedItem)
                     }
                 }
-                .help("Open the selected context file")
+                .help("Open the selected context entry")
                 .disabled(selectedItem?.exists != true)
 
                 Button("Reveal in Finder", systemImage: "folder") {
@@ -80,7 +80,7 @@ struct AgentContextInspectorView: View {
                         reveal(selectedItem)
                     }
                 }
-                .help("Reveal the selected context file in Finder")
+                .help("Reveal the selected context entry in Finder")
                 .disabled(selectedItem?.exists != true)
 
                 Button("Refresh", systemImage: "arrow.clockwise") {

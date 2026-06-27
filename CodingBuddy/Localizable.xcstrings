@@ -2023,22 +2023,22 @@
         }
       }
     },
+    "Open" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnen"
+          }
+        }
+      }
+    },
     "Open Codex" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Codex öffnen"
-          }
-        }
-      }
-    },
-    "Open File" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Datei öffnen"
           }
         }
       }
@@ -2053,12 +2053,12 @@
         }
       }
     },
-    "Open the selected context file" : {
+    "Open the selected context entry" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ausgewählte Kontextdatei öffnen"
+            "value" : "Ausgewählten Kontexteintrag öffnen"
           }
         }
       }
@@ -2113,12 +2113,12 @@
         }
       }
     },
-    "Reveal the selected context file in Finder" : {
+    "Reveal the selected context entry in Finder" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ausgewählte Kontextdatei im Finder anzeigen"
+            "value" : "Ausgewählten Kontexteintrag im Finder anzeigen"
           }
         }
       }

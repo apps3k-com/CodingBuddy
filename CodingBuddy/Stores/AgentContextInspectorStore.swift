@@ -32,9 +32,23 @@ final class AgentContextInspectorStore {
         reloadTask?.cancel()
     }
 
-    /// Number of actionable warnings, excluding informational signals.
+    /// Number of actionable warnings, counting repo-wide signals once.
     var problemCount: Int {
-        items.flatMap(\.warnings).filter { $0.severity != .info }.count
+        var count = 0
+        var countedGovernanceConflict = false
+
+        for warning in items.flatMap(\.warnings) {
+            guard warning.severity != .info else { continue }
+
+            if warning == .bothGovernanceFilesPresent {
+                guard !countedGovernanceConflict else { continue }
+                countedGovernanceConflict = true
+            }
+
+            count += 1
+        }
+
+        return count
     }
 
     /// Persists a new repository folder and reloads scanner output.

@@ -7,10 +7,12 @@ import Foundation
 import Testing
 @testable import CodingBuddy
 
+/// Scanner and store coverage for the read-only Agent Context Inspector.
 @MainActor
 @Suite(.serialized)
 struct AgentContextInspectorTests {
 
+    /// Creates an isolated temporary repository fixture for a single test.
     private func makeTempDir() throws -> URL {
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent("AgentContextInspectorTests-\(UUID().uuidString)", isDirectory: true)
@@ -18,6 +20,7 @@ struct AgentContextInspectorTests {
         return dir
     }
 
+    /// Writes UTF-8 content while creating any missing parent directories.
     private func write(_ contents: String, to url: URL) throws {
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
@@ -26,10 +29,12 @@ struct AgentContextInspectorTests {
         try contents.write(to: url, atomically: true, encoding: .utf8)
     }
 
+    /// Finds a scanner result by repository-relative path.
     private func item(_ relativePath: String, in items: [AgentContextItem]) throws -> AgentContextItem {
         try #require(items.first { $0.relativePath == relativePath })
     }
 
+    /// Waits for the store's background reload to publish scanner output.
     private func waitForItems(in store: AgentContextInspectorStore) async throws -> [AgentContextItem] {
         for _ in 0..<100 {
             if !store.items.isEmpty {
@@ -40,6 +45,7 @@ struct AgentContextInspectorTests {
         return store.items
     }
 
+    /// Verifies deterministic discovery order and primary signals for supported context entries.
     @Test func scannerReportsGovernanceOptionalContextAndProjectConfig() throws {
         let repo = try makeTempDir()
         try write("# Agent rules\n", to: repo.appendingPathComponent("AGENTS.md"))
@@ -78,6 +84,7 @@ struct AgentContextInspectorTests {
         #expect(codexConfig.warnings == [.codexProjectConfigPresent])
     }
 
+    /// Verifies missing, empty, and oversized file warnings for governance and documentation entries.
     @Test func scannerFlagsMissingEmptyAndOversizedGovernanceFiles() throws {
         let repo = try makeTempDir()
         try write("", to: repo.appendingPathComponent("CLAUDE.md"))
@@ -98,6 +105,7 @@ struct AgentContextInspectorTests {
         #expect(readme.warnings == [.oversizedFile])
     }
 
+    /// Verifies `.cursor/rules` may be a file without triggering recursive repository scans.
     @Test func scannerReportsCursorRulesFileWithoutRecursingRepository() throws {
         let repo = try makeTempDir()
         try FileManager.default.createDirectory(
@@ -114,6 +122,7 @@ struct AgentContextInspectorTests {
         #expect(!items.contains { $0.relativePath == "Sources/AGENTS.md" })
     }
 
+    /// Verifies symlink entries are reported without traversing their targets.
     @Test func scannerReportsDanglingSymlinkAsPresentWithoutTraversingTarget() throws {
         let repo = try makeTempDir()
         let link = repo.appendingPathComponent(".mcp.json")
@@ -128,6 +137,7 @@ struct AgentContextInspectorTests {
         #expect(mcpConfig.warnings.contains(.projectLocalMCPConfigPresent))
     }
 
+    /// Verifies repository selection persistence and reload behavior use injected defaults.
     @Test func storePersistsRepositorySelectionAndReloadsItems() async throws {
         let repo = try makeTempDir()
         try write("# Agent rules\n", to: repo.appendingPathComponent("AGENTS.md"))
@@ -154,6 +164,23 @@ struct AgentContextInspectorTests {
         #expect(defaults.string(forKey: AgentContextInspectorStore.repositoryPathKey) == nil)
     }
 
+    /// Verifies repo-wide governance conflicts are counted once in the sidebar badge.
+    @Test func storeCountsRepoWideGovernanceWarningOnce() async throws {
+        let repo = try makeTempDir()
+        try write("# Agent rules\n", to: repo.appendingPathComponent("AGENTS.md"))
+        try write("# Claude rules\n", to: repo.appendingPathComponent("CLAUDE.md"))
+        let suiteName = "CodingBuddy.AgentContextInspectorTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defaults.removePersistentDomain(forName: suiteName)
+
+        let store = AgentContextInspectorStore(defaults: defaults)
+        store.selectRepository(repo)
+        _ = try await waitForItems(in: store)
+
+        #expect(store.problemCount == 1)
+    }
+
+    /// Verifies inspector search covers paths, kinds, entry types, and warning signals.
     @Test func itemSearchMatchesPathKindTypeAndSignals() {
         let item = AgentContextItem(
             relativePath: ".mcp.json",
