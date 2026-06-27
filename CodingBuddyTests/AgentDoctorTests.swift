@@ -30,6 +30,16 @@ struct AgentDoctorTests {
         #expect(diagnostics.contains(.missingDirectory(tool: .mcpAuth, path: home.appendingPathComponent(".mcp-auth").path)))
     }
 
+    @Test func reportsToolDirectoryPathsThatAreRegularFiles() throws {
+        let home = try makeTempDir()
+        let codexPath = home.appendingPathComponent(".codex")
+        try "not a directory".write(to: codexPath, atomically: true, encoding: .utf8)
+
+        let diagnostics = AgentDoctorScanner(homeDirectory: home).diagnostics()
+
+        #expect(diagnostics.contains(.missingDirectory(tool: .codex, path: codexPath.path)))
+    }
+
     @Test func reportsCodexMissingReferencedEnvVarAndUnsafePermissions() throws {
         let home = try makeTempDir()
         let codex = home.appendingPathComponent(".codex", isDirectory: true)
@@ -171,6 +181,25 @@ struct AgentDoctorTests {
 
         let diagnostics = AgentDoctorScanner(homeDirectory: home).diagnostics()
         let expectedSource = clientInfo.resolvingSymlinksInPath().path
+
+        #expect(diagnostics.contains {
+            $0.code == .unsafePermissions
+                && $0.tool == .mcpAuth
+                && URL(fileURLWithPath: $0.source).resolvingSymlinksInPath().path == expectedSource
+        })
+    }
+
+    @Test func reportsUnsafeMCPAuthCodeVerifierPermissions() throws {
+        let home = try makeTempDir()
+        let mcpAuth = home.appendingPathComponent(".mcp-auth/mcp-remote-1.0.0", isDirectory: true)
+        try FileManager.default.createDirectory(at: mcpAuth, withIntermediateDirectories: true)
+        let hash = String(repeating: "56", count: 16)
+        let codeVerifier = mcpAuth.appendingPathComponent("\(hash)_code_verifier.txt")
+        try "raw-code-verifier-value".write(to: codeVerifier, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: codeVerifier.path)
+
+        let diagnostics = AgentDoctorScanner(homeDirectory: home).diagnostics()
+        let expectedSource = codeVerifier.resolvingSymlinksInPath().path
 
         #expect(diagnostics.contains {
             $0.code == .unsafePermissions

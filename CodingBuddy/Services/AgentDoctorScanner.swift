@@ -61,7 +61,7 @@ nonisolated struct AgentDoctorScanner {
             (.craftAgents, craftDirectory),
             (.mcpAuth, mcpAuthDirectory),
         ].compactMap { tool, url in
-            fileManager.fileExists(atPath: url.path)
+            isDirectory(url)
                 ? nil
                 : .missingDirectory(tool: tool, path: url.path)
         }
@@ -69,7 +69,7 @@ nonisolated struct AgentDoctorScanner {
 
     /// Reports Codex env-file permission and referenced-variable issues.
     private func codexDiagnostics() -> [AgentDiagnostic] {
-        guard fileManager.fileExists(atPath: codexDirectory.path) else { return [] }
+        guard isDirectory(codexDirectory) else { return [] }
 
         var diagnostics: [AgentDiagnostic] = []
         let mcpEnv = codexDirectory.appendingPathComponent("mcp.env")
@@ -119,7 +119,7 @@ nonisolated struct AgentDoctorScanner {
 
     /// Reports stale, incomplete, or broadly-readable MCP Auth cache entries.
     private func mcpAuthDiagnostics() -> [AgentDiagnostic] {
-        guard fileManager.fileExists(atPath: mcpAuthDirectory.path) else { return [] }
+        guard isDirectory(mcpAuthDirectory) else { return [] }
 
         let knownURLs = MCPAuthScanner.configuredServerURLs(homeDirectory: homeDirectory)
         return MCPAuthScanner.scan(root: mcpAuthDirectory, knownServerURLs: knownURLs).flatMap { entry in
@@ -135,6 +135,12 @@ nonisolated struct AgentDoctorScanner {
             }
             return diagnostics
         }
+    }
+
+    /// Returns true only when the path exists and is a directory.
+    private func isDirectory(_ url: URL) -> Bool {
+        var isDirectory: ObjCBool = false
+        return fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) && isDirectory.boolValue
     }
 
     /// Checks credential-bearing MCP Auth files for owner-only permissions.
