@@ -28,7 +28,7 @@ jobs:
             exit 0
           fi
           # The PR must link its GitHub issue with a closing keyword (Closes #N).
-          if ! echo "$BODY" | grep -qiE '(close[sd]?|fix(e[sd])?|resolve[sd]?)[[:space:]]+#[0-9]+'; then
+          if ! printf '%s\n' "$BODY" | grep -qiE '(^|[^[:alnum:]_])(close[sd]?|fix(e[sd])?|resolve[sd]?)[[:space:]]+#[0-9]+([^[:alnum:]_]|$)'; then
             echo "::error::PR body must link its issue with a closing keyword, e.g. 'Closes #12'."
             exit 1
           fi
