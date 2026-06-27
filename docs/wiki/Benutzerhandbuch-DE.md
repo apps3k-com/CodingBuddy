@@ -60,6 +60,18 @@ Der Sidebar-Bereich **Zugangsdaten → MCP Auth** verwaltet den OAuth-Cache, den
 
 ## AI-Tools
 
+### Agent Doctor
+
+Der Seitenleisten-Eintrag **Agent Doctor** (Alpha) ist ein Nur-Lese-Gesundheitscheck für die lokale Agent-Einrichtung. Er markiert:
+
+- Fehlende Tool-Verzeichnisse.
+- Ungültige JSON-Konfigurationsdateien.
+- Codex-MCP-Umgebungsvariablen, die in der Konfiguration referenziert werden, aber in `~/.codex/mcp.env` fehlen.
+- Credential-Dateien mit zu offenen Dateirechten.
+- Abgelaufene oder unvollständige Einträge in `~/.mcp-auth`.
+
+v1-Grenzen: Agent Doctor prüft keine Netzwerk-Erreichbarkeit, startet keine Agent-Prozesse neu, nimmt keine Auto-Fixes vor und zeigt keine Geheimwerte an.
+
 ### Codex
 
 Der Seitenleisten-Eintrag **Codex** (Alpha) verwaltet die Umgebungsdatei von OpenAI Codex:

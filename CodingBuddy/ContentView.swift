@@ -9,6 +9,7 @@ enum SidebarScope: Hashable {
     case all
     case file(ShellConfigFile)
     case mcpAuth
+    case agentDoctor
     case aiTool(AITool)
 
     var file: ShellConfigFile? {
@@ -21,6 +22,7 @@ enum SidebarScope: Hashable {
         case .all: String(localized: "All Variables")
         case .file(let file): file.rawValue
         case .mcpAuth: "MCP Auth"
+        case .agentDoctor: String(localized: "Agent Doctor")
         case .aiTool(let tool): tool.displayName
         }
     }
@@ -34,6 +36,7 @@ struct ContentView: View {
     @State private var claudeCodeStore = ClaudeCodeStore()
     @State private var cursorStore = CursorStore()
     @State private var craftStore = CraftAgentStore()
+    @State private var agentDoctorStore: AgentDoctorStore? = FeatureFlag.agentDoctor.isEnabled ? AgentDoctorStore() : nil
     @State private var secrets = SecretsGuard()
     @State private var scope: SidebarScope? = .all
     @State private var showSettings = false
@@ -77,12 +80,28 @@ struct ContentView: View {
                         .tag(SidebarScope.mcpAuth)
                     }
                 }
+                if let agentDoctorStore {
+                    Section("Health") {
+                        Label("Agent Doctor", systemImage: "stethoscope")
+                            .badge(agentDoctorStore.problemCount)
+                            .tag(SidebarScope.agentDoctor)
+                    }
+                    .onAppear {
+                        agentDoctorStore.reload()
+                    }
+                }
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 210)
         } detail: {
             switch scope {
             case .mcpAuth:
                 MCPAuthListView(store: mcpAuthStore, secrets: secrets)
+            case .agentDoctor:
+                if let agentDoctorStore {
+                    AgentDoctorView(store: agentDoctorStore)
+                } else {
+                    VariableListView(store: store, secrets: secrets, scope: .all)
+                }
             case .aiTool(.codex):
                 CodexView(store: codexStore, secrets: secrets)
             case .aiTool(.claudeCode):

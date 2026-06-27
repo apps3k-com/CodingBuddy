@@ -31,6 +31,26 @@
         }
       }
     },
+    "%@ has not created its configuration directory yet." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ hat das Konfigurationsverzeichnis noch nicht angelegt."
+          }
+        }
+      }
+    },
+    "%@ references %@, but CodingBuddy cannot find it in the tool environment file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ referenziert %2$@, aber CodingBuddy findet sie nicht in der Tool-Umgebungsdatei."
+          }
+        }
+      }
+    },
     "1 minute" : {
       "localizations" : {
         "de" : {
@@ -109,6 +129,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktiv"
+          }
+        }
+      }
+    },
+    "Agent Doctor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent Doctor"
+          }
+        }
+      }
+    },
+    "Agent Doctor did not find anything that needs attention." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent Doctor hat nichts gefunden, das Aufmerksamkeit benötigt."
           }
         }
       }
@@ -313,6 +353,56 @@
         }
       }
     },
+    "Credential file permissions are too broad" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dateirechte der Zugangsdaten sind zu offen"
+          }
+        }
+      }
+    },
+    "CodingBuddy could not parse this configuration file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte diese Konfigurationsdatei nicht lesen."
+          }
+        }
+      }
+    },
+    "Configuration directory missing" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konfigurationsverzeichnis fehlt"
+          }
+        }
+      }
+    },
+    "Configuration file is not valid JSON" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konfigurationsdatei ist kein gültiges JSON"
+          }
+        }
+      }
+    },
+    "Current mode is %@; expected %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktueller Modus ist %@; erwartet wird %@."
+          }
+        }
+      }
+    },
     "Dark" : {
       "localizations" : {
         "de" : {
@@ -483,12 +573,32 @@
         }
       }
     },
+    "Finding" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Befund"
+          }
+        }
+      }
+    },
     "General" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Allgemein"
+          }
+        }
+      }
+    },
+    "Health" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemzustand"
           }
         }
       }
@@ -559,6 +669,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unvollständig (keine Tokens)"
+          }
+        }
+      }
+    },
+    "Info" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Info"
           }
         }
       }
@@ -713,6 +833,16 @@
         }
       }
     },
+    "Next Action" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nächste Aktion"
+          }
+        }
+      }
+    },
     "No Claude Code configuration" : {
       "localizations" : {
         "de" : {
@@ -759,6 +889,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keine Cursor-Konfiguration"
+          }
+        }
+      }
+    },
+    "No diagnostics" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Diagnosemeldungen"
           }
         }
       }
@@ -823,12 +963,72 @@
         }
       }
     },
+    "Open the file and fix the JSON syntax." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne die Datei und korrigiere die JSON-Syntax."
+          }
+        }
+      }
+    },
+    "OAuth access token appears expired" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OAuth-Access-Token scheint abgelaufen"
+          }
+        }
+      }
+    },
+    "OAuth login cache is incomplete" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OAuth-Anmelde-Cache ist unvollständig"
+          }
+        }
+      }
+    },
     "Referenced by MCP servers but not defined in mcp.env:" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Von MCP-Servern referenziert, aber nicht in mcp.env definiert:"
+          }
+        }
+      }
+    },
+    "Referenced environment variable is missing" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Referenzierte Umgebungsvariable fehlt"
+          }
+        }
+      }
+    },
+    "Refresh" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktualisieren"
+          }
+        }
+      }
+    },
+    "Refresh diagnostics" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagnosen aktualisieren"
           }
         }
       }
@@ -859,6 +1059,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eintrag zurücksetzen…"
+          }
+        }
+      }
+    },
+    "Reset the entry and reconnect the MCP server." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Setze den Eintrag zurück und verbinde den MCP-Server neu."
+          }
+        }
+      }
+    },
+    "Reset the entry in MCP Auth if the server no longer connects." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Setze den Eintrag in MCP Auth zurück, wenn der Server nicht mehr verbindet."
           }
         }
       }
@@ -923,6 +1143,16 @@
         }
       }
     },
+    "Severity" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schweregrad"
+          }
+        }
+      }
+    },
     "Settings…" : {
       "localizations" : {
         "de" : {
@@ -969,6 +1199,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Status"
+          }
+        }
+      }
+    },
+    "Set up the tool first, then refresh Agent Doctor." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Richte das Tool zuerst ein und aktualisiere dann Agent Doctor."
+          }
+        }
+      }
+    },
+    "Define the variable in the matching tool environment file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lege die Variable in der passenden Tool-Umgebungsdatei an."
           }
         }
       }
@@ -1083,6 +1333,36 @@
         }
       }
     },
+    "The cached MCP credential may need a fresh login." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die zwischengespeicherten MCP-Zugangsdaten benötigen möglicherweise eine neue Anmeldung."
+          }
+        }
+      }
+    },
+    "The MCP Auth entry has no tokens file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der MCP-Auth-Eintrag hat keine Token-Datei."
+          }
+        }
+      }
+    },
+    "Restrict the file so only your user can read and write it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beschränke die Datei so, dass nur dein Benutzer sie lesen und schreiben kann."
+          }
+        }
+      }
+    },
     "The server may refresh the session automatically; reset the entry if it is stuck." : {
       "localizations" : {
         "de" : {
@@ -1159,6 +1439,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Token-Werte bleiben maskiert, bis du dich authentifizierst."
+          }
+        }
+      }
+    },
+    "Tool" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tool"
           }
         }
       }
@@ -1249,6 +1539,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Für Kindprozesse sichtbar (export)"
+          }
+        }
+      }
+    },
+    "Warning" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warnung"
           }
         }
       }

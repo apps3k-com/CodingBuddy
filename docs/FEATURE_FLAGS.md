@@ -94,3 +94,13 @@ Manages the `~/.mcp-auth` credential cache of `mcp-remote`-connected MCP
 servers: lists entries with server resolution (md5 of configured URLs) and
 token status, resets single servers or everything to the Trash, and edits the
 raw credential JSON after Touch ID / password authentication.
+
+### `agentDoctor` — maturity: alpha
+
+Read-only diagnostics for local agent setup. It checks missing tool
+directories, invalid JSON configuration files, Codex MCP environment variables
+referenced by config but missing from `~/.codex/mcp.env`, credential files with
+unsafe permissions, and expired or incomplete MCP Auth entries.
+
+v1 only reports findings: no network reachability checks, process restarts,
+auto-fixes, or secret value display.
