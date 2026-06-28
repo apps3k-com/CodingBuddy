@@ -115,6 +115,18 @@ Der Seitenleisten-Eintrag **MCP Inventory** (Alpha) ist eine Nur-Lese-Tabelle de
 
 v1-Grenzen: MCP Inventory bearbeitet, installiert und prüft keine Server im Netzwerk. Claude-Code- und Cursor-Zeilen zeigen nur konfigurierte `env`- und Header-Keys; sie leiten keine fehlenden Variablen aus Command-Text ab.
 
+### Agent PR Monitor
+
+Der Seitenleisten-Eintrag **Agent PR Monitor** (Alpha, unter Inventar) ist eine Nur-Lese-Tabelle für offene GitHub-Pull-Requests in einem ausgewählten Repository. Jede Zeile wird als vermutlich Agent, vermutlich Mensch oder unbekannt klassifiziert.
+
+- Füge im Setup-Sheet einen feingranularen GitHub-Nur-Lese-Token hinzu; CodingBuddy speichert ihn im Schlüsselbund, nicht in UserDefaults oder Dateien.
+- Wähle ein Repository im Format `owner/name`; CodingBuddy merkt sich das ausgewählte Repository.
+- Die Tabelle zeigt PR-Titel, Autor-/Quellklassifizierung, verknüpfte Closing-Issues, CI-Status, Review-Status, ungelöste Befunde, beratende Merge-Bereitschaft und letzte Aktualisierung.
+- Mit **Aktualisieren** lädst du manuell neu, mit **PR öffnen** arbeitest du im Browser weiter. Der Monitor kommentiert nie, genehmigt nie, löst keine Threads auf und führt keine Merges aus.
+- Rate-Limits, fehlende Rechte, verweigerte Repositories und Offline-Fehler erscheinen als UI-sichere Zustände; der letzte erfolgreiche Snapshot bleibt möglichst sichtbar.
+
+v1-Grenzen: Agent PR Monitor liest nur GitHub.com, überwacht jeweils ein Repository und aktualisiert keine GitHub Projects. Nach dem Beenden von CodingBuddy läuft er nicht im Hintergrund weiter.
+
 ### Codex
 
 Der Seitenleisten-Eintrag **Codex** (Alpha) verwaltet die Umgebungsdatei von OpenAI Codex:

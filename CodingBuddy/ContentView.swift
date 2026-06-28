@@ -13,6 +13,7 @@ enum SidebarScope: Hashable {
     case agentContextInspector
     case repoReadinessChecklist
     case mcpServerInventory
+    case agentPRMonitor
     case backupBrowser
     case aiTool(AITool)
 
@@ -30,6 +31,7 @@ enum SidebarScope: Hashable {
         case .agentContextInspector: String(localized: "Agent Context")
         case .repoReadinessChecklist: String(localized: "Repo Readiness")
         case .mcpServerInventory: String(localized: "MCP Inventory")
+        case .agentPRMonitor: String(localized: "Agent PR Monitor")
         case .backupBrowser: String(localized: "Backups")
         case .aiTool(let tool): tool.displayName
         }
@@ -51,6 +53,8 @@ struct ContentView: View {
         FeatureFlag.repoReadinessChecklist.isEnabled ? RepoReadinessStore() : nil
     @State private var mcpServerInventoryStore: MCPServerInventoryStore? =
         FeatureFlag.mcpServerInventory.isEnabled ? MCPServerInventoryStore() : nil
+    @State private var agentPRMonitorStore: AgentPRMonitorStore? =
+        FeatureFlag.agentPRMonitor.isEnabled ? AgentPRMonitorStore() : nil
     @State private var backupBrowserStore: BackupBrowserStore? =
         FeatureFlag.backupBrowser.isEnabled ? BackupBrowserStore() : nil
     @State private var secrets = SecretsGuard()
@@ -106,7 +110,8 @@ struct ContentView: View {
                         agentDoctorStore.reload()
                     }
                 }
-                if agentContextInspectorStore != nil || repoReadinessStore != nil || mcpServerInventoryStore != nil {
+                if agentContextInspectorStore != nil || repoReadinessStore != nil
+                    || mcpServerInventoryStore != nil || agentPRMonitorStore != nil {
                     Section("Inventory") {
                         if let agentContextInspectorStore {
                             Label("Agent Context", systemImage: "text.book.closed")
@@ -123,11 +128,19 @@ struct ContentView: View {
                                 .badge(mcpServerInventoryStore.count)
                                 .tag(SidebarScope.mcpServerInventory)
                         }
+                        if let agentPRMonitorStore {
+                            Label("Agent PR Monitor", systemImage: "arrow.triangle.pull")
+                                .badge(agentPRMonitorStore.attentionCount)
+                                .tag(SidebarScope.agentPRMonitor)
+                        }
                     }
                     .onAppear {
                         agentContextInspectorStore?.reload()
                         repoReadinessStore?.reload()
                         mcpServerInventoryStore?.reload()
+                        if agentPRMonitorStore?.selectedRepository != nil {
+                            agentPRMonitorStore?.refresh()
+                        }
                     }
                 }
                 if let backupBrowserStore {
@@ -169,6 +182,12 @@ struct ContentView: View {
                     MCPServerInventoryView(store: mcpServerInventoryStore) { tool in
                         scope = .aiTool(tool)
                     }
+                } else {
+                    VariableListView(store: store, secrets: secrets, scope: .all)
+                }
+            case .agentPRMonitor:
+                if let agentPRMonitorStore {
+                    AgentPRMonitorView(store: agentPRMonitorStore)
                 } else {
                     VariableListView(store: store, secrets: secrets, scope: .all)
                 }

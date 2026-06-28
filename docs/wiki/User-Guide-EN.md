@@ -114,6 +114,18 @@ The **MCP Inventory** entry (alpha) is a read-only table of MCP servers discover
 
 v1 limits: MCP Inventory does not edit, install, or network-test servers. Claude Code and Cursor rows show configured `env` and header keys only; they do not infer missing variables from command text.
 
+### Agent PR Monitor
+
+The **Agent PR Monitor** entry (alpha, under Inventory) is a read-only table for open GitHub pull requests in one selected repository. Each row is classified as likely agent, likely human or unknown.
+
+- Add a fine-grained read-only GitHub token in the setup sheet; CodingBuddy stores it in Keychain, not in UserDefaults or files.
+- Choose one repository in `owner/name` format; CodingBuddy remembers the selected repository.
+- The table shows PR title, author/source classification, linked closing issues, CI status, review status, unresolved findings, advisory readiness and last update time.
+- Use **Refresh** to reload manually and **Open PR** to continue in the browser. The monitor never comments, approves, resolves threads or merges PRs.
+- Rate limits, missing permissions, denied repositories and offline errors are shown as UI-safe states while the last successful snapshot stays visible where possible.
+
+v1 limits: Agent PR Monitor reads GitHub.com only, monitors one repository at a time and does not update GitHub Projects or run in the background after CodingBuddy quits.
+
 ### Codex
 
 The **Codex** sidebar entry (alpha) manages OpenAI Codex's environment file:

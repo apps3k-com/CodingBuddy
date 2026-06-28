@@ -143,6 +143,19 @@ v1 does not edit, install, or probe MCP servers and never displays secret
 values from environment blocks, URL credentials, query strings, or token-like
 command arguments.
 
+### `agentPRMonitor` — maturity: alpha
+
+Read-only monitor for open GitHub pull requests in one selected repository. It
+classifies each row as likely agent, likely human, or unknown, uses a
+Keychain-stored fine-grained GitHub token, and shows linked closing issues,
+CI/check status, review decision, unresolved review-thread findings, rate-limit
+state, and advisory merge readiness.
+
+v1 never comments, approves, resolves threads, merges pull requests, mutates
+GitHub Projects, shells out to `gh`/`git`, or stores token values outside
+Keychain. REST fallback is limited to missing status/check data when GraphQL
+does not return a status rollup.
+
 ### `backupBrowser` — maturity: alpha
 
 Safety section for browsing CodingBuddy's managed backup directory. It lists
