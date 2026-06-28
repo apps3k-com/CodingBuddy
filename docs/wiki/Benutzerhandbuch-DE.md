@@ -63,7 +63,7 @@ Der Sidebar-Bereich **Zugangsdaten → MCP Auth** verwaltet den OAuth-Cache, den
 
 - Jeder Eintrag ist ein Server. CodingBuddy löst die kryptischen Datei-Hashes über deine Claude-Konfiguration (`~/.claude.json`, Claude-Desktop-Config) zu Server-URLs auf; nicht auflösbare Einträge zeigen den Hash plus den OAuth-Scope als Hinweis.
 - Die **Status-Spalte** zeigt, ob der Access-Token noch aktiv ist (mit geschätztem Ablauf), abgelaufen ist oder der Eintrag unvollständig ist (ein nie abgeschlossener Login).
-- **Eintrag zurücksetzen…** legt nur die Dateien dieses Servers nach einer Bestätigung in den **Papierkorb**, die Server und Folge klar nennt — chirurgisch, reversibel, und die nächste Verbindung startet einfach den OAuth-Flow neu. **Alles zurücksetzen…** nutzt eine eigene Bestätigung für alle Zugangsdaten (das GUI-Pendant zu `rm -rf ~/.mcp-auth`, aber rückgängig machbar).
+- **Eintrag zurücksetzen…** legt nur die Dateien dieses Servers nach einer Bestätigung in den **Papierkorb**, die den Server und die Folge klar benennt — chirurgisch, reversibel, und die nächste Verbindung startet einfach den OAuth-Flow neu. **Alles zurücksetzen…** nutzt eine eigene Bestätigung für alle Zugangsdaten (das GUI-Pendant zu `rm -rf ~/.mcp-auth`, aber rückgängig machbar).
 - **Dateien ansehen…** (oder Doppelklick) öffnet die Credential-Dateien mit maskierten Token-Werten. Nach Authentifizierung mit Touch ID oder Passwort kannst du das rohe JSON bearbeiten; ungültiges JSON wird beim Speichern abgelehnt.
 - Kein App-Neustart nötig: Die Ansicht lädt live nach, wenn `mcp-remote` die Dateien neu schreibt.
 
