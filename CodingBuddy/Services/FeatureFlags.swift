@@ -53,6 +53,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
     case mcpAuthManager
     case agentDoctor
     case agentContextInspector
+    case repoReadinessChecklist
     case mcpServerInventory
     case backupBrowser
 
@@ -72,6 +73,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
         case .mcpAuthManager: .stable
         case .agentDoctor: .alpha
         case .agentContextInspector: .alpha
+        case .repoReadinessChecklist: .alpha
         case .mcpServerInventory: .alpha
         case .backupBrowser: .alpha
         }

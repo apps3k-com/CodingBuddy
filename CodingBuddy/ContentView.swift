@@ -11,6 +11,7 @@ enum SidebarScope: Hashable {
     case mcpAuth
     case agentDoctor
     case agentContextInspector
+    case repoReadinessChecklist
     case mcpServerInventory
     case backupBrowser
     case aiTool(AITool)
@@ -27,6 +28,7 @@ enum SidebarScope: Hashable {
         case .mcpAuth: "MCP Auth"
         case .agentDoctor: String(localized: "Agent Doctor")
         case .agentContextInspector: String(localized: "Agent Context")
+        case .repoReadinessChecklist: String(localized: "Repo Readiness")
         case .mcpServerInventory: String(localized: "MCP Inventory")
         case .backupBrowser: String(localized: "Backups")
         case .aiTool(let tool): tool.displayName
@@ -45,6 +47,8 @@ struct ContentView: View {
     @State private var agentDoctorStore: AgentDoctorStore? = FeatureFlag.agentDoctor.isEnabled ? AgentDoctorStore() : nil
     @State private var agentContextInspectorStore: AgentContextInspectorStore? =
         FeatureFlag.agentContextInspector.isEnabled ? AgentContextInspectorStore() : nil
+    @State private var repoReadinessStore: RepoReadinessStore? =
+        FeatureFlag.repoReadinessChecklist.isEnabled ? RepoReadinessStore() : nil
     @State private var mcpServerInventoryStore: MCPServerInventoryStore? =
         FeatureFlag.mcpServerInventory.isEnabled ? MCPServerInventoryStore() : nil
     @State private var backupBrowserStore: BackupBrowserStore? =
@@ -102,12 +106,17 @@ struct ContentView: View {
                         agentDoctorStore.reload()
                     }
                 }
-                if agentContextInspectorStore != nil || mcpServerInventoryStore != nil {
+                if agentContextInspectorStore != nil || repoReadinessStore != nil || mcpServerInventoryStore != nil {
                     Section("Inventory") {
                         if let agentContextInspectorStore {
                             Label("Agent Context", systemImage: "text.book.closed")
                                 .badge(agentContextInspectorStore.problemCount)
                                 .tag(SidebarScope.agentContextInspector)
+                        }
+                        if let repoReadinessStore {
+                            Label("Repo Readiness", systemImage: "checklist")
+                                .badge(repoReadinessStore.problemCount)
+                                .tag(SidebarScope.repoReadinessChecklist)
                         }
                         if let mcpServerInventoryStore {
                             Label("MCP Inventory", systemImage: "server.rack")
@@ -117,6 +126,7 @@ struct ContentView: View {
                     }
                     .onAppear {
                         agentContextInspectorStore?.reload()
+                        repoReadinessStore?.reload()
                         mcpServerInventoryStore?.reload()
                     }
                 }
@@ -145,6 +155,12 @@ struct ContentView: View {
             case .agentContextInspector:
                 if let agentContextInspectorStore {
                     AgentContextInspectorView(store: agentContextInspectorStore)
+                } else {
+                    VariableListView(store: store, secrets: secrets, scope: .all)
+                }
+            case .repoReadinessChecklist:
+                if let repoReadinessStore {
+                    RepoReadinessView(store: repoReadinessStore)
                 } else {
                     VariableListView(store: store, secrets: secrets, scope: .all)
                 }

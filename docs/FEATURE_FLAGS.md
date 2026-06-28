@@ -119,6 +119,18 @@ v1 does not edit files, recurse through the repository, or interpret policy
 text semantically. It is a context inventory, not a natural-language rules
 reviewer.
 
+### `repoReadinessChecklist` — maturity: alpha
+
+Read-only checklist for a selected repository folder before agentic coding
+work starts. It runs deterministic local checks for agent governance, README
+coverage, documented build/test commands, contribution workflow docs, GitHub
+issue/PR templates, Swift feature-flag docs where relevant, setup scripts and
+hooks, CI workflows, and lightweight `.git` in-progress markers.
+
+v1 is advisory only: it never writes repository files, calls GitHub, shells out
+to `git`, or validates whether commands actually pass. Warnings are prompts to
+improve handoff quality, not merge blockers by themselves.
+
 ### `mcpServerInventory` — maturity: alpha
 
 Read-only inventory of MCP server definitions across Codex, Claude Code, and

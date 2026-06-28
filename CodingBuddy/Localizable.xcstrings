@@ -2692,6 +2692,816 @@
           }
         }
       }
+    },
+    "A Git index lock file is present." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Git-Index-Lock-Datei ist vorhanden."
+          }
+        }
+      }
+    },
+    "A Git merge, rebase, cherry-pick, or revert marker is present." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Git-Merge-, Rebase-, Cherry-Pick- oder Revert-Marker ist vorhanden."
+          }
+        }
+      }
+    },
+    "A GitHub Actions workflow appears to run build or test checks." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein GitHub-Actions-Workflow scheint Build- oder Testprüfungen auszuführen."
+          }
+        }
+      }
+    },
+    "A README exists but is empty." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine README ist vorhanden, aber leer."
+          }
+        }
+      }
+    },
+    "A governance file exists but has no readable guidance." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Governance-Datei ist vorhanden, enthält aber keine lesbaren Anweisungen."
+          }
+        }
+      }
+    },
+    "A non-empty README is present." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine nicht leere README ist vorhanden."
+          }
+        }
+      }
+    },
+    "A setup script and hook activation signal are present." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Setup-Skript und ein Hook-Aktivierungssignal sind vorhanden."
+          }
+        }
+      }
+    },
+    "A setup script exists but no hook activation signal was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Setup-Skript ist vorhanden, aber kein Hook-Aktivierungssignal wurde gefunden."
+          }
+        }
+      }
+    },
+    "AGENTS.md is present at the repository root." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AGENTS.md ist im Repository-Root vorhanden."
+          }
+        }
+      }
+    },
+    "Add AGENTS.md or mirror the shared agent instructions there." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lege AGENTS.md an oder spiegele dort die gemeinsamen Agent-Anweisungen."
+          }
+        }
+      }
+    },
+    "Add CI that runs the repository build and test checks." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge CI hinzu, die die Build- und Testprüfungen des Repositories ausführt."
+          }
+        }
+      }
+    },
+    "Add GitHub issue and pull request templates for repeatable agent handoffs." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge GitHub-Issue- und Pull-Request-Templates für wiederholbare Agent-Handoffs hinzu."
+          }
+        }
+      }
+    },
+    "Add a CI workflow that runs the documented build and test commands." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge einen CI-Workflow hinzu, der die dokumentierten Build- und Testbefehle ausführt."
+          }
+        }
+      }
+    },
+    "Add a README that orients agents and humans before they change code." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge eine README hinzu, die Agents und Menschen vor Codeänderungen Orientierung gibt."
+          }
+        }
+      }
+    },
+    "Add a setup script that prepares local checks and hooks without network-only assumptions." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge ein Setup-Skript hinzu, das lokale Prüfungen und Hooks ohne reine Netzwerkannahmen vorbereitet."
+          }
+        }
+      }
+    },
+    "Add an agent governance file that explains repo-specific coding rules." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge eine Agent-Governance-Datei hinzu, die repo-spezifische Coding-Regeln erklärt."
+          }
+        }
+      }
+    },
+    "Add contributing docs that explain issue, branch, test, and PR expectations." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge Contribution-Dokumentation hinzu, die Issue-, Branch-, Test- und PR-Erwartungen erklärt."
+          }
+        }
+      }
+    },
+    "Add copy-pasteable build and test commands to README or developer docs." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ergänze kopierbare Build- und Testbefehle in README oder Entwicklerdokumentation."
+          }
+        }
+      }
+    },
+    "Add feature flag documentation when repository features become flag-gated." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ergänze Feature-Flag-Dokumentation, sobald Repository-Funktionen per Flag gesteuert werden."
+          }
+        }
+      }
+    },
+    "Add the missing template so issues and PRs carry consistent context." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge das fehlende Template hinzu, damit Issues und PRs konsistenten Kontext enthalten."
+          }
+        }
+      }
+    },
+    "Agent governance file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent-Governance-Datei"
+          }
+        }
+      }
+    },
+    "Build and test commands" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Build- und Testbefehle"
+          }
+        }
+      }
+    },
+    "CI workflow" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI-Workflow"
+          }
+        }
+      }
+    },
+    "CLAUDE.md is present, but AGENTS.md is missing." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CLAUDE.md ist vorhanden, aber AGENTS.md fehlt."
+          }
+        }
+      }
+    },
+    "Check" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfung"
+          }
+        }
+      }
+    },
+    "Choose a repository folder to run readiness checks." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Repository-Ordner aus, um Readiness-Prüfungen auszuführen."
+          }
+        }
+      }
+    },
+    "Contribution docs cover issues, review, and validation workflow." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contribution-Dokumentation deckt Issues, Review und Validierungsworkflow ab."
+          }
+        }
+      }
+    },
+    "Contribution docs exist but do not cover the full issue-to-PR workflow." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contribution-Dokumentation ist vorhanden, deckt aber den vollständigen Issue-bis-PR-Workflow nicht ab."
+          }
+        }
+      }
+    },
+    "Contribution workflow" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contribution-Workflow"
+          }
+        }
+      }
+    },
+    "Document both the build command and the test command agents should run." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentiere sowohl den Build-Befehl als auch den Testbefehl, den Agents ausführen sollen."
+          }
+        }
+      }
+    },
+    "Document feature flags, maturity, and rollout expectations in docs/FEATURE_FLAGS.md." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentiere Feature-Flags, Reifegrad und Rollout-Erwartungen in docs/FEATURE_FLAGS.md."
+          }
+        }
+      }
+    },
+    "Document how to start work, validate it, and submit it for review." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentiere, wie Arbeit gestartet, validiert und zur Prüfung eingereicht wird."
+          }
+        }
+      }
+    },
+    "Document or wire up git hook activation in the setup script." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentiere oder verdrahte die Git-Hook-Aktivierung im Setup-Skript."
+          }
+        }
+      }
+    },
+    "Document the local agent rules, ownership boundaries, and safety requirements." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentiere lokale Agent-Regeln, Verantwortungsgrenzen und Sicherheitsanforderungen."
+          }
+        }
+      }
+    },
+    "Documented build and test commands were found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentierte Build- und Testbefehle wurden gefunden."
+          }
+        }
+      }
+    },
+    "Fail" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Feature flag documentation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feature-Flag-Dokumentation"
+          }
+        }
+      }
+    },
+    "Fill in the README with the project purpose, setup, and primary workflows." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fülle die README mit Projektzweck, Setup und wichtigsten Workflows."
+          }
+        }
+      }
+    },
+    "Finish or abort the in-progress Git operation before starting agent work." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beende oder brich die laufende Git-Operation ab, bevor Agent-Arbeit startet."
+          }
+        }
+      }
+    },
+    "GitHub Actions workflows exist, but no obvious build or test command was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Actions-Workflows sind vorhanden, aber kein offensichtlicher Build- oder Testbefehl wurde gefunden."
+          }
+        }
+      }
+    },
+    "GitHub templates" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Templates"
+          }
+        }
+      }
+    },
+    "Issue and pull request templates are present." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Issue- und Pull-Request-Templates sind vorhanden."
+          }
+        }
+      }
+    },
+    "Keep CI aligned with the local commands documented for contributors." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte CI mit den lokal dokumentierten Befehlen für Mitwirkende synchron."
+          }
+        }
+      }
+    },
+    "Keep agent rules current as repository workflow decisions change." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte Agent-Regeln aktuell, wenn sich Workflow-Entscheidungen im Repository ändern."
+          }
+        }
+      }
+    },
+    "Keep documented commands runnable from a fresh checkout." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte dokumentierte Befehle aus einem frischen Checkout heraus lauffähig."
+          }
+        }
+      }
+    },
+    "Keep setup idempotent so agents and contributors can rerun it safely." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte das Setup idempotent, damit Agents und Mitwirkende es sicher erneut ausführen können."
+          }
+        }
+      }
+    },
+    "Keep templates focused on the information reviewers and agents need." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte Templates auf die Informationen fokussiert, die Reviewer und Agents benötigen."
+          }
+        }
+      }
+    },
+    "Keep the README aligned with the current project purpose and setup path." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte die README mit aktuellem Projektzweck und Setup-Pfad synchron."
+          }
+        }
+      }
+    },
+    "Keep the flag registry synchronized with feature flag code." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte das Flag-Register mit dem Feature-Flag-Code synchron."
+          }
+        }
+      }
+    },
+    "Keep workflow docs aligned with the current branching and review process." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte Workflow-Dokumentation mit dem aktuellen Branching- und Review-Prozess synchron."
+          }
+        }
+      }
+    },
+    "No .git entry was found in the selected folder." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im ausgewählten Ordner wurde kein .git-Eintrag gefunden."
+          }
+        }
+      }
+    },
+    "No AGENTS.md or CLAUDE.md file was found at the repository root." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Repository-Root wurde keine AGENTS.md- oder CLAUDE.md-Datei gefunden."
+          }
+        }
+      }
+    },
+    "No GitHub Actions workflow was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde kein GitHub-Actions-Workflow gefunden."
+          }
+        }
+      }
+    },
+    "No GitHub issue or pull request template was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde kein GitHub-Issue- oder Pull-Request-Template gefunden."
+          }
+        }
+      }
+    },
+    "No README file was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde keine README-Datei gefunden."
+          }
+        }
+      }
+    },
+    "No Swift app feature flag convention was detected." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde keine Swift-App-Feature-Flag-Konvention erkannt."
+          }
+        }
+      }
+    },
+    "No contribution workflow document was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde keine Contribution-Workflow-Dokumentation gefunden."
+          }
+        }
+      }
+    },
+    "No documented local build or test command was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde kein dokumentierter lokaler Build- oder Testbefehl gefunden."
+          }
+        }
+      }
+    },
+    "No lightweight .git lock or in-progress operation marker was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde kein leichter .git-Lock- oder Marker für laufende Operationen gefunden."
+          }
+        }
+      }
+    },
+    "No one-time setup script was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde kein einmaliges Setup-Skript gefunden."
+          }
+        }
+      }
+    },
+    "Only one of issue or pull request templates was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur eines von Issue- oder Pull-Request-Templates wurde gefunden."
+          }
+        }
+      }
+    },
+    "Only part of the local build/test workflow is documented." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur ein Teil des lokalen Build-/Test-Workflows ist dokumentiert."
+          }
+        }
+      }
+    },
+    "Pass" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bestanden"
+          }
+        }
+      }
+    },
+    "README" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "README"
+          }
+        }
+      }
+    },
+    "Refresh readiness checks" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Readiness-Prüfungen aktualisieren"
+          }
+        }
+      }
+    },
+    "Remediation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behebung"
+          }
+        }
+      }
+    },
+    "Repo Readiness" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repo Readiness"
+          }
+        }
+      }
+    },
+    "Repository state" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Status"
+          }
+        }
+      }
+    },
+    "Resolve the interrupted Git operation before asking agents to modify the repo." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löse die unterbrochene Git-Operation, bevor Agents das Repository ändern."
+          }
+        }
+      }
+    },
+    "Reveal the selected repository in Finder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewähltes Repository im Finder anzeigen"
+          }
+        }
+      }
+    },
+    "Search readiness checks" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Readiness-Prüfungen suchen"
+          }
+        }
+      }
+    },
+    "Select the repository root or initialize Git before relying on repo-state checks." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle den Repository-Root oder initialisiere Git, bevor du Repo-Statusprüfungen nutzt."
+          }
+        }
+      }
+    },
+    "Setup script and hooks" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Setup-Skript und Hooks"
+          }
+        }
+      }
+    },
+    "Swift app feature flag documentation is present." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swift-App-Feature-Flag-Dokumentation ist vorhanden."
+          }
+        }
+      }
+    },
+    "Swift app structure was detected without feature flag documentation." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swift-App-Struktur wurde ohne Feature-Flag-Dokumentation erkannt."
+          }
+        }
+      }
+    },
+    "Try a different check, status, source, or remediation." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche eine andere Prüfung, einen anderen Status, eine andere Quelle oder Behebung."
+          }
+        }
+      }
+    },
+    "Warn" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warnung"
+          }
+        }
+      }
+    },
+    "Add build or test execution to CI, or document why another workflow provides validation." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge Build- oder Testausführung zur CI hinzu oder dokumentiere, warum ein anderer Workflow die Validierung übernimmt."
+          }
+        }
+      }
+    },
+    "Keep the .git file in standard gitdir format or select the primary worktree root." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte die .git-Datei im Standard-gitdir-Format oder wähle den primären Worktree-Root aus."
+          }
+        }
+      }
+    },
+    "Refresh this check after branch changes or interrupted Git operations." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktualisiere diese Prüfung nach Branch-Wechseln oder unterbrochenen Git-Operationen."
+          }
+        }
+      }
+    },
+    "The .git file could not be resolved to a local Git directory." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die .git-Datei konnte nicht zu einem lokalen Git-Verzeichnis aufgelöst werden."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
