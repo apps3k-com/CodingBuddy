@@ -79,28 +79,33 @@ struct MCPAuthListView: View {
             MCPAuthFileEditorView(store: store, secrets: secrets, entry: entry)
         }
         .confirmationDialog(
-            "Move the credentials for “\(pendingReset?.displayName ?? "")” to the Trash?",
+            "Move credentials for “\(pendingReset?.displayName ?? "")” to the Trash?",
             isPresented: Binding(
                 get: { pendingReset != nil },
                 set: { if !$0 { pendingReset = nil } }
             ),
             titleVisibility: .visible
         ) {
-            Button("Move to Trash", role: .destructive) {
+            Button("Move Server Credentials to Trash", role: .destructive) {
                 if let entry = pendingReset { store.reset(entry) }
                 pendingReset = nil
             }
+            Button("Cancel", role: .cancel) {}
         } message: {
             Text("The next connection will trigger a fresh OAuth login.")
         }
         .confirmationDialog(
-            "Move all MCP credentials to the Trash? Every connected server will ask you to log in again.",
+            "Move all MCP credentials to the Trash?",
             isPresented: $confirmResetAll,
             titleVisibility: .visible
         ) {
-            Button("Move to Trash", role: .destructive) {
+            Button("Move All MCP Credentials to Trash", role: .destructive) {
                 store.resetAll()
+                confirmResetAll = false
             }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Every connected server will ask you to log in again.")
         }
         .alert(
             "Error",

@@ -62,7 +62,7 @@ The **Credentials → MCP Auth** sidebar section manages the OAuth cache that `m
 
 - Each entry is one server. CodingBuddy resolves the cryptic file hashes back to server URLs by matching them against your Claude configuration (`~/.claude.json`, Claude Desktop config); unresolved entries show their hash plus the OAuth scope as a hint.
 - The **status column** shows whether the access token is still active (with its estimated expiry), expired, or the entry is incomplete (a login that never finished).
-- **Reset Entry…** moves just that server's files to the **Trash** — surgical, reversible, and the next connection simply re-runs the OAuth flow. **Reset All…** does the same for everything (the GUI equivalent of `rm -rf ~/.mcp-auth`, but undoable).
+- **Reset Entry…** moves just that server's files to the **Trash** after a confirmation that names the server and the consequence — surgical, reversible, and the next connection simply re-runs the OAuth flow. **Reset All…** uses a separate all-credentials confirmation for everything (the GUI equivalent of `rm -rf ~/.mcp-auth`, but undoable).
 - **View Files…** (or double-click) opens the credential files with all token values masked. After authenticating with Touch ID or your password you can edit the raw JSON; invalid JSON is rejected on save.
 - No app restart is needed: the view live-reloads when `mcp-remote` rewrites the files.
 
@@ -150,8 +150,8 @@ The **Cursor** entry (alpha) manages `~/.cursor/mcp.json`: the per-server `env` 
 The **Craft Agents** entry (alpha) shows what the Craft Agents app stores in `~/.craft-agent/` — strictly read-only:
 
 - **LLM connections** from `config.json`.
-- **Token files** under `secrets/` with their expiry status; each can be reset individually (moved to the Trash — the next connection triggers a fresh login).
-- **The encrypted credential store** (`credentials.enc`): CodingBuddy shows size and age but never opens it; a reset moves it to the Trash, after which every Craft connector asks to log in again.
+- **Token files** under `secrets/` with their expiry status; each can be reset individually after a confirmation that names the file and explains that the next connection triggers a fresh login.
+- **The encrypted credential store** (`credentials.enc`): CodingBuddy shows size and age but never opens it; its reset confirmation is separate from token-file resets and explains that every Craft connector asks to log in again.
 
 ## Settings
 
