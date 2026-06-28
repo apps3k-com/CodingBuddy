@@ -35,7 +35,7 @@ struct CursorView: View {
             }
         }
         .navigationTitle(Text(verbatim: "Cursor"))
-        .navigationSubtitle(Text("\(store.envEntries.count) variables"))
+        .navigationSubtitle(Text(LocalizedCountText.variables(store.envEntries.count)))
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("New Variable", systemImage: "plus") {

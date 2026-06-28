@@ -51,6 +51,16 @@
         }
       }
     },
+    "1 file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Datei"
+          }
+        }
+      }
+    },
     "1 minute" : {
       "localizations" : {
         "de" : {
@@ -77,6 +87,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "5 Minuten"
+          }
+        }
+      }
+    },
+    "1 server" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Server"
+          }
+        }
+      }
+    },
+    "1 variable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Variable"
           }
         }
       }
@@ -943,12 +973,22 @@
         }
       }
     },
-    "Import %lld" : {
+    "Import %lld Variables" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld importieren"
+            "value" : "%lld Variablen importieren"
+          }
+        }
+      }
+    },
+    "Import 1 Variable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Variable importieren"
           }
         }
       }
