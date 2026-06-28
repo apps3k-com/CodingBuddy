@@ -31,6 +31,15 @@ CodingBuddy ist eine native macOS-App zur Verwaltung der Environment Variables i
 Vor jeder Änderung schreibt CodingBuddy ein Backup mit Zeitstempel nach
 `~/Library/Application Support/CodingBuddy/Backups/` (die letzten 20 pro Datei bleiben erhalten). Geschrieben wird atomar, symlink-sicher (Dotfile-Manager bleiben intakt) und unter Erhalt der Dateirechte. Wurde die Datei währenddessen extern geändert, wird der Schreibvorgang verweigert und die Ansicht neu geladen.
 
+Der Eintrag **Sicherheit → Backups** (Alpha) listet diese Backups für
+zsh-Dotfiles und unterstützte Agent-Konfigurations-/Env-Dateien
+(`~/.codex/mcp.env`, Claude-Code-Settings, Cursor `mcp.json`). Wähle ein
+Backup aus, um eine redigierte **Backup**-Vorschau mit dem aktuellen Ziel zu
+vergleichen. **Wiederherstellen …** schreibt das ausgewählte Backup über
+denselben sicheren Writer zurück; dadurch wird die aktuelle Datei vor dem
+Ersetzen erneut gesichert. Backups, die keinem bekannten von CodingBuddy
+verwalteten Ziel zugeordnet werden können, bleiben reine Vorschau.
+
 ## Import & Export
 
 - **Aus .env importieren…** (Ablage-Menü oder Toolbar, ⇧⌘I) liest eine dotenv-Datei, zeigt eine Vorschau zur Auswahl der Einträge (Duplikate werden markiert) und hängt sie an den verwalteten Block einer Datei deiner Wahl an.
@@ -141,4 +150,4 @@ CodingBuddy beobachtet deine Dotfiles. Änderungen aus Terminal oder Editor ersc
 | Eine Variable erscheint nicht | Gelesen werden nur `~/.zshenv`, `~/.zprofile`, `~/.zshrc` — nicht `.bashrc` oder anderswo gesourcte Dateien. |
 | Eine Zeile hat ein Schloss-Symbol | Die Zeile ist zu komplex, um sie sicher umzuschreiben. Bearbeite sie im Texteditor. |
 | „Die Datei wurde extern geändert" | Etwas anderes hat die Dotfile während der Bearbeitung verändert. Die App hat neu geladen — einfach erneut speichern. |
-| Alten Stand wiederherstellen | Backup aus `~/Library/Application Support/CodingBuddy/Backups/` über die Dotfile kopieren. |
+| Alten Stand wiederherstellen | Nutze **Sicherheit → Backups**, wähle ein unterstütztes Backup, prüfe die Vorschau und klicke **Wiederherstellen …**. Unbekannte Backup-Namen lassen sich weiterhin ansehen, bleiben aber reine Vorschau. |

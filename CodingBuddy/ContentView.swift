@@ -12,6 +12,7 @@ enum SidebarScope: Hashable {
     case agentDoctor
     case agentContextInspector
     case mcpServerInventory
+    case backupBrowser
     case aiTool(AITool)
 
     var file: ShellConfigFile? {
@@ -27,6 +28,7 @@ enum SidebarScope: Hashable {
         case .agentDoctor: String(localized: "Agent Doctor")
         case .agentContextInspector: String(localized: "Agent Context")
         case .mcpServerInventory: String(localized: "MCP Inventory")
+        case .backupBrowser: String(localized: "Backups")
         case .aiTool(let tool): tool.displayName
         }
     }
@@ -45,6 +47,8 @@ struct ContentView: View {
         FeatureFlag.agentContextInspector.isEnabled ? AgentContextInspectorStore() : nil
     @State private var mcpServerInventoryStore: MCPServerInventoryStore? =
         FeatureFlag.mcpServerInventory.isEnabled ? MCPServerInventoryStore() : nil
+    @State private var backupBrowserStore: BackupBrowserStore? =
+        FeatureFlag.backupBrowser.isEnabled ? BackupBrowserStore() : nil
     @State private var secrets = SecretsGuard()
     @State private var scope: SidebarScope? = .all
     @State private var showSettings = false
@@ -116,6 +120,16 @@ struct ContentView: View {
                         mcpServerInventoryStore?.reload()
                     }
                 }
+                if let backupBrowserStore {
+                    Section("Safety") {
+                        Label("Backups", systemImage: "clock.arrow.circlepath")
+                            .badge(backupBrowserStore.count)
+                            .tag(SidebarScope.backupBrowser)
+                    }
+                    .onAppear {
+                        backupBrowserStore.reload()
+                    }
+                }
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 210)
         } detail: {
@@ -139,6 +153,12 @@ struct ContentView: View {
                     MCPServerInventoryView(store: mcpServerInventoryStore) { tool in
                         scope = .aiTool(tool)
                     }
+                } else {
+                    VariableListView(store: store, secrets: secrets, scope: .all)
+                }
+            case .backupBrowser:
+                if let backupBrowserStore {
+                    BackupBrowserView(store: backupBrowserStore)
                 } else {
                     VariableListView(store: store, secrets: secrets, scope: .all)
                 }

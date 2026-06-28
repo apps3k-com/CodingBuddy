@@ -130,3 +130,15 @@ source file, and Codex variables that are referenced but missing from
 v1 does not edit, install, or probe MCP servers and never displays secret
 values from environment blocks, URL credentials, query strings, or token-like
 command arguments.
+
+### `backupBrowser` — maturity: alpha
+
+Safety section for browsing CodingBuddy's managed backup directory. It lists
+timestamped backups for zsh startup files, Codex `mcp.env`, Claude Code
+settings files, and Cursor `mcp.json`; shows a redacted Current/Backup preview;
+and restores supported targets through the same safe writer that creates a new
+backup of the current file before replacing it.
+
+v1 only restores backups whose filename can be mapped to a known
+CodingBuddy-managed target. Unknown backup names remain preview-only because
+the historical backup filename format does not store the full original path.
