@@ -1093,17 +1093,37 @@
         }
       }
     },
-    "Move all MCP credentials to the Trash? Every connected server will ask you to log in again." : {
+    "Move all MCP credentials to the Trash?" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alle MCP-Zugangsdaten in den Papierkorb legen? Jeder verbundene Server fragt danach neu nach dem Login."
+            "value" : "Alle MCP-Zugangsdaten in den Papierkorb legen?"
           }
         }
       }
     },
-    "Move the credentials for “%@” to the Trash?" : {
+    "Move All MCP Credentials to Trash" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle MCP-Zugangsdaten in den Papierkorb legen"
+          }
+        }
+      }
+    },
+    "Move Credential Store to Trash" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credential-Speicher in den Papierkorb legen"
+          }
+        }
+      }
+    },
+    "Move credentials for “%@” to the Trash?" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1113,22 +1133,32 @@
         }
       }
     },
-    "Move the encrypted credential store to the Trash? Every Craft connector will ask you to log in again." : {
+    "Move Secret File to Trash" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verschlüsselten Credential-Speicher in den Papierkorb legen? Jeder Craft-Connector verlangt danach eine neue Anmeldung."
+            "value" : "Secret-Datei in den Papierkorb legen"
           }
         }
       }
     },
-    "Move to Trash" : {
+    "Move Server Credentials to Trash" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In den Papierkorb legen"
+            "value" : "Server-Zugangsdaten in den Papierkorb legen"
+          }
+        }
+      }
+    },
+    "Move the encrypted credential store to the Trash?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verschlüsselten Credential-Speicher in den Papierkorb legen?"
           }
         }
       }
@@ -1879,6 +1909,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Die nächste Verbindung startet einen neuen OAuth-Login."
+          }
+        }
+      }
+    },
+    "Every connected server will ask you to log in again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeder verbundene Server verlangt danach eine neue Anmeldung."
+          }
+        }
+      }
+    },
+    "Every Craft connector will ask you to log in again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeder Craft-Connector verlangt danach eine neue Anmeldung."
           }
         }
       }

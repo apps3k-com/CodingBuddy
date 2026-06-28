@@ -35,21 +35,26 @@ struct CraftAgentView: View {
             ),
             titleVisibility: .visible
         ) {
-            Button("Move to Trash", role: .destructive) {
+            Button("Move Secret File to Trash", role: .destructive) {
                 if let secret = pendingSecretReset { store.reset(secret) }
                 pendingSecretReset = nil
             }
+            Button("Cancel", role: .cancel) {}
         } message: {
             Text("The next connection will trigger a fresh OAuth login.")
         }
         .confirmationDialog(
-            "Move the encrypted credential store to the Trash? Every Craft connector will ask you to log in again.",
+            "Move the encrypted credential store to the Trash?",
             isPresented: $confirmEncryptedReset,
             titleVisibility: .visible
         ) {
-            Button("Move to Trash", role: .destructive) {
+            Button("Move Credential Store to Trash", role: .destructive) {
                 store.resetEncryptedStore()
+                confirmEncryptedReset = false
             }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Every Craft connector will ask you to log in again.")
         }
         .alert(
             "Error",
