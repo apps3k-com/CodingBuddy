@@ -26,13 +26,13 @@ nonisolated enum BackupBrowserSource: Equatable, Hashable, Sendable {
         case .shell(let file):
             file.rawValue
         case .codexMCPEnv:
-            "Codex mcp.env"
+            String(localized: "Codex mcp.env")
         case .claudeSettings:
-            "Claude Code settings.json"
+            String(localized: "Claude Code settings.json")
         case .claudeLocalSettings:
-            "Claude Code settings.local.json"
+            String(localized: "Claude Code settings.local.json")
         case .cursorMCPJSON:
-            "Cursor mcp.json"
+            String(localized: "Cursor mcp.json")
         case .unsupported:
             String(localized: "Unsupported backup")
         }

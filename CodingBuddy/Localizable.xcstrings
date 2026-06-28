@@ -126,7 +126,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wähle ein Backup, um das aktuelle Ziel und die gespeicherten Inhalte vorzusehen."
+            "value" : "Wähle ein Backup, um das aktuelle Ziel und die gespeicherten Inhalte in der Vorschau anzuzeigen."
           }
         }
       }
@@ -303,6 +303,26 @@
         }
       }
     },
+    "Claude Code settings.json" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code settings.json"
+          }
+        }
+      }
+    },
+    "Claude Code settings.local.json" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code settings.local.json"
+          }
+        }
+      }
+    },
     "Codex" : {
       "localizations" : {
         "de" : {
@@ -319,6 +339,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Codex-Konfiguration"
+          }
+        }
+      }
+    },
+    "Codex mcp.env" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex mcp.env"
           }
         }
       }
@@ -639,6 +669,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cursor"
+          }
+        }
+      }
+    },
+    "Cursor mcp.json" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cursor mcp.json"
           }
         }
       }
