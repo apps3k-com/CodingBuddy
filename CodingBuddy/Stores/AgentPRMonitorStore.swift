@@ -110,9 +110,12 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
 
     /// Persists a selected repository and clears stale rows.
     func selectRepository(_ repository: GitHubRepositoryRef) {
+        refreshTask?.cancel()
         selectedRepository = repository
         defaults.setAgentPRMonitorString(repository.displayName, forKey: Self.repositoryKey)
         rows = []
+        rateLimit = nil
+        isRefreshing = false
         state = .idle
     }
 
@@ -128,25 +131,33 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
     }
 
     /// Saves a replacement token through the injected token store.
-    func saveToken(_ token: String) {
+    @discardableResult
+    func saveToken(_ token: String) -> Bool {
         do {
-            try tokenStore.saveToken(token)
+            try tokenStore.saveToken(token.trimmingCharacters(in: .whitespacesAndNewlines))
             if selectedRepository != nil {
                 refresh()
-            } else if case .needsToken = state {
-                state = selectedRepository == nil ? .needsRepository : .idle
+            } else {
+                state = .needsRepository
             }
+            return true
         } catch {
             state = .refreshFailed(.tokenStorageFailed)
+            return false
         }
     }
 
     /// Removes the saved token through the injected token store.
     func deleteToken() {
         do {
+            refreshTask?.cancel()
             try tokenStore.deleteToken()
+            rows = []
+            rateLimit = nil
+            isRefreshing = false
             state = .needsToken
         } catch {
+            isRefreshing = false
             state = .refreshFailed(.tokenStorageFailed)
         }
     }
@@ -165,29 +176,32 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         state = rows.isEmpty ? .loading : state
 
         let client = client
-        refreshTask = Task {
+        refreshTask = Task { [weak self, selectedRepository, client] in
             do {
                 let snapshot = try await client.fetchOpenPullRequests(repository: selectedRepository)
                 guard !Task.isCancelled else { return }
-                rows = snapshot.rows
-                rateLimit = snapshot.rateLimit
-                state = snapshot.rows.isEmpty ? .empty : .loaded
-                isRefreshing = false
+                guard let self else { return }
+                self.rows = snapshot.rows
+                self.rateLimit = snapshot.rateLimit
+                self.state = snapshot.rows.isEmpty ? .empty : .loaded
+                self.isRefreshing = false
             } catch let error as GitHubClientError {
                 guard !Task.isCancelled else { return }
+                guard let self else { return }
                 switch error {
                 case .noToken:
-                    state = .needsToken
+                    self.state = .needsToken
                 case .rateLimited(let resetAt):
-                    state = .rateLimited(resetAt)
+                    self.state = .rateLimited(resetAt)
                 default:
-                    state = .refreshFailed(error)
+                    self.state = .refreshFailed(error)
                 }
-                isRefreshing = false
+                self.isRefreshing = false
             } catch {
                 guard !Task.isCancelled else { return }
-                state = .refreshFailed(.networkUnavailable)
-                isRefreshing = false
+                guard let self else { return }
+                self.state = .refreshFailed(.networkUnavailable)
+                self.isRefreshing = false
             }
         }
     }

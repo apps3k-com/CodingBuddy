@@ -155,6 +155,12 @@ struct AgentPRMonitorView: View {
             } actions: {
                 Button("Add Token...") { showsTokenSheet = true }
             }
+        } else if case .refreshFailed(let error) = store.state, store.rows.isEmpty {
+            ContentUnavailableView(
+                "Refresh failed",
+                systemImage: "exclamationmark.triangle",
+                description: Text(error.localizedDescription)
+            )
         } else if store.selectedRepository == nil {
             ContentUnavailableView {
                 Label("No repository selected", systemImage: "tray.and.arrow.down")
@@ -168,12 +174,6 @@ struct AgentPRMonitorView: View {
                 "GitHub rate limit reached",
                 systemImage: "clock.badge.exclamationmark",
                 description: Text(rateLimitMessage(resetAt: resetAt))
-            )
-        } else if case .refreshFailed(let error) = store.state, store.rows.isEmpty {
-            ContentUnavailableView(
-                "Refresh failed",
-                systemImage: "exclamationmark.triangle",
-                description: Text(error.localizedDescription)
             )
         } else if store.isRefreshing && store.rows.isEmpty {
             ProgressView(String(localized: "Loading pull requests..."))
@@ -240,8 +240,10 @@ private struct GitHubTokenSetupSheet: View {
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
                 Button("Save Token") {
-                    store.saveToken(token)
-                    dismiss()
+                    let trimmedToken = token.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if store.saveToken(trimmedToken) {
+                        dismiss()
+                    }
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)

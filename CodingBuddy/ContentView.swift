@@ -5,23 +5,36 @@
 
 import SwiftUI
 
+/// Navigation destinations shown in the app sidebar.
 enum SidebarScope: Hashable {
+    /// Environment variables across all managed dotfiles.
     case all
+    /// Environment variables from one managed dotfile.
     case file(ShellConfigFile)
+    /// Local MCP authentication entries.
     case mcpAuth
+    /// Agent setup diagnostics.
     case agentDoctor
+    /// Agent governance and context inspection.
     case agentContextInspector
+    /// Repository readiness checklist.
     case repoReadinessChecklist
+    /// Cross-tool MCP server inventory.
     case mcpServerInventory
+    /// GitHub pull request monitor for agent follow-up.
     case agentPRMonitor
+    /// Local backup browser.
     case backupBrowser
+    /// Configuration for one supported AI coding tool.
     case aiTool(AITool)
 
+    /// Dotfile represented by this scope when it is file-backed.
     var file: ShellConfigFile? {
         if case .file(let file) = self { return file }
         return nil
     }
 
+    /// Localized sidebar title for the scope.
     var title: String {
         switch self {
         case .all: String(localized: "All Variables")
@@ -38,29 +51,47 @@ enum SidebarScope: Hashable {
     }
 }
 
+/// Root split-view container for CodingBuddy.
 struct ContentView: View {
+    /// Shared menu command bridge.
     @Environment(MenuActions.self) private var menuActions
+    /// Environment variable store.
     @State private var store = EnvStore()
+    /// MCP authentication store.
     @State private var mcpAuthStore = MCPAuthStore()
+    /// Codex configuration store.
     @State private var codexStore = CodexStore()
+    /// Claude Code configuration store.
     @State private var claudeCodeStore = ClaudeCodeStore()
+    /// Cursor configuration store.
     @State private var cursorStore = CursorStore()
+    /// Craft Agents configuration store.
     @State private var craftStore = CraftAgentStore()
+    /// Agent Doctor store when the feature flag is enabled.
     @State private var agentDoctorStore: AgentDoctorStore? = FeatureFlag.agentDoctor.isEnabled ? AgentDoctorStore() : nil
+    /// Agent Context store when the feature flag is enabled.
     @State private var agentContextInspectorStore: AgentContextInspectorStore? =
         FeatureFlag.agentContextInspector.isEnabled ? AgentContextInspectorStore() : nil
+    /// Repo Readiness store when the feature flag is enabled.
     @State private var repoReadinessStore: RepoReadinessStore? =
         FeatureFlag.repoReadinessChecklist.isEnabled ? RepoReadinessStore() : nil
+    /// MCP Inventory store when the feature flag is enabled.
     @State private var mcpServerInventoryStore: MCPServerInventoryStore? =
         FeatureFlag.mcpServerInventory.isEnabled ? MCPServerInventoryStore() : nil
+    /// Agent PR Monitor store when the feature flag is enabled.
     @State private var agentPRMonitorStore: AgentPRMonitorStore? =
         FeatureFlag.agentPRMonitor.isEnabled ? AgentPRMonitorStore() : nil
+    /// Backup Browser store when the feature flag is enabled.
     @State private var backupBrowserStore: BackupBrowserStore? =
         FeatureFlag.backupBrowser.isEnabled ? BackupBrowserStore() : nil
+    /// Secret masking state shared across editors.
     @State private var secrets = SecretsGuard()
+    /// Current sidebar selection.
     @State private var scope: SidebarScope? = .all
+    /// Whether the settings sheet is visible.
     @State private var showSettings = false
 
+    /// Main app navigation and detail content.
     var body: some View {
         NavigationSplitView {
             List(selection: $scope) {
@@ -231,6 +262,7 @@ struct ContentView: View {
         }
     }
 
+    /// Returns whether a tool has local configuration available.
     private func toolExists(_ tool: AITool) -> Bool {
         switch tool {
         case .codex: codexStore.directoryExists
@@ -240,6 +272,7 @@ struct ContentView: View {
         }
     }
 
+    /// Count shown in the sidebar badge for one AI tool.
     private func toolBadgeCount(_ tool: AITool) -> Int {
         switch tool {
         case .codex: codexStore.variables.count

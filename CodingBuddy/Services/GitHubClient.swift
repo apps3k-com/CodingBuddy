@@ -110,6 +110,8 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
     let graphQLEndpoint: URL
     /// GitHub REST API base URL.
     let restBaseURL: URL
+    /// Number of pull requests requested per GraphQL page.
+    private static let pullRequestPageSize = 50
 
     /// Creates a GitHub client with injectable token and transport dependencies.
     init(
@@ -131,40 +133,14 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
             throw GitHubClientError.noToken
         }
 
-        var request = URLRequest(url: graphQLEndpoint)
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("CodingBuddy", forHTTPHeaderField: "User-Agent")
-        request.httpBody = try JSONEncoder().encode(GraphQLRequest(
-            query: Self.pullRequestQuery,
-            variables: GraphQLVariables(owner: repository.owner, repo: repository.name, first: 50)
-        ))
+        var after: String?
+        var latestRateLimit: GitHubRateLimitState?
+        var rows: [AgentPullRequest] = []
+        repeat {
+            let page = try await fetchGraphQLPage(repository: repository, token: token, after: after)
+            latestRateLimit = page.rateLimit ?? latestRateLimit
 
-        let data: Data
-        let response: HTTPURLResponse
-        do {
-            (data, response) = try await transport.data(for: request)
-        } catch let error as GitHubClientError {
-            throw error
-        } catch let error as URLError where error.code == .notConnectedToInternet || error.code == .networkConnectionLost {
-            throw GitHubClientError.networkUnavailable
-        } catch {
-            throw GitHubClientError.networkUnavailable
-        }
-
-        let rateLimit = Self.rateLimit(from: response)
-        try Self.validate(response: response, data: data, repository: repository, rateLimit: rateLimit)
-
-        do {
-            let decoded = try JSONDecoder.github.decode(GraphQLResponse.self, from: data)
-            if let firstError = decoded.errors?.first {
-                throw Self.map(graphQLError: firstError, repository: repository, rateLimit: decoded.data?.rateLimit ?? rateLimit)
-            }
-            var latestRateLimit = decoded.data?.rateLimit ?? rateLimit
-            var rows: [AgentPullRequest] = []
-            for node in decoded.data?.repository.pullRequests.nodes ?? [] {
+            for node in page.repository.pullRequests.nodes {
                 let contexts = node.statusContexts
                 if contexts.isEmpty, !node.normalizedHeadSHA.isEmpty {
                     let fallback = try await fetchRESTStatusContexts(
@@ -188,7 +164,67 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
                     ))
                 }
             }
-            return AgentPRMonitorSnapshot(rows: rows, rateLimit: latestRateLimit)
+
+            if page.repository.pullRequests.pageInfo?.hasNextPage == true {
+                guard let nextCursor = page.repository.pullRequests.pageInfo?.endCursor,
+                      nextCursor != after else {
+                    throw GitHubClientError.decodingFailed
+                }
+                after = nextCursor
+            } else {
+                after = nil
+            }
+        } while after != nil
+
+        return AgentPRMonitorSnapshot(rows: rows, rateLimit: latestRateLimit)
+    }
+
+    /// Fetches one page of open pull requests through GitHub GraphQL.
+    private func fetchGraphQLPage(
+        repository: GitHubRepositoryRef,
+        token: String,
+        after: String?
+    ) async throws -> (repository: RepositoryData, rateLimit: GitHubRateLimitState?) {
+        var request = URLRequest(url: graphQLEndpoint)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("CodingBuddy", forHTTPHeaderField: "User-Agent")
+        request.httpBody = try JSONEncoder().encode(GraphQLRequest(
+            query: Self.pullRequestQuery,
+            variables: GraphQLVariables(
+                owner: repository.owner,
+                repo: repository.name,
+                first: Self.pullRequestPageSize,
+                after: after
+            )
+        ))
+
+        let data: Data
+        let response: HTTPURLResponse
+        do {
+            (data, response) = try await transport.data(for: request)
+        } catch let error as GitHubClientError {
+            throw error
+        } catch let error as URLError where error.code == .notConnectedToInternet || error.code == .networkConnectionLost {
+            throw GitHubClientError.networkUnavailable
+        } catch {
+            throw GitHubClientError.networkUnavailable
+        }
+
+        let rateLimit = Self.rateLimit(from: response)
+        try Self.validate(response: response, data: data, repository: repository, rateLimit: rateLimit)
+
+        do {
+            let decoded = try JSONDecoder.github.decode(GraphQLResponse.self, from: data)
+            if let firstError = decoded.errors?.first {
+                throw Self.map(graphQLError: firstError, repository: repository, rateLimit: decoded.data?.rateLimit ?? rateLimit)
+            }
+            guard let repositoryData = decoded.data?.repository else {
+                throw GitHubClientError.repositoryDenied(repository)
+            }
+            return (repositoryData, decoded.data?.rateLimit ?? rateLimit)
         } catch let error as GitHubClientError {
             throw error
         } catch {
@@ -355,9 +391,10 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
 
     /// Primary GraphQL query for open pull requests.
     private static let pullRequestQuery = """
-    query AgentPRMonitor($owner: String!, $repo: String!, $first: Int!) {
+    query AgentPRMonitor($owner: String!, $repo: String!, $first: Int!, $after: String) {
       repository(owner: $owner, name: $repo) {
-        pullRequests(first: $first, states: OPEN, orderBy: { field: UPDATED_AT, direction: DESC }) {
+        pullRequests(first: $first, after: $after, states: OPEN, orderBy: { field: UPDATED_AT, direction: DESC }) {
+          pageInfo { hasNextPage endCursor }
           nodes {
             number
             title
@@ -437,6 +474,8 @@ private nonisolated struct GraphQLVariables: Encodable {
     let repo: String
     /// Number of open pull requests to request.
     let first: Int
+    /// Cursor for the next open pull request page.
+    let after: String?
 }
 
 /// Minimal REST-style error body.
@@ -462,7 +501,7 @@ private nonisolated struct GraphQLError: Decodable {
 /// Successful Agent PR Monitor GraphQL data.
 private nonisolated struct GraphQLData: Decodable {
     /// Repository data for the requested owner/name pair.
-    let repository: RepositoryData
+    let repository: RepositoryData?
     /// GraphQL rate-limit state.
     let rateLimit: GitHubRateLimitState?
 }
@@ -477,6 +516,8 @@ private nonisolated struct RepositoryData: Decodable {
 private nonisolated struct PullRequestConnection: Decodable {
     /// Open pull requests in requested order.
     let nodes: [PullRequestNode]
+    /// Pagination metadata for the open pull request list.
+    let pageInfo: PageInfo?
 }
 
 /// GraphQL pull request node mapped into the app row model.
@@ -699,8 +740,10 @@ private nonisolated struct StatusContextConnection: Decodable {
 
 /// Minimal GitHub GraphQL pagination metadata.
 private nonisolated struct PageInfo: Decodable {
-    /// Whether another page exists past the fetched v1 cap.
+    /// Whether another page exists after the fetched connection page.
     let hasNextPage: Bool
+    /// Cursor for the next page, if available.
+    let endCursor: String?
 }
 
 /// Polymorphic GraphQL status context node.

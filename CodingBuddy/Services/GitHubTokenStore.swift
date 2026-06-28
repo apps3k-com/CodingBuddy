@@ -74,6 +74,7 @@ nonisolated final class KeychainGitHubTokenStore: GitHubTokenStore, @unchecked S
 
         let updateStatus = SecItemUpdate(query as CFDictionary, [
             kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
         ] as CFDictionary)
 
         if updateStatus == errSecSuccess {
@@ -84,6 +85,7 @@ nonisolated final class KeychainGitHubTokenStore: GitHubTokenStore, @unchecked S
         }
 
         query[kSecValueData as String] = data
+        query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         let addStatus = SecItemAdd(query as CFDictionary, nil)
         guard addStatus == errSecSuccess else {
             throw GitHubTokenStoreError.keychain(status: addStatus)
