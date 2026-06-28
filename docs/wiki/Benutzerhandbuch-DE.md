@@ -93,6 +93,17 @@ Der Seitenleisten-Eintrag **Agent Context** (Alpha, unter Inventar) ist ein Nur-
 
 v1-Grenzen: Agent Context ist ausschließlich deterministische Erkennung. Er durchsucht das Repository nicht rekursiv, vergleicht Policy-Text nicht semantisch, entscheidet nicht, welche Regel gewinnt, und führt keine Natural-Language-Analyse über Instruktionen aus.
 
+### Repo Readiness
+
+Der Seitenleisten-Eintrag **Repo Readiness** (Alpha, unter Inventar) ist eine Nur-Lese-Checkliste für einen Repository-Ordner, bevor du Arbeit an einen Coding-Agent übergibst.
+
+- Wähle einen Repository-Ordner; CodingBuddy merkt sich den zuletzt gewählten Ordner.
+- Die Tabelle prüft Agent-Governance, README-Abdeckung, dokumentierte Build-/Testbefehle, Contribution-Workflow-Dokumente, GitHub-Issue-/PR-Templates, Feature-Flag-Dokumentation für Swift-App-Repositories, Setup-Skripte und Hooks, CI-Workflows sowie leichte `.git`-Marker für laufende Operationen.
+- Jede Zeile ist **Bestanden**, **Warnung** oder **Fehlgeschlagen** und enthält einen kurzen Hinweis zur Behebung. Warnungen bedeuten, dass die App ein teilweises oder mehrdeutiges Signal gefunden hat.
+- Die Checkliste bearbeitet keine Dateien, ruft GitHub nicht auf, startet kein `git` und prüft nicht, ob Befehle tatsächlich erfolgreich laufen.
+
+v1-Grenzen: Repo Readiness ist deterministisch und beratend. Es prüft keinen entfernten Project-Status, erstellt keine fehlenden Templates und entscheidet nicht, ob ein Repository merge-sicher ist.
+
 ### MCP Inventory
 
 Der Seitenleisten-Eintrag **MCP Inventory** (Alpha) ist eine Nur-Lese-Tabelle der MCP-Server, die CodingBuddy in Codex, Claude Code und Cursor findet.
