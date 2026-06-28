@@ -106,6 +106,19 @@ incomplete MCP Auth entries.
 v1 only reports findings: no network reachability checks, process restarts,
 auto-fixes, or secret value display.
 
+### `agentContextInspector` — maturity: alpha
+
+Read-only inspector for a selected repository folder. It deterministically
+checks a fixed allowlist of agent context files (`AGENTS.md`, `CLAUDE.md`,
+`.cursor/rules`, `.mcp.json`, `.codex` project config, and obvious developer
+documentation) and reports file-system metadata plus simple signals such as
+missing governance files, both governance files being present, empty files,
+large files, project-local MCP config, and Codex project config.
+
+v1 does not edit files, recurse through the repository, or interpret policy
+text semantically. It is a context inventory, not a natural-language rules
+reviewer.
+
 ### `mcpServerInventory` — maturity: alpha
 
 Read-only inventory of MCP server definitions across Codex, Claude Code, and
