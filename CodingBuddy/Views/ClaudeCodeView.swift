@@ -36,7 +36,7 @@ struct ClaudeCodeView: View {
             }
         }
         .navigationTitle(Text(verbatim: "Claude Code"))
-        .navigationSubtitle(Text("\(store.envEntries.count) variables"))
+        .navigationSubtitle(Text(LocalizedCountText.variables(store.envEntries.count)))
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("New Variable", systemImage: "plus") {

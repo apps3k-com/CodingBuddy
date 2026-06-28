@@ -59,7 +59,7 @@ struct ImportPreviewView: View {
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                Button("Import \(selectedIDs.count)") { importSelected() }
+                Button(LocalizedCountText.importVariables(selectedIDs.count)) { importSelected() }
                     .keyboardShortcut(.defaultAction)
                     .buttonStyle(.borderedProminent)
                     .disabled(selectedIDs.isEmpty)

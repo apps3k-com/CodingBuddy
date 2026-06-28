@@ -42,7 +42,7 @@ verwalteten Ziel zugeordnet werden können, bleiben reine Vorschau.
 
 ## Import & Export
 
-- **Aus .env importieren…** (Ablage-Menü oder Toolbar, ⇧⌘I) liest eine dotenv-Datei, zeigt eine Vorschau zur Auswahl der Einträge (Duplikate werden markiert) und hängt sie an den verwalteten Block einer Datei deiner Wahl an.
+- **Aus .env importieren…** (Ablage-Menü oder Toolbar, ⇧⌘I) liest eine dotenv-Datei, zeigt eine Vorschau zur Auswahl der Einträge (Duplikate werden markiert) und hängt sie an den verwalteten Block einer Datei deiner Wahl an. Die Import-Schaltfläche nennt die ausgewählte Anzahl, etwa **1 Variable importieren** oder **2 Variablen importieren**.
 - **Sichtbare als .env exportieren…** (Ablage-Menü oder Toolbar, ⇧⌘E) schreibt die aktuell angezeigten Variablen in eine `.env`-Datei.
 
 ## Hilfe-Menü

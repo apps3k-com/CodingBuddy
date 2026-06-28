@@ -104,7 +104,7 @@ struct VariableListView: View {
         }
         .searchable(text: $searchText, prompt: "Search variables")
         .navigationTitle(scope.title)
-        .navigationSubtitle(Text("\(filtered.count) variables"))
+        .navigationSubtitle(Text(LocalizedCountText.variables(filtered.count)))
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("New Variable", systemImage: "plus") {

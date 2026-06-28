@@ -47,7 +47,7 @@ struct MCPAuthListView: View {
             .width(min: 110, ideal: 130)
 
             TableColumn("Files") { entry in
-                Text("\(entry.files.count) files")
+                Text(LocalizedCountText.files(entry.files.count))
                     .foregroundStyle(.secondary)
             }
             .width(min: 60, ideal: 80)
@@ -65,7 +65,7 @@ struct MCPAuthListView: View {
             if let entry = entry(for: ids.first) { inspectedEntry = entry }
         }
         .navigationTitle(Text(verbatim: "MCP Auth"))
-        .navigationSubtitle(Text("\(store.entries.count) servers"))
+        .navigationSubtitle(Text(LocalizedCountText.servers(store.entries.count)))
         .toolbar {
             ToolbarItem {
                 Button("Reset All…", systemImage: "trash", role: .destructive) {

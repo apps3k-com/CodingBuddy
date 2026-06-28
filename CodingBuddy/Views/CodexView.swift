@@ -34,7 +34,7 @@ struct CodexView: View {
             }
         }
         .navigationTitle(Text(verbatim: "Codex"))
-        .navigationSubtitle(Text("\(store.variables.count) variables"))
+        .navigationSubtitle(Text(LocalizedCountText.variables(store.variables.count)))
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("New Variable", systemImage: "plus") {
