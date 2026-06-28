@@ -2,12 +2,25 @@
 
 ## Restore a dotfile from backup
 
+Preferred path:
+
+1. Open **Safety → Backups** in CodingBuddy.
+2. Select the backup.
+3. Review the Current/Backup preview.
+4. Choose **Restore…**. CodingBuddy backs up the current target before writing
+   the selected backup through its safe writer.
+
+Manual fallback:
+
 ```bash
 ls -t ~/Library/Application\ Support/CodingBuddy/Backups/zshrc-*
 cp ~/Library/Application\ Support/CodingBuddy/Backups/zshrc-<timestamp> ~/.zshrc
 ```
 
-Backups are plain copies of the pre-write state; the newest 20 per file are kept.
+Backups are plain copies of the pre-write state; the newest 20 per file are
+kept. The UI restore only enables backups whose filename maps to a known
+CodingBuddy-managed target, because older backup filenames do not store full
+original paths.
 
 ## Reset app settings
 

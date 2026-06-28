@@ -31,6 +31,14 @@ CodingBuddy is a native macOS app for managing the environment variables that li
 Before every change CodingBuddy writes a timestamped backup to
 `~/Library/Application Support/CodingBuddy/Backups/` (the last 20 per file are kept). Writes are atomic, follow symlinks (dotfile managers stay intact) and preserve file permissions. If a file changed outside the app mid-edit, the write is refused and the view reloads.
 
+The **Safety → Backups** entry (alpha) lists those backups for zsh dotfiles and
+supported agent config/env files (`~/.codex/mcp.env`, Claude Code settings,
+Cursor `mcp.json`). Select a backup to compare a redacted **Backup** preview
+with the current target. **Restore…** writes the selected backup through the
+same safe writer, so the current file is backed up again before it is replaced.
+Backups that cannot be mapped to a known CodingBuddy-managed target stay
+preview-only.
+
 ## Import & export
 
 - **Import from .env…** (File menu or toolbar, ⇧⌘I) reads a dotenv file, shows a preview where you pick the entries (duplicates are flagged), and appends them to the managed block of a file of your choice.
@@ -141,4 +149,4 @@ CodingBuddy watches your dotfiles. Edits made in a terminal or editor show up in
 | A variable doesn't show up | Only `~/.zshenv`, `~/.zprofile`, `~/.zshrc` are read — not `.bashrc` or files sourced from elsewhere. |
 | A row has a lock icon | The line is too complex to rewrite safely. Edit it in a text editor. |
 | "The file was changed externally" | Something else modified the dotfile while you edited. The app reloaded — just redo the edit. |
-| Restore an old state | Copy the backup from `~/Library/Application Support/CodingBuddy/Backups/` over the dotfile. |
+| Restore an old state | Use **Safety → Backups**, select a supported backup, preview it, then choose **Restore…**. Unknown backup names can still be inspected but are preview-only. |
