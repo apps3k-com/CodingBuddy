@@ -6,6 +6,7 @@
 
 **🔧 Technical (EN)**
 - [Architecture](Architecture)
+- [Agent PR Monitor Design](Agent-PR-Monitor)
 - [Data Model & Safety](Data-Model)
 - [Development Setup](Development-Setup)
 - [Conventions](Conventions)
