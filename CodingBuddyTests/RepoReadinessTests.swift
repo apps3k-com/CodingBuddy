@@ -11,6 +11,26 @@ import Testing
 @MainActor
 @Suite(.serialized)
 struct RepoReadinessTests {
+    /// In-memory defaults replacement that keeps store tests away from real preferences.
+    private final class MemoryDefaults: RepoReadinessDefaultsStoring {
+        /// Stored key-value pairs for one test instance.
+        private var values: [String: String] = [:]
+
+        /// Returns a stored string for the given key.
+        func string(forKey defaultName: String) -> String? {
+            values[defaultName]
+        }
+
+        /// Stores a string for the given key.
+        func setRepoReadinessString(_ value: String, forKey defaultName: String) {
+            values[defaultName] = value
+        }
+
+        /// Removes a stored value for the given key.
+        func removeObject(forKey defaultName: String) {
+            values.removeValue(forKey: defaultName)
+        }
+    }
 
     /// Creates an isolated temporary repository fixture for a single test.
     private func makeTempDir() throws -> URL {
@@ -199,6 +219,76 @@ struct RepoReadinessTests {
         #expect(try item(.buildAndTestDocumentation, in: items).status == .fail)
     }
 
+    /// Verifies symlinked documentation directories are not enumerated outside the selected repository.
+    @Test func scannerDoesNotReadSymlinkedDocumentationDirectoriesOutsideRepository() throws {
+        let repo = try makeTempDir()
+        let outside = FileManager.default.temporaryDirectory
+            .appendingPathComponent("RepoReadinessOutsideDocs-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: outside, withIntermediateDirectories: true)
+        try write(
+            """
+            # Outside docs
+
+            Build with `xcodebuild build`.
+            Test with `xcodebuild test`.
+            """,
+            to: outside.appendingPathComponent("DEVELOPMENT.md")
+        )
+        try FileManager.default.createSymbolicLink(
+            at: repo.appendingPathComponent("docs"),
+            withDestinationURL: outside
+        )
+
+        let items = RepoReadinessScanner(repositoryURL: repo).items()
+
+        #expect(try item(.buildAndTestDocumentation, in: items).status == .fail)
+    }
+
+    /// Verifies nested GitHub paths are not read through a symlinked parent directory.
+    @Test func scannerDoesNotReadThroughSymlinkedGitHubParentDirectory() throws {
+        let repo = try makeTempDir()
+        let outside = FileManager.default.temporaryDirectory
+            .appendingPathComponent("RepoReadinessOutsideGitHub-\(UUID().uuidString)", isDirectory: true)
+        try write("name: bug\n", to: outside.appendingPathComponent("ISSUE_TEMPLATE/bug.yml"))
+        try write("## Summary\n", to: outside.appendingPathComponent("pull_request_template.md"))
+        try write(
+            """
+            name: CI
+            on: [push]
+            jobs:
+              test:
+                steps:
+                  - run: xcodebuild test -project Example.xcodeproj -scheme Example -destination 'platform=macOS'
+            """,
+            to: outside.appendingPathComponent("workflows/ci.yml")
+        )
+        try FileManager.default.createSymbolicLink(
+            at: repo.appendingPathComponent(".github"),
+            withDestinationURL: outside
+        )
+
+        let items = RepoReadinessScanner(repositoryURL: repo).items()
+
+        #expect(try item(.githubTemplates, in: items).status == .fail)
+        #expect(try item(.ciWorkflow, in: items).status == .fail)
+    }
+
+    /// Verifies structural scans do not recurse into symlinked directories.
+    @Test func scannerDoesNotTraverseSymlinkedDirectoriesForSwiftAppDetection() throws {
+        let repo = try makeTempDir()
+        let outside = FileManager.default.temporaryDirectory
+            .appendingPathComponent("RepoReadinessOutsideApp-\(UUID().uuidString)", isDirectory: true)
+        try write("enum FeatureFlag {}\n", to: outside.appendingPathComponent("Services/FeatureFlags.swift"))
+        try FileManager.default.createSymbolicLink(
+            at: repo.appendingPathComponent("App"),
+            withDestinationURL: outside
+        )
+
+        let items = RepoReadinessScanner(repositoryURL: repo).items()
+
+        #expect(try item(.featureFlagDocumentation, in: items).status == .pass)
+    }
+
     /// Verifies a later complete workflow document can satisfy the check after an incomplete candidate.
     @Test func contributionWorkflowScansAllCandidateDocuments() throws {
         let repo = try makeTempDir()
@@ -221,10 +311,9 @@ struct RepoReadinessTests {
     /// Verifies repository selection persistence and reload behavior use injected defaults.
     @Test func storePersistsRepositorySelectionAndReloadsItems() async throws {
         let repo = try makeTempDir()
+        let secondRepo = try makeTempDir()
         try write("# Agent rules\n", to: repo.appendingPathComponent("AGENTS.md"))
-        let suiteName = "CodingBuddy.RepoReadinessTests.\(UUID().uuidString)"
-        let defaults = try #require(UserDefaults(suiteName: suiteName))
-        defaults.removePersistentDomain(forName: suiteName)
+        let defaults = MemoryDefaults()
 
         let store = RepoReadinessStore(defaults: defaults)
         #expect(store.selectedRepositoryURL == nil)
@@ -239,6 +328,9 @@ struct RepoReadinessTests {
 
         let restoredStore = RepoReadinessStore(defaults: defaults)
         #expect(restoredStore.selectedRepositoryURL?.path == repo.standardizedFileURL.path)
+
+        store.selectRepository(secondRepo)
+        #expect(store.items.isEmpty)
 
         store.clearRepository()
         #expect(store.selectedRepositoryURL == nil)

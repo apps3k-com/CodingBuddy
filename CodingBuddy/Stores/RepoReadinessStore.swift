@@ -1,6 +1,25 @@
 import Foundation
 import Observation
 
+/// Minimal key-value storage used to persist the selected Repo Readiness folder.
+protocol RepoReadinessDefaultsStoring: AnyObject {
+    /// Returns a stored string for the given key.
+    func string(forKey defaultName: String) -> String?
+
+    /// Stores a string for the given key.
+    func setRepoReadinessString(_ value: String, forKey defaultName: String)
+
+    /// Removes a stored value for the given key.
+    func removeObject(forKey defaultName: String)
+}
+
+extension UserDefaults: RepoReadinessDefaultsStoring {
+    /// Stores a string for the given key.
+    func setRepoReadinessString(_ value: String, forKey defaultName: String) {
+        set(value, forKey: defaultName)
+    }
+}
+
 /// Root-owned state for the read-only Repo Readiness checklist.
 @Observable
 final class RepoReadinessStore {
@@ -13,14 +32,14 @@ final class RepoReadinessStore {
     /// Latest scanner output in deterministic display order.
     private(set) var items: [RepoReadinessItem] = []
 
-    /// UserDefaults storage injected by tests.
-    @ObservationIgnored private let defaults: UserDefaults
+    /// Key-value storage injected by tests.
+    @ObservationIgnored private let defaults: any RepoReadinessDefaultsStoring
 
     /// Current background reload, cancelled when a newer reload starts.
     @ObservationIgnored private var reloadTask: Task<Void, Never>?
 
     /// Creates a store and restores the last selected repository path.
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: any RepoReadinessDefaultsStoring = UserDefaults.standard) {
         self.defaults = defaults
         if let path = defaults.string(forKey: Self.repositoryPathKey), !path.isEmpty {
             selectedRepositoryURL = URL(fileURLWithPath: path).standardizedFileURL
@@ -41,7 +60,8 @@ final class RepoReadinessStore {
     func selectRepository(_ url: URL) {
         let standardizedURL = url.standardizedFileURL
         selectedRepositoryURL = standardizedURL
-        defaults.set(standardizedURL.path, forKey: Self.repositoryPathKey)
+        items = []
+        defaults.setRepoReadinessString(standardizedURL.path, forKey: Self.repositoryPathKey)
         reload()
     }
 

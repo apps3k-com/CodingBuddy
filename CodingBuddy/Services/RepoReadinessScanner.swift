@@ -580,7 +580,8 @@ nonisolated struct RepoReadinessScanner: Sendable {
 
     /// Reads a bounded UTF-8-ish text file, returning nil for missing, directories, or oversized files.
     private func text(for relativePath: String) -> String? {
-        rawTextFile(at: url(for: relativePath), maxBytes: Self.maxReadableTextBytes)
+        guard let fileURL = safeFileURL(for: relativePath) else { return nil }
+        return rawTextFile(at: fileURL, maxBytes: Self.maxReadableTextBytes)
     }
 
     /// Reads a bounded regular text file without following symlinks.
@@ -605,11 +606,7 @@ nonisolated struct RepoReadinessScanner: Sendable {
 
     /// Returns sorted shallow files under a directory.
     private func shallowFiles(in relativeDirectory: String, allowedExtensions: Set<String>?) -> [String] {
-        let directoryURL = url(for: relativeDirectory)
-        var isDirectory = ObjCBool(false)
-        guard fileManager.fileExists(atPath: directoryURL.path, isDirectory: &isDirectory), isDirectory.boolValue else {
-            return []
-        }
+        guard let directoryURL = safeDirectoryURL(for: relativeDirectory) else { return [] }
 
         guard let urls = try? fileManager.contentsOfDirectory(
             at: directoryURL,
@@ -621,8 +618,7 @@ nonisolated struct RepoReadinessScanner: Sendable {
 
         return urls
             .filter { url in
-                let values = try? url.resourceValues(forKeys: [.isRegularFileKey])
-                guard values?.isRegularFile == true else { return false }
+                guard fileExists(url) else { return false }
                 guard let allowedExtensions else { return true }
                 return allowedExtensions.contains(url.pathExtension.lowercased())
             }
@@ -646,6 +642,7 @@ nonisolated struct RepoReadinessScanner: Sendable {
         results: inout [String]
     ) {
         guard depthRemaining >= 0, results.count < maxCount else { return }
+        guard safeDirectoryURL(directoryURL) != nil else { return }
         guard let urls = try? fileManager.contentsOfDirectory(
             at: directoryURL,
             includingPropertiesForKeys: [.isDirectoryKey],
@@ -658,6 +655,7 @@ nonisolated struct RepoReadinessScanner: Sendable {
             guard results.count < maxCount else { return }
             let name = url.lastPathComponent
             guard !Self.skippedDirectoryNames.contains(name) else { continue }
+            guard !isSymbolicLink(url) else { continue }
 
             let relativePath = prefix.isEmpty ? name : "\(prefix)/\(name)"
             results.append(relativePath)
@@ -695,12 +693,12 @@ nonisolated struct RepoReadinessScanner: Sendable {
 
     /// Returns true for any present filesystem entry.
     private func fileExists(_ relativePath: String) -> Bool {
-        fileExists(url(for: relativePath))
+        safeFileURL(for: relativePath) != nil
     }
 
     /// Returns true for any present directory.
     private func directoryExists(_ relativePath: String) -> Bool {
-        directoryExists(url(for: relativePath))
+        safeDirectoryURL(for: relativePath) != nil
     }
 
     /// Returns true for any present regular file under a directory URL.
@@ -719,6 +717,56 @@ nonisolated struct RepoReadinessScanner: Sendable {
         return fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory)
             && !isDirectory.boolValue
             && !isSymbolicLink(url)
+    }
+
+    /// Returns a safe repository-local regular file URL for a relative path.
+    private func safeFileURL(for relativePath: String) -> URL? {
+        safeFileURL(url(for: relativePath))
+    }
+
+    /// Returns a regular file URL only when the resolved path remains under the selected repository.
+    private func safeFileURL(_ url: URL) -> URL? {
+        let standardizedURL = url.standardizedFileURL
+        var isDirectory = ObjCBool(false)
+        guard fileManager.fileExists(atPath: standardizedURL.path, isDirectory: &isDirectory),
+              !isDirectory.boolValue,
+              !isSymbolicLink(standardizedURL),
+              isRepositoryLocal(standardizedURL.resolvingSymlinksInPath())
+        else { return nil }
+        return standardizedURL
+    }
+
+    /// Returns a safe repository-local directory URL for a relative directory.
+    private func safeDirectoryURL(for relativeDirectory: String) -> URL? {
+        safeDirectoryURL(url(for: relativeDirectory))
+    }
+
+    /// Returns a directory URL only when the resolved path remains under the selected repository.
+    private func safeDirectoryURL(_ url: URL) -> URL? {
+        let standardizedURL = url.standardizedFileURL
+        var isDirectory = ObjCBool(false)
+        let isRepositoryRoot = standardizedURL.path == repositoryURL.path
+        guard fileManager.fileExists(atPath: standardizedURL.path, isDirectory: &isDirectory),
+              isDirectory.boolValue,
+              (isRepositoryRoot || !isSymbolicLink(standardizedURL)),
+              isRepositoryLocal(standardizedURL.resolvingSymlinksInPath())
+        else { return nil }
+        return standardizedURL
+    }
+
+    /// Returns true when the resolved candidate path is the repository root or one of its children.
+    private func isRepositoryLocal(_ candidateURL: URL) -> Bool {
+        let rootComponents = repositoryURL
+            .resolvingSymlinksInPath()
+            .standardizedFileURL
+            .pathComponents
+        let candidateComponents = candidateURL
+            .standardizedFileURL
+            .pathComponents
+        guard candidateComponents.count >= rootComponents.count else { return false }
+        return zip(rootComponents, candidateComponents).allSatisfy { rootComponent, candidateComponent in
+            rootComponent == candidateComponent
+        }
     }
 
     /// Returns true for any present directory URL.
