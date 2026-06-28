@@ -159,6 +159,7 @@ struct BackupBrowserView: View {
     private func restore(_ item: BackupBrowserItem) {
         do {
             try store.restore(item)
+            store.reload()
             restoreError = nil
             restoreCandidate = nil
             selection = item.id
