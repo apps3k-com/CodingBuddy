@@ -11,8 +11,11 @@ import Foundation
 /// stamps into the build: `x.y.z-beta.n` → beta, plain `x.y.z` → stable.
 /// Debug builds are always alpha. No extra Info.plist keys needed.
 nonisolated enum ReleaseChannel: String, Sendable {
+    /// Internal alpha builds with every experimental feature enabled.
     case alpha
+    /// Beta builds with features that are ready for wider validation.
     case beta
+    /// Stable builds for regular users.
     case stable
 
     /// How far towards "everyone" the channel reaches. Alpha builds see the
@@ -25,6 +28,7 @@ nonisolated enum ReleaseChannel: String, Sendable {
         }
     }
 
+    /// Release channel inferred from the current app bundle version.
     static var current: ReleaseChannel {
         #if DEBUG
         .alpha
@@ -43,18 +47,33 @@ nonisolated enum ReleaseChannel: String, Sendable {
 /// and CI): every case has a `### \`flagName\`` section in
 /// docs/FEATURE_FLAGS.md, and vice versa.
 nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
+    /// Enables Codex tool configuration in the AI tools area.
     case aiToolsCodex
+    /// Enables Claude Code tool configuration in the AI tools area.
     case aiToolsClaudeCode
+    /// Enables Cursor tool configuration in the AI tools area.
     case aiToolsCursor
+    /// Enables Craft Agents tool configuration in the AI tools area.
     case aiToolsCraftAgent
+    /// Hides variable rows overridden by later dotfiles.
     case hideOverriddenVariables
+    /// Enables UI affordances for masking and revealing secrets.
     case secretsProtection
+    /// Enables import/export workflows for environment variables.
     case envImportExport
+    /// Enables the local MCP authentication manager.
     case mcpAuthManager
+    /// Enables local agent setup diagnostics.
     case agentDoctor
+    /// Enables governance and context file inspection.
     case agentContextInspector
+    /// Enables repository readiness checks.
     case repoReadinessChecklist
+    /// Enables cross-tool MCP server inventory.
     case mcpServerInventory
+    /// Enables the read-only GitHub Agent PR Monitor.
+    case agentPRMonitor
+    /// Enables local backup discovery and restore.
     case backupBrowser
 
     /// The most stable channel in which the feature is active. `.alpha` means
@@ -75,6 +94,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
         case .agentContextInspector: .alpha
         case .repoReadinessChecklist: .alpha
         case .mcpServerInventory: .alpha
+        case .agentPRMonitor: .alpha
         case .backupBrowser: .alpha
         }
     }
