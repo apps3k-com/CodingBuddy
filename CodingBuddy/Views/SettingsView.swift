@@ -94,7 +94,6 @@ struct SettingsView: View {
                     Text("Light").tag(AppearanceMode.light.rawValue)
                     Text("Dark").tag(AppearanceMode.dark.rawValue)
                 }
-                .pickerStyle(.segmented)
             }
         }
         .formStyle(.grouped)
