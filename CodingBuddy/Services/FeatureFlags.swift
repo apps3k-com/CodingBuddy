@@ -75,6 +75,8 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
     case agentPRMonitor
     /// Enables local backup discovery and restore.
     case backupBrowser
+    /// Enables a default external editor preference for text-like files.
+    case defaultEditorPreference
 
     /// The most stable channel in which the feature is active. `.alpha` means
     /// alpha builds only, `.beta` means alpha + beta, `.stable` means everyone.
@@ -96,6 +98,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
         case .mcpServerInventory: .alpha
         case .agentPRMonitor: .alpha
         case .backupBrowser: .alpha
+        case .defaultEditorPreference: .alpha
         }
     }
 

@@ -88,6 +88,18 @@ regression could be disabled via local override.
 Import variables from `.env` files (with preview) and export the visible
 variables as `.env`.
 
+### `defaultEditorPreference` — maturity: alpha
+
+Settings preference for the external editor CodingBuddy uses when it owns an
+open action for Markdown, JSON, YAML, shell, dotfile-style, and other
+text-like repository files. The preference stores the selected macOS
+application metadata in UserDefaults and falls back to Launch Services'
+system default when no editor is selected or the selected app is unavailable.
+
+v1 applies to CodingBuddy-owned repository file actions such as Agent Context
+entries. It does not change Finder reveal actions, browser URLs, backup
+restore flows, or any file writing behavior.
+
 ### `mcpAuthManager` — maturity: stable
 
 Manages the `~/.mcp-auth` credential cache of `mcp-remote`-connected MCP

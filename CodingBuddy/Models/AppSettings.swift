@@ -45,3 +45,85 @@ nonisolated enum AppLanguage: String, CaseIterable {
         }
     }
 }
+
+/// Default external editor preference for text-like repository files.
+nonisolated enum DefaultTextEditorPreference: Equatable, Sendable {
+    /// UserDefaults key for the selected editor bundle identifier.
+    static let bundleIdentifierKey = "defaultTextEditorBundleIdentifier"
+    /// UserDefaults key for the selected editor application path.
+    static let applicationPathKey = "defaultTextEditorApplicationPath"
+    /// UserDefaults key for the selected editor display name.
+    static let displayNameKey = "defaultTextEditorDisplayName"
+
+    /// Let Launch Services choose the app.
+    case systemDefault
+    /// Open text-like files with a selected macOS application.
+    case application(bundleIdentifier: String?, applicationURL: URL, displayName: String)
+
+    /// Loads the persisted editor preference.
+    static func load(from defaults: UserDefaults = .standard) -> DefaultTextEditorPreference {
+        fromStoredValues(
+            bundleIdentifier: defaults.string(forKey: bundleIdentifierKey),
+            applicationPath: defaults.string(forKey: applicationPathKey),
+            displayName: defaults.string(forKey: displayNameKey)
+        )
+    }
+
+    /// Builds a preference from raw values, trimming empty strings to the system default.
+    static func fromStoredValues(
+        bundleIdentifier: String?,
+        applicationPath: String?,
+        displayName: String?
+    ) -> DefaultTextEditorPreference {
+        let trimmedPath = applicationPath?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !trimmedPath.isEmpty else { return .systemDefault }
+
+        let trimmedBundleIdentifier = bundleIdentifier?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedDisplayName = displayName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedDisplayName = trimmedDisplayName.flatMap { $0.isEmpty ? nil : $0 }
+        return .application(
+            bundleIdentifier: trimmedBundleIdentifier?.isEmpty == false ? trimmedBundleIdentifier : nil,
+            applicationURL: URL(fileURLWithPath: trimmedPath),
+            displayName: resolvedDisplayName
+                ?? URL(fileURLWithPath: trimmedPath).deletingPathExtension().lastPathComponent
+        )
+    }
+
+    /// Creates a preference for a selected application bundle.
+    static func application(at url: URL) -> DefaultTextEditorPreference {
+        .application(
+            bundleIdentifier: Bundle(url: url)?.bundleIdentifier,
+            applicationURL: url,
+            displayName: FileManager.default.displayName(atPath: url.path)
+        )
+    }
+
+    /// Persists this preference into UserDefaults.
+    func save(to defaults: UserDefaults = .standard) {
+        switch self {
+        case .systemDefault:
+            Self.reset(in: defaults)
+        case .application(let bundleIdentifier, let applicationURL, let displayName):
+            defaults.set(bundleIdentifier ?? "", forKey: Self.bundleIdentifierKey)
+            defaults.set(applicationURL.path, forKey: Self.applicationPathKey)
+            defaults.set(displayName, forKey: Self.displayNameKey)
+        }
+    }
+
+    /// Removes all persisted editor preference values.
+    static func reset(in defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: bundleIdentifierKey)
+        defaults.removeObject(forKey: applicationPathKey)
+        defaults.removeObject(forKey: displayNameKey)
+    }
+
+    /// User-facing name for Settings.
+    var displayName: String {
+        switch self {
+        case .systemDefault:
+            String(localized: "System Default")
+        case .application(_, _, let displayName):
+            displayName
+        }
+    }
+}
