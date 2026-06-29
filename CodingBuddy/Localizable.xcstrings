@@ -968,7 +968,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geheimnisse verbergen"
+            "value" : "Secrets ausblenden"
           }
         }
       }
@@ -1048,7 +1048,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geheimnisse sichtbar lassen für"
+            "value" : "Secrets sichtbar lassen für"
           }
         }
       }
@@ -1628,7 +1628,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geheimnisse anzeigen"
+            "value" : "Secrets anzeigen"
           }
         }
       }
@@ -2138,7 +2138,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Werte, die wie Geheimnisse aussehen (TOKEN, KEY, PASSWORD, …), bleiben maskiert, bis du dich mit Touch ID oder Passwort authentifizierst."
+            "value" : "Werte, die wie Secrets aussehen (TOKEN, KEY, PASSWORD, …), bleiben maskiert, bis du dich mit Touch ID oder Passwort authentifizierst."
           }
         }
       }
@@ -2218,7 +2218,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "geheime Werte anzuzeigen"
+            "value" : "Secret-Werte anzuzeigen"
           }
         }
       }

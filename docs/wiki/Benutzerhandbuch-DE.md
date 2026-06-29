@@ -49,7 +49,7 @@ verwalteten Ziel zugeordnet werden können, bleiben reine Vorschau.
 
 **Hilfe → CodingBuddy-Hilfe** (⌘?) öffnet diese Dokumentation in deiner App-Sprache — das deutsche Benutzerhandbuch, wenn die App auf Deutsch läuft, sonst den englischen Guide. **Hilfe → Dokumentation (Wiki)** öffnet das vollständige Wiki.
 
-## Geheimnisse bleiben maskiert
+## Secrets bleiben maskiert
 
 Variablen, deren Namen nach Zugangsdaten aussehen (`GITHUB_TOKEN`, `AWS_SECRET_ACCESS_KEY`, alles mit `TOKEN`, `KEY`, `SECRET`, `PASSWORD`, `AUTH`, …), zeigen `••••••••` statt ihres Werts.
 
@@ -80,7 +80,7 @@ Der Seitenleisten-Eintrag **Agent Doctor** (Alpha) ist ein Nur-Lese-Gesundheitsc
 - Credential-Dateien mit zu offenen Dateirechten.
 - Abgelaufene oder unvollständige Einträge in `~/.mcp-auth`.
 
-v1-Grenzen: Agent Doctor prüft keine Netzwerk-Erreichbarkeit, startet keine Agent-Prozesse neu, nimmt keine Auto-Fixes vor und zeigt keine Geheimwerte an.
+v1-Grenzen: Agent Doctor prüft keine Netzwerk-Erreichbarkeit, startet keine Agent-Prozesse neu, nimmt keine Auto-Fixes vor und zeigt keine Secret-Werte an.
 
 ### Agent Context
 
@@ -111,7 +111,7 @@ Der Seitenleisten-Eintrag **MCP Inventory** (Alpha) ist eine Nur-Lese-Tabelle de
 - Die Tabelle zeigt Quell-Tool, Servername, Scope oder Projektpfad, Transport, sichere Command- oder URL-Zusammenfassung, referenzierte Environment-Variable-Namen, Header-Keys und Quelldatei.
 - Die Suche filtert nach Servername, Tool, Scope, Command- oder URL-Zusammenfassung und Environment-Variable-Name.
 - Codex-Server, die Variablen referenzieren, die in `~/.codex/mcp.env` fehlen, werden hervorgehoben. Mit **Tool öffnen** springst du aus einer ausgewählten Codex-, Claude-Code- oder Cursor-Zeile zum bestehenden Tool-Editor.
-- Geheimwerte werden nie angezeigt: URL-Userinfo, Query-Strings, Fragmente und tokenartige Command-Argumente werden redigiert.
+- Secret-Werte werden nie angezeigt: URL-Userinfo, Query-Strings, Fragmente und tokenartige Command-Argumente werden redigiert.
 
 v1-Grenzen: MCP Inventory bearbeitet, installiert und prüft keine Server im Netzwerk. Claude-Code- und Cursor-Zeilen zeigen nur konfigurierte `env`- und Header-Keys; sie leiten keine fehlenden Variablen aus Command-Text ab.
 
@@ -131,7 +131,7 @@ v1-Grenzen: Agent PR Monitor liest nur GitHub.com, überwacht jeweils ein Reposi
 
 Der Seitenleisten-Eintrag **Codex** (Alpha) verwaltet die Umgebungsdatei von OpenAI Codex:
 
-- **`~/.codex/mcp.env`** — die Variablen, die Codex lädt (z. B. Bearer-Tokens für MCP-Server). Einträge lassen sich wie Dotfile-Variablen bearbeiten, anlegen und löschen; geheimnisartige Werte sind maskiert, Kommentare in der Datei bleiben erhalten, die Datei behält ihre restriktiven `600`-Rechte. Backups wie bei den Dotfiles.
+- **`~/.codex/mcp.env`** — die Variablen, die Codex lädt (z. B. Bearer-Tokens für MCP-Server). Einträge lassen sich wie Dotfile-Variablen bearbeiten, anlegen und löschen; Werte, die wie Secrets aussehen, sind maskiert, Kommentare in der Datei bleiben erhalten, die Datei behält ihre restriktiven `600`-Rechte. Backups wie bei den Dotfiles.
 - **MCP-Server** — eine Nur-Lese-Übersicht aus `~/.codex/config.toml`: welcher Server welche Umgebungsvariable referenziert (`bearer_token_env_var`, `env_vars`).
 - **Warnung bei fehlenden Variablen** — referenziert ein Server eine Variable, die in `mcp.env` nicht definiert ist, zeigt CodingBuddy eine Warnung mit **Definieren …**-Shortcut. Das beantwortet die klassische Frage „Woher liest Codex dieses Token?“.
 
@@ -160,7 +160,7 @@ Der Eintrag **Craft Agents** (Alpha) zeigt, was die Craft-Agents-App in `~/.craf
 
 - **Sprache** — System, English oder Deutsch. Wird nach einem Neustart der App wirksam.
 - **Erscheinungsbild** — Auto (folgt dem System), Hell oder Dunkel.
-- **Sicherheit** — wie lange Geheimnisse nach der Authentifizierung sichtbar bleiben.
+- **Sicherheit** — wie lange Secrets nach der Authentifizierung sichtbar bleiben.
 
 ## Live-Aktualisierung
 
