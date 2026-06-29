@@ -55,6 +55,8 @@ nonisolated struct MCPServerInventoryItem: Identifiable, Equatable, Hashable, Se
     var name: String
     /// User scope or project path that owns the definition.
     var scope: String
+    /// Repository or workspace name derived from the owning scope.
+    var repositoryName: String
     /// Source file that contributed this inventory row.
     var sourcePath: String
     /// Transport category inferred from the definition.
@@ -78,11 +80,11 @@ nonisolated struct MCPServerInventoryItem: Identifiable, Equatable, Hashable, Se
         !missingEnvVarNames.isEmpty
     }
 
-    /// Search predicate covering server name, tool, scope, env vars, and source path.
+    /// Search predicate covering server name, tool, repository, scope, env vars, and source path.
     func matches(searchText: String) -> Bool {
         let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return true }
-        let haystack = ([name, tool.displayName, scope, sourcePath, transport.displayName, summary]
+        let haystack = ([name, tool.displayName, repositoryName, scope, sourcePath, transport.displayName, summary]
             + envVarNames + missingEnvVarNames + headerKeys)
             .joined(separator: " ")
         return haystack.localizedCaseInsensitiveContains(trimmed)

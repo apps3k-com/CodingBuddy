@@ -107,8 +107,8 @@ v1 limits: Repo Readiness is deterministic and advisory. It does not inspect rem
 
 The **MCP Inventory** entry (alpha) is a read-only table of MCP servers discovered across Codex, Claude Code and Cursor.
 
-- It shows source tool, server name, scope or project path, transport, a safe command or URL summary, referenced environment variable names, header keys and source file.
-- Search filters by server name, tool, scope, command or URL summary, and environment variable name.
+- It shows source tool, server name, repository or workspace name, scope or project path, transport, a safe command or URL summary, referenced environment variable names, header keys and source file.
+- Search filters by server name, tool, repository or workspace name, scope, command or URL summary, and environment variable name.
 - Codex servers that reference variables missing from `~/.codex/mcp.env` are highlighted. Use **Open Tool** to jump from a selected Codex, Claude Code or Cursor row to the existing tool editor.
 - Secret values are never shown: URL user info, query strings, fragments and token-like command arguments are redacted.
 

@@ -108,8 +108,8 @@ v1-Grenzen: Repo Readiness ist deterministisch und beratend. Es prüft keinen en
 
 Der Seitenleisten-Eintrag **MCP Inventory** (Alpha) ist eine Nur-Lese-Tabelle der MCP-Server, die CodingBuddy in Codex, Claude Code und Cursor findet.
 
-- Die Tabelle zeigt Quell-Tool, Servername, Scope oder Projektpfad, Transport, sichere Command- oder URL-Zusammenfassung, referenzierte Environment-Variable-Namen, Header-Keys und Quelldatei.
-- Die Suche filtert nach Servername, Tool, Scope, Command- oder URL-Zusammenfassung und Environment-Variable-Name.
+- Die Tabelle zeigt Quell-Tool, Servername, Repository- oder Workspace-Name, Scope oder Projektpfad, Transport, sichere Command- oder URL-Zusammenfassung, referenzierte Environment-Variable-Namen, Header-Keys und Quelldatei.
+- Die Suche filtert nach Servername, Tool, Repository- oder Workspace-Name, Scope, Command- oder URL-Zusammenfassung und Environment-Variable-Name.
 - Codex-Server, die Variablen referenzieren, die in `~/.codex/mcp.env` fehlen, werden hervorgehoben. Mit **Tool öffnen** springst du aus einer ausgewählten Codex-, Claude-Code- oder Cursor-Zeile zum bestehenden Tool-Editor.
 - Secret-Werte werden nie angezeigt: URL-Userinfo, Query-Strings, Fragmente und tokenartige Command-Argumente werden redigiert.
 
