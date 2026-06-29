@@ -118,7 +118,7 @@ struct AgentPRMonitorView: View {
                 .help("Refresh pull requests")
                 .disabled(store.selectedRepository == nil || store.isRefreshing)
 
-                Button("Repository...", systemImage: "tray.and.arrow.down") {
+                Button("Repository...", systemImage: "book.closed") {
                     showsRepositorySheet = true
                 }
                 .help("Choose the GitHub repository to monitor")
@@ -163,7 +163,7 @@ struct AgentPRMonitorView: View {
             )
         } else if store.selectedRepository == nil {
             ContentUnavailableView {
-                Label("No repository selected", systemImage: "tray.and.arrow.down")
+                Label("No repository selected", systemImage: "book.closed")
             } description: {
                 Text("Choose a GitHub repository in owner/name format to monitor open pull requests.")
             } actions: {
