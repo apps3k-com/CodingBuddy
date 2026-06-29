@@ -33,10 +33,11 @@ struct BackupBrowserView: View {
     var body: some View {
         HSplitView {
             backupTable
-                .frame(minWidth: 520)
+                .frame(minWidth: 520, maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             BackupPreviewPane(store: store, item: selectedItem)
-                .frame(minWidth: 360)
+                .frame(minWidth: 360, maxWidth: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .navigationTitle("Backups")
         .searchable(text: $searchText, prompt: "Search backups")
         .toolbar {
@@ -209,6 +210,7 @@ private struct BackupPreviewPane: View {
                 }
             }
             .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else {
             ContentUnavailableView(
                 "Select a backup",
