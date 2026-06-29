@@ -2633,6 +2633,16 @@
         }
       }
     },
+    "Try a different server, tool, repository, scope, or environment variable name." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche es mit einem anderen Server, Tool, Repository, Scope oder Environment-Variable-Namen."
+          }
+        }
+      }
+    },
     "Try a different file, warning, or path." : {
       "localizations" : {
         "de" : {

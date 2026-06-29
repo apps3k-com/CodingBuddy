@@ -134,9 +134,10 @@ improve handoff quality, not merge blockers by themselves.
 ### `mcpServerInventory` — maturity: alpha
 
 Read-only inventory of MCP server definitions across Codex, Claude Code, and
-Cursor. It normalizes server name, source tool, scope/project path, transport,
-safe command or URL summary, referenced environment variable names, header keys,
-source file, and Codex variables that are referenced but missing from
+Cursor. It normalizes server name, source tool, repository/workspace name,
+scope/project path, transport, safe command or URL summary, referenced
+environment variable names, header keys, source file, and Codex variables that
+are referenced but missing from
 `~/.codex/mcp.env`.
 
 v1 does not edit, install, or probe MCP servers and never displays secret

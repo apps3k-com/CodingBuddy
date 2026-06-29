@@ -46,6 +46,7 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
                 tool: .codex,
                 name: server.name,
                 scope: String(localized: "User"),
+                repositoryName: String(localized: "User"),
                 sourcePath: configURL.path,
                 transport: .infer(type: nil, url: server.url, command: server.command),
                 summary: summary(url: server.url, command: server.command, args: server.args),
@@ -110,6 +111,7 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
             tool: tool,
             name: server.name,
             scope: server.scope == userScope ? String(localized: "User") : server.scope,
+            repositoryName: repositoryName(for: server.scope),
             sourcePath: sourcePath,
             transport: .infer(type: server.type, url: server.url, command: server.command),
             summary: summary(url: server.url, command: server.command, args: server.args),
@@ -121,6 +123,92 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
 
     /// Internal unlocalized marker for user-level configuration.
     private var userScope: String { "user" }
+
+    /// Derives a stable repository/workspace name for display without shelling out.
+    private func repositoryName(for scope: String) -> String {
+        guard scope != userScope else { return String(localized: "User") }
+        let scopeURL = URL(fileURLWithPath: scope).standardizedFileURL
+        if let gitRoot = nearestGitRoot(from: scopeURL) {
+            return gitRoot.lastPathComponent
+        }
+        return scopeURL.lastPathComponent.isEmpty ? String(localized: "Unknown") : scopeURL.lastPathComponent
+    }
+
+    /// Walks from a project path to the nearest valid `.git` directory or gitdir file.
+    private func nearestGitRoot(from url: URL) -> URL? {
+        var current = url
+        while current.path != current.deletingLastPathComponent().path {
+            switch gitMarkerState(at: current.appendingPathComponent(".git")) {
+            case .valid:
+                return current
+            case .invalid:
+                return nil
+            case .missing:
+                current.deleteLastPathComponent()
+            }
+        }
+        return nil
+    }
+
+    /// Filesystem state for a potential `.git` marker.
+    private enum GitMarkerState {
+        /// No marker exists at the inspected path.
+        case missing
+        /// The marker proves the current folder is a Git root.
+        case valid
+        /// A marker exists but is unsafe or malformed.
+        case invalid
+    }
+
+    /// Classifies `.git` as absent, a valid directory/gitdir file, or an unsafe marker.
+    private func gitMarkerState(at url: URL) -> GitMarkerState {
+        if isSymbolicLink(url) {
+            return .invalid
+        }
+
+        var isDirectory: ObjCBool = false
+        guard fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) else {
+            return .missing
+        }
+
+        if isDirectory.boolValue {
+            return .valid
+        }
+
+        return isValidGitdirFile(url) ? .valid : .invalid
+    }
+
+    /// Returns true when the URL is a symbolic link entry.
+    private func isSymbolicLink(_ url: URL) -> Bool {
+        (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]))?.isSymbolicLink == true
+    }
+
+    /// Validates the `.git` file format used by Git worktrees.
+    private func isValidGitdirFile(_ url: URL) -> Bool {
+        guard let text = try? String(contentsOf: url, encoding: .utf8) else {
+            return false
+        }
+
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.hasPrefix("gitdir:") else {
+            return false
+        }
+
+        let rawPath = trimmed
+            .dropFirst("gitdir:".count)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !rawPath.isEmpty else {
+            return false
+        }
+
+        let targetURL = URL(
+            fileURLWithPath: rawPath,
+            relativeTo: url.deletingLastPathComponent()
+        ).standardizedFileURL
+        var isDirectory: ObjCBool = false
+        return fileManager.fileExists(atPath: targetURL.path, isDirectory: &isDirectory)
+            && isDirectory.boolValue
+    }
 
     /// Returns unique values while preserving input order.
     private func unique(_ values: [String]) -> [String] {

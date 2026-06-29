@@ -53,6 +53,13 @@ struct MCPServerInventoryView: View {
             }
             .width(min: 150, ideal: 210)
 
+            TableColumn("Repository") { item in
+                Text(verbatim: item.repositoryName)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+            .width(min: 120, ideal: 160, max: 220)
+
             TableColumn("Scope") { item in
                 Text(verbatim: item.scope)
                     .font(.caption)
@@ -123,7 +130,7 @@ struct MCPServerInventoryView: View {
                     ContentUnavailableView(
                         "No Results",
                         systemImage: "magnifyingglass",
-                        description: Text("Try a different server, tool, scope, or environment variable name.")
+                        description: Text("Try a different server, tool, repository, scope, or environment variable name.")
                     )
                 }
             }

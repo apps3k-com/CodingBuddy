@@ -50,6 +50,7 @@ struct MCPServerInventoryTests {
 
         let project = home.appendingPathComponent("Project", isDirectory: true)
         try FileManager.default.createDirectory(at: project, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: project.appendingPathComponent(".git"), withIntermediateDirectories: true)
         try #"{"mcpServers":{"local-only":{"command":"swift","args":["run"],"env":{"LOCAL_PROJECT_TOKEN":"x"}}}}"#
             .write(to: project.appendingPathComponent(".mcp.json"), atomically: true, encoding: .utf8)
         try """
@@ -114,16 +115,129 @@ struct MCPServerInventoryTests {
         let claudeUser = try #require(items.first { $0.name == "claude-user" })
         #expect(claudeUser.tool == .claudeCode)
         #expect(claudeUser.scope == String(localized: "User"))
+        #expect(claudeUser.repositoryName == String(localized: "User"))
         #expect(claudeUser.headerKeys == ["Authorization"])
 
         let projectStdio = try #require(items.first { $0.name == "project-stdio" })
         #expect(projectStdio.scope == project.path)
+        #expect(projectStdio.repositoryName == "Project")
         #expect(projectStdio.envVarNames == ["PROJECT_TOKEN"])
+
+        let localOnly = try #require(items.first { $0.name == "local-only" })
+        #expect(localOnly.repositoryName == "Project")
 
         let cursorLinear = try #require(items.first { $0.name == "cursor-linear" })
         #expect(cursorLinear.tool == .cursor)
+        #expect(cursorLinear.repositoryName == String(localized: "User"))
         #expect(cursorLinear.transport == .sse)
         #expect(cursorLinear.envVarNames == ["LINEAR_TOKEN"])
+    }
+
+    /// Verifies repository display names use the nearest git root or deterministic workspace fallback.
+    @Test func repositoryNamesResolveFromNestedAndNonGitProjectScopes() throws {
+        let home = try makeTempDir()
+        let root = home.appendingPathComponent("RootRepo", isDirectory: true)
+        let nested = root.appendingPathComponent("packages/app", isDirectory: true)
+        let nonGit = home.appendingPathComponent("LooseWorkspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: root.appendingPathComponent(".git"), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: nested, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: nonGit, withIntermediateDirectories: true)
+        try #"{"mcpServers":{"nested-local":{"command":"node","args":["server.js"]}}}"#
+            .write(to: nested.appendingPathComponent(".mcp.json"), atomically: true, encoding: .utf8)
+        try #"{"mcpServers":{"loose-local":{"command":"node","args":["server.js"]}}}"#
+            .write(to: nonGit.appendingPathComponent(".mcp.json"), atomically: true, encoding: .utf8)
+        try """
+        {
+          "projects": {
+            "\(nested.path)": {},
+            "\(nonGit.path)": {}
+          }
+        }
+        """.write(to: home.appendingPathComponent(".claude.json"), atomically: true, encoding: .utf8)
+
+        let items = MCPServerInventoryScanner(homeDirectory: home).items()
+
+        let nestedItem = try #require(items.first { $0.name == "nested-local" })
+        #expect(nestedItem.scope == nested.path)
+        #expect(nestedItem.repositoryName == "RootRepo")
+
+        let looseItem = try #require(items.first { $0.name == "loose-local" })
+        #expect(looseItem.scope == nonGit.path)
+        #expect(looseItem.repositoryName == "LooseWorkspace")
+    }
+
+    /// Verifies repository names handle worktree gitdir files and malformed `.git` markers safely.
+    @Test func repositoryNamesHandleGitdirFilesAndInvalidMarkers() throws {
+        let home = try makeTempDir()
+        let outer = home.appendingPathComponent("OuterRepo", isDirectory: true)
+        let brokenWorkspace = outer.appendingPathComponent("BrokenWorkspace", isDirectory: true)
+        let worktree = home.appendingPathComponent("WorktreeRepo", isDirectory: true)
+        let metadata = home
+            .appendingPathComponent("GitMetadata", isDirectory: true)
+            .appendingPathComponent("worktrees/worktree-repo", isDirectory: true)
+        try FileManager.default.createDirectory(at: outer.appendingPathComponent(".git"), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: brokenWorkspace, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: worktree, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: metadata, withIntermediateDirectories: true)
+        try "not a gitdir marker\n".write(
+            to: brokenWorkspace.appendingPathComponent(".git"),
+            atomically: true,
+            encoding: .utf8
+        )
+        try "gitdir: \(metadata.path)\n".write(
+            to: worktree.appendingPathComponent(".git"),
+            atomically: true,
+            encoding: .utf8
+        )
+        try #"{"mcpServers":{"broken-local":{"command":"node","args":["server.js"]}}}"#
+            .write(to: brokenWorkspace.appendingPathComponent(".mcp.json"), atomically: true, encoding: .utf8)
+        try #"{"mcpServers":{"worktree-local":{"command":"node","args":["server.js"]}}}"#
+            .write(to: worktree.appendingPathComponent(".mcp.json"), atomically: true, encoding: .utf8)
+        try """
+        {
+          "projects": {
+            "\(brokenWorkspace.path)": {},
+            "\(worktree.path)": {}
+          }
+        }
+        """.write(to: home.appendingPathComponent(".claude.json"), atomically: true, encoding: .utf8)
+
+        let items = MCPServerInventoryScanner(homeDirectory: home).items()
+
+        let brokenItem = try #require(items.first { $0.name == "broken-local" })
+        #expect(brokenItem.scope == brokenWorkspace.path)
+        #expect(brokenItem.repositoryName == "BrokenWorkspace")
+
+        let worktreeItem = try #require(items.first { $0.name == "worktree-local" })
+        #expect(worktreeItem.scope == worktree.path)
+        #expect(worktreeItem.repositoryName == "WorktreeRepo")
+    }
+
+    /// Verifies symlinked `.git` markers fall back to the selected workspace name.
+    @Test func repositoryNamesIgnoreSymlinkGitMarkers() throws {
+        let home = try makeTempDir()
+        let outer = home.appendingPathComponent("OuterRepo", isDirectory: true)
+        let symlinkWorkspace = outer.appendingPathComponent("SymlinkWorkspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: outer.appendingPathComponent(".git"), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: symlinkWorkspace, withIntermediateDirectories: true)
+        try FileManager.default.createSymbolicLink(
+            at: symlinkWorkspace.appendingPathComponent(".git"),
+            withDestinationURL: outer.appendingPathComponent(".git")
+        )
+        try #"{"mcpServers":{"symlink-local":{"command":"node","args":["server.js"]}}}"#
+            .write(to: symlinkWorkspace.appendingPathComponent(".mcp.json"), atomically: true, encoding: .utf8)
+        try """
+        {
+          "projects": {
+            "\(symlinkWorkspace.path)": {}
+          }
+        }
+        """.write(to: home.appendingPathComponent(".claude.json"), atomically: true, encoding: .utf8)
+
+        let item = try #require(MCPServerInventoryScanner(homeDirectory: home).items().first)
+
+        #expect(item.scope == symlinkWorkspace.path)
+        #expect(item.repositoryName == "SymlinkWorkspace")
     }
 
     @Test func summariesRedactSecretBearingURLsAndArguments() throws {
@@ -193,8 +307,9 @@ struct MCPServerInventoryTests {
         let item = MCPServerInventoryItem(
             tool: .codex,
             name: "apps3k",
-            scope: "/tmp/project",
-            sourcePath: "/tmp/project/.codex/config.toml",
+            scope: "/tmp/project-scope",
+            repositoryName: "apps3k-repo",
+            sourcePath: "/tmp/project-scope/.codex/config.toml",
             transport: .http,
             summary: "https://example.com/mcp",
             envVarNames: ["APPS3K_TOKEN"],
@@ -204,7 +319,8 @@ struct MCPServerInventoryTests {
 
         #expect(item.matches(searchText: "apps3k"))
         #expect(item.matches(searchText: "codex"))
-        #expect(item.matches(searchText: "project"))
+        #expect(item.matches(searchText: "apps3k-repo"))
+        #expect(item.matches(searchText: "project-scope"))
         #expect(item.matches(searchText: "APPS3K_TOKEN"))
         #expect(!item.matches(searchText: "cursor"))
     }
