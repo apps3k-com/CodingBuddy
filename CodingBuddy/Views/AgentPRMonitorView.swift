@@ -10,13 +10,13 @@ import SwiftUI
 struct AgentPRMonitorView: View {
     /// Observable monitor state.
     var store: AgentPRMonitorStore
+    /// Opens the app Settings sheet for GitHub authorization changes.
+    var openSettings: () -> Void = {}
 
     /// Currently selected pull request row.
     @State private var selection: AgentPullRequest.ID?
     /// Search text applied across title, branch, author, issue, and status text.
     @State private var searchText = ""
-    /// Whether the token setup sheet is visible.
-    @State private var showsTokenSheet = false
     /// Whether the repository setup sheet is visible.
     @State private var showsRepositorySheet = false
 
@@ -122,18 +122,10 @@ struct AgentPRMonitorView: View {
                     showsRepositorySheet = true
                 }
                 .help("Choose the GitHub repository to monitor")
-
-                Button("GitHub Token...", systemImage: "key") {
-                    showsTokenSheet = true
-                }
-                .help("Add or replace the read-only GitHub token")
             }
         }
         .overlay {
             overlayView
-        }
-        .sheet(isPresented: $showsTokenSheet) {
-            GitHubTokenSetupSheet(store: store)
         }
         .sheet(isPresented: $showsRepositorySheet) {
             RepositorySetupSheet(store: store)
@@ -153,14 +145,18 @@ struct AgentPRMonitorView: View {
             } description: {
                 Text("Add a fine-grained read-only token to load pull request status.")
             } actions: {
-                Button("Add Token...") { showsTokenSheet = true }
+                Button("Open Settings") { openSettings() }
             }
         } else if case .refreshFailed(let error) = store.state, store.rows.isEmpty {
-            ContentUnavailableView(
-                "Refresh failed",
-                systemImage: "exclamationmark.triangle",
-                description: Text(error.localizedDescription)
-            )
+            ContentUnavailableView {
+                Label("Refresh failed", systemImage: "exclamationmark.triangle")
+            } description: {
+                Text(error.localizedDescription)
+            } actions: {
+                if error.isGitHubAuthorizationRecoverable {
+                    Button("Open Settings") { openSettings() }
+                }
+            }
         } else if store.selectedRepository == nil {
             ContentUnavailableView {
                 Label("No repository selected", systemImage: "book.closed")
@@ -212,45 +208,16 @@ struct AgentPRMonitorView: View {
     }
 }
 
-/// Sheet for saving a replacement GitHub token.
-private struct GitHubTokenSetupSheet: View {
-    /// Store that owns token persistence.
-    var store: AgentPRMonitorStore
-
-    /// Token text typed by the user. It is never copied into row models.
-    @State private var token = ""
-    /// Dismisses the setup sheet after save or cancel.
-    @Environment(\.dismiss) private var dismiss
-
-    /// Compact token setup form.
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("GitHub Token")
-                .font(.title3)
-                .fontWeight(.semibold)
-
-            Text("Use a fine-grained personal access token with read-only Metadata, Pull requests, Issues, Checks, and Commit statuses permissions.")
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-
-            SecureField("Token", text: $token)
-                .textFieldStyle(.roundedBorder)
-
-            HStack {
-                Spacer()
-                Button("Cancel", role: .cancel) { dismiss() }
-                Button("Save Token") {
-                    let trimmedToken = token.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if store.saveToken(trimmedToken) {
-                        dismiss()
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            }
+private extension GitHubClientError {
+    /// Whether the failure can be resolved by changing the GitHub token in Settings.
+    var isGitHubAuthorizationRecoverable: Bool {
+        switch self {
+        case .noToken, .authenticationFailed, .missingScope(_), .tokenStorageFailed:
+            true
+        case .repositoryDenied(_), .rateLimited(_), .networkUnavailable, .server(_), .invalidResponse,
+             .decodingFailed, .githubError:
+            false
         }
-        .padding(20)
-        .frame(width: 460)
     }
 }
 

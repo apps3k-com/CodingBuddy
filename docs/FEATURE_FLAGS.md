@@ -160,9 +160,9 @@ command arguments.
 
 Read-only monitor for open GitHub pull requests in one selected repository. It
 classifies each row as likely agent, likely human, or unknown, uses a
-Keychain-stored fine-grained GitHub token, and shows linked closing issues,
-CI/check status, review decision, unresolved review-thread findings, rate-limit
-state, and advisory merge readiness.
+Keychain-stored fine-grained GitHub token configured in Settings → Security,
+and shows linked closing issues, CI/check status, review decision, unresolved
+review-thread findings, rate-limit state, and advisory merge readiness.
 
 v1 never comments, approves, resolves threads, merges pull requests, mutates
 GitHub Projects, shells out to `gh`/`git`, or stores token values outside

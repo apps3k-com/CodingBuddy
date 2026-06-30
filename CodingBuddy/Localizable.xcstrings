@@ -4053,6 +4053,16 @@
         }
       }
     },
+    "GitHub token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Token"
+          }
+        }
+      }
+    },
     "Likely agent" : {
       "localizations" : {
         "de" : {
@@ -4133,12 +4143,32 @@
         }
       }
     },
+    "No token saved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Token gespeichert"
+          }
+        }
+      }
+    },
     "Open PR" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "PR öffnen"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen öffnen"
           }
         }
       }
@@ -4229,6 +4259,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Repository ..."
+          }
+        }
+      }
+    },
+    "Remove Token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token entfernen"
+          }
+        }
+      }
+    },
+    "Replace Token..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token ersetzen ..."
           }
         }
       }
@@ -4363,6 +4413,26 @@
         }
       }
     },
+    "Token saved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token gespeichert"
+          }
+        }
+      }
+    },
+    "Token update failed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token-Aktualisierung fehlgeschlagen"
+          }
+        }
+      }
+    },
     "Try a different title, branch, issue, status, or author." : {
       "localizations" : {
         "de" : {
@@ -4379,6 +4449,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktualisiert"
+          }
+        }
+      }
+    },
+    "Used by Agent PR Monitor to read pull request, issue, check, and review status from GitHub." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird vom Agent PR Monitor verwendet, um Pull-Request-, Issue-, Check- und Review-Status von GitHub zu lesen."
           }
         }
       }

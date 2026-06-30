@@ -135,11 +135,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
     func saveToken(_ token: String) -> Bool {
         do {
             try tokenStore.saveToken(token.trimmingCharacters(in: .whitespacesAndNewlines))
-            if selectedRepository != nil {
-                refresh()
-            } else {
-                state = .needsRepository
-            }
+            handleGitHubAuthorizationChange(.saved)
             return true
         } catch {
             state = .refreshFailed(.tokenStorageFailed)
@@ -149,16 +145,31 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
 
     /// Removes the saved token through the injected token store.
     func deleteToken() {
+        refreshTask?.cancel()
         do {
-            refreshTask?.cancel()
             try tokenStore.deleteToken()
+            handleGitHubAuthorizationChange(.removed)
+        } catch {
+            isRefreshing = false
+            state = .refreshFailed(.tokenStorageFailed)
+        }
+    }
+
+    /// Reacts to token changes made outside the monitor, such as in Settings.
+    func handleGitHubAuthorizationChange(_ change: GitHubAuthorizationChange) {
+        switch change {
+        case .saved:
+            if selectedRepository != nil {
+                refresh()
+            } else {
+                state = .needsRepository
+            }
+        case .removed:
+            refreshTask?.cancel()
             rows = []
             rateLimit = nil
             isRefreshing = false
             state = .needsToken
-        } catch {
-            isRefreshing = false
-            state = .refreshFailed(.tokenStorageFailed)
         }
     }
 

@@ -409,6 +409,52 @@ struct AgentPRMonitorTests {
         #expect(!(GitHubClientError.tokenStorageFailed.errorDescription ?? "").contains("github_pat_secret"))
     }
 
+    /// Verifies a token saved in Settings refreshes the selected repository.
+    @Test func storeSettingsTokenSaveRefreshesSelectedRepository() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let client = StubAgentPRMonitorClient(results: [
+            .success(AgentPRMonitorSnapshot(rows: [samplePullRequest(number: 60)], rateLimit: nil)),
+        ])
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.selectRepository(repository)
+        store.handleGitHubAuthorizationChange(.saved)
+        try await waitForRefresh(in: store)
+
+        #expect(store.state == .loaded)
+        #expect(store.rows.map(\.number) == [60])
+    }
+
+    /// Verifies removing the token in Settings clears monitor-only data.
+    @Test func storeSettingsTokenRemovalClearsPrivateRowsAndRefreshMetadata() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let client = StubAgentPRMonitorClient(results: [
+            .success(AgentPRMonitorSnapshot(
+                rows: [samplePullRequest(number: 61)],
+                rateLimit: GitHubRateLimitState(remaining: 10, resetAt: nil)
+            )),
+        ])
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.selectRepository(repository)
+        store.refresh()
+        try await waitForRefresh(in: store)
+        store.handleGitHubAuthorizationChange(.removed)
+
+        #expect(store.state == .needsToken)
+        #expect(store.rows.isEmpty)
+        #expect(store.rateLimit == nil)
+        #expect(!store.isRefreshing)
+    }
+
     /// Verifies deleting the token clears private row data and refresh metadata.
     @Test func storeDeleteTokenClearsPrivateRowsAndRefreshState() async throws {
         let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
@@ -452,8 +498,11 @@ struct AgentPRMonitorTests {
         store.refresh()
         try await waitUntilRefreshStarted(in: store)
         store.deleteToken()
+        try await Task.sleep(nanoseconds: 300_000_000)
 
         #expect(store.state == .refreshFailed(.tokenStorageFailed))
+        #expect(store.rows.isEmpty)
+        #expect(store.rateLimit == nil)
         #expect(!store.isRefreshing)
     }
 
