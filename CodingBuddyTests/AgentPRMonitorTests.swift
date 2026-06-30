@@ -114,6 +114,19 @@ struct AgentPRMonitorTests {
         #expect(transport.requests.isEmpty)
     }
 
+    /// Verifies token load failures stay local, typed, and recoverable through Settings.
+    @Test func clientMapsTokenLoadFailureWithoutCallingTransport() async {
+        let transport = RecordingGitHubTransport()
+        let client = GitHubClient(tokenStore: LoadFailingGitHubTokenStore(), transport: transport)
+
+        await #expect(throws: GitHubClientError.tokenLoadFailed) {
+            try await client.fetchOpenPullRequests(repository: repository)
+        }
+        #expect(transport.requests.isEmpty)
+        #expect(GitHubClientError.tokenLoadFailed.isGitHubAuthorizationRecoverable)
+        #expect(!(GitHubClientError.tokenLoadFailed.errorDescription ?? "").contains("github_pat_secret"))
+    }
+
     /// Verifies REST-style rate-limit headers map to a typed rate-limit error.
     @Test func clientMapsRateLimitHeadersToTypedError() async throws {
         let tokenStore = MemoryGitHubTokenStore(token: "ghp_secret-token")
@@ -302,6 +315,7 @@ struct AgentPRMonitorTests {
         await #expect(throws: GitHubClientError.repositoryDenied(repository)) {
             try await client.fetchOpenPullRequests(repository: repository)
         }
+        #expect(GitHubClientError.repositoryDenied(repository).isGitHubAuthorizationRecoverable)
     }
 
     /// Verifies the store shows token setup state without touching the network.
@@ -367,7 +381,7 @@ struct AgentPRMonitorTests {
         store.refresh()
         try await waitUntilRefreshStarted(in: store)
         store.selectRepository(otherRepository)
-        try await Task.sleep(nanoseconds: 300_000_000)
+        try await waitUntilRefreshStopped(in: store)
 
         #expect(store.selectedRepository == otherRepository)
         #expect(store.rows.isEmpty)
@@ -407,6 +421,74 @@ struct AgentPRMonitorTests {
         #expect(!didSave)
         #expect(failingStore.state == .refreshFailed(.tokenStorageFailed))
         #expect(!(GitHubClientError.tokenStorageFailed.errorDescription ?? "").contains("github_pat_secret"))
+    }
+
+    /// Verifies legacy monitor token saves reject blank values before persistence.
+    @Test func storeSaveTokenRejectsBlankTokenWithoutPersisting() throws {
+        let tokenStore = MemoryGitHubTokenStore(token: nil)
+        let client = StubAgentPRMonitorClient(results: [
+            .success(AgentPRMonitorSnapshot(rows: [samplePullRequest(number: 57)], rateLimit: nil)),
+        ])
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.selectRepository(repository)
+        let didSave = store.saveToken(" \n\t ")
+
+        #expect(!didSave)
+        #expect(try tokenStore.loadToken() == nil)
+        #expect(store.state == .idle)
+        #expect(store.rows.isEmpty)
+        #expect(!store.isRefreshing)
+    }
+
+    /// Verifies a token saved in Settings refreshes the selected repository.
+    @Test func storeSettingsTokenSaveRefreshesSelectedRepository() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let client = StubAgentPRMonitorClient(results: [
+            .success(AgentPRMonitorSnapshot(rows: [samplePullRequest(number: 60)], rateLimit: nil)),
+        ])
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.selectRepository(repository)
+        store.handleGitHubAuthorizationChange(.saved)
+        try await waitForRefresh(in: store)
+
+        #expect(store.state == .loaded)
+        #expect(store.rows.map(\.number) == [60])
+    }
+
+    /// Verifies removing the token in Settings clears monitor-only data.
+    @Test func storeSettingsTokenRemovalClearsPrivateRowsAndRefreshMetadata() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let client = StubAgentPRMonitorClient(results: [
+            .success(AgentPRMonitorSnapshot(
+                rows: [samplePullRequest(number: 61)],
+                rateLimit: GitHubRateLimitState(remaining: 10, resetAt: nil)
+            )),
+        ])
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.selectRepository(repository)
+        store.refresh()
+        try await waitForRefresh(in: store)
+        store.handleGitHubAuthorizationChange(.removed)
+
+        #expect(store.state == .needsToken)
+        #expect(store.rows.isEmpty)
+        #expect(store.rateLimit == nil)
+        #expect(!store.isRefreshing)
     }
 
     /// Verifies deleting the token clears private row data and refresh metadata.
@@ -452,8 +534,11 @@ struct AgentPRMonitorTests {
         store.refresh()
         try await waitUntilRefreshStarted(in: store)
         store.deleteToken()
+        try await waitUntilRefreshStopped(in: store)
 
         #expect(store.state == .refreshFailed(.tokenStorageFailed))
+        #expect(store.rows.isEmpty)
+        #expect(store.rateLimit == nil)
         #expect(!store.isRefreshing)
     }
 
@@ -510,6 +595,17 @@ struct AgentPRMonitorTests {
             try await Task.sleep(nanoseconds: 10_000_000)
         }
         Issue.record("Timed out waiting for AgentPRMonitorStore refresh to start")
+    }
+
+    /// Waits until an in-flight refresh is no longer visible to the store.
+    private func waitUntilRefreshStopped(in store: AgentPRMonitorStore) async throws {
+        for _ in 0..<100 {
+            if !store.isRefreshing {
+                return
+            }
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+        Issue.record("Timed out waiting for AgentPRMonitorStore refresh to stop")
     }
 
     /// Builds a paginated GraphQL response fixture for open pull request pages.
@@ -783,6 +879,28 @@ struct AgentPRMonitorTests {
       ]
     }
     """
+}
+
+/// Token store test double that fails while loading the token.
+private struct LoadFailingGitHubTokenStore: GitHubTokenStore {
+    /// Always throws a token-like failure string to verify leak protection.
+    func loadToken() throws -> String? {
+        throw Failure()
+    }
+
+    /// Saves are unused for this test double.
+    func saveToken(_ token: String) throws {}
+
+    /// Deletes are unused for this test double.
+    func deleteToken() throws {}
+
+    /// Synthetic Keychain-like load failure used by the failing token store.
+    private struct Failure: LocalizedError {
+        /// Error text intentionally contains a fake token to exercise sanitization.
+        var errorDescription: String? {
+            "keychain failed for github_pat_secret"
+        }
+    }
 }
 
 /// In-memory token store test double.

@@ -78,9 +78,10 @@ struct ContentView: View {
     /// MCP Inventory store when the feature flag is enabled.
     @State private var mcpServerInventoryStore: MCPServerInventoryStore? =
         FeatureFlag.mcpServerInventory.isEnabled ? MCPServerInventoryStore() : nil
+    /// GitHub authorization state shared between Settings and Agent PR Monitor.
+    @State private var githubAuthorizationStore: GitHubAuthorizationStore
     /// Agent PR Monitor store when the feature flag is enabled.
-    @State private var agentPRMonitorStore: AgentPRMonitorStore? =
-        FeatureFlag.agentPRMonitor.isEnabled ? AgentPRMonitorStore() : nil
+    @State private var agentPRMonitorStore: AgentPRMonitorStore?
     /// Backup Browser store when the feature flag is enabled.
     @State private var backupBrowserStore: BackupBrowserStore? =
         FeatureFlag.backupBrowser.isEnabled ? BackupBrowserStore() : nil
@@ -90,6 +91,16 @@ struct ContentView: View {
     @State private var scope: SidebarScope? = .all
     /// Whether the settings sheet is visible.
     @State private var showSettings = false
+    /// Settings pane requested by the action that opened Settings.
+    @State private var requestedSettingsPane = SettingsInitialPane.general
+
+    /// Creates root-owned stores and shares GitHub token persistence.
+    init(githubTokenStore: any GitHubTokenStore = KeychainGitHubTokenStore()) {
+        _githubAuthorizationStore = State(initialValue: GitHubAuthorizationStore(tokenStore: githubTokenStore))
+        _agentPRMonitorStore = State(initialValue: FeatureFlag.agentPRMonitor.isEnabled
+            ? AgentPRMonitorStore(tokenStore: githubTokenStore)
+            : nil)
+    }
 
     /// Main app navigation and detail content.
     var body: some View {
@@ -218,7 +229,10 @@ struct ContentView: View {
                 }
             case .agentPRMonitor:
                 if let agentPRMonitorStore {
-                    AgentPRMonitorView(store: agentPRMonitorStore)
+                    AgentPRMonitorView(store: agentPRMonitorStore) {
+                        requestedSettingsPane = .security
+                        showSettings = true
+                    }
                 } else {
                     VariableListView(store: store, secrets: secrets, scope: .all)
                 }
@@ -241,10 +255,16 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showSettings) {
-            SettingsView()
+            SettingsView(
+                githubAuthorizationStore: githubAuthorizationStore,
+                initialPane: requestedSettingsPane
+            ) { change in
+                agentPRMonitorStore?.handleGitHubAuthorizationChange(change)
+            }
         }
         .onChange(of: menuActions.settingsRequested, initial: true) {
             if menuActions.settingsRequested {
+                requestedSettingsPane = .general
                 showSettings = true
                 menuActions.settingsRequested = false
             }

@@ -10,13 +10,13 @@ import SwiftUI
 struct AgentPRMonitorView: View {
     /// Observable monitor state.
     var store: AgentPRMonitorStore
+    /// Opens the app Settings sheet for GitHub authorization changes.
+    var openSettings: () -> Void = {}
 
     /// Currently selected pull request row.
     @State private var selection: AgentPullRequest.ID?
     /// Search text applied across title, branch, author, issue, and status text.
     @State private var searchText = ""
-    /// Whether the token setup sheet is visible.
-    @State private var showsTokenSheet = false
     /// Whether the repository setup sheet is visible.
     @State private var showsRepositorySheet = false
 
@@ -28,6 +28,16 @@ struct AgentPRMonitorView: View {
     /// Currently selected row object.
     private var selectedRow: AgentPullRequest? {
         selection.flatMap { id in filteredRows.first { $0.id == id } }
+    }
+
+    /// Recoverable authorization failure shown while stale rows remain visible.
+    private var staleAuthorizationFailure: GitHubClientError? {
+        guard case .refreshFailed(let error) = store.state,
+              !store.rows.isEmpty,
+              error.isGitHubAuthorizationRecoverable else {
+            return nil
+        }
+        return error
     }
 
     /// Native table view with setup, filtering, refresh, and browser follow-up actions.
@@ -122,18 +132,15 @@ struct AgentPRMonitorView: View {
                     showsRepositorySheet = true
                 }
                 .help("Choose the GitHub repository to monitor")
-
-                Button("GitHub Token...", systemImage: "key") {
-                    showsTokenSheet = true
-                }
-                .help("Add or replace the read-only GitHub token")
             }
         }
         .overlay {
             overlayView
         }
-        .sheet(isPresented: $showsTokenSheet) {
-            GitHubTokenSetupSheet(store: store)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if let staleAuthorizationFailure {
+                authorizationRecoveryBanner(staleAuthorizationFailure)
+            }
         }
         .sheet(isPresented: $showsRepositorySheet) {
             RepositorySetupSheet(store: store)
@@ -145,6 +152,32 @@ struct AgentPRMonitorView: View {
         }
     }
 
+    /// Compact recovery prompt shown above stale pull request rows.
+    private func authorizationRecoveryBanner(_ error: GitHubClientError) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("GitHub authorization needs attention")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                Text(error.localizedDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+            Spacer(minLength: 8)
+            Button("Open Settings") { openSettings() }
+                .controlSize(.small)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.bar)
+        .overlay(alignment: .bottom) {
+            Divider()
+        }
+    }
+
     /// Setup, empty, and error overlays for non-table states.
     @ViewBuilder private var overlayView: some View {
         if case .needsToken = store.state {
@@ -153,14 +186,18 @@ struct AgentPRMonitorView: View {
             } description: {
                 Text("Add a fine-grained read-only token to load pull request status.")
             } actions: {
-                Button("Add Token...") { showsTokenSheet = true }
+                Button("Open Settings") { openSettings() }
             }
         } else if case .refreshFailed(let error) = store.state, store.rows.isEmpty {
-            ContentUnavailableView(
-                "Refresh failed",
-                systemImage: "exclamationmark.triangle",
-                description: Text(error.localizedDescription)
-            )
+            ContentUnavailableView {
+                Label("Refresh failed", systemImage: "exclamationmark.triangle")
+            } description: {
+                Text(error.localizedDescription)
+            } actions: {
+                if error.isGitHubAuthorizationRecoverable {
+                    Button("Open Settings") { openSettings() }
+                }
+            }
         } else if store.selectedRepository == nil {
             ContentUnavailableView {
                 Label("No repository selected", systemImage: "book.closed")
@@ -209,48 +246,6 @@ struct AgentPRMonitorView: View {
             )
         }
         return String(localized: "GitHub did not provide a reset time. Try again later.")
-    }
-}
-
-/// Sheet for saving a replacement GitHub token.
-private struct GitHubTokenSetupSheet: View {
-    /// Store that owns token persistence.
-    var store: AgentPRMonitorStore
-
-    /// Token text typed by the user. It is never copied into row models.
-    @State private var token = ""
-    /// Dismisses the setup sheet after save or cancel.
-    @Environment(\.dismiss) private var dismiss
-
-    /// Compact token setup form.
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("GitHub Token")
-                .font(.title3)
-                .fontWeight(.semibold)
-
-            Text("Use a fine-grained personal access token with read-only Metadata, Pull requests, Issues, Checks, and Commit statuses permissions.")
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-
-            SecureField("Token", text: $token)
-                .textFieldStyle(.roundedBorder)
-
-            HStack {
-                Spacer()
-                Button("Cancel", role: .cancel) { dismiss() }
-                Button("Save Token") {
-                    let trimmedToken = token.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if store.saveToken(trimmedToken) {
-                        dismiss()
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            }
-        }
-        .padding(20)
-        .frame(width: 460)
     }
 }
 

@@ -4053,6 +4053,26 @@
         }
       }
     },
+    "GitHub token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Token"
+          }
+        }
+      }
+    },
+    "GitHub authorization needs attention" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Autorisierung benötigt Aufmerksamkeit"
+          }
+        }
+      }
+    },
     "Likely agent" : {
       "localizations" : {
         "de" : {
@@ -4133,12 +4153,32 @@
         }
       }
     },
+    "No token saved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Token gespeichert"
+          }
+        }
+      }
+    },
     "Open PR" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "PR öffnen"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen öffnen"
           }
         }
       }
@@ -4229,6 +4269,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Repository ..."
+          }
+        }
+      }
+    },
+    "Remove GitHub token?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Token entfernen?"
+          }
+        }
+      }
+    },
+    "Remove Token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token entfernen"
+          }
+        }
+      }
+    },
+    "Replace Token..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token ersetzen ..."
           }
         }
       }
@@ -4353,12 +4423,42 @@
         }
       }
     },
+    "This removes the token from Keychain. You will need to add a token again to use Agent PR Monitor." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dadurch wird der Token aus dem Schlüsselbund entfernt. Du musst erneut einen Token hinzufügen, um Agent PR Monitor zu verwenden."
+          }
+        }
+      }
+    },
     "Token" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Token"
+          }
+        }
+      }
+    },
+    "Token saved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token gespeichert"
+          }
+        }
+      }
+    },
+    "Token update failed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token-Aktualisierung fehlgeschlagen"
           }
         }
       }
@@ -4379,6 +4479,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktualisiert"
+          }
+        }
+      }
+    },
+    "Used by Agent PR Monitor to read pull request, issue, check, and review status from GitHub." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird vom Agent PR Monitor verwendet, um Pull-Request-, Issue-, Check- und Review-Status von GitHub zu lesen."
           }
         }
       }

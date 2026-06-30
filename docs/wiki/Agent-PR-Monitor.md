@@ -73,8 +73,8 @@ Example setup for a junior implementer to document in the future UI:
 2. Limit the token to the repositories the user wants CodingBuddy to monitor.
 3. Grant only read access for Metadata, Pull requests, Issues, Checks, and
    Commit statuses.
-4. Copy the token once into CodingBuddy. CodingBuddy stores it in Keychain and
-   never displays it again by default.
+4. Copy the token once into CodingBuddy under **Settings → Security**.
+   CodingBuddy stores it in Keychain and never displays it again by default.
 
 Token storage should use a small `GitHubTokenStore` wrapper around
 Security.framework Keychain APIs. Store only the token and minimal metadata
@@ -84,9 +84,8 @@ Non-secret choices such as selected repositories can live in `UserDefaults`;
 the token itself must not.
 
 The app should never copy the token into row models, diagnostics, logs, error
-messages, or crash reports. If a token input UI is implemented later, reveal
-and copy actions should use the existing secret-unlock behavior rather than
-displaying token values by default.
+messages, or crash reports. The Settings token input UI should save or replace
+the Keychain value without offering reveal or copy actions by default.
 
 ## GitHub API Surface
 
@@ -214,7 +213,7 @@ Doctor, MCP Inventory, Agent Context, and Repo Readiness.
 
 | State | UI behavior |
 |---|---|
-| No token | Show a setup empty state with a button to add a GitHub token. |
+| No token | Show a setup empty state with a button that opens Settings → Security for GitHub token setup. |
 | No repository | Ask the user to add an owner/repo pair or choose from saved repositories. |
 | Loading | Keep the previous snapshot visible with a subtle progress indicator unless the repository changed. |
 | Loaded | Table rows show PR title, branch, author/source, linked issue, CI, review, findings, and updated time. |
@@ -233,8 +232,8 @@ or "needs reply".
 
 | Failure | Expected behavior |
 |---|---|
-| No token | Do not call GitHub. Offer setup. |
-| Invalid token | Show an authentication error and allow token replacement. |
+| No token | Do not call GitHub. Offer Settings → Security setup. |
+| Invalid token | Show an authentication error and allow token replacement in Settings → Security. |
 | Missing scope | Surface the missing permission if GitHub returns `X-Accepted-GitHub-Permissions`; otherwise show a scoped access error. |
 | Private repo denied | Show `Denied` for that repository without deleting the saved repo. |
 | Network offline | Keep the last snapshot and show that refresh failed. |
