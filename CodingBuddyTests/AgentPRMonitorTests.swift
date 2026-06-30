@@ -318,6 +318,106 @@ struct AgentPRMonitorTests {
         #expect(GitHubClientError.repositoryDenied(repository).isGitHubAuthorizationRecoverable)
     }
 
+    /// Verifies repository picker REST requests and response decoding.
+    @Test func clientListsAccessibleRepositoriesAndSendsRepositoryListRequest() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let transport = RecordingGitHubTransport(
+            result: .response(Data(Self.restRepositoryListResponse.utf8), statusCode: 200, headers: [
+                "X-RateLimit-Remaining": "42",
+            ])
+        )
+        let client = GitHubClient(tokenStore: tokenStore, transport: transport)
+
+        let list = try await client.fetchAccessibleRepositories()
+
+        let request = try #require(transport.requests.first)
+        let url = try #require(request.url)
+        let components = try #require(URLComponents(url: url, resolvingAgainstBaseURL: false))
+        let queryItems = components.queryItems ?? []
+        #expect(url.path == "/user/repos")
+        #expect(queryItems.first { $0.name == "visibility" }?.value == "all")
+        #expect(queryItems.first { $0.name == "affiliation" }?.value == "owner,collaborator,organization_member")
+        #expect(queryItems.first { $0.name == "sort" }?.value == "full_name")
+        #expect(queryItems.first { $0.name == "per_page" }?.value == "100")
+        #expect(queryItems.first { $0.name == "page" }?.value == "1")
+        #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer github_pat_secret")
+        #expect(list.repositories.map(\.displayName) == ["apps3k-com/CodingBuddy", "apps3k-com/Website"])
+        #expect(list.repositories.first?.description == "Native macOS environment helper")
+        #expect(list.repositories.first?.isPrivate == true)
+        #expect(list.repositories.first?.matches(searchText: "codingbuddy") == true)
+        #expect(list.repositories.first?.matches(searchText: "apps3k-com/CodingBuddy") == true)
+        #expect(list.rateLimit?.remaining == 42)
+        #expect(!list.isTruncated)
+    }
+
+    /// Verifies repository picker pagination stops at the configured cap.
+    @Test func clientCapsRepositoryListPagination() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let nextLink = #"<https://api.github.com/user/repos?page=3>; rel="next""#
+        let transport = RecordingGitHubTransport(results: [
+            .response(Data(Self.restRepositoryPage(owner: "apps3k-com", name: "One").utf8), statusCode: 200, headers: [
+                "Link": nextLink,
+            ]),
+            .response(Data(Self.restRepositoryPage(owner: "apps3k-com", name: "Two").utf8), statusCode: 200, headers: [
+                "Link": nextLink,
+            ]),
+            .response(Data(Self.restRepositoryPage(owner: "apps3k-com", name: "Three").utf8), statusCode: 200, headers: [:]),
+        ])
+        let client = GitHubClient(tokenStore: tokenStore, transport: transport, repositoryPageLimit: 2)
+
+        let list = try await client.fetchAccessibleRepositories()
+
+        let requestedPages = transport.requests.compactMap { request -> String? in
+            guard let url = request.url,
+                  let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+                return nil
+            }
+            return components.queryItems?.first { $0.name == "page" }?.value
+        }
+        #expect(list.repositories.map(\.displayName) == ["apps3k-com/One", "apps3k-com/Two"])
+        #expect(requestedPages == ["1", "2"])
+        #expect(list.isTruncated)
+    }
+
+    /// Verifies repository picker token, scope, and rate-limit failures stay typed.
+    @Test func clientMapsRepositoryListFailures() async {
+        let noTokenClient = GitHubClient(
+            tokenStore: MemoryGitHubTokenStore(token: nil),
+            transport: RecordingGitHubTransport()
+        )
+        await #expect(throws: GitHubClientError.noToken) {
+            try await noTokenClient.fetchAccessibleRepositories()
+        }
+
+        let missingScopeClient = GitHubClient(
+            tokenStore: MemoryGitHubTokenStore(token: "github_pat_secret"),
+            transport: RecordingGitHubTransport(result: .response(
+                Data(#"{"message":"Resource not accessible by personal access token"}"#.utf8),
+                statusCode: 403,
+                headers: ["X-Accepted-GitHub-Permissions": "metadata=read"]
+            ))
+        )
+        await #expect(throws: GitHubClientError.missingScope("metadata=read")) {
+            try await missingScopeClient.fetchAccessibleRepositories()
+        }
+
+        let resetAt = Date(timeIntervalSince1970: 1_783_000_000)
+        let rateLimitedClient = GitHubClient(
+            tokenStore: MemoryGitHubTokenStore(token: "github_pat_secret"),
+            transport: RecordingGitHubTransport(result: .response(
+                Data(#"{"message":"rate limit exceeded"}"#.utf8),
+                statusCode: 429,
+                headers: [
+                    "X-RateLimit-Remaining": "0",
+                    "X-RateLimit-Reset": "\(Int(resetAt.timeIntervalSince1970))",
+                ]
+            ))
+        )
+        await #expect(throws: GitHubClientError.rateLimited(resetAt: resetAt)) {
+            try await rateLimitedClient.fetchAccessibleRepositories()
+        }
+    }
+
     /// Verifies the store shows token setup state without touching the network.
     @Test func storeRefreshWithoutTokenShowsSetupStateAndKeepsTransportUnused() async throws {
         let tokenStore = MemoryGitHubTokenStore(token: nil)
@@ -388,6 +488,126 @@ struct AgentPRMonitorTests {
         #expect(store.rateLimit == nil)
         #expect(store.state == .idle)
         #expect(!store.isRefreshing)
+    }
+
+    /// Verifies repository choices load through the injected client and selected values persist.
+    @Test func storeLoadsRepositoryChoicesAndPersistsSelection() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let defaults = MemoryAgentPRMonitorDefaults()
+        let rateLimit = GitHubRateLimitState(remaining: 77, resetAt: Date(timeIntervalSince1970: 1_783_000_000))
+        let repositoryChoices = [
+            GitHubRepositorySummary(
+                ref: repository,
+                description: "Native macOS environment helper",
+                isPrivate: true,
+                isArchived: false,
+                pushedAt: nil
+            ),
+            GitHubRepositorySummary(
+                ref: GitHubRepositoryRef(owner: "apps3k-com", name: "Website"),
+                description: nil,
+                isPrivate: false,
+                isArchived: false,
+                pushedAt: nil
+            ),
+        ]
+        let client = StubAgentPRMonitorClient(
+            results: [],
+            repositoryResults: [
+                .success(GitHubRepositoryList(
+                    repositories: repositoryChoices,
+                    rateLimit: rateLimit,
+                    isTruncated: true
+                )),
+            ]
+        )
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: defaults
+        )
+
+        store.loadRepositoryChoices()
+        try await waitForRepositoryChoices(in: store)
+        store.selectRepository(repositoryChoices[1].ref)
+        let restoredStore = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: StubAgentPRMonitorClient(results: []),
+            defaults: defaults
+        )
+
+        #expect(store.repositoryPickerState == .loaded)
+        #expect(store.repositoryChoices == repositoryChoices)
+        #expect(store.repositoryPickerRateLimit == rateLimit)
+        #expect(store.repositoryChoicesAreTruncated)
+        #expect(store.selectedRepository == repositoryChoices[1].ref)
+        #expect(restoredStore.selectedRepository == repositoryChoices[1].ref)
+    }
+
+    /// Verifies repository picker failures do not clear the visible pull request snapshot.
+    @Test func storeRepositoryChoiceFailureKeepsCurrentSnapshotVisible() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let client = StubAgentPRMonitorClient(
+            results: [
+                .success(AgentPRMonitorSnapshot(rows: [samplePullRequest(number: 62)], rateLimit: nil)),
+            ],
+            repositoryResults: [
+                .failure(.authenticationFailed),
+            ]
+        )
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.selectRepository(repository)
+        store.refresh()
+        try await waitForRefresh(in: store)
+        store.loadRepositoryChoices(force: true)
+        try await waitForRepositoryChoices(in: store)
+
+        #expect(store.state == .loaded)
+        #expect(store.rows.map(\.number) == [62])
+        #expect(store.repositoryPickerState == .failed(.authenticationFailed))
+    }
+
+    /// Verifies a failed repository reload preserves cached picker choices.
+    @Test func storeRepositoryChoiceReloadFailureKeepsCachedChoices() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let cachedChoices = [
+            GitHubRepositorySummary(
+                ref: repository,
+                description: "Native macOS environment helper",
+                isPrivate: true,
+                isArchived: false,
+                pushedAt: nil
+            ),
+        ]
+        let client = StubAgentPRMonitorClient(
+            results: [],
+            repositoryResults: [
+                .success(GitHubRepositoryList(
+                    repositories: cachedChoices,
+                    rateLimit: nil,
+                    isTruncated: false
+                )),
+                .failure(.networkUnavailable),
+            ]
+        )
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.loadRepositoryChoices()
+        try await waitForRepositoryChoices(in: store)
+        store.loadRepositoryChoices(force: true)
+        try await waitForRepositoryChoices(in: store)
+
+        #expect(store.repositoryPickerState == .failed(.networkUnavailable))
+        #expect(store.repositoryChoices == cachedChoices)
     }
 
     /// Verifies token save success refreshes selected repositories and failures stay token-safe.
@@ -608,6 +828,20 @@ struct AgentPRMonitorTests {
         Issue.record("Timed out waiting for AgentPRMonitorStore refresh to stop")
     }
 
+    /// Waits for repository choices to finish loading.
+    private func waitForRepositoryChoices(in store: AgentPRMonitorStore) async throws {
+        for _ in 0..<100 {
+            switch store.repositoryPickerState {
+            case .loaded, .empty, .failed:
+                return
+            case .idle, .loading:
+                break
+            }
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+        Issue.record("Timed out waiting for AgentPRMonitorStore repository choices to finish")
+    }
+
     /// Builds a paginated GraphQL response fixture for open pull request pages.
     private static func graphQLPageResponse(number: Int, hasNextPage: Bool, endCursor: String?) -> String {
         let cursor = endCursor.map { "\"\($0)\"" } ?? "null"
@@ -662,6 +896,47 @@ struct AgentPRMonitorTests {
             "rateLimit": { "remaining": 4999, "resetAt": "2026-06-28T11:00:00Z" }
           }
         }
+        """
+    }
+
+    /// REST repository-list fixture with two visible repositories.
+    private static let restRepositoryListResponse = """
+    [
+      {
+        "name": "CodingBuddy",
+        "full_name": "apps3k-com/CodingBuddy",
+        "private": true,
+        "archived": false,
+        "pushed_at": "2026-06-30T10:00:00Z",
+        "description": "Native macOS environment helper",
+        "owner": { "login": "apps3k-com" }
+      },
+      {
+        "name": "Website",
+        "full_name": "apps3k-com/Website",
+        "private": false,
+        "archived": false,
+        "pushed_at": "2026-06-29T10:00:00Z",
+        "description": null,
+        "owner": { "login": "apps3k-com" }
+      }
+    ]
+    """
+
+    /// Builds one REST repository-list page with a single repository.
+    private static func restRepositoryPage(owner: String, name: String) -> String {
+        """
+        [
+          {
+            "name": "\(name)",
+            "full_name": "\(owner)/\(name)",
+            "private": false,
+            "archived": false,
+            "pushed_at": "2026-06-30T10:00:00Z",
+            "description": null,
+            "owner": { "login": "\(owner)" }
+          }
+        ]
         """
     }
 
@@ -1037,12 +1312,18 @@ private final class MemoryAgentPRMonitorDefaults: AgentPRMonitorDefaultsStoring 
 private final class StubAgentPRMonitorClient: AgentPRMonitorFetching, @unchecked Sendable {
     /// Pending fetch results.
     private var results: [Result<AgentPRMonitorSnapshot, GitHubClientError>]
+    /// Pending repository-list results.
+    private var repositoryResults: [Result<GitHubRepositoryList, GitHubClientError>]
     /// Lock protecting the queued results.
     private let lock = NSLock()
 
     /// Creates a stub with deterministic queued results.
-    init(results: [Result<AgentPRMonitorSnapshot, GitHubClientError>]) {
+    init(
+        results: [Result<AgentPRMonitorSnapshot, GitHubClientError>],
+        repositoryResults: [Result<GitHubRepositoryList, GitHubClientError>] = []
+    ) {
         self.results = results
+        self.repositoryResults = repositoryResults
     }
 
     /// Returns the next queued snapshot or error.
@@ -1052,6 +1333,16 @@ private final class StubAgentPRMonitorClient: AgentPRMonitorFetching, @unchecked
                 throw GitHubClientError.networkUnavailable
             }
             return try results.removeFirst().get()
+        }
+    }
+
+    /// Returns the next queued repository list or error.
+    func fetchAccessibleRepositories() async throws -> GitHubRepositoryList {
+        try lock.withLock {
+            if repositoryResults.isEmpty {
+                throw GitHubClientError.networkUnavailable
+            }
+            return try repositoryResults.removeFirst().get()
         }
     }
 }
@@ -1074,5 +1365,10 @@ private final class DelayedAgentPRMonitorClient: AgentPRMonitorFetching, @unchec
         try await Task.sleep(nanoseconds: delayNanoseconds)
         try Task.checkCancellation()
         return snapshot
+    }
+
+    /// Repository listing is not used by cancellation-focused delayed tests.
+    func fetchAccessibleRepositories() async throws -> GitHubRepositoryList {
+        throw GitHubClientError.networkUnavailable
     }
 }

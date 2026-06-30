@@ -163,6 +163,9 @@ classifies each row as likely agent, likely human, or unknown, uses a
 Keychain-stored fine-grained GitHub token configured in Settings → Security,
 and shows linked closing issues, CI/check status, review decision, unresolved
 review-thread findings, rate-limit state, and advisory merge readiness.
+Repository setup loads repositories visible to the saved token through GitHub's
+REST API, caps pagination for bounded UI work, and keeps an `owner/name` manual
+fallback for recovery when listing is unavailable.
 
 v1 never comments, approves, resolves threads, merges pull requests, mutates
 GitHub Projects, shells out to `gh`/`git`, or stores token values outside

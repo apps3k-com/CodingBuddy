@@ -119,7 +119,7 @@ v1 limits: MCP Inventory does not edit, install, or network-test servers. Claude
 The **Agent PR Monitor** entry (alpha, under Inventory) is a read-only table for open GitHub pull requests in one selected repository. Each row is classified as likely agent, likely human or unknown.
 
 - Add or replace the fine-grained read-only GitHub token in **Settings → Security**; CodingBuddy stores it in Keychain, not in UserDefaults or files. If no token is saved or GitHub rejects it, the monitor sends you back to Settings.
-- Choose one repository in `owner/name` format; CodingBuddy remembers the selected repository.
+- Choose one repository from the searchable picker; search matches owner, repository name, full `owner/name` and visible descriptions. The manual `owner/name` fallback remains available when repository listing is unavailable.
 - The table shows PR title, author/source classification, linked closing issues, CI status, review status, unresolved findings, advisory readiness and last update time.
 - Use **Refresh** to reload manually and **Open PR** to continue in the browser. The monitor never comments, approves, resolves threads or merges PRs.
 - Rate limits, missing permissions, denied repositories and offline errors are shown as UI-safe states while the last successful snapshot stays visible where possible.

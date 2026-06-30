@@ -46,6 +46,20 @@ nonisolated enum AgentPRMonitorState: Equatable, Sendable {
     case refreshFailed(GitHubClientError)
 }
 
+/// User-facing load state for the repository picker.
+nonisolated enum AgentPRRepositoryPickerState: Equatable, Sendable {
+    /// The picker has not loaded repositories yet.
+    case idle
+    /// Repository choices are currently loading.
+    case loading
+    /// Repository choices are available.
+    case loaded
+    /// GitHub returned no accessible repositories.
+    case empty
+    /// Loading repository choices failed.
+    case failed(GitHubClientError)
+}
+
 /// Root-owned state for the read-only Agent PR Monitor.
 @Observable
 final class AgentPRMonitorStore: CustomDebugStringConvertible {
@@ -64,6 +78,18 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
     /// Latest rate-limit metadata returned by GitHub.
     private(set) var rateLimit: GitHubRateLimitState?
 
+    /// Repositories visible to the saved token for setup selection.
+    private(set) var repositoryChoices: [GitHubRepositorySummary] = []
+
+    /// Latest repository picker state.
+    private(set) var repositoryPickerState: AgentPRRepositoryPickerState = .idle
+
+    /// Whether the repository picker stopped early at the configured pagination cap.
+    private(set) var repositoryChoicesAreTruncated = false
+
+    /// Latest rate-limit metadata returned while loading repository choices.
+    private(set) var repositoryPickerRateLimit: GitHubRateLimitState?
+
     /// Whether a refresh request is currently running.
     private(set) var isRefreshing = false
 
@@ -78,6 +104,9 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
 
     /// Current refresh task, cancelled when a newer refresh starts.
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
+
+    /// Current repository-list task, cancelled when a newer load starts.
+    @ObservationIgnored private var repositoryListTask: Task<Void, Never>?
 
     /// Creates the monitor store and restores the last selected repository.
     init(
@@ -96,6 +125,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
     /// Cancels any pending refresh when the store is released.
     deinit {
         refreshTask?.cancel()
+        repositoryListTask?.cancel()
     }
 
     /// Count of rows that currently need attention.
@@ -130,6 +160,47 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         defaults.removeObject(forKey: Self.repositoryKey)
     }
 
+    /// Loads repositories visible to the saved token for the picker sheet.
+    func loadRepositoryChoices(force: Bool = false) {
+        if !force {
+            switch repositoryPickerState {
+            case .loading, .loaded, .empty:
+                return
+            case .idle, .failed:
+                break
+            }
+        }
+
+        repositoryListTask?.cancel()
+        repositoryPickerState = .loading
+        repositoryChoicesAreTruncated = false
+
+        let client = client
+        repositoryListTask = Task { [weak self, client] in
+            do {
+                let list = try await client.fetchAccessibleRepositories()
+                guard !Task.isCancelled else { return }
+                guard let self else { return }
+                self.repositoryChoices = list.repositories
+                self.repositoryPickerRateLimit = list.rateLimit
+                self.repositoryChoicesAreTruncated = list.isTruncated
+                self.repositoryPickerState = list.repositories.isEmpty ? .empty : .loaded
+            } catch let error as GitHubClientError {
+                guard !Task.isCancelled else { return }
+                guard let self else { return }
+                self.repositoryPickerRateLimit = nil
+                self.repositoryChoicesAreTruncated = false
+                self.repositoryPickerState = .failed(error)
+            } catch {
+                guard !Task.isCancelled else { return }
+                guard let self else { return }
+                self.repositoryPickerRateLimit = nil
+                self.repositoryChoicesAreTruncated = false
+                self.repositoryPickerState = .failed(.networkUnavailable)
+            }
+        }
+    }
+
     /// Saves a replacement token through the injected token store.
     @discardableResult
     func saveToken(_ token: String) -> Bool {
@@ -162,6 +233,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
 
     /// Reacts to token changes made outside the monitor, such as in Settings.
     func handleGitHubAuthorizationChange(_ change: GitHubAuthorizationChange) {
+        resetRepositoryChoices()
         switch change {
         case .saved:
             if selectedRepository != nil {
@@ -176,6 +248,15 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
             isRefreshing = false
             state = .needsToken
         }
+    }
+
+    /// Clears cached repository choices when token state changes.
+    private func resetRepositoryChoices() {
+        repositoryListTask?.cancel()
+        repositoryChoices = []
+        repositoryPickerRateLimit = nil
+        repositoryChoicesAreTruncated = false
+        repositoryPickerState = .idle
     }
 
     /// Refreshes the selected repository while preserving the last snapshot on failure.
