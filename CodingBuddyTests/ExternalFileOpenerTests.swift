@@ -143,6 +143,32 @@ struct ExternalFileOpenerTests {
         #expect(workspace.appOpenedURLs.isEmpty)
     }
 
+    /// Verifies total open failure when both selected editor and fallback app reject the URL.
+    @Test func selectedEditorFailureAndSystemFallbackFailureReturnFailed() async {
+        let appURL = URL(fileURLWithPath: "/Applications/Editor.app")
+        let url = URL(fileURLWithPath: "/tmp/README.md")
+        let workspace = FakeExternalFileWorkspace(
+            bundleApplications: ["com.example.Editor": appURL],
+            existingURLs: [appURL, url],
+            defaultOpenSucceeds: false,
+            appOpenSucceeds: false
+        )
+        let opener = ExternalFileOpener(workspace: workspace)
+
+        let result = await opener.open(
+            url,
+            preference: .application(
+                bundleIdentifier: "com.example.Editor",
+                applicationURL: appURL,
+                displayName: "Editor"
+            )
+        )
+
+        #expect(result == .failed)
+        #expect(workspace.defaultOpenedURLs == [url])
+        #expect(workspace.appOpenedURLs == [FakeExternalFileWorkspace.AppOpen(url: url, applicationURL: appURL)])
+    }
+
     @Test func nonFileURLsAreNotOpened() async {
         let workspace = FakeExternalFileWorkspace()
         let opener = ExternalFileOpener(workspace: workspace)
