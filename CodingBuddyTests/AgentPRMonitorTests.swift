@@ -381,7 +381,7 @@ struct AgentPRMonitorTests {
         store.refresh()
         try await waitUntilRefreshStarted(in: store)
         store.selectRepository(otherRepository)
-        try await Task.sleep(nanoseconds: 300_000_000)
+        try await waitUntilRefreshStopped(in: store)
 
         #expect(store.selectedRepository == otherRepository)
         #expect(store.rows.isEmpty)
@@ -534,7 +534,7 @@ struct AgentPRMonitorTests {
         store.refresh()
         try await waitUntilRefreshStarted(in: store)
         store.deleteToken()
-        try await Task.sleep(nanoseconds: 300_000_000)
+        try await waitUntilRefreshStopped(in: store)
 
         #expect(store.state == .refreshFailed(.tokenStorageFailed))
         #expect(store.rows.isEmpty)
@@ -595,6 +595,17 @@ struct AgentPRMonitorTests {
             try await Task.sleep(nanoseconds: 10_000_000)
         }
         Issue.record("Timed out waiting for AgentPRMonitorStore refresh to start")
+    }
+
+    /// Waits until an in-flight refresh is no longer visible to the store.
+    private func waitUntilRefreshStopped(in store: AgentPRMonitorStore) async throws {
+        for _ in 0..<100 {
+            if !store.isRefreshing {
+                return
+            }
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+        Issue.record("Timed out waiting for AgentPRMonitorStore refresh to stop")
     }
 
     /// Builds a paginated GraphQL response fixture for open pull request pages.
