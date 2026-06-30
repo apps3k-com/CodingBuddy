@@ -1,2 +1,2 @@
 // Managed by release-please — never bump by hand.
-MARKETING_VERSION = 0.7.0 // x-release-please-version
+MARKETING_VERSION = 0.8.0 // x-release-please-version

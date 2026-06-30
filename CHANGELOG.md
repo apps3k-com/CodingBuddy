@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.8.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.7.0...v0.8.0) (2026-06-30)
+
+
+### Features
+
+* add a read-only Agent Context Inspector for repositories ([#42](https://github.com/apps3k-com/CodingBuddy/issues/42)) ([b147685](https://github.com/apps3k-com/CodingBuddy/commit/b147685d95dbaef12d64014ad868add96b8399b8))
+* add a safe backup browser and restore workflow ([70c684d](https://github.com/apps3k-com/CodingBuddy/commit/70c684dd7072aff986620ede6cc55b37c273320b))
+* add agent context inspector ([#42](https://github.com/apps3k-com/CodingBuddy/issues/42)) ([f144cf1](https://github.com/apps3k-com/CodingBuddy/commit/f144cf17a77e4d9765f354fb08278517beb4e498))
+* add Agent Doctor dashboard for local coding-agent health ([#40](https://github.com/apps3k-com/CodingBuddy/issues/40)) ([f135659](https://github.com/apps3k-com/CodingBuddy/commit/f1356596e9e337831bec0027bbc26087ec21dcc8))
+* add backup browser and restore flow ([#43](https://github.com/apps3k-com/CodingBuddy/issues/43)) ([bb2bacd](https://github.com/apps3k-com/CodingBuddy/commit/bb2bacd31754c5bc1ace4cf7678fc05de9cda046))
+* add default editor preference for repository files ([e3f9b90](https://github.com/apps3k-com/CodingBuddy/commit/e3f9b90304453b842855b921f782579959cafc54))
+* add default editor preference for text files ([e35a19b](https://github.com/apps3k-com/CodingBuddy/commit/e35a19b5abcb6597c965caa5557ee46eca45e90e))
+* add MCP server inventory ([#41](https://github.com/apps3k-com/CodingBuddy/issues/41)) ([66d5a46](https://github.com/apps3k-com/CodingBuddy/commit/66d5a4602c3117d3dda2dd6d21770dc09be9e145))
+* add native agent PR monitor ([#54](https://github.com/apps3k-com/CodingBuddy/issues/54)) ([7fec39d](https://github.com/apps3k-com/CodingBuddy/commit/7fec39d9f45644b1bb524340489fb0029b4226a2))
+* add native Agent PR Monitor for pull request follow-up ([6a99fef](https://github.com/apps3k-com/CodingBuddy/commit/6a99fef990c1242b00aefd6c17542a5a23d5637b))
+* add native repo readiness checklist for coding agents ([ee780fd](https://github.com/apps3k-com/CodingBuddy/commit/ee780fdf3b80785b8a42895ebd73a09f2f3b327a))
+* add repo readiness checklist for agents ([#44](https://github.com/apps3k-com/CodingBuddy/issues/44)) ([85b7c64](https://github.com/apps3k-com/CodingBuddy/commit/85b7c6476fba92f91787bb6a54fb91c68a6ac42b))
+* show repository names in MCP inventory ([38bd438](https://github.com/apps3k-com/CodingBuddy/commit/38bd438ed34fe46aa4f0ec22ecf3b64942f61edf))
+* show repository names in MCP Server Inventory ([9677e8c](https://github.com/apps3k-com/CodingBuddy/commit/9677e8c4e441fd9ec4ce2e5e260158096f89f4aa))
+
+
+### Bug Fixes
+
+* address agent context review feedback ([#42](https://github.com/apps3k-com/CodingBuddy/issues/42)) ([37bb27e](https://github.com/apps3k-com/CodingBuddy/commit/37bb27e38ab8a4dd841248fb03aa442fe9e9ee0e))
+* address Agent PR Monitor review feedback ([#54](https://github.com/apps3k-com/CodingBuddy/issues/54)) ([3a29437](https://github.com/apps3k-com/CodingBuddy/commit/3a29437a74d3a755aacf90aee5e528357010d3d8))
+* address backup browser review feedback ([#43](https://github.com/apps3k-com/CodingBuddy/issues/43)) ([94fc290](https://github.com/apps3k-com/CodingBuddy/commit/94fc290dac380d54bfc8584898b34337a38f3b0d))
+* address default editor review feedback ([0085867](https://github.com/apps3k-com/CodingBuddy/commit/00858671d9fdbe5b6c3b895688b31805dced0b71))
+* address MCP inventory review findings ([#41](https://github.com/apps3k-com/CodingBuddy/issues/41)) ([21f2981](https://github.com/apps3k-com/CodingBuddy/commit/21f29819be46d28cf843605726880e28c1c39999))
+* address repo readiness review findings ([#44](https://github.com/apps3k-com/CodingBuddy/issues/44)) ([547a7bd](https://github.com/apps3k-com/CodingBuddy/commit/547a7bdc0000e0fd1bed44e51297e4071880fff4))
+* align appearance setting with language preference ([c197cd5](https://github.com/apps3k-com/CodingBuddy/commit/c197cd59a19debbb31e7138bd283191d9d75c35c))
+* align backup browser content at top ([c3e90ce](https://github.com/apps3k-com/CodingBuddy/commit/c3e90ce6d6d2739c25ab4327c9cca2f42ccd0bb3))
+* clarify credential reset dialog copy ([#56](https://github.com/apps3k-com/CodingBuddy/issues/56)) ([55a6638](https://github.com/apps3k-com/CodingBuddy/commit/55a66389adc47288b4681726fb1e93bb94067e59))
+* keep Backup Browser list and preview aligned at top ([4552ea4](https://github.com/apps3k-com/CodingBuddy/commit/4552ea47b4cf8393b15cf589d660478b08780ba2))
+* keep Secrets as German developer term ([4bc67a4](https://github.com/apps3k-com/CodingBuddy/commit/4bc67a47486325913046edbb59ca8cbc549268ff))
+* keep Secrets as German developer terminology in app ([7fdda9b](https://github.com/apps3k-com/CodingBuddy/commit/7fdda9b1a2568d69cf74cf5e166985366d68a6f5))
+* make app count labels plural-aware across screens ([17f358a](https://github.com/apps3k-com/CodingBuddy/commit/17f358a8c42deec93de217c49accefd9c9c37ab7))
+* make appearance setting use dropdown picker ([9cc1159](https://github.com/apps3k-com/CodingBuddy/commit/9cc1159a6f17277075e3aa845f5fc69f563f5310))
+* make count labels plural-aware across app screens ([#57](https://github.com/apps3k-com/CodingBuddy/issues/57)) ([77d5cd4](https://github.com/apps3k-com/CodingBuddy/commit/77d5cd476ae277acb4ebd1e6d88d6d9de136c0b6))
+* make credential reset confirmations safer and clearer ([9681746](https://github.com/apps3k-com/CodingBuddy/commit/96817460dd975f45c2114c663c321fe2e4014990))
+* refresh backup browser after restore ([#43](https://github.com/apps3k-com/CodingBuddy/issues/43)) ([68af1c1](https://github.com/apps3k-com/CodingBuddy/commit/68af1c146f7a0064ecce6c9adc139edc283f6a1b))
+* show repository icon in Agent PR Monitor picker ([ab8a923](https://github.com/apps3k-com/CodingBuddy/commit/ab8a923b6bf68c23ecd60c5bfa61192c84c2b42d))
+* use repository icon for monitor picker ([12c1986](https://github.com/apps3k-com/CodingBuddy/commit/12c1986860bcd81e809adf73d0097da4323ba4af))
+
 ## [0.7.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.6.0...v0.7.0) (2026-06-23)
 
 
