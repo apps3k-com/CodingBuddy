@@ -293,6 +293,36 @@
         }
       }
     },
+    "Choose App..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App auswählen..."
+          }
+        }
+      }
+    },
+    "Choose Default Editor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard-Editor auswählen"
+          }
+        }
+      }
+    },
+    "Choose the app CodingBuddy should use for Markdown and other text files." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle die App, die CodingBuddy für Markdown und andere Textdateien verwenden soll."
+          }
+        }
+      }
+    },
     "Choose a repository folder" : {
       "localizations" : {
         "de" : {
@@ -719,6 +749,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dunkel"
+          }
+        }
+      }
+    },
+    "Default editor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard-Editor"
           }
         }
       }
@@ -1853,6 +1893,16 @@
         }
       }
     },
+    "System Default" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemstandard"
+          }
+        }
+      }
+    },
     "Takes effect after relaunching CodingBuddy." : {
       "localizations" : {
         "de" : {
@@ -1939,6 +1989,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Die Datei wurde extern geändert. Bitte erneut versuchen."
+          }
+        }
+      }
+    },
+    "The configured default editor is unavailable. CodingBuddy opened the file with the system default instead." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der konfigurierte Standard-Editor ist nicht verfügbar. CodingBuddy hat die Datei stattdessen mit dem Systemstandard geöffnet."
           }
         }
       }
@@ -2109,6 +2169,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bis zum Beenden"
+          }
+        }
+      }
+    },
+    "Used when CodingBuddy opens Markdown, JSON, YAML, and other text files from repository tools." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird verwendet, wenn CodingBuddy Markdown, JSON, YAML und andere Textdateien aus Repository-Tools öffnet."
           }
         }
       }
@@ -3469,6 +3539,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Repository-Status"
+          }
+        }
+      }
+    },
+    "Reset" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurücksetzen"
           }
         }
       }

@@ -5,12 +5,18 @@ import SwiftUI
 struct AgentContextInspectorView: View {
     /// Observable state that owns repository selection and scanner output.
     var store: AgentContextInspectorStore
+    /// External file opener honoring the default editor preference.
+    var fileOpener = ExternalFileOpener()
 
     /// Currently selected table row.
     @State private var selection: AgentContextItem.ID?
 
     /// Search text applied across paths, kinds, types, and signals.
     @State private var searchText = ""
+    /// Non-blocking file-open warning shown after graceful fallback.
+    @State private var openWarning: String?
+    /// Identifier that restarts the warning auto-dismiss timer.
+    @State private var openWarningID = UUID()
 
     /// Inspector rows after applying the current search filter.
     private var filteredItems: [AgentContextItem] {
@@ -110,6 +116,21 @@ struct AgentContextInspectorView: View {
                 )
             }
         }
+        .overlay(alignment: .bottom) {
+            if let openWarning {
+                Text(openWarning)
+                    .font(.caption)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+                    .padding(.bottom, 12)
+            }
+        }
+        .task(id: openWarningID) {
+            guard openWarning != nil else { return }
+            try? await Task.sleep(for: .seconds(4))
+            openWarning = nil
+        }
     }
 
     /// Finds the currently visible row for a selected table identifier.
@@ -131,9 +152,20 @@ struct AgentContextInspectorView: View {
         store.selectRepository(url)
     }
 
-    /// Opens a present context entry through Launch Services.
+    /// Opens a present context entry through the configured file opener.
     private func open(_ item: AgentContextItem) {
-        NSWorkspace.shared.open(item.url)
+        let preference = FeatureFlag.defaultEditorPreference.isEnabled
+            ? DefaultTextEditorPreference.load()
+            : .systemDefault
+        Task { @MainActor in
+            let result = await fileOpener.open(item.url, preference: preference)
+            if result == .fellBackToSystemDefault {
+                openWarning = String(
+                    localized: "The configured default editor is unavailable. CodingBuddy opened the file with the system default instead."
+                )
+                openWarningID = UUID()
+            }
+        }
     }
 
     /// Reveals a present context entry in Finder.

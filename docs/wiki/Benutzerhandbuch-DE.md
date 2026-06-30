@@ -89,7 +89,7 @@ Der Seitenleisten-Eintrag **Agent Context** (Alpha, unter Inventar) ist ein Nur-
 - Wähle einen Repository-Ordner; CodingBuddy merkt sich den zuletzt gewählten Ordner.
 - Die Tabelle prüft eine feste Allowlist: `AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, `.mcp.json`, `.codex`-Projektkonfiguration und offensichtliche Entwicklerdokumentation wie `README.md`, `CONTRIBUTING.md` und Development-Setup-Dokumente.
 - Signale markieren fehlende `AGENTS.md` oder `CLAUDE.md`, zwei gleichzeitig vorhandene Governance-Dateien, leere Dateien, ungewöhnlich große Dateien sowie projektlokale MCP-/Codex-Konfiguration.
-- Mit **Öffnen** oder **Im Finder anzeigen** springst du nativ zum Eintrag. Der Inspector bearbeitet diese Dateien nie.
+- Mit **Öffnen** oder **Im Finder anzeigen** springst du nativ zum Eintrag. **Öffnen** verwendet deinen konfigurierten Standard-Editor für textartige Dateien; der Inspector bearbeitet diese Dateien nie.
 
 v1-Grenzen: Agent Context ist ausschließlich deterministische Erkennung. Er durchsucht das Repository nicht rekursiv, vergleicht Policy-Text nicht semantisch, entscheidet nicht, welche Regel gewinnt, und führt keine Natural-Language-Analyse über Instruktionen aus.
 
@@ -160,6 +160,7 @@ Der Eintrag **Craft Agents** (Alpha) zeigt, was die Craft-Agents-App in `~/.craf
 
 - **Sprache** — System, English oder Deutsch. Wird nach einem Neustart der App wirksam.
 - **Erscheinungsbild** — Auto (folgt dem System), Hell oder Dunkel.
+- **Standard-Editor** — wähle die macOS-App, die CodingBuddy beim Öffnen von Markdown, JSON, YAML und anderen textartigen Repository-Dateien verwenden soll, oder setze auf den Systemstandard zurück.
 - **Sicherheit** — wie lange Secrets nach der Authentifizierung sichtbar bleiben.
 
 ## Live-Aktualisierung

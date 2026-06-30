@@ -3,11 +3,14 @@
 //  CodingBuddy
 //
 
+import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Presented as a sheet over the main window — window-modal on purpose, so
 /// it neither spawns a second window nor leaves the app interactive behind it.
 struct SettingsView: View {
+    /// Settings sections exposed by the sheet's segmented control.
     private enum Pane: Hashable {
         case general
         case security
@@ -17,6 +20,9 @@ struct SettingsView: View {
     @State private var pane: Pane = .general
     @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.auto.rawValue
     @AppStorage("appLanguage") private var languageRaw = AppLanguage.system.rawValue
+    @AppStorage(DefaultTextEditorPreference.bundleIdentifierKey) private var editorBundleIdentifier = ""
+    @AppStorage(DefaultTextEditorPreference.applicationPathKey) private var editorApplicationPath = ""
+    @AppStorage(DefaultTextEditorPreference.displayNameKey) private var editorDisplayName = ""
     @AppStorage(SecretsGuard.unlockDurationKey) private var unlockDuration = SecretsGuard.defaultUnlockDuration
 
     var body: some View {
@@ -53,7 +59,7 @@ struct SettingsView: View {
             }
             .padding(12)
         }
-        .frame(width: 440, height: 400)
+        .frame(width: 480, height: 430)
     }
 
     private var securityPane: some View {
@@ -95,6 +101,30 @@ struct SettingsView: View {
                     Text("Dark").tag(AppearanceMode.dark.rawValue)
                 }
             }
+
+            if FeatureFlag.defaultEditorPreference.isEnabled {
+                Section {
+                    LabeledContent("Default editor") {
+                        HStack(spacing: 8) {
+                            Text(verbatim: defaultEditorPreference.displayName)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            Spacer(minLength: 8)
+                            Button("Choose App...") {
+                                chooseDefaultEditor()
+                            }
+                            Button("Reset") {
+                                resetDefaultEditor()
+                            }
+                            .disabled(defaultEditorPreference == .systemDefault)
+                        }
+                    }
+                } footer: {
+                    Text("Used when CodingBuddy opens Markdown, JSON, YAML, and other text files from repository tools.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .formStyle(.grouped)
         .onChange(of: languageRaw) {
@@ -105,6 +135,49 @@ struct SettingsView: View {
         .onChange(of: appearanceRaw) {
             AppearanceMode(rawValue: appearanceRaw)?.apply()
         }
+    }
+
+    /// Editor preference represented by the current AppStorage values.
+    private var defaultEditorPreference: DefaultTextEditorPreference {
+        DefaultTextEditorPreference.fromStoredValues(
+            bundleIdentifier: editorBundleIdentifier,
+            applicationPath: editorApplicationPath,
+            displayName: editorDisplayName
+        )
+    }
+
+    /// Presents a native application picker and stores the selected app.
+    private func chooseDefaultEditor() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [.applicationBundle]
+        panel.directoryURL = FileManager.default.urls(for: .applicationDirectory, in: .localDomainMask).first
+        panel.message = String(localized: "Choose the app CodingBuddy should use for Markdown and other text files.")
+        panel.prompt = String(localized: "Choose Default Editor")
+
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        saveDefaultEditor(url)
+    }
+
+    /// Stores the selected application bundle metadata for later relaunches.
+    private func saveDefaultEditor(_ url: URL) {
+        switch DefaultTextEditorPreference.application(at: url) {
+        case .systemDefault:
+            resetDefaultEditor()
+        case .application(let bundleIdentifier, let applicationURL, let displayName):
+            editorBundleIdentifier = bundleIdentifier ?? ""
+            editorApplicationPath = applicationURL.path
+            editorDisplayName = displayName
+        }
+    }
+
+    /// Resets CodingBuddy to Launch Services' system default editor.
+    private func resetDefaultEditor() {
+        editorBundleIdentifier = ""
+        editorApplicationPath = ""
+        editorDisplayName = ""
     }
 }
 
