@@ -419,26 +419,12 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
         repository: GitHubRepositoryRef,
         rateLimit: GitHubRateLimitState?
     ) throws {
-        switch response.statusCode {
-        case 200..<300:
-            return
-        case 401:
-            throw GitHubClientError.authenticationFailed
-        case 403, 429:
-            if response.statusCode == 429 || rateLimit?.remaining == 0 {
-                throw GitHubClientError.rateLimited(resetAt: rateLimit?.resetAt)
-            }
-            if let permissions = response.value(forHTTPHeaderField: "X-Accepted-GitHub-Permissions") {
-                throw GitHubClientError.missingScope(permissions)
-            }
-            if let message = try? JSONDecoder().decode(GitHubRESTError.self, from: data).message,
-               message.localizedCaseInsensitiveContains("rate limit") {
-                throw GitHubClientError.rateLimited(resetAt: rateLimit?.resetAt)
-            }
-            throw GitHubClientError.repositoryDenied(repository)
-        default:
-            throw GitHubClientError.server(statusCode: response.statusCode)
-        }
+        try mapRESTStatus(
+            response: response,
+            data: data,
+            rateLimit: rateLimit,
+            fallbackError: .repositoryDenied(repository)
+        )
     }
 
     /// Maps HTTP metadata for repository-list requests into UI-safe typed errors.
@@ -446,6 +432,21 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
         response: HTTPURLResponse,
         data: Data,
         rateLimit: GitHubRateLimitState?
+    ) throws {
+        try mapRESTStatus(
+            response: response,
+            data: data,
+            rateLimit: rateLimit,
+            fallbackError: .githubError
+        )
+    }
+
+    /// Shared REST status mapping for GitHub responses with endpoint-specific fallback errors.
+    private static func mapRESTStatus(
+        response: HTTPURLResponse,
+        data: Data,
+        rateLimit: GitHubRateLimitState?,
+        fallbackError: GitHubClientError
     ) throws {
         switch response.statusCode {
         case 200..<300:
@@ -463,7 +464,7 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
                message.localizedCaseInsensitiveContains("rate limit") {
                 throw GitHubClientError.rateLimited(resetAt: rateLimit?.resetAt)
             }
-            throw GitHubClientError.githubError
+            throw fallbackError
         default:
             throw GitHubClientError.server(statusCode: response.statusCode)
         }

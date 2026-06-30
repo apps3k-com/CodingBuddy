@@ -572,6 +572,44 @@ struct AgentPRMonitorTests {
         #expect(store.repositoryPickerState == .failed(.authenticationFailed))
     }
 
+    /// Verifies a failed repository reload preserves cached picker choices.
+    @Test func storeRepositoryChoiceReloadFailureKeepsCachedChoices() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let cachedChoices = [
+            GitHubRepositorySummary(
+                ref: repository,
+                description: "Native macOS environment helper",
+                isPrivate: true,
+                isArchived: false,
+                pushedAt: nil
+            ),
+        ]
+        let client = StubAgentPRMonitorClient(
+            results: [],
+            repositoryResults: [
+                .success(GitHubRepositoryList(
+                    repositories: cachedChoices,
+                    rateLimit: nil,
+                    isTruncated: false
+                )),
+                .failure(.networkUnavailable),
+            ]
+        )
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.loadRepositoryChoices()
+        try await waitForRepositoryChoices(in: store)
+        store.loadRepositoryChoices(force: true)
+        try await waitForRepositoryChoices(in: store)
+
+        #expect(store.repositoryPickerState == .failed(.networkUnavailable))
+        #expect(store.repositoryChoices == cachedChoices)
+    }
+
     /// Verifies token save success refreshes selected repositories and failures stay token-safe.
     @Test func storeSaveTokenRefreshesSelectedRepositoryAndDoesNotLeakStorageFailures() async throws {
         let tokenStore = MemoryGitHubTokenStore(token: nil)

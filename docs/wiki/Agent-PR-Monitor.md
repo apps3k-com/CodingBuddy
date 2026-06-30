@@ -2,8 +2,8 @@
 
 ## Status
 
-Design spike for issue #45. This page proposes the native architecture for a
-future Agent PR Monitor; it does not ship app feature code.
+Design spike for issue #45 plus implementation notes for the shipped native
+Agent PR Monitor. The feature is available behind the `agentPRMonitor` flag.
 
 ## Goal
 
@@ -46,6 +46,23 @@ test may call GitHub or read real `$HOME` state.
 
 The feature should be introduced behind an `agentPRMonitor` alpha flag only
 when implementation begins. This spike intentionally does not add that flag.
+
+## Repository Picker
+
+The shipped monitor no longer requires users to type a repository manually as
+the primary setup path. The repository setup sheet loads repositories visible to
+the saved GitHub token through `GET /user/repos`, then shows a native searchable
+list. Search matches owner, repository name, full `owner/name`, and visible
+descriptions.
+
+The picker keeps manual `owner/name` entry as a fallback when listing
+repositories is unavailable or the desired repository is not returned. Reload
+failures do not clear the current pull request snapshot, and a failed repository
+list reload keeps cached repository choices selectable while showing a retry or
+Settings recovery action.
+
+Repository listing is page-capped for v1. If GitHub exposes more pages after
+the cap, the picker shows a truncation notice and keeps manual entry available.
 
 ## Authentication And Token Storage
 
@@ -159,6 +176,7 @@ partial shape for a token:
 
 | Data | Endpoint | Required permission |
 |---|---|---|
+| Accessible repositories | `GET /user/repos` | Metadata read for visible repositories. |
 | PR list/details | `GET /repos/{owner}/{repo}/pulls` and `GET /repos/{owner}/{repo}/pulls/{pull_number}` | Pull requests read; GitHub also allows `Get a pull request` with Contents read. |
 | Reviews | `GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews` | Pull requests read. |
 | Linked issue details | `GET /repos/{owner}/{repo}/issues/{issue_number}` | Issues read. |
@@ -214,7 +232,11 @@ Doctor, MCP Inventory, Agent Context, and Repo Readiness.
 | State | UI behavior |
 |---|---|
 | No token | Show a setup empty state with a button that opens Settings → Security for GitHub token setup. |
-| No repository | Ask the user to add an owner/repo pair or choose from saved repositories. |
+| No repository | Open the repository picker so the user can search accessible repositories or use manual `owner/name` entry. |
+| Repository list loading | Show a native progress state while keeping manual entry available. |
+| Repository list unavailable | Show retry and Settings recovery actions; keep cached choices selectable when available. |
+| Repository list empty | Explain that the saved token did not return accessible repositories and keep manual entry available. |
+| Repository list truncated | Explain that some repositories are hidden because the page cap was reached. |
 | Loading | Keep the previous snapshot visible with a subtle progress indicator unless the repository changed. |
 | Loaded | Table rows show PR title, branch, author/source, linked issue, CI, review, findings, and updated time. |
 | Empty | Explain that no matching open agent PRs were found. |
@@ -265,6 +287,8 @@ Recommended behavior:
 
 - Token values never appear in model values, tables, logs, alerts, or copied
   diagnostic text.
+- Raw GitHub repository-list, PR, review, issue, check, and status responses
+  are decoded into normalized in-memory models and are never logged.
 - PR titles, issue titles, branch names, and review comments may be private
   repository data. They should stay local to the app and should not be written
   to disk unless a future cache is explicitly designed and documented.

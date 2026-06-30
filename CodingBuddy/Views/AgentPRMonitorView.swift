@@ -280,6 +280,15 @@ private struct RepositorySetupSheet: View {
         GitHubRepositoryRef(displayName: manualRepository.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 
+    /// Latest repository-load error when cached choices can still be selected.
+    private var cachedRepositoryLoadError: GitHubClientError? {
+        guard case .failed(let error) = store.repositoryPickerState,
+              !store.repositoryChoices.isEmpty else {
+            return nil
+        }
+        return error
+    }
+
     /// Searchable repository picker with manual owner/name fallback.
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -322,6 +331,27 @@ private struct RepositorySetupSheet: View {
                 .frame(minHeight: 260)
 
                 repositoryListOverlay
+            }
+
+            if let cachedRepositoryLoadError {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Label("Repositories unavailable", systemImage: "exclamationmark.triangle")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(cachedRepositoryLoadError.localizedDescription)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                    Spacer(minLength: 8)
+                    if cachedRepositoryLoadError.isGitHubAuthorizationRecoverable {
+                        Button("Open Settings") { openSettingsAfterDismiss() }
+                            .controlSize(.small)
+                    }
+                    Button("Retry") {
+                        store.loadRepositoryChoices(force: true)
+                    }
+                    .controlSize(.small)
+                }
             }
 
             if store.repositoryChoicesAreTruncated {
@@ -409,20 +439,30 @@ private struct RepositorySetupSheet: View {
                 description: Text("The saved token did not return any accessible repositories.")
             )
         case .failed(let error):
-            ContentUnavailableView {
-                Label("Repositories unavailable", systemImage: "exclamationmark.triangle")
-            } description: {
-                Text(error.localizedDescription)
-            } actions: {
-                HStack {
-                    if error.isGitHubAuthorizationRecoverable {
-                        Button("Open Settings") { openSettings() }
-                    }
-                    Button("Retry") {
-                        store.loadRepositoryChoices(force: true)
+            if store.repositoryChoices.isEmpty {
+                ContentUnavailableView {
+                    Label("Repositories unavailable", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(error.localizedDescription)
+                } actions: {
+                    HStack {
+                        if error.isGitHubAuthorizationRecoverable {
+                            Button("Open Settings") { openSettingsAfterDismiss() }
+                        }
+                        Button("Retry") {
+                            store.loadRepositoryChoices(force: true)
+                        }
                     }
                 }
             }
+        }
+    }
+
+    /// Dismisses this sheet before opening Settings to avoid stacked sheet presentation issues.
+    private func openSettingsAfterDismiss() {
+        dismiss()
+        DispatchQueue.main.async {
+            openSettings()
         }
     }
 
