@@ -213,10 +213,9 @@ private extension GitHubClientError {
     /// Whether the failure can be resolved by changing the GitHub token in Settings.
     var isGitHubAuthorizationRecoverable: Bool {
         switch self {
-        case .noToken, .authenticationFailed, .missingScope(_), .tokenStorageFailed:
+        case .noToken, .authenticationFailed, .missingScope(_), .repositoryDenied(_), .tokenStorageFailed:
             true
-        case .repositoryDenied(_), .rateLimited(_), .networkUnavailable, .server(_), .invalidResponse,
-             .decodingFailed, .githubError:
+        case .rateLimited(_), .networkUnavailable, .server(_), .invalidResponse, .decodingFailed, .githubError:
             false
         }
     }

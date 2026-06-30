@@ -4263,6 +4263,16 @@
         }
       }
     },
+    "Remove GitHub token?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Token entfernen?"
+          }
+        }
+      }
+    },
     "Remove Token" : {
       "localizations" : {
         "de" : {
@@ -4399,6 +4409,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Der gespeicherte GitHub-Token konnte nicht gelesen werden."
+          }
+        }
+      }
+    },
+    "This removes the token from Keychain. You will need to add a token again to use Agent PR Monitor." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dadurch wird der Token aus dem Schlüsselbund entfernt. Du musst erneut einen Token hinzufügen, um Agent PR Monitor zu verwenden."
           }
         }
       }

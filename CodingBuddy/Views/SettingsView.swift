@@ -40,6 +40,8 @@ struct SettingsView: View {
     var onGitHubAuthorizationChange: (GitHubAuthorizationChange) -> Void
     /// Whether the GitHub token replacement sheet is visible.
     @State private var showsGitHubTokenSheet = false
+    /// Whether the GitHub token removal confirmation is visible.
+    @State private var showsRemoveGitHubTokenConfirmation = false
 
     /// Creates the settings sheet with an optional initial pane.
     init(
@@ -102,9 +104,7 @@ struct SettingsView: View {
                                 showsGitHubTokenSheet = true
                             }
                             Button("Remove Token", role: .destructive) {
-                                if githubAuthorizationStore.deleteToken() {
-                                    onGitHubAuthorizationChange(.removed)
-                                }
+                                showsRemoveGitHubTokenConfirmation = true
                             }
                             .disabled(!githubAuthorizationStore.hasSavedToken)
                         }
@@ -139,6 +139,16 @@ struct SettingsView: View {
             GitHubTokenSettingsSheet(store: githubAuthorizationStore) {
                 onGitHubAuthorizationChange(.saved)
             }
+        }
+        .confirmationDialog("Remove GitHub token?", isPresented: $showsRemoveGitHubTokenConfirmation) {
+            Button("Remove Token", role: .destructive) {
+                if githubAuthorizationStore.deleteToken() {
+                    onGitHubAuthorizationChange(.removed)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This removes the token from Keychain. You will need to add a token again to use Agent PR Monitor.")
         }
     }
 
