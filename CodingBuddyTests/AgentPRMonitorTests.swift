@@ -114,6 +114,19 @@ struct AgentPRMonitorTests {
         #expect(transport.requests.isEmpty)
     }
 
+    /// Verifies token load failures stay local, typed, and recoverable through Settings.
+    @Test func clientMapsTokenLoadFailureWithoutCallingTransport() async {
+        let transport = RecordingGitHubTransport()
+        let client = GitHubClient(tokenStore: LoadFailingGitHubTokenStore(), transport: transport)
+
+        await #expect(throws: GitHubClientError.tokenLoadFailed) {
+            try await client.fetchOpenPullRequests(repository: repository)
+        }
+        #expect(transport.requests.isEmpty)
+        #expect(GitHubClientError.tokenLoadFailed.isGitHubAuthorizationRecoverable)
+        #expect(!(GitHubClientError.tokenLoadFailed.errorDescription ?? "").contains("github_pat_secret"))
+    }
+
     /// Verifies REST-style rate-limit headers map to a typed rate-limit error.
     @Test func clientMapsRateLimitHeadersToTypedError() async throws {
         let tokenStore = MemoryGitHubTokenStore(token: "ghp_secret-token")
@@ -302,6 +315,7 @@ struct AgentPRMonitorTests {
         await #expect(throws: GitHubClientError.repositoryDenied(repository)) {
             try await client.fetchOpenPullRequests(repository: repository)
         }
+        #expect(GitHubClientError.repositoryDenied(repository).isGitHubAuthorizationRecoverable)
     }
 
     /// Verifies the store shows token setup state without touching the network.
@@ -854,6 +868,28 @@ struct AgentPRMonitorTests {
       ]
     }
     """
+}
+
+/// Token store test double that fails while loading the token.
+private struct LoadFailingGitHubTokenStore: GitHubTokenStore {
+    /// Always throws a token-like failure string to verify leak protection.
+    func loadToken() throws -> String? {
+        throw Failure()
+    }
+
+    /// Saves are unused for this test double.
+    func saveToken(_ token: String) throws {}
+
+    /// Deletes are unused for this test double.
+    func deleteToken() throws {}
+
+    /// Synthetic Keychain-like load failure used by the failing token store.
+    private struct Failure: LocalizedError {
+        /// Error text intentionally contains a fake token to exercise sanitization.
+        var errorDescription: String? {
+            "keychain failed for github_pat_secret"
+        }
+    }
 }
 
 /// In-memory token store test double.

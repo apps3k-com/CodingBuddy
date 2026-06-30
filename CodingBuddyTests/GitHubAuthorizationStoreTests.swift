@@ -30,6 +30,15 @@ struct GitHubAuthorizationStoreTests {
         #expect(!store.hasSavedToken)
     }
 
+    /// Verifies load failures use read-specific token-safe UI state.
+    @Test func authorizationStoreLoadFailureReportsReadFailure() {
+        let store = GitHubAuthorizationStore(tokenStore: LoadFailingGitHubAuthorizationTokenStore())
+
+        #expect(store.state == .failed(.tokenLoadFailed))
+        #expect(!store.hasSavedToken)
+        #expect(!store.debugDescription.contains("github_pat_secret"))
+    }
+
     /// Verifies saved tokens are trimmed before storage.
     @Test func authorizationStoreSavesTrimmedTokenAndReportsAuthorizedState() {
         let tokenStore = MemoryGitHubAuthorizationTokenStore(token: nil)
@@ -79,6 +88,28 @@ struct GitHubAuthorizationStoreTests {
         #expect(!didSave)
         #expect(store.state == .failed(.tokenStorageFailed))
         #expect(!store.debugDescription.contains("github_pat_secret"))
+    }
+}
+
+/// Token store that fails while loading the saved token.
+private struct LoadFailingGitHubAuthorizationTokenStore: GitHubTokenStore {
+    /// Always throws a token-like error to exercise sanitization.
+    func loadToken() throws -> String? {
+        throw Failure()
+    }
+
+    /// Saves are unused for this test double.
+    func saveToken(_ token: String) throws {}
+
+    /// Deletes are unused for this test double.
+    func deleteToken() throws {}
+
+    /// Synthetic load failure with secret-looking text.
+    private struct Failure: LocalizedError {
+        /// Error text intentionally includes a fake token.
+        var errorDescription: String? {
+            "keychain failed for github_pat_secret"
+        }
     }
 }
 

@@ -30,6 +30,16 @@ struct AgentPRMonitorView: View {
         selection.flatMap { id in filteredRows.first { $0.id == id } }
     }
 
+    /// Recoverable authorization failure shown while stale rows remain visible.
+    private var staleAuthorizationFailure: GitHubClientError? {
+        guard case .refreshFailed(let error) = store.state,
+              !store.rows.isEmpty,
+              error.isGitHubAuthorizationRecoverable else {
+            return nil
+        }
+        return error
+    }
+
     /// Native table view with setup, filtering, refresh, and browser follow-up actions.
     var body: some View {
         Table(filteredRows, selection: $selection) {
@@ -127,6 +137,11 @@ struct AgentPRMonitorView: View {
         .overlay {
             overlayView
         }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if let staleAuthorizationFailure {
+                authorizationRecoveryBanner(staleAuthorizationFailure)
+            }
+        }
         .sheet(isPresented: $showsRepositorySheet) {
             RepositorySetupSheet(store: store)
         }
@@ -134,6 +149,32 @@ struct AgentPRMonitorView: View {
             if store.selectedRepository != nil, store.rows.isEmpty, store.state == .idle {
                 store.refresh()
             }
+        }
+    }
+
+    /// Compact recovery prompt shown above stale pull request rows.
+    private func authorizationRecoveryBanner(_ error: GitHubClientError) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("GitHub authorization needs attention")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                Text(error.localizedDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+            Spacer(minLength: 8)
+            Button("Open Settings") { openSettings() }
+                .controlSize(.small)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.bar)
+        .overlay(alignment: .bottom) {
+            Divider()
         }
     }
 
@@ -205,19 +246,6 @@ struct AgentPRMonitorView: View {
             )
         }
         return String(localized: "GitHub did not provide a reset time. Try again later.")
-    }
-}
-
-/// Token-related error classification for monitor recovery actions.
-private extension GitHubClientError {
-    /// Whether the failure can be resolved by changing the GitHub token in Settings.
-    var isGitHubAuthorizationRecoverable: Bool {
-        switch self {
-        case .noToken, .authenticationFailed, .missingScope(_), .repositoryDenied(_), .tokenStorageFailed:
-            true
-        case .rateLimited(_), .networkUnavailable, .server(_), .invalidResponse, .decodingFailed, .githubError:
-            false
-        }
     }
 }
 

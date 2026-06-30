@@ -161,9 +161,13 @@ struct SettingsView: View {
         case .missing:
             Label("No token saved", systemImage: "key")
                 .foregroundStyle(.secondary)
-        case .failed:
-            Label("Token update failed", systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
+        case .failed(let error):
+            Label {
+                Text(error.localizedDescription)
+            } icon: {
+                Image(systemName: "exclamationmark.triangle.fill")
+            }
+            .foregroundStyle(.orange)
         }
     }
 
@@ -295,8 +299,8 @@ private struct GitHubTokenSettingsSheet: View {
             SecureField("Token", text: $token)
                 .textFieldStyle(.roundedBorder)
 
-            if case .failed = store.state {
-                Text(GitHubClientError.tokenStorageFailed.localizedDescription)
+            if case .failed(let error) = store.state {
+                Text(error.localizedDescription)
                     .font(.caption)
                     .foregroundStyle(.red)
             }

@@ -95,7 +95,7 @@ final class GitHubAuthorizationStore: CustomDebugStringConvertible {
             }
             return .missing
         } catch {
-            return .failed(.tokenStorageFailed)
+            return .failed(.tokenLoadFailed)
         }
     }
 

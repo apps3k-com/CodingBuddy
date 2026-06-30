@@ -56,6 +56,8 @@ nonisolated enum GitHubClientError: LocalizedError, Equatable, Sendable {
     case githubError
     /// CodingBuddy could not update the GitHub token in Keychain.
     case tokenStorageFailed
+    /// CodingBuddy could not read the saved GitHub token from Keychain.
+    case tokenLoadFailed
 
     /// Localized UI-safe error text.
     var errorDescription: String? {
@@ -96,6 +98,21 @@ nonisolated enum GitHubClientError: LocalizedError, Equatable, Sendable {
             String(localized: "GitHub returned an error. Check the token permissions and try again.")
         case .tokenStorageFailed:
             String(localized: "CodingBuddy could not update the saved GitHub token in Keychain.")
+        case .tokenLoadFailed:
+            String(localized: "The saved GitHub token could not be read.")
+        }
+    }
+}
+
+extension GitHubClientError {
+    /// Whether changing the GitHub token in Settings can resolve the failure.
+    nonisolated var isGitHubAuthorizationRecoverable: Bool {
+        switch self {
+        case .noToken, .authenticationFailed, .missingScope(_), .repositoryDenied(_), .tokenStorageFailed,
+             .tokenLoadFailed:
+            true
+        case .rateLimited(_), .networkUnavailable, .server(_), .invalidResponse, .decodingFailed, .githubError:
+            false
         }
     }
 }
@@ -128,7 +145,13 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
 
     /// Fetches open pull requests for one repository through GitHub GraphQL.
     func fetchOpenPullRequests(repository: GitHubRepositoryRef) async throws -> AgentPRMonitorSnapshot {
-        guard let token = try tokenStore.loadToken()?.trimmingCharacters(in: .whitespacesAndNewlines),
+        let loadedToken: String?
+        do {
+            loadedToken = try tokenStore.loadToken()
+        } catch {
+            throw GitHubClientError.tokenLoadFailed
+        }
+        guard let token = loadedToken?.trimmingCharacters(in: .whitespacesAndNewlines),
               !token.isEmpty else {
             throw GitHubClientError.noToken
         }
