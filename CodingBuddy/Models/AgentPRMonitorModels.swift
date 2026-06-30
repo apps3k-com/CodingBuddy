@@ -33,6 +33,52 @@ nonisolated struct GitHubRepositoryRef: Identifiable, Codable, Equatable, Hashab
     }
 }
 
+/// Repository entry returned by the authenticated GitHub repository picker.
+nonisolated struct GitHubRepositorySummary: Identifiable, Codable, Equatable, Hashable, Sendable {
+    /// Stable repository identity used by monitor fetches and persistence.
+    let ref: GitHubRepositoryRef
+    /// GitHub repository description when one is visible.
+    let description: String?
+    /// Whether the repository is private.
+    let isPrivate: Bool
+    /// Whether the repository is archived on GitHub.
+    let isArchived: Bool
+    /// Last pushed timestamp when GitHub exposed it.
+    let pushedAt: Date?
+
+    /// Stable identifier matching the underlying `owner/name` reference.
+    var id: String { ref.id }
+
+    /// Human-readable `owner/name` repository label.
+    var displayName: String { ref.displayName }
+
+    /// Owner login used for search and display.
+    var owner: String { ref.owner }
+
+    /// Repository name used for search and display.
+    var name: String { ref.name }
+
+    /// True when the repository should remain visible for a picker search.
+    func matches(searchText: String) -> Bool {
+        let normalizedSearch = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedSearch.isEmpty else { return true }
+        return owner.localizedCaseInsensitiveContains(normalizedSearch)
+            || name.localizedCaseInsensitiveContains(normalizedSearch)
+            || displayName.localizedCaseInsensitiveContains(normalizedSearch)
+            || (description?.localizedCaseInsensitiveContains(normalizedSearch) == true)
+    }
+}
+
+/// Page-capped repository list returned to the Agent PR Monitor picker.
+nonisolated struct GitHubRepositoryList: Equatable, Sendable {
+    /// Repositories visible to the current token.
+    let repositories: [GitHubRepositorySummary]
+    /// Latest rate-limit metadata returned by GitHub.
+    let rateLimit: GitHubRateLimitState?
+    /// Whether the configured pagination cap stopped before GitHub's final page.
+    let isTruncated: Bool
+}
+
 /// Best-effort source classification for a pull request.
 nonisolated enum AgentPRAuthorSource: String, CaseIterable, Sendable {
     /// Signals indicate the PR was likely created by a coding agent.

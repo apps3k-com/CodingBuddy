@@ -120,7 +120,7 @@ v1-Grenzen: MCP Inventory bearbeitet, installiert und prüft keine Server im Net
 Der Seitenleisten-Eintrag **Agent PR Monitor** (Alpha, unter Inventar) ist eine Nur-Lese-Tabelle für offene GitHub-Pull-Requests in einem ausgewählten Repository. Jede Zeile wird als vermutlich Agent, vermutlich Mensch oder unbekannt klassifiziert.
 
 - Füge den feingranularen GitHub-Nur-Lese-Token unter **Einstellungen → Sicherheit** hinzu oder ersetze ihn dort; CodingBuddy speichert ihn im Schlüsselbund, nicht in UserDefaults oder Dateien. Wenn kein Token gespeichert ist oder GitHub ihn ablehnt, führt dich der Monitor zurück in die Einstellungen.
-- Wähle ein Repository im Format `owner/name`; CodingBuddy merkt sich das ausgewählte Repository.
+- Wähle ein Repository aus der durchsuchbaren Auswahl; die Suche passt auf Owner, Repository-Namen, volles `owner/name` und sichtbare Beschreibungen. Die manuelle `owner/name`-Eingabe bleibt als Fallback verfügbar, wenn die Repository-Liste nicht geladen werden kann.
 - Die Tabelle zeigt PR-Titel, Autor-/Quellklassifizierung, verknüpfte Closing-Issues, CI-Status, Review-Status, ungelöste Befunde, beratende Merge-Bereitschaft und letzte Aktualisierung.
 - Mit **Aktualisieren** lädst du manuell neu, mit **PR öffnen** arbeitest du im Browser weiter. Der Monitor kommentiert nie, genehmigt nie, löst keine Threads auf und führt keine Merges aus.
 - Rate-Limits, fehlende Rechte, verweigerte Repositories und Offline-Fehler erscheinen als UI-sichere Zustände; der letzte erfolgreiche Snapshot bleibt möglichst sichtbar.

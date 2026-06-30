@@ -143,7 +143,7 @@ struct AgentPRMonitorView: View {
             }
         }
         .sheet(isPresented: $showsRepositorySheet) {
-            RepositorySetupSheet(store: store)
+            RepositorySetupSheet(store: store, openSettings: openSettings)
         }
         .onAppear {
             if store.selectedRepository != nil, store.rows.isEmpty, store.state == .idle {
@@ -253,60 +253,264 @@ struct AgentPRMonitorView: View {
 private struct RepositorySetupSheet: View {
     /// Store that owns repository persistence.
     var store: AgentPRMonitorStore
+    /// Opens Settings for token recovery.
+    var openSettings: () -> Void
 
-    /// Repository owner or organization login.
-    @State private var owner = ""
-    /// Repository name without owner prefix.
-    @State private var name = ""
+    /// Search text applied to owner, repository name, full name, and description.
+    @State private var searchText = ""
+    /// Optional manual `owner/name` fallback.
+    @State private var manualRepository = ""
+    /// Selected repository row in the native list.
+    @State private var selectedRepositoryID: GitHubRepositorySummary.ID?
     /// Dismisses the setup sheet after save or cancel.
     @Environment(\.dismiss) private var dismiss
 
-    /// Compact owner/name setup form.
+    /// Repositories visible after applying the search text.
+    private var filteredRepositories: [GitHubRepositorySummary] {
+        store.repositoryChoices.filter { $0.matches(searchText: searchText) }
+    }
+
+    /// Currently selected repository summary.
+    private var selectedRepository: GitHubRepositorySummary? {
+        filteredRepositories.first { $0.id == selectedRepositoryID }
+    }
+
+    /// Parsed manual repository reference, if valid.
+    private var manualRepositoryRef: GitHubRepositoryRef? {
+        GitHubRepositoryRef(displayName: manualRepository.trimmingCharacters(in: .whitespacesAndNewlines))
+    }
+
+    /// Searchable repository picker with manual owner/name fallback.
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Repository")
                 .font(.title3)
                 .fontWeight(.semibold)
 
-            Text("Enter the GitHub repository to monitor. CodingBuddy reads open pull requests only.")
+            Text("Choose a repository visible to the saved GitHub token.")
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 10) {
-                GridRow {
-                    Text("Owner")
-                    TextField("apps3k-com", text: $owner)
-                        .textFieldStyle(.roundedBorder)
+            TextField("Search repositories", text: $searchText)
+                .textFieldStyle(.roundedBorder)
+                .onSubmit {
+                    chooseSelectedRepository()
                 }
+
+            HStack {
+                Text("Accessible repositories")
+                    .font(.headline)
+                Spacer()
+                Button("Reload", systemImage: "arrow.clockwise") {
+                    store.loadRepositoryChoices(force: true)
+                }
+                .disabled(store.repositoryPickerState == .loading)
+            }
+
+            ZStack {
+                List(filteredRepositories, selection: $selectedRepositoryID) { repository in
+                    RepositoryChoiceRow(
+                        repository: repository,
+                        isCurrentSelection: repository.ref == store.selectedRepository
+                    )
+                    .tag(repository.id)
+                    .contentShape(Rectangle())
+                    .onTapGesture(count: 2) {
+                        choose(repository.ref)
+                    }
+                }
+                .frame(minHeight: 260)
+
+                repositoryListOverlay
+            }
+
+            if store.repositoryChoicesAreTruncated {
+                Label("Some repositories are hidden because the picker reached its page limit.", systemImage: "line.3.horizontal.decrease.circle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Divider()
+
+            Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 8) {
                 GridRow {
-                    Text("Repository")
-                    TextField("CodingBuddy", text: $name)
+                    Text("Manual entry")
+                    TextField("owner/name", text: $manualRepository)
                         .textFieldStyle(.roundedBorder)
+                        .onSubmit {
+                            chooseManualRepository()
+                        }
                 }
             }
 
             HStack {
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
-                Button("Save Repository") {
-                    let repository = GitHubRepositoryRef(
-                        owner: owner.trimmingCharacters(in: .whitespacesAndNewlines),
-                        name: name.trimmingCharacters(in: .whitespacesAndNewlines)
-                    )
-                    store.selectRepository(repository)
-                    dismiss()
-                    store.refresh()
+                    .keyboardShortcut(.cancelAction)
+                Button("Use Manual Entry") {
+                    chooseManualRepository()
+                }
+                .disabled(manualRepositoryRef == nil)
+                Button("Choose Repository") {
+                    chooseSelectedRepository()
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(owner.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                    || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .keyboardShortcut(.defaultAction)
+                .disabled(selectedRepository == nil)
             }
         }
         .padding(20)
-        .frame(width: 430)
+        .frame(width: 560)
         .onAppear {
-            owner = store.selectedRepository?.owner ?? ""
-            name = store.selectedRepository?.name ?? ""
+            manualRepository = store.selectedRepository?.displayName ?? ""
+            selectedRepositoryID = store.selectedRepository?.id
+            store.loadRepositoryChoices()
+            keepSelectionVisible()
+        }
+        .onChange(of: searchText) {
+            keepSelectionVisible()
+        }
+        .onChange(of: store.repositoryChoices) {
+            keepSelectionVisible()
+        }
+        .onMoveCommand { direction in
+            switch direction {
+            case .up:
+                moveSelection(by: -1)
+            case .down:
+                moveSelection(by: 1)
+            default:
+                break
+            }
+        }
+    }
+
+    /// Empty, loading, and error overlay for repository choices.
+    @ViewBuilder private var repositoryListOverlay: some View {
+        switch store.repositoryPickerState {
+        case .idle:
+            EmptyView()
+        case .loading:
+            if store.repositoryChoices.isEmpty {
+                ProgressView(String(localized: "Loading repositories..."))
+            }
+        case .loaded:
+            if filteredRepositories.isEmpty {
+                ContentUnavailableView(
+                    "No Results",
+                    systemImage: "magnifyingglass",
+                    description: Text("Try a different owner, name, or description.")
+                )
+            }
+        case .empty:
+            ContentUnavailableView(
+                "No repositories",
+                systemImage: "tray",
+                description: Text("The saved token did not return any accessible repositories.")
+            )
+        case .failed(let error):
+            ContentUnavailableView {
+                Label("Repositories unavailable", systemImage: "exclamationmark.triangle")
+            } description: {
+                Text(error.localizedDescription)
+            } actions: {
+                HStack {
+                    if error.isGitHubAuthorizationRecoverable {
+                        Button("Open Settings") { openSettings() }
+                    }
+                    Button("Retry") {
+                        store.loadRepositoryChoices(force: true)
+                    }
+                }
+            }
+        }
+    }
+
+    /// Keeps the selected row within the filtered list for keyboard confirmation.
+    private func keepSelectionVisible() {
+        guard !filteredRepositories.isEmpty else {
+            selectedRepositoryID = nil
+            return
+        }
+        if let selectedRepositoryID,
+           filteredRepositories.contains(where: { $0.id == selectedRepositoryID }) {
+            return
+        }
+        selectedRepositoryID = filteredRepositories.first?.id
+    }
+
+    /// Moves the highlighted repository for keyboard navigation.
+    private func moveSelection(by offset: Int) {
+        guard !filteredRepositories.isEmpty else {
+            selectedRepositoryID = nil
+            return
+        }
+        let currentIndex = selectedRepositoryID.flatMap { selectedID in
+            filteredRepositories.firstIndex { $0.id == selectedID }
+        } ?? (offset > 0 ? -1 : filteredRepositories.count)
+        let nextIndex = min(max(currentIndex + offset, 0), filteredRepositories.count - 1)
+        selectedRepositoryID = filteredRepositories[nextIndex].id
+    }
+
+    /// Selects the highlighted repository, if any.
+    private func chooseSelectedRepository() {
+        guard let selectedRepository else { return }
+        choose(selectedRepository.ref)
+    }
+
+    /// Selects the parsed manual repository fallback, if valid.
+    private func chooseManualRepository() {
+        guard let manualRepositoryRef else { return }
+        choose(manualRepositoryRef)
+    }
+
+    /// Persists a repository and refreshes the monitor.
+    private func choose(_ repository: GitHubRepositoryRef) {
+        store.selectRepository(repository)
+        dismiss()
+        store.refresh()
+    }
+}
+
+/// Repository row used by the setup picker.
+private struct RepositoryChoiceRow: View {
+    /// Repository summary displayed by the row.
+    var repository: GitHubRepositorySummary
+    /// Whether this repository is currently monitored.
+    var isCurrentSelection: Bool
+
+    /// Native list row with owner/name, metadata, and current-selection marker.
+    var body: some View {
+        HStack(alignment: .center, spacing: 10) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(verbatim: repository.displayName)
+                    .fontWeight(.medium)
+                    .lineLimit(1)
+                if let description = repository.description, !description.isEmpty {
+                    Text(verbatim: description)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer(minLength: 8)
+
+            if repository.isArchived {
+                Label("Archived", systemImage: "archivebox")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Image(systemName: repository.isPrivate ? "lock.fill" : "globe")
+                .foregroundStyle(.secondary)
+                .help(repository.isPrivate ? "Private repository" : "Public repository")
+
+            if isCurrentSelection {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(Color.accentColor)
+                    .help("Current repository")
+            }
         }
     }
 }

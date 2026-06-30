@@ -3743,6 +3743,26 @@
         }
       }
     },
+    "Accessible repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugängliche Repositories"
+          }
+        }
+      }
+    },
+    "Archived" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiviert"
+          }
+        }
+      }
+    },
     "Blocked" : {
       "localizations" : {
         "de" : {
@@ -3823,12 +3843,32 @@
         }
       }
     },
+    "Choose Repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository auswählen"
+          }
+        }
+      }
+    },
     "Choose a GitHub repository in owner/name format to monitor open pull requests." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wähle ein GitHub-Repository im Format owner/name aus, um offene Pull Requests zu überwachen."
+          }
+        }
+      }
+    },
+    "Choose a repository visible to the saved GitHub token." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle ein Repository aus, das für den gespeicherten GitHub-Token sichtbar ist."
           }
         }
       }
@@ -3899,6 +3939,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "CodingBuddy hat keine offenen Pull Requests für das ausgewählte Repository gefunden."
+          }
+        }
+      }
+    },
+    "Current repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuelles Repository"
           }
         }
       }
@@ -4113,6 +4163,26 @@
         }
       }
     },
+    "Loading repositories..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repositories werden geladen ..."
+          }
+        }
+      }
+    },
+    "Manual entry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuelle Eingabe"
+          }
+        }
+      }
+    },
     "Needs attention" : {
       "localizations" : {
         "de" : {
@@ -4149,6 +4219,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keine Pull Requests"
+          }
+        }
+      }
+    },
+    "No repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Repositories"
           }
         }
       }
@@ -4213,6 +4293,26 @@
         }
       }
     },
+    "Private repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privates Repository"
+          }
+        }
+      }
+    },
+    "Public repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffentliches Repository"
+          }
+        }
+      }
+    },
     "Readiness" : {
       "localizations" : {
         "de" : {
@@ -4253,12 +4353,32 @@
         }
       }
     },
+    "Reload" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neu laden"
+          }
+        }
+      }
+    },
     "Repository" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Repository"
+          }
+        }
+      }
+    },
+    "Repositories unavailable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repositories nicht verfügbar"
           }
         }
       }
@@ -4353,6 +4473,16 @@
         }
       }
     },
+    "Retry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut versuchen"
+          }
+        }
+      }
+    },
     "Save Repository" : {
       "localizations" : {
         "de" : {
@@ -4379,6 +4509,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pull Requests suchen"
+          }
+        }
+      }
+    },
+    "Search repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repositories suchen"
+          }
+        }
+      }
+    },
+    "Some repositories are hidden because the picker reached its page limit." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einige Repositories sind ausgeblendet, weil die Auswahl die Seitengrenze erreicht hat."
           }
         }
       }
@@ -4419,6 +4569,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Der gespeicherte GitHub-Token konnte nicht gelesen werden."
+          }
+        }
+      }
+    },
+    "The saved token did not return any accessible repositories." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der gespeicherte Token hat keine zugänglichen Repositories zurückgegeben."
           }
         }
       }
@@ -4483,12 +4643,42 @@
         }
       }
     },
+    "Try a different owner, name, or description." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche es mit einem anderen Owner, Namen oder einer anderen Beschreibung."
+          }
+        }
+      }
+    },
+    "Use Manual Entry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuelle Eingabe verwenden"
+          }
+        }
+      }
+    },
     "Used by Agent PR Monitor to read pull request, issue, check, and review status from GitHub." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wird vom Agent PR Monitor verwendet, um Pull-Request-, Issue-, Check- und Review-Status von GitHub zu lesen."
+          }
+        }
+      }
+    },
+    "owner/name" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "owner/name"
           }
         }
       }

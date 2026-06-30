@@ -9,6 +9,9 @@ import Foundation
 nonisolated protocol AgentPRMonitorFetching: Sendable {
     /// Fetches the latest read-only PR monitor snapshot for one repository.
     func fetchOpenPullRequests(repository: GitHubRepositoryRef) async throws -> AgentPRMonitorSnapshot
+
+    /// Fetches GitHub repositories visible to the saved token for picker setup.
+    func fetchAccessibleRepositories() async throws -> GitHubRepositoryList
 }
 
 /// Injectable HTTP transport for GitHub requests.
@@ -129,32 +132,29 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
     let restBaseURL: URL
     /// Number of pull requests requested per GraphQL page.
     private static let pullRequestPageSize = 50
+    /// Number of repositories requested per REST page.
+    private static let repositoryPageSize = 100
+    /// Maximum number of repository pages read for one picker load.
+    let repositoryPageLimit: Int
 
     /// Creates a GitHub client with injectable token and transport dependencies.
     init(
         tokenStore: any GitHubTokenStore,
         transport: any GitHubTransport = URLSessionGitHubTransport(),
         graphQLEndpoint: URL = URL(string: "https://api.github.com/graphql")!,
-        restBaseURL: URL = URL(string: "https://api.github.com")!
+        restBaseURL: URL = URL(string: "https://api.github.com")!,
+        repositoryPageLimit: Int = 10
     ) {
         self.tokenStore = tokenStore
         self.transport = transport
         self.graphQLEndpoint = graphQLEndpoint
         self.restBaseURL = restBaseURL
+        self.repositoryPageLimit = max(1, repositoryPageLimit)
     }
 
     /// Fetches open pull requests for one repository through GitHub GraphQL.
     func fetchOpenPullRequests(repository: GitHubRepositoryRef) async throws -> AgentPRMonitorSnapshot {
-        let loadedToken: String?
-        do {
-            loadedToken = try tokenStore.loadToken()
-        } catch {
-            throw GitHubClientError.tokenLoadFailed
-        }
-        guard let token = loadedToken?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !token.isEmpty else {
-            throw GitHubClientError.noToken
-        }
+        let token = try loadToken()
 
         var after: String?
         var latestRateLimit: GitHubRateLimitState?
@@ -200,6 +200,61 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
         } while after != nil
 
         return AgentPRMonitorSnapshot(rows: rows, rateLimit: latestRateLimit)
+    }
+
+    /// Fetches repositories visible to the saved token through GitHub REST.
+    func fetchAccessibleRepositories() async throws -> GitHubRepositoryList {
+        let token = try loadToken()
+
+        var page = 1
+        var repositories: [GitHubRepositorySummary] = []
+        var latestRateLimit: GitHubRateLimitState?
+        var hitPageLimitWithNextPage = false
+        var shouldContinue: Bool
+        repeat {
+            let request = restRequest(
+                pathComponents: ["user", "repos"],
+                token: token,
+                queryItems: [
+                    URLQueryItem(name: "visibility", value: "all"),
+                    URLQueryItem(name: "affiliation", value: "owner,collaborator,organization_member"),
+                    URLQueryItem(name: "sort", value: "full_name"),
+                    URLQueryItem(name: "per_page", value: "\(Self.repositoryPageSize)"),
+                    URLQueryItem(name: "page", value: "\(page)"),
+                ]
+            )
+            let (data, response) = try await perform(request: request)
+            let rateLimit = Self.rateLimit(from: response)
+            latestRateLimit = rateLimit ?? latestRateLimit
+            try Self.validateRepositoryList(response: response, data: data, rateLimit: rateLimit)
+            repositories.append(contentsOf: try decodeRESTRepositories(from: data))
+
+            let hasNextPage = Self.hasNextLink(response)
+            hitPageLimitWithNextPage = hasNextPage && page >= repositoryPageLimit
+            shouldContinue = hasNextPage && !hitPageLimitWithNextPage
+            page += 1
+        } while shouldContinue
+
+        return GitHubRepositoryList(
+            repositories: repositories,
+            rateLimit: latestRateLimit,
+            isTruncated: hitPageLimitWithNextPage
+        )
+    }
+
+    /// Loads and normalizes the saved GitHub token before network requests.
+    private func loadToken() throws -> String {
+        let loadedToken: String?
+        do {
+            loadedToken = try tokenStore.loadToken()
+        } catch {
+            throw GitHubClientError.tokenLoadFailed
+        }
+        guard let token = loadedToken?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !token.isEmpty else {
+            throw GitHubClientError.noToken
+        }
+        return token
     }
 
     /// Fetches one page of open pull requests through GitHub GraphQL.
@@ -348,6 +403,15 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
         }
     }
 
+    /// Decodes REST repository entries into picker summaries.
+    private func decodeRESTRepositories(from data: Data) throws -> [GitHubRepositorySummary] {
+        do {
+            return try JSONDecoder.github.decode([RESTRepositoryNode].self, from: data).compactMap(\.repositorySummary)
+        } catch {
+            throw GitHubClientError.decodingFailed
+        }
+    }
+
     /// Maps HTTP metadata into UI-safe typed errors before decoding.
     private static func validate(
         response: HTTPURLResponse,
@@ -372,6 +436,34 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
                 throw GitHubClientError.rateLimited(resetAt: rateLimit?.resetAt)
             }
             throw GitHubClientError.repositoryDenied(repository)
+        default:
+            throw GitHubClientError.server(statusCode: response.statusCode)
+        }
+    }
+
+    /// Maps HTTP metadata for repository-list requests into UI-safe typed errors.
+    private static func validateRepositoryList(
+        response: HTTPURLResponse,
+        data: Data,
+        rateLimit: GitHubRateLimitState?
+    ) throws {
+        switch response.statusCode {
+        case 200..<300:
+            return
+        case 401:
+            throw GitHubClientError.authenticationFailed
+        case 403, 429:
+            if response.statusCode == 429 || rateLimit?.remaining == 0 {
+                throw GitHubClientError.rateLimited(resetAt: rateLimit?.resetAt)
+            }
+            if let permissions = response.value(forHTTPHeaderField: "X-Accepted-GitHub-Permissions") {
+                throw GitHubClientError.missingScope(permissions)
+            }
+            if let message = try? JSONDecoder().decode(GitHubRESTError.self, from: data).message,
+               message.localizedCaseInsensitiveContains("rate limit") {
+                throw GitHubClientError.rateLimited(resetAt: rateLimit?.resetAt)
+            }
+            throw GitHubClientError.githubError
         default:
             throw GitHubClientError.server(statusCode: response.statusCode)
         }
@@ -505,6 +597,50 @@ private nonisolated struct GraphQLVariables: Encodable {
 private nonisolated struct GitHubRESTError: Decodable {
     /// Human-readable GitHub error message.
     let message: String
+}
+
+/// REST repository response node used by the repository picker.
+private nonisolated struct RESTRepositoryNode: Decodable {
+    /// Repository name without owner.
+    let name: String
+    /// Optional repository description.
+    let description: String?
+    /// Privacy flag returned by GitHub.
+    let isPrivate: Bool
+    /// Archive flag returned by GitHub.
+    let archived: Bool
+    /// Last push timestamp.
+    let pushedAt: Date?
+    /// Owner payload.
+    let owner: RESTRepositoryOwner
+
+    /// App-facing picker summary when the response contains a valid owner/name pair.
+    var repositorySummary: GitHubRepositorySummary? {
+        guard !owner.login.isEmpty, !name.isEmpty else { return nil }
+        let ref = GitHubRepositoryRef(owner: owner.login, name: name)
+        return GitHubRepositorySummary(
+            ref: ref,
+            description: description,
+            isPrivate: isPrivate,
+            isArchived: archived,
+            pushedAt: pushedAt
+        )
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case description
+        case isPrivate = "private"
+        case archived
+        case pushedAt = "pushed_at"
+        case owner
+    }
+}
+
+/// REST repository owner payload.
+private nonisolated struct RESTRepositoryOwner: Decodable {
+    /// Owner or organization login.
+    let login: String
 }
 
 /// Top-level GraphQL response body.
