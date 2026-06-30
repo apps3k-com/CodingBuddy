@@ -23,12 +23,12 @@ struct ExternalFileOpenerTests {
 
     @Test func selectedEditorOpensMarkdownWithConfiguredApplication() async {
         let appURL = URL(fileURLWithPath: "/Applications/Editor.app")
+        let url = URL(fileURLWithPath: "/tmp/AGENTS.md")
         let workspace = FakeExternalFileWorkspace(
             bundleApplications: ["com.example.Editor": appURL],
-            existingURLs: [appURL]
+            existingURLs: [appURL, url]
         )
         let opener = ExternalFileOpener(workspace: workspace)
-        let url = URL(fileURLWithPath: "/tmp/AGENTS.md")
 
         let result = await opener.open(
             url,
@@ -45,9 +45,9 @@ struct ExternalFileOpenerTests {
     }
 
     @Test func selectedEditorFallsBackWhenApplicationIsUnavailable() async {
-        let workspace = FakeExternalFileWorkspace()
-        let opener = ExternalFileOpener(workspace: workspace)
         let url = URL(fileURLWithPath: "/tmp/.mcp.json")
+        let workspace = FakeExternalFileWorkspace(existingURLs: [url])
+        let opener = ExternalFileOpener(workspace: workspace)
 
         let result = await opener.open(
             url,
@@ -65,9 +65,9 @@ struct ExternalFileOpenerTests {
 
     @Test func selectedEditorUsesStoredApplicationPathWhenBundleLookupFails() async {
         let appURL = URL(fileURLWithPath: "/Applications/Editor.app")
-        let workspace = FakeExternalFileWorkspace(existingURLs: [appURL])
-        let opener = ExternalFileOpener(workspace: workspace)
         let url = URL(fileURLWithPath: "/tmp/project.yml")
+        let workspace = FakeExternalFileWorkspace(existingURLs: [appURL, url])
+        let opener = ExternalFileOpener(workspace: workspace)
 
         let result = await opener.open(
             url,
@@ -85,14 +85,14 @@ struct ExternalFileOpenerTests {
 
     @Test func selectedEditorOpenFailureFallsBackToSystemDefault() async {
         let appURL = URL(fileURLWithPath: "/Applications/Editor.app")
+        let url = URL(fileURLWithPath: "/tmp/README.md")
         let workspace = FakeExternalFileWorkspace(
             bundleApplications: ["com.example.Editor": appURL],
-            existingURLs: [appURL],
+            existingURLs: [appURL, url],
             appOpenSucceeds: false,
             appOpenYieldsBeforeResult: true
         )
         let opener = ExternalFileOpener(workspace: workspace)
-        let url = URL(fileURLWithPath: "/tmp/README.md")
 
         let result = await opener.open(
             url,
@@ -106,6 +106,41 @@ struct ExternalFileOpenerTests {
         #expect(result == .fellBackToSystemDefault)
         #expect(workspace.defaultOpenedURLs == [url])
         #expect(workspace.appOpenedURLs == [FakeExternalFileWorkspace.AppOpen(url: url, applicationURL: appURL)])
+    }
+
+    @Test func missingTextFileUsesSystemDefaultInsteadOfSelectedEditor() async {
+        let appURL = URL(fileURLWithPath: "/Applications/Editor.app")
+        let workspace = FakeExternalFileWorkspace(
+            bundleApplications: ["com.example.Editor": appURL],
+            existingURLs: [appURL]
+        )
+        let opener = ExternalFileOpener(workspace: workspace)
+        let url = URL(fileURLWithPath: "/tmp/Missing.md")
+
+        let result = await opener.open(
+            url,
+            preference: .application(
+                bundleIdentifier: "com.example.Editor",
+                applicationURL: appURL,
+                displayName: "Editor"
+            )
+        )
+
+        #expect(result == .openedWithSystemDefault)
+        #expect(workspace.defaultOpenedURLs == [url])
+        #expect(workspace.appOpenedURLs.isEmpty)
+    }
+
+    @Test func failedSystemDefaultOpenReturnsFailedResult() async {
+        let workspace = FakeExternalFileWorkspace(defaultOpenSucceeds: false)
+        let opener = ExternalFileOpener(workspace: workspace)
+        let url = URL(fileURLWithPath: "/tmp/README.md")
+
+        let result = await opener.open(url, preference: .systemDefault)
+
+        #expect(result == .failed)
+        #expect(workspace.defaultOpenedURLs == [url])
+        #expect(workspace.appOpenedURLs.isEmpty)
     }
 
     @Test func nonFileURLsAreNotOpened() async {
@@ -125,7 +160,7 @@ struct ExternalFileOpenerTests {
         let workspace = FakeExternalFileWorkspace(
             directoryURLs: [directoryURL],
             bundleApplications: ["com.example.Editor": appURL],
-            existingURLs: [appURL]
+            existingURLs: [appURL, directoryURL]
         )
         let opener = ExternalFileOpener(workspace: workspace)
 
@@ -149,7 +184,7 @@ struct ExternalFileOpenerTests {
         let workspace = FakeExternalFileWorkspace(
             symlinkURLs: [symlinkURL],
             bundleApplications: ["com.example.Editor": appURL],
-            existingURLs: [appURL]
+            existingURLs: [appURL, symlinkURL]
         )
         let opener = ExternalFileOpener(workspace: workspace)
 
@@ -191,6 +226,8 @@ private final class FakeExternalFileWorkspace: ExternalFileWorkspace {
     private let bundleApplications: [String: URL]
     /// URLs treated as existing files.
     private let existingURLs: Set<URL>
+    /// Whether system-default open requests should report success.
+    private let defaultOpenSucceeds: Bool
     /// Whether app-specific open requests should report success.
     private let appOpenSucceeds: Bool
     /// Whether app-specific open requests should suspend before returning.
@@ -202,6 +239,7 @@ private final class FakeExternalFileWorkspace: ExternalFileWorkspace {
         symlinkURLs: Set<URL> = [],
         bundleApplications: [String: URL] = [:],
         existingURLs: Set<URL> = [],
+        defaultOpenSucceeds: Bool = true,
         appOpenSucceeds: Bool = true,
         appOpenYieldsBeforeResult: Bool = false
     ) {
@@ -209,6 +247,7 @@ private final class FakeExternalFileWorkspace: ExternalFileWorkspace {
         self.symlinkURLs = symlinkURLs
         self.bundleApplications = bundleApplications
         self.existingURLs = existingURLs
+        self.defaultOpenSucceeds = defaultOpenSucceeds
         self.appOpenSucceeds = appOpenSucceeds
         self.appOpenYieldsBeforeResult = appOpenYieldsBeforeResult
     }
@@ -216,7 +255,7 @@ private final class FakeExternalFileWorkspace: ExternalFileWorkspace {
     /// Records a system-default open request.
     func openDefault(_ url: URL) -> Bool {
         defaultOpenedURLs.append(url)
-        return true
+        return defaultOpenSucceeds
     }
 
     /// Records an app-specific open request.

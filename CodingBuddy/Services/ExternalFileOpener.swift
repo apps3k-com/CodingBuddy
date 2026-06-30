@@ -137,7 +137,8 @@ nonisolated enum ExternalFileOpenResult: Equatable, Sendable {
 
     /// Returns whether a URL should be opened with the configured text editor.
     private func shouldUseTextEditor(for url: URL) -> Bool {
-        !workspace.isDirectory(at: url)
+        workspace.fileExists(at: url)
+            && !workspace.isDirectory(at: url)
             && !workspace.isSymbolicLink(at: url)
             && TextFileClassifier.isTextLike(url)
     }

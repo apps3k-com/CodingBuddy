@@ -15,6 +15,8 @@ struct AgentContextInspectorView: View {
     @State private var searchText = ""
     /// Non-blocking file-open warning shown after graceful fallback.
     @State private var openWarning: String?
+    /// Identifier that restarts the warning auto-dismiss timer.
+    @State private var openWarningID = UUID()
 
     /// Inspector rows after applying the current search filter.
     private var filteredItems: [AgentContextItem] {
@@ -124,7 +126,7 @@ struct AgentContextInspectorView: View {
                     .padding(.bottom, 12)
             }
         }
-        .task(id: openWarning) {
+        .task(id: openWarningID) {
             guard openWarning != nil else { return }
             try? await Task.sleep(for: .seconds(4))
             openWarning = nil
@@ -161,6 +163,7 @@ struct AgentContextInspectorView: View {
                 openWarning = String(
                     localized: "The configured default editor is unavailable. CodingBuddy opened the file with the system default instead."
                 )
+                openWarningID = UUID()
             }
         }
     }

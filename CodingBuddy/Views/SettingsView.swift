@@ -10,6 +10,7 @@ import UniformTypeIdentifiers
 /// Presented as a sheet over the main window — window-modal on purpose, so
 /// it neither spawns a second window nor leaves the app interactive behind it.
 struct SettingsView: View {
+    /// Settings sections exposed by the sheet's segmented control.
     private enum Pane: Hashable {
         case general
         case security
