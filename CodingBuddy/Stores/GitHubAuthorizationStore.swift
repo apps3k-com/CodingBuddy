@@ -54,7 +54,7 @@ final class GitHubAuthorizationStore: CustomDebugStringConvertible {
     func saveToken(_ token: String) -> Bool {
         let trimmedToken = token.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedToken.isEmpty else {
-            state = .missing
+            state = Self.loadState(from: tokenStore)
             return false
         }
 

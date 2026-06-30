@@ -409,6 +409,28 @@ struct AgentPRMonitorTests {
         #expect(!(GitHubClientError.tokenStorageFailed.errorDescription ?? "").contains("github_pat_secret"))
     }
 
+    /// Verifies legacy monitor token saves reject blank values before persistence.
+    @Test func storeSaveTokenRejectsBlankTokenWithoutPersisting() throws {
+        let tokenStore = MemoryGitHubTokenStore(token: nil)
+        let client = StubAgentPRMonitorClient(results: [
+            .success(AgentPRMonitorSnapshot(rows: [samplePullRequest(number: 57)], rateLimit: nil)),
+        ])
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.selectRepository(repository)
+        let didSave = store.saveToken(" \n\t ")
+
+        #expect(!didSave)
+        #expect(try tokenStore.loadToken() == nil)
+        #expect(store.state == .idle)
+        #expect(store.rows.isEmpty)
+        #expect(!store.isRefreshing)
+    }
+
     /// Verifies a token saved in Settings refreshes the selected repository.
     @Test func storeSettingsTokenSaveRefreshesSelectedRepository() async throws {
         let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")

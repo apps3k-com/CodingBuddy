@@ -20,7 +20,9 @@ nonisolated enum SettingsInitialPane: Hashable {
 struct SettingsView: View {
     /// Settings sections exposed by the sheet's segmented control.
     private enum Pane: Hashable {
+        /// General app behavior, language, appearance, and editor settings.
         case general
+        /// Security-sensitive credentials and unlock timing settings.
         case security
     }
 
@@ -50,6 +52,7 @@ struct SettingsView: View {
         _pane = State(initialValue: initialPane == .security ? .security : .general)
     }
 
+    /// Segmented settings sheet content.
     var body: some View {
         // No TabView here: inside a sheet it draws its own bordered box,
         // which clashes with the grouped form and the sheet background.
@@ -87,6 +90,7 @@ struct SettingsView: View {
         .frame(width: 480, height: 430)
     }
 
+    /// Security-related settings, including GitHub authorization.
     private var securityPane: some View {
         Form {
             if FeatureFlag.agentPRMonitor.isEnabled {
@@ -153,6 +157,7 @@ struct SettingsView: View {
         }
     }
 
+    /// General app preferences shown by default.
     private var generalPane: some View {
         Form {
             Section {

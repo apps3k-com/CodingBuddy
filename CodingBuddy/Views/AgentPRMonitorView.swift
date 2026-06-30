@@ -208,6 +208,7 @@ struct AgentPRMonitorView: View {
     }
 }
 
+/// Token-related error classification for monitor recovery actions.
 private extension GitHubClientError {
     /// Whether the failure can be resolved by changing the GitHub token in Settings.
     var isGitHubAuthorizationRecoverable: Bool {

@@ -133,8 +133,13 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
     /// Saves a replacement token through the injected token store.
     @discardableResult
     func saveToken(_ token: String) -> Bool {
+        let trimmedToken = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedToken.isEmpty else {
+            return false
+        }
+
         do {
-            try tokenStore.saveToken(token.trimmingCharacters(in: .whitespacesAndNewlines))
+            try tokenStore.saveToken(trimmedToken)
             handleGitHubAuthorizationChange(.saved)
             return true
         } catch {
