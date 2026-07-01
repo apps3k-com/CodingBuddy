@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.9.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.8.0...v0.9.0) (2026-07-01)
+
+
+### Features
+
+* add searchable GitHub repository picker to Agent PR Monitor ([b302bdd](https://github.com/apps3k-com/CodingBuddy/commit/b302bdddaacecffa8386c1c975bb0d0912ddf833))
+* add searchable repository picker ([#65](https://github.com/apps3k-com/CodingBuddy/issues/65)) ([d6d98cb](https://github.com/apps3k-com/CodingBuddy/commit/d6d98cbbabad3a05a246afe802b5fd10af1d2d16))
+* move GitHub authorization controls into app settings ([3514a20](https://github.com/apps3k-com/CodingBuddy/commit/3514a20828ee5231c5c338893c73da66dfa95ade))
+
+
+### Bug Fixes
+
+* address GitHub token recovery review ([a0e407d](https://github.com/apps3k-com/CodingBuddy/commit/a0e407db487495f40f0e97c2bd013345c35ca10c))
+* address repository picker review feedback ([#65](https://github.com/apps3k-com/CodingBuddy/issues/65)) ([ff6bf17](https://github.com/apps3k-com/CodingBuddy/commit/ff6bf175c0d1f15803cdc5ac0ee79b48ac1ec8ce))
+* clarify CodingBuddy security unlock duration label ([2a8a7c2](https://github.com/apps3k-com/CodingBuddy/commit/2a8a7c29dd9e9ca143a19ce67e29e0c94c5bea78))
+* clarify CodingBuddy security unlock duration label ([8ded40c](https://github.com/apps3k-com/CodingBuddy/commit/8ded40c6aad4dbbf699ae379d270c5e3c1ba8ddd))
+* clarify repo readiness warning label context ([1b40b1b](https://github.com/apps3k-com/CodingBuddy/commit/1b40b1b9e9e3ed26c56b0335126d892cb170d07e))
+* keep GitHub auth recovery visible ([8486d20](https://github.com/apps3k-com/CodingBuddy/commit/8486d20c81fd2c10111bb2a533c9f0bf4dfa7174))
+* reject blank GitHub tokens consistently ([f96ceb1](https://github.com/apps3k-com/CodingBuddy/commit/f96ceb1f962372d72674dec5772fc979872bdeb7))
+* scope repo readiness warning localization ([0a5ac53](https://github.com/apps3k-com/CodingBuddy/commit/0a5ac53842517839e4a3ebc6b50a863b7b33d935))
+* use clearer outcome labels for repo readiness status ([81ffff6](https://github.com/apps3k-com/CodingBuddy/commit/81ffff652543b423dae4dd70c876ec774a5687e4))
+* use outcome labels for repo readiness status ([8e138e3](https://github.com/apps3k-com/CodingBuddy/commit/8e138e36c59d4e2afe63b8c07dcb46dc59dd0167))
+
 ## [0.8.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.7.0...v0.8.0) (2026-06-30)
 
 
