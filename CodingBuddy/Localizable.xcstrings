@@ -3493,6 +3493,16 @@
         }
       }
     },
+    "Repo Readiness status warning" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warnung"
+          }
+        }
+      }
+    },
     "README" : {
       "localizations" : {
         "de" : {

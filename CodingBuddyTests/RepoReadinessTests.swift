@@ -374,7 +374,7 @@ struct RepoReadinessTests {
         let strings = try catalogStrings()
 
         #expect(strings.keys.contains("Passed"))
-        #expect(strings.keys.contains("Warning"))
+        #expect(strings.keys.contains("Repo Readiness status warning"))
         #expect(strings.keys.contains("Failed"))
         #expect(!strings.keys.contains("Pass"))
         #expect(!strings.keys.contains("Warn"))

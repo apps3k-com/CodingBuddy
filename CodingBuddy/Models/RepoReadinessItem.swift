@@ -17,7 +17,7 @@ nonisolated enum RepoReadinessStatus: String, CaseIterable, Sendable {
         case .pass:
             String(localized: "Passed")
         case .warn:
-            String(localized: "Warning")
+            String(localized: "Repo Readiness status warning", defaultValue: "Warning")
         case .fail:
             String(localized: "Failed")
         }
