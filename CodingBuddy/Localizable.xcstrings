@@ -2163,12 +2163,12 @@
         }
       }
     },
-    "Until quit" : {
+    "Until CodingBuddy quits" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bis zum Beenden"
+            "value" : "Bis CodingBuddy beendet wird"
           }
         }
       }

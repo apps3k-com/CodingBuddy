@@ -123,7 +123,7 @@ struct SettingsView: View {
                     Text("1 minute").tag(60.0)
                     Text("5 minutes").tag(300.0)
                     Text("15 minutes").tag(900.0)
-                    Text("Until quit").tag(-1.0)
+                    Text("Until CodingBuddy quits").tag(-1.0)
                 }
             } footer: {
                 Text("Values that look like secrets (TOKEN, KEY, PASSWORD, …) are masked until you authenticate with Touch ID or your password.")

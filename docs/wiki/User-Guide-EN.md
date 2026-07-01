@@ -53,7 +53,7 @@ preview-only.
 Variables whose names look like credentials (`GITHUB_TOKEN`, `AWS_SECRET_ACCESS_KEY`, anything with `TOKEN`, `KEY`, `SECRET`, `PASSWORD`, `AUTH`, …) show `••••••••` instead of their value.
 
 - Click the **lock button** in the toolbar (or just try to edit/copy a masked value) and authenticate with **Touch ID or your account password** to reveal them.
-- The unlock expires automatically — configure the duration in *Settings → Security* (1/5/15 minutes or until quit). The lock button re-masks immediately.
+- The unlock expires automatically — configure the duration in *Settings → Security* (1/5/15 minutes or until CodingBuddy quits). The lock button re-masks immediately.
 - Copying a value or line, editing, and `.env` export of masked variables all require authentication first.
 
 ## MCP credentials (~/.mcp-auth)
