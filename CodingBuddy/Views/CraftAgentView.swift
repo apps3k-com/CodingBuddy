@@ -136,7 +136,11 @@ struct CraftAgentView: View {
         }
         .overlay {
             if store.connections.isEmpty, store.secretFiles.isEmpty, store.encryptedStore == nil {
-                ContentUnavailableView("No Craft credentials", systemImage: "sparkles")
+                ContentUnavailableView(
+                    "No Craft credentials",
+                    systemImage: "sparkles",
+                    description: Text("Set up Craft Agents or connect a Craft connector. Credential files will appear here when Craft creates them.")
+                )
             }
         }
     }

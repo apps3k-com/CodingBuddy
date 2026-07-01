@@ -64,6 +64,7 @@ The **Credentials → MCP Auth** sidebar section manages the OAuth cache that `m
 - The **status column** shows whether the access token is still active (with its estimated expiry), expired, or the entry is incomplete (a login that never finished).
 - **Reset Entry…** moves just that server's files to the **Trash** after a confirmation that names the server and the consequence — surgical, reversible, and the next connection simply re-runs the OAuth flow. **Reset All…** uses a separate all-credentials confirmation for everything (the GUI equivalent of `rm -rf ~/.mcp-auth`, but undoable).
 - **View Files…** (or double-click) opens the credential files with all token values masked. After authenticating with Touch ID or your password you can edit the raw JSON; invalid JSON is rejected on save.
+- When `~/.mcp-auth` is missing or empty, the empty state points you back to connecting an OAuth-enabled MCP server first. CodingBuddy lists cached credentials after `mcp-remote` creates them.
 - No app restart is needed: the view live-reloads when `mcp-remote` rewrites the files.
 
 ## AI tools
@@ -152,6 +153,7 @@ The **Craft Agents** entry (alpha) shows what the Craft Agents app stores in `~/
 - **LLM connections** from `config.json`.
 - **Token files** under `secrets/` with their expiry status; each can be reset individually after a confirmation that names the file and explains that the next connection triggers a fresh login.
 - **The encrypted credential store** (`credentials.enc`): CodingBuddy shows size and age but never opens it; its reset confirmation is separate from token-file resets and explains that every Craft connector asks to log in again.
+- When the folder exists but has no credential data yet, the empty state points you back to setting up Craft Agents or connecting a Craft connector. CodingBuddy waits for Craft to create the files.
 
 ## Settings
 

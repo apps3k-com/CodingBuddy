@@ -123,10 +123,14 @@ struct MCPAuthListView: View {
                 ContentUnavailableView(
                     "No MCP credentials",
                     systemImage: "key.slash",
-                    description: Text("~/.mcp-auth does not exist — nothing to manage.")
+                    description: Text("Connect to a remote MCP server first. CodingBuddy will list cached OAuth credentials here after they exist.")
                 )
             } else if store.entries.isEmpty {
-                ContentUnavailableView("No MCP credentials", systemImage: "key.slash")
+                ContentUnavailableView(
+                    "No MCP credentials",
+                    systemImage: "key.slash",
+                    description: Text("Connect to an MCP server that uses OAuth. Its cached credentials will appear here.")
+                )
             }
         }
     }
