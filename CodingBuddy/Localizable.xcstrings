@@ -3494,6 +3494,7 @@
       }
     },
     "Repo Readiness status warning" : {
+      "comment" : "Status label for a Repo Readiness checklist item that has a partial or ambiguous local signal.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
