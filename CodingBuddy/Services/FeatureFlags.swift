@@ -77,6 +77,8 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
     case backupBrowser
     /// Enables a default external editor preference for text-like files.
     case defaultEditorPreference
+    /// Enables persistent collapsible top-level sidebar groups.
+    case collapsibleSidebarSections
 
     /// The most stable channel in which the feature is active. `.alpha` means
     /// alpha builds only, `.beta` means alpha + beta, `.stable` means everyone.
@@ -99,6 +101,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
         case .agentPRMonitor: .alpha
         case .backupBrowser: .alpha
         case .defaultEditorPreference: .alpha
+        case .collapsibleSidebarSections: .alpha
         }
     }
 
