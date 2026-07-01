@@ -101,4 +101,15 @@ struct SecretsTerminologyTests {
         #expect(text.contains("wie lange Secrets nach der Authentifizierung sichtbar bleiben"))
         expectNoBannedSecretTerms(in: text)
     }
+
+    /// Ensures the long reveal duration names CodingBuddy explicitly.
+    @Test func unlockDurationCopyNamesCodingBuddy() throws {
+        let strings = try catalogStrings()
+        let text = try String(contentsOf: germanUserGuideURL, encoding: .utf8)
+
+        #expect(try germanTranslation(for: "Until CodingBuddy quits", in: strings) == "Bis CodingBuddy beendet wird")
+        #expect(!strings.keys.contains("Until quit"))
+        #expect(text.contains("bis CodingBuddy beendet wird"))
+        #expect(!text.localizedCaseInsensitiveContains("bis zum Beenden"))
+    }
 }
