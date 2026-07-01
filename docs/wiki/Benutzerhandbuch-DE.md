@@ -65,6 +65,7 @@ Der Sidebar-Bereich **Zugangsdaten → MCP Auth** verwaltet den OAuth-Cache, den
 - Die **Status-Spalte** zeigt, ob der Access-Token noch aktiv ist (mit geschätztem Ablauf), abgelaufen ist oder der Eintrag unvollständig ist (ein nie abgeschlossener Login).
 - **Eintrag zurücksetzen…** legt nur die Dateien dieses Servers nach einer Bestätigung in den **Papierkorb**, die den Server und die Folge klar benennt — chirurgisch, reversibel, und die nächste Verbindung startet einfach den OAuth-Flow neu. **Alles zurücksetzen…** nutzt eine eigene Bestätigung für alle Zugangsdaten (das GUI-Pendant zu `rm -rf ~/.mcp-auth`, aber rückgängig machbar).
 - **Dateien ansehen…** (oder Doppelklick) öffnet die Credential-Dateien mit maskierten Token-Werten. Nach Authentifizierung mit Touch ID oder Passwort kannst du das rohe JSON bearbeiten; ungültiges JSON wird beim Speichern abgelehnt.
+- Fehlt `~/.mcp-auth` oder ist das Verzeichnis leer, verweist der leere Zustand zuerst auf die Verbindung mit einem OAuth-fähigen MCP-Server. CodingBuddy listet zwischengespeicherte Zugangsdaten, nachdem `mcp-remote` sie erstellt hat.
 - Kein App-Neustart nötig: Die Ansicht lädt live nach, wenn `mcp-remote` die Dateien neu schreibt.
 
 ## AI-Tools
@@ -153,6 +154,7 @@ Der Eintrag **Craft Agents** (Alpha) zeigt, was die Craft-Agents-App in `~/.craf
 - **LLM-Verbindungen** aus `config.json`.
 - **Token-Dateien** unter `secrets/` mit Ablaufstatus; jede lässt sich einzeln nach einer Bestätigung zurücksetzen, die Datei und frischen Login klar nennt.
 - **Der verschlüsselte Credential-Speicher** (`credentials.enc`): CodingBuddy zeigt Größe und Alter, öffnet die Datei aber nie; seine Reset-Bestätigung ist getrennt von Token-Datei-Resets und erklärt, dass jeder Craft-Connector eine neue Anmeldung verlangt.
+- Ist der Ordner vorhanden, enthält aber noch keine Zugangsdaten, verweist der leere Zustand zurück auf die Einrichtung von Craft Agents oder die Verbindung eines Craft-Connectors. CodingBuddy wartet, bis Craft die Dateien erstellt.
 
 ## Einstellungen
 

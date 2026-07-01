@@ -593,6 +593,26 @@
         }
       }
     },
+    "Connect to a remote MCP server first. CodingBuddy will list cached OAuth credentials here after they exist." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbinde zuerst einen Remote-MCP-Server. CodingBuddy listet hier zwischengespeicherte OAuth-Zugangsdaten, sobald sie vorhanden sind."
+          }
+        }
+      }
+    },
+    "Connect to an MCP server that uses OAuth. Its cached credentials will appear here." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbinde einen MCP-Server, der OAuth verwendet. Die zwischengespeicherten Zugangsdaten erscheinen dann hier."
+          }
+        }
+      }
+    },
     "Connector credentials, encrypted by Craft — CodingBuddy never opens this file." : {
       "localizations" : {
         "de" : {
@@ -1773,6 +1793,16 @@
         }
       }
     },
+    "Set up Craft Agents or connect a Craft connector. Credential files will appear here when Craft creates them." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Richte Craft Agents ein oder verbinde einen Craft-Connector. Zugangsdaten-Dateien erscheinen hier, sobald Craft sie erstellt."
+          }
+        }
+      }
+    },
     "Show in Finder" : {
       "localizations" : {
         "de" : {
@@ -2809,16 +2839,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "~/.cursor existiert nicht — Cursor ist auf diesem Mac nicht eingerichtet."
-          }
-        }
-      }
-    },
-    "~/.mcp-auth does not exist — nothing to manage." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~/.mcp-auth existiert nicht — nichts zu verwalten."
           }
         }
       }
