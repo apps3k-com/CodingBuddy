@@ -98,7 +98,7 @@ The **Repo Readiness** entry (alpha, under Inventory) is a read-only checklist f
 
 - Choose a repository folder; CodingBuddy remembers the last selected folder.
 - The table checks agent governance, README coverage, documented build/test commands, contribution workflow docs, GitHub issue/PR templates, feature-flag docs for Swift app repos, setup scripts and hooks, CI workflows and lightweight `.git` in-progress markers.
-- Each row is **Pass**, **Warn** or **Fail** and includes a short remediation hint. Warnings mean the app found a partial or ambiguous signal.
+- Each row is **Passed**, **Warning** or **Failed** and includes a short remediation hint. Warnings mean the app found a partial or ambiguous signal.
 - The checklist never edits files, calls GitHub, shells out to `git` or validates that commands actually pass.
 
 v1 limits: Repo Readiness is deterministic and advisory. It does not inspect remote Project state, create missing templates or decide whether a repository is safe to merge.

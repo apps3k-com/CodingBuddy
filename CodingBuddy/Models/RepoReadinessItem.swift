@@ -15,11 +15,11 @@ nonisolated enum RepoReadinessStatus: String, CaseIterable, Sendable {
     var displayName: String {
         switch self {
         case .pass:
-            String(localized: "Pass")
+            String(localized: "Passed")
         case .warn:
-            String(localized: "Warn")
+            String(localized: "Warning")
         case .fail:
-            String(localized: "Fail")
+            String(localized: "Failed")
         }
     }
 }

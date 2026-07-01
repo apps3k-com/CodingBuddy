@@ -3213,7 +3213,7 @@
         }
       }
     },
-    "Fail" : {
+    "Failed" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3483,7 +3483,7 @@
         }
       }
     },
-    "Pass" : {
+    "Passed" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3629,16 +3629,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Versuche eine andere Prüfung, einen anderen Status, eine andere Quelle oder Behebung."
-          }
-        }
-      }
-    },
-    "Warn" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warnung"
           }
         }
       }
