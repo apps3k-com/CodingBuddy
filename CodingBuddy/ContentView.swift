@@ -89,6 +89,8 @@ struct ContentView: View {
     @State private var secrets = SecretsGuard()
     /// Current sidebar selection.
     @State private var scope: SidebarScope? = .all
+    /// Persisted collapsed top-level sidebar groups.
+    @AppStorage("sidebar.collapsedSections") private var collapsedSidebarSections = ""
     /// Whether the settings sheet is visible.
     @State private var showSettings = false
     /// Settings pane requested by the action that opened Settings.
@@ -108,7 +110,9 @@ struct ContentView: View {
             List(selection: $scope) {
                 Label("All Variables", systemImage: "list.bullet")
                     .tag(SidebarScope.all)
-                Section("Files") {
+                sidebarSection(.files) {
+                    Text("Files")
+                } content: {
                     ForEach(ShellConfigFile.allCases) { file in
                         Label(file.rawValue, systemImage: "doc.text")
                             .foregroundStyle(store.existingFiles.contains(file) ? .primary : .secondary)
@@ -117,7 +121,9 @@ struct ContentView: View {
                     }
                 }
                 if AITool.allCases.contains(where: { $0.featureFlag.isEnabled }) {
-                    Section("AI Tools") {
+                    sidebarSection(.aiTools) {
+                        Text("AI Tools")
+                    } content: {
                         ForEach(AITool.allCases.filter { $0.featureFlag.isEnabled }) { tool in
                             Label {
                                 Text(verbatim: tool.displayName)
@@ -131,7 +137,9 @@ struct ContentView: View {
                     }
                 }
                 if FeatureFlag.mcpAuthManager.isEnabled {
-                    Section("Credentials") {
+                    sidebarSection(.credentials) {
+                        Text("Credentials")
+                    } content: {
                         Label {
                             Text(verbatim: "MCP Auth")
                         } icon: {
@@ -143,7 +151,9 @@ struct ContentView: View {
                     }
                 }
                 if let agentDoctorStore {
-                    Section("Health") {
+                    sidebarSection(.health) {
+                        Text("Health")
+                    } content: {
                         Label("Agent Doctor", systemImage: "stethoscope")
                             .badge(agentDoctorStore.problemCount)
                             .tag(SidebarScope.agentDoctor)
@@ -154,7 +164,9 @@ struct ContentView: View {
                 }
                 if agentContextInspectorStore != nil || repoReadinessStore != nil
                     || mcpServerInventoryStore != nil || agentPRMonitorStore != nil {
-                    Section("Inventory") {
+                    sidebarSection(.inventory) {
+                        Text("Inventory")
+                    } content: {
                         if let agentContextInspectorStore {
                             Label("Agent Context", systemImage: "text.book.closed")
                                 .badge(agentContextInspectorStore.problemCount)
@@ -186,7 +198,9 @@ struct ContentView: View {
                     }
                 }
                 if let backupBrowserStore {
-                    Section("Safety") {
+                    sidebarSection(.safety) {
+                        Text("Safety")
+                    } content: {
                         Label("Backups", systemImage: "clock.arrow.circlepath")
                             .badge(backupBrowserStore.count)
                             .tag(SidebarScope.backupBrowser)
@@ -279,6 +293,32 @@ struct ContentView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(store.lastError ?? "")
+        }
+    }
+
+    /// Wraps a sidebar group in native collapsible sections when the feature is enabled.
+    @ViewBuilder
+    private func sidebarSection<Header: View, Content: View>(
+        _ section: SidebarSectionID,
+        @ViewBuilder header: () -> Header,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        if FeatureFlag.collapsibleSidebarSections.isEnabled {
+            Section(isExpanded: sidebarExpansionBinding(for: section), content: content, header: header)
+        } else {
+            Section(content: content, header: header)
+        }
+    }
+
+    /// Binding that bridges persisted collapsed section IDs to SwiftUI's expanded state.
+    private func sidebarExpansionBinding(for section: SidebarSectionID) -> Binding<Bool> {
+        Binding {
+            SidebarSectionExpansionState(storageValue: collapsedSidebarSections)
+                .isExpanded(section)
+        } set: { isExpanded in
+            var state = SidebarSectionExpansionState(storageValue: collapsedSidebarSections)
+            state.setExpanded(isExpanded, for: section)
+            collapsedSidebarSections = state.storageValue
         }
     }
 

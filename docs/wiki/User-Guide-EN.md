@@ -5,6 +5,7 @@ CodingBuddy is a native macOS app for managing the environment variables that li
 ## Browsing variables
 
 - The **sidebar** shows *All variables* plus one entry per dotfile with a count badge. Files that don't exist yet are dimmed; adding a variable to one creates it.
+- Top-level sidebar groups can be collapsed and expanded. CodingBuddy remembers which groups you collapsed.
 - The **table** lists name, value and source file. Use the search field (⌘F) to filter by name or value.
 - A 🔒 **lock icon** marks complex lines (command substitution like `$(date)`, multi-assignments like `export A=1 B=2`). CodingBuddy shows them honestly but never rewrites them — edit those in your editor of choice.
 - An orange **overridden** badge means a later assignment wins: zsh loads `.zshenv → .zprofile → .zshrc`, and within a file the last assignment of a name takes effect.

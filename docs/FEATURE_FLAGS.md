@@ -100,6 +100,15 @@ v1 applies to CodingBuddy-owned repository file actions such as Agent Context
 entries. It does not change Finder reveal actions, browser URLs, backup
 restore flows, or any file writing behavior.
 
+### `collapsibleSidebarSections` — maturity: alpha
+
+Top-level sidebar groups use native macOS expandable sections, and the user's
+collapsed groups are stored in app preferences so the sidebar keeps its shape
+across window recreation and relaunch.
+
+v1 keeps all groups expanded for new users and preserves the current sidebar
+selection even when its parent group is collapsed.
+
 ### `mcpAuthManager` — maturity: stable
 
 Manages the `~/.mcp-auth` credential cache of `mcp-remote`-connected MCP
