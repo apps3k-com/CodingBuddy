@@ -30,6 +30,21 @@ struct AgentPRMonitorView: View {
         selection.flatMap { id in filteredRows.first { $0.id == id } }
     }
 
+    /// Subtitle summarizing the currently watched repositories.
+    private var repositorySubtitle: String {
+        switch store.watchedRepositories.count {
+        case 0:
+            String(localized: "No repository selected")
+        case 1:
+            store.watchedRepositories[0].displayName
+        default:
+            String(
+                format: String(localized: "%lld repositories"),
+                Int64(store.watchedRepositories.count)
+            )
+        }
+    }
+
     /// Recoverable authorization failure shown while stale rows remain visible.
     private var staleAuthorizationFailure: GitHubClientError? {
         guard case .refreshFailed(let error) = store.state,
@@ -38,6 +53,19 @@ struct AgentPRMonitorView: View {
             return nil
         }
         return error
+    }
+
+    /// Per-repository refresh states that need user attention while other repositories may still show rows.
+    private var repositoryRefreshIssues: [(repository: GitHubRepositoryRef, state: AgentPRMonitorState)] {
+        store.watchedRepositories.compactMap { repository in
+            guard let state = store.repositoryRefreshStates[repository] else { return nil }
+            switch state {
+            case .needsToken, .rateLimited, .refreshFailed:
+                return (repository, state)
+            case .idle, .needsRepository, .loading, .loaded, .empty:
+                return nil
+            }
+        }
     }
 
     /// Native table view with setup, filtering, refresh, and browser follow-up actions.
@@ -56,6 +84,13 @@ struct AgentPRMonitorView: View {
                 }
             }
             .width(min: 260, ideal: 360)
+
+            TableColumn("Repository") { row in
+                Text(verbatim: row.repository.displayName)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+            .width(min: 150, ideal: 190)
 
             TableColumn("Source") { row in
                 VStack(alignment: .leading, spacing: 2) {
@@ -112,7 +147,7 @@ struct AgentPRMonitorView: View {
             .width(min: 95, ideal: 115)
         }
         .navigationTitle("Agent PR Monitor")
-        .navigationSubtitle(Text(verbatim: store.selectedRepository?.displayName ?? String(localized: "No repository selected")))
+        .navigationSubtitle(Text(verbatim: repositorySubtitle))
         .searchable(text: $searchText, prompt: "Search pull requests")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
@@ -126,27 +161,32 @@ struct AgentPRMonitorView: View {
                     store.refresh()
                 }
                 .help("Refresh pull requests")
-                .disabled(store.selectedRepository == nil || store.isRefreshing)
+                .disabled(store.watchedRepositories.isEmpty || store.isRefreshing)
 
-                Button("Repository...", systemImage: "book.closed") {
+                Button("Repositories...", systemImage: "book.closed") {
                     showsRepositorySheet = true
                 }
-                .help("Choose the GitHub repository to monitor")
+                .help("Choose the GitHub repositories to monitor")
             }
         }
         .overlay {
             overlayView
         }
         .safeAreaInset(edge: .top, spacing: 0) {
-            if let staleAuthorizationFailure {
-                authorizationRecoveryBanner(staleAuthorizationFailure)
+            VStack(spacing: 0) {
+                if let staleAuthorizationFailure {
+                    authorizationRecoveryBanner(staleAuthorizationFailure)
+                }
+                if !repositoryRefreshIssues.isEmpty {
+                    repositoryIssueBanner(repositoryRefreshIssues)
+                }
             }
         }
         .sheet(isPresented: $showsRepositorySheet) {
             RepositorySetupSheet(store: store, openSettings: openSettings)
         }
         .onAppear {
-            if store.selectedRepository != nil, store.rows.isEmpty, store.state == .idle {
+            if !store.watchedRepositories.isEmpty, store.rows.isEmpty, store.state == .idle {
                 store.refresh()
             }
         }
@@ -178,6 +218,48 @@ struct AgentPRMonitorView: View {
         }
     }
 
+    /// Compact summary for partial repository refresh failures.
+    private func repositoryIssueBanner(_ issues: [(repository: GitHubRepositoryRef, state: AgentPRMonitorState)]) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Repository refresh issues")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                Text(repositoryIssueMessage(issues))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+            Spacer(minLength: 8)
+            if issues.contains(where: { $0.state.isGitHubAuthorizationRecoverable }) {
+                Button("Open Settings") { openSettings() }
+                    .controlSize(.small)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.bar)
+        .overlay(alignment: .bottom) {
+            Divider()
+        }
+    }
+
+    /// Human-readable summary for repository-scoped refresh failures.
+    private func repositoryIssueMessage(
+        _ issues: [(repository: GitHubRepositoryRef, state: AgentPRMonitorState)]
+    ) -> String {
+        if issues.count > 1 {
+            return String(
+                format: String(localized: "%lld repositories need attention."),
+                Int64(issues.count)
+            )
+        }
+        guard let issue = issues.first else { return "" }
+        return issue.state.repositoryMessage(repository: issue.repository) ?? issue.repository.displayName
+    }
+
     /// Setup, empty, and error overlays for non-table states.
     @ViewBuilder private var overlayView: some View {
         if case .needsToken = store.state {
@@ -198,13 +280,13 @@ struct AgentPRMonitorView: View {
                     Button("Open Settings") { openSettings() }
                 }
             }
-        } else if store.selectedRepository == nil {
+        } else if store.watchedRepositories.isEmpty {
             ContentUnavailableView {
                 Label("No repository selected", systemImage: "book.closed")
             } description: {
-                Text("Choose a GitHub repository in owner/name format to monitor open pull requests.")
+                Text("Add at least one GitHub repository to monitor open pull requests.")
             } actions: {
-                Button("Choose Repository...") { showsRepositorySheet = true }
+                Button("Choose Repositories...") { showsRepositorySheet = true }
             }
         } else if case .rateLimited(let resetAt) = store.state {
             ContentUnavailableView(
@@ -219,7 +301,7 @@ struct AgentPRMonitorView: View {
                 ContentUnavailableView(
                     "No pull requests",
                     systemImage: "point.topleft.down.curvedto.point.bottomright.up",
-                    description: Text("CodingBuddy did not find open pull requests for the selected repository.")
+                    description: Text("CodingBuddy did not find open pull requests for the watched repositories.")
                 )
             } else {
                 ContentUnavailableView(
@@ -249,7 +331,52 @@ struct AgentPRMonitorView: View {
     }
 }
 
-/// Sheet for choosing the single GitHub repository monitored by v1.
+private extension AgentPRMonitorState {
+    /// Whether this state can be recovered by changing GitHub authorization.
+    var isGitHubAuthorizationRecoverable: Bool {
+        switch self {
+        case .needsToken:
+            true
+        case .refreshFailed(let error):
+            error.isGitHubAuthorizationRecoverable
+        case .idle, .needsRepository, .loading, .loaded, .empty, .rateLimited:
+            false
+        }
+    }
+
+    /// Repository-scoped status text for banners and watchlist rows.
+    func repositoryMessage(repository: GitHubRepositoryRef) -> String? {
+        switch self {
+        case .idle, .needsRepository:
+            return nil
+        case .loading:
+            return String(localized: "Loading")
+        case .loaded:
+            return String(localized: "Loaded")
+        case .empty:
+            return String(localized: "No open pull requests")
+        case .needsToken:
+            return String(format: String(localized: "%@ needs a GitHub token."), repository.displayName)
+        case .rateLimited(let resetAt):
+            if let resetAt {
+                return String(
+                    format: String(localized: "GitHub rate limit for %@ until %@."),
+                    repository.displayName,
+                    resetAt.formatted(date: .omitted, time: .shortened)
+                )
+            }
+            return String(format: String(localized: "GitHub rate limit for %@."), repository.displayName)
+        case .refreshFailed(let error):
+            return String(
+                format: String(localized: "Reload failed for %@: %@"),
+                repository.displayName,
+                error.localizedDescription
+            )
+        }
+    }
+}
+
+/// Sheet for managing the GitHub repositories monitored by the Agent PR Monitor.
 private struct RepositorySetupSheet: View {
     /// Store that owns repository persistence.
     var store: AgentPRMonitorStore
@@ -262,7 +389,7 @@ private struct RepositorySetupSheet: View {
     @State private var manualRepository = ""
     /// Selected repository row in the native list.
     @State private var selectedRepositoryID: GitHubRepositorySummary.ID?
-    /// Dismisses the setup sheet after save or cancel.
+    /// Dismisses the setup sheet after edits are finished.
     @Environment(\.dismiss) private var dismiss
 
     /// Repositories visible after applying the search text.
@@ -292,18 +419,38 @@ private struct RepositorySetupSheet: View {
     /// Searchable repository picker with manual owner/name fallback.
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Repository")
+            Text("Watched repositories")
                 .font(.title3)
                 .fontWeight(.semibold)
 
-            Text("Choose a repository visible to the saved GitHub token.")
+            Text("Add repositories visible to the saved GitHub token.")
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+
+            if !store.watchedRepositories.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Currently watched")
+                        .font(.headline)
+                    List(store.watchedRepositories) { repository in
+                        WatchedRepositoryRow(
+                            repository: repository,
+                            state: store.repositoryRefreshStates[repository],
+                            remove: {
+                                store.removeWatchedRepository(repository)
+                                if !store.watchedRepositories.isEmpty {
+                                    store.refresh()
+                                }
+                            }
+                        )
+                    }
+                    .frame(minHeight: 96, idealHeight: 120, maxHeight: 150)
+                }
+            }
 
             TextField("Search repositories", text: $searchText)
                 .textFieldStyle(.roundedBorder)
                 .onSubmit {
-                    chooseSelectedRepository()
+                    addSelectedRepository()
                 }
 
             HStack {
@@ -320,12 +467,12 @@ private struct RepositorySetupSheet: View {
                 List(filteredRepositories, selection: $selectedRepositoryID) { repository in
                     RepositoryChoiceRow(
                         repository: repository,
-                        isCurrentSelection: repository.ref == store.selectedRepository
+                        isWatched: store.watchedRepositories.contains(repository.ref)
                     )
                     .tag(repository.id)
                     .contentShape(Rectangle())
                     .onTapGesture(count: 2) {
-                        choose(repository.ref)
+                        add(repository.ref)
                     }
                 }
                 .frame(minHeight: 260)
@@ -368,32 +515,32 @@ private struct RepositorySetupSheet: View {
                     TextField("owner/name", text: $manualRepository)
                         .textFieldStyle(.roundedBorder)
                         .onSubmit {
-                            chooseManualRepository()
+                            addManualRepository()
                         }
                 }
             }
 
             HStack {
                 Spacer()
-                Button("Cancel", role: .cancel) { dismiss() }
+                Button("Done") { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                Button("Use Manual Entry") {
-                    chooseManualRepository()
+                Button("Add Manual Entry") {
+                    addManualRepository()
                 }
-                .disabled(manualRepositoryRef == nil)
-                Button("Choose Repository") {
-                    chooseSelectedRepository()
+                .disabled(manualRepositoryRef == nil || isWatched(manualRepositoryRef))
+                Button("Add Repository") {
+                    addSelectedRepository()
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
-                .disabled(selectedRepository == nil)
+                .disabled(selectedRepository == nil || isWatched(selectedRepository?.ref))
             }
         }
         .padding(20)
         .frame(width: 560)
         .onAppear {
-            manualRepository = store.selectedRepository?.displayName ?? ""
-            selectedRepositoryID = store.selectedRepository?.id
+            manualRepository = ""
+            selectedRepositoryID = store.watchedRepositories.first?.id
             store.loadRepositoryChoices()
             keepSelectionVisible()
         }
@@ -492,22 +639,28 @@ private struct RepositorySetupSheet: View {
         selectedRepositoryID = filteredRepositories[nextIndex].id
     }
 
-    /// Selects the highlighted repository, if any.
-    private func chooseSelectedRepository() {
+    /// Returns true when the repository is already watched.
+    private func isWatched(_ repository: GitHubRepositoryRef?) -> Bool {
+        guard let repository else { return false }
+        return store.watchedRepositories.contains(repository)
+    }
+
+    /// Adds the highlighted repository, if any.
+    private func addSelectedRepository() {
         guard let selectedRepository else { return }
-        choose(selectedRepository.ref)
+        add(selectedRepository.ref)
     }
 
-    /// Selects the parsed manual repository fallback, if valid.
-    private func chooseManualRepository() {
+    /// Adds the parsed manual repository fallback, if valid.
+    private func addManualRepository() {
         guard let manualRepositoryRef else { return }
-        choose(manualRepositoryRef)
+        add(manualRepositoryRef)
+        manualRepository = ""
     }
 
-    /// Persists a repository and refreshes the monitor.
-    private func choose(_ repository: GitHubRepositoryRef) {
-        store.selectRepository(repository)
-        dismiss()
+    /// Persists a watched repository and refreshes the monitor.
+    private func add(_ repository: GitHubRepositoryRef) {
+        store.addWatchedRepository(repository)
         store.refresh()
     }
 }
@@ -517,9 +670,9 @@ private struct RepositoryChoiceRow: View {
     /// Repository summary displayed by the row.
     var repository: GitHubRepositorySummary
     /// Whether this repository is currently monitored.
-    var isCurrentSelection: Bool
+    var isWatched: Bool
 
-    /// Native list row with owner/name, metadata, and current-selection marker.
+    /// Native list row with owner/name, metadata, and watchlist marker.
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 3) {
@@ -546,12 +699,76 @@ private struct RepositoryChoiceRow: View {
                 .foregroundStyle(.secondary)
                 .help(repository.isPrivate ? "Private repository" : "Public repository")
 
-            if isCurrentSelection {
+            if isWatched {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(Color.accentColor)
-                    .help("Current repository")
+                    .help("Watched repository")
             }
         }
+    }
+}
+
+/// Watched repository row with scoped refresh state and a remove action.
+private struct WatchedRepositoryRow: View {
+    /// Repository currently in the watchlist.
+    var repository: GitHubRepositoryRef
+    /// Latest scoped refresh state for this repository.
+    var state: AgentPRMonitorState?
+    /// Removes the repository from the watchlist.
+    var remove: () -> Void
+
+    /// Compact row for the watched repository list.
+    var body: some View {
+        HStack(alignment: .center, spacing: 10) {
+            statusImage
+                .frame(width: 16)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: repository.displayName)
+                    .fontWeight(.medium)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                if let statusText {
+                    Text(statusText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            Spacer(minLength: 8)
+            Button {
+                remove()
+            } label: {
+                Image(systemName: "minus.circle")
+            }
+            .buttonStyle(.plain)
+            .help(String(format: String(localized: "Remove %@"), repository.displayName))
+        }
+    }
+
+    /// Semantic status icon for the latest repository refresh.
+    @ViewBuilder private var statusImage: some View {
+        switch state {
+        case .loading:
+            ProgressView()
+                .controlSize(.small)
+        case .loaded:
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green)
+        case .empty:
+            Image(systemName: "tray")
+                .foregroundStyle(.secondary)
+        case .needsToken, .rateLimited, .refreshFailed:
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+        case .idle, .needsRepository, nil:
+            Image(systemName: "circle")
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    /// Optional one-line scoped status text.
+    private var statusText: String? {
+        state?.repositoryMessage(repository: repository)
     }
 }
 

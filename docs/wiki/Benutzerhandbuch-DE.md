@@ -119,15 +119,15 @@ v1-Grenzen: MCP Inventory bearbeitet, installiert und prüft keine Server im Net
 
 ### Agent PR Monitor
 
-Der Seitenleisten-Eintrag **Agent PR Monitor** (Alpha, unter Inventar) ist eine Nur-Lese-Tabelle für offene GitHub-Pull-Requests in einem ausgewählten Repository. Jede Zeile wird als vermutlich Agent, vermutlich Mensch oder unbekannt klassifiziert.
+Der Seitenleisten-Eintrag **Agent PR Monitor** (Alpha, unter Inventar) ist eine Nur-Lese-Tabelle für offene GitHub-Pull-Requests über eine überwachte Repository-Liste hinweg. Jede Zeile wird als vermutlich Agent, vermutlich Mensch oder unbekannt klassifiziert.
 
 - Füge den feingranularen GitHub-Nur-Lese-Token unter **Einstellungen → Sicherheit** hinzu oder ersetze ihn dort; CodingBuddy speichert ihn im Schlüsselbund, nicht in UserDefaults oder Dateien. Wenn kein Token gespeichert ist oder GitHub ihn ablehnt, führt dich der Monitor zurück in die Einstellungen.
-- Wähle ein Repository aus der durchsuchbaren Auswahl; die Suche passt auf Owner, Repository-Namen, volles `owner/name` und sichtbare Beschreibungen. Die manuelle `owner/name`-Eingabe bleibt als Fallback verfügbar, wenn die Repository-Liste nicht geladen werden kann.
-- Die Tabelle zeigt PR-Titel, Autor-/Quellklassifizierung, verknüpfte Closing-Issues, CI-Status, Review-Status, ungelöste Befunde, beratende Merge-Bereitschaft und letzte Aktualisierung.
+- Füge überwachte Repositories über die durchsuchbare Auswahl hinzu oder entferne sie dort; die Suche passt auf Owner, Repository-Namen, volles `owner/name` und sichtbare Beschreibungen. Die manuelle `owner/name`-Eingabe bleibt als Fallback verfügbar, wenn die Repository-Liste nicht geladen werden kann.
+- Die Tabelle zeigt PR-Titel, Repository, Autor-/Quellklassifizierung, verknüpfte Closing-Issues, CI-Status, Review-Status, ungelöste Befunde, beratende Merge-Bereitschaft und letzte Aktualisierung.
 - Mit **Aktualisieren** lädst du manuell neu, mit **PR öffnen** arbeitest du im Browser weiter. Der Monitor kommentiert nie, genehmigt nie, löst keine Threads auf und führt keine Merges aus.
-- Rate-Limits, fehlende Rechte, verweigerte Repositories und Offline-Fehler erscheinen als UI-sichere Zustände; der letzte erfolgreiche Snapshot bleibt möglichst sichtbar.
+- Rate-Limits, fehlende Rechte, verweigerte Repositories und Offline-Fehler erscheinen als UI-sichere Zustände; der letzte erfolgreiche Snapshot bleibt möglichst sichtbar. Repository-spezifische Fehler sind abgegrenzt, sodass erfolgreiche Repositories sichtbar bleiben, wenn ein anderes überwachtes Repository fehlschlägt.
 
-v1-Grenzen: Agent PR Monitor liest nur GitHub.com, überwacht jeweils ein Repository und aktualisiert keine GitHub Projects. Nach dem Beenden von CodingBuddy läuft er nicht im Hintergrund weiter.
+v1-Grenzen: Agent PR Monitor liest nur GitHub.com, aktualisiert keine GitHub Projects und läuft nach dem Beenden von CodingBuddy nicht im Hintergrund weiter.
 
 ### Codex
 

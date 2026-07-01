@@ -3754,6 +3754,46 @@
         }
       }
     },
+    "Add Manual Entry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuelle Eingabe hinzufügen"
+          }
+        }
+      }
+    },
+    "Add Repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository hinzufügen"
+          }
+        }
+      }
+    },
+    "Add at least one GitHub repository to monitor open pull requests." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge mindestens ein GitHub-Repository hinzu, um offene Pull Requests zu überwachen."
+          }
+        }
+      }
+    },
+    "Add repositories visible to the saved GitHub token." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge Repositories hinzu, die für den gespeicherten GitHub-Token sichtbar sind."
+          }
+        }
+      }
+    },
     "Agent PR Monitor" : {
       "localizations" : {
         "de" : {
@@ -3864,6 +3904,16 @@
         }
       }
     },
+    "Choose Repositories..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repositories auswählen ..."
+          }
+        }
+      }
+    },
     "Choose Repository" : {
       "localizations" : {
         "de" : {
@@ -3900,6 +3950,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wähle das zu überwachende GitHub-Repository aus"
+          }
+        }
+      }
+    },
+    "Choose the GitHub repositories to monitor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle die zu überwachenden GitHub-Repositories aus"
           }
         }
       }
@@ -3964,12 +4024,32 @@
         }
       }
     },
+    "CodingBuddy did not find open pull requests for the watched repositories." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat keine offenen Pull Requests für die überwachten Repositories gefunden."
+          }
+        }
+      }
+    },
     "Current repository" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktuelles Repository"
+          }
+        }
+      }
+    },
+    "Currently watched" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuell überwacht"
           }
         }
       }
@@ -4060,6 +4140,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "GitHub-Rate-Limit erreicht. Versuche es später erneut."
+          }
+        }
+      }
+    },
+    "GitHub rate limit for %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Rate-Limit für %@."
+          }
+        }
+      }
+    },
+    "GitHub rate limit for %@ until %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Rate-Limit für %@ bis %@."
           }
         }
       }
@@ -4174,6 +4274,26 @@
         }
       }
     },
+    "Loaded" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geladen"
+          }
+        }
+      }
+    },
+    "Loading" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lädt"
+          }
+        }
+      }
+    },
     "Loading pull requests..." : {
       "localizations" : {
         "de" : {
@@ -4230,6 +4350,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kein verknüpftes Issue"
+          }
+        }
+      }
+    },
+    "No open pull requests" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine offenen Pull Requests"
           }
         }
       }
@@ -4384,6 +4514,16 @@
         }
       }
     },
+    "Reload failed for %@: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neu laden für %@ fehlgeschlagen: %@"
+          }
+        }
+      }
+    },
     "Repository" : {
       "localizations" : {
         "de" : {
@@ -4404,12 +4544,32 @@
         }
       }
     },
+    "Repositories..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repositories ..."
+          }
+        }
+      }
+    },
     "Repository..." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Repository ..."
+          }
+        }
+      }
+    },
+    "Repository refresh issues" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Aktualisierungsprobleme"
           }
         }
       }
@@ -4430,6 +4590,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Token entfernen"
+          }
+        }
+      }
+    },
+    "Remove %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ entfernen"
           }
         }
       }
@@ -4690,6 +4860,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wird vom Agent PR Monitor verwendet, um Pull-Request-, Issue-, Check- und Review-Status von GitHub zu lesen."
+          }
+        }
+      }
+    },
+    "Watched repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überwachte Repositories"
+          }
+        }
+      }
+    },
+    "Watched repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überwachtes Repository"
+          }
+        }
+      }
+    },
+    "%@ needs a GitHub token." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ benötigt einen GitHub-Token."
+          }
+        }
+      }
+    },
+    "%lld repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Repositories"
+          }
+        }
+      }
+    },
+    "%lld repositories need attention." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Repositories benötigen Aufmerksamkeit."
           }
         }
       }

@@ -65,15 +65,21 @@ nonisolated enum AgentPRRepositoryPickerState: Equatable, Sendable {
 final class AgentPRMonitorStore: CustomDebugStringConvertible {
     /// UserDefaults key for the selected repository string.
     static let repositoryKey = "agentPRMonitorRepository"
+    /// UserDefaults key for the newline-delimited watched repository list.
+    static let watchedRepositoriesKey = "agentPRMonitorRepositories"
 
     /// Currently selected repository.
     private(set) var selectedRepository: GitHubRepositoryRef?
+    /// Repositories currently watched by the monitor.
+    private(set) var watchedRepositories: [GitHubRepositoryRef] = []
 
     /// Latest visible pull request rows.
     private(set) var rows: [AgentPullRequest] = []
 
     /// Latest view state.
     private(set) var state: AgentPRMonitorState = .idle
+    /// Latest refresh state per watched repository.
+    private(set) var repositoryRefreshStates: [GitHubRepositoryRef: AgentPRMonitorState] = [:]
 
     /// Latest rate-limit metadata returned by GitHub.
     private(set) var rateLimit: GitHubRateLimitState?
@@ -117,9 +123,15 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         self.tokenStore = tokenStore
         self.client = client ?? GitHubClient(tokenStore: tokenStore)
         self.defaults = defaults
-        if let saved = defaults.string(forKey: Self.repositoryKey) {
-            selectedRepository = GitHubRepositoryRef(displayName: saved)
+        if let saved = defaults.string(forKey: Self.watchedRepositoriesKey) {
+            watchedRepositories = Self.repositoryList(from: saved)
+        } else if let saved = defaults.string(forKey: Self.repositoryKey),
+                  let repository = GitHubRepositoryRef(displayName: saved) {
+            watchedRepositories = [repository]
+            persistWatchedRepositories()
         }
+        selectedRepository = watchedRepositories.first
+        defaults.removeObject(forKey: Self.repositoryKey)
     }
 
     /// Cancels any pending refresh when the store is released.
@@ -142,22 +154,76 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
     func selectRepository(_ repository: GitHubRepositoryRef) {
         refreshTask?.cancel()
         selectedRepository = repository
-        defaults.setAgentPRMonitorString(repository.displayName, forKey: Self.repositoryKey)
+        watchedRepositories = [repository]
+        persistWatchedRepositories()
         rows = []
         rateLimit = nil
+        repositoryRefreshStates = [:]
         isRefreshing = false
         state = .idle
+    }
+
+    /// Adds a repository to the watchlist without disturbing existing entries.
+    func addWatchedRepository(_ repository: GitHubRepositoryRef) {
+        guard !watchedRepositories.contains(repository) else { return }
+        watchedRepositories.append(repository)
+        selectedRepository = selectedRepository ?? repository
+        repositoryRefreshStates[repository] = .idle
+        persistWatchedRepositories()
+    }
+
+    /// Removes one repository from the watchlist while keeping the remaining entries.
+    func removeWatchedRepository(_ repository: GitHubRepositoryRef) {
+        guard watchedRepositories.contains(repository) else { return }
+        refreshTask?.cancel()
+        watchedRepositories.removeAll { $0 == repository }
+        if selectedRepository == repository {
+            selectedRepository = watchedRepositories.first
+        }
+        persistWatchedRepositories()
+        repositoryRefreshStates.removeValue(forKey: repository)
+        rows.removeAll { $0.repository == repository }
+        if watchedRepositories.isEmpty {
+            rateLimit = nil
+            state = .needsRepository
+        }
+        isRefreshing = false
     }
 
     /// Clears repository selection and rows.
     func clearRepository() {
         refreshTask?.cancel()
         selectedRepository = nil
+        watchedRepositories = []
         rows = []
         rateLimit = nil
+        repositoryRefreshStates = [:]
         state = .needsRepository
         isRefreshing = false
         defaults.removeObject(forKey: Self.repositoryKey)
+        defaults.removeObject(forKey: Self.watchedRepositoriesKey)
+    }
+
+    /// Converts stored repository text into ordered unique references.
+    private static func repositoryList(from storageValue: String) -> [GitHubRepositoryRef] {
+        var seen = Set<GitHubRepositoryRef>()
+        return storageValue
+            .split(whereSeparator: \.isNewline)
+            .compactMap { GitHubRepositoryRef(displayName: String($0)) }
+            .filter { seen.insert($0).inserted }
+    }
+
+    /// Persists the watchlist using one owner/name reference per line.
+    private func persistWatchedRepositories() {
+        defaults.removeObject(forKey: Self.repositoryKey)
+        guard !watchedRepositories.isEmpty else {
+            defaults.removeObject(forKey: Self.watchedRepositoriesKey)
+            return
+        }
+        let value = watchedRepositories
+            .map(\.displayName)
+            .joined(separator: "\n")
+        defaults.setAgentPRMonitorString(value, forKey: Self.watchedRepositoriesKey)
     }
 
     /// Loads repositories visible to the saved token for the picker sheet.
@@ -269,37 +335,63 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
             return
         }
 
+        let repositories = watchedRepositories.isEmpty ? [selectedRepository] : watchedRepositories
         isRefreshing = true
         state = rows.isEmpty ? .loading : state
+        for repository in repositories {
+            repositoryRefreshStates[repository] = .loading
+        }
 
         let client = client
-        refreshTask = Task { [weak self, selectedRepository, client] in
-            do {
-                let snapshot = try await client.fetchOpenPullRequests(repository: selectedRepository)
-                guard !Task.isCancelled else { return }
-                guard let self else { return }
-                self.rows = snapshot.rows
-                self.rateLimit = snapshot.rateLimit
-                self.state = snapshot.rows.isEmpty ? .empty : .loaded
-                self.isRefreshing = false
-            } catch let error as GitHubClientError {
-                guard !Task.isCancelled else { return }
-                guard let self else { return }
-                switch error {
+        refreshTask = Task { [weak self, repositories, client] in
+            var refreshedRows: [AgentPullRequest] = []
+            var latestRateLimit: GitHubRateLimitState?
+            var repositoryStates: [GitHubRepositoryRef: AgentPRMonitorState] = [:]
+            var failures: [GitHubClientError] = []
+
+            for repository in repositories {
+                do {
+                    let snapshot = try await client.fetchOpenPullRequests(repository: repository)
+                    try Task.checkCancellation()
+                    refreshedRows.append(contentsOf: snapshot.rows)
+                    latestRateLimit = snapshot.rateLimit ?? latestRateLimit
+                    repositoryStates[repository] = snapshot.rows.isEmpty ? .empty : .loaded
+                } catch let error as GitHubClientError {
+                    guard !Task.isCancelled else { return }
+                    failures.append(error)
+                    switch error {
+                    case .noToken:
+                        repositoryStates[repository] = .needsToken
+                    case .rateLimited(let resetAt):
+                        repositoryStates[repository] = .rateLimited(resetAt)
+                    default:
+                        repositoryStates[repository] = .refreshFailed(error)
+                    }
+                } catch {
+                    guard !Task.isCancelled else { return }
+                    failures.append(.networkUnavailable)
+                    repositoryStates[repository] = .refreshFailed(.networkUnavailable)
+                }
+            }
+
+            guard !Task.isCancelled else { return }
+            guard let self else { return }
+            self.repositoryRefreshStates = repositoryStates
+            if !refreshedRows.isEmpty || failures.count < repositories.count {
+                self.rows = refreshedRows
+                self.rateLimit = latestRateLimit
+                self.state = refreshedRows.isEmpty ? .empty : .loaded
+            } else if let failure = failures.first {
+                switch failure {
                 case .noToken:
                     self.state = .needsToken
                 case .rateLimited(let resetAt):
                     self.state = .rateLimited(resetAt)
                 default:
-                    self.state = .refreshFailed(error)
+                    self.state = .refreshFailed(failure)
                 }
-                self.isRefreshing = false
-            } catch {
-                guard !Task.isCancelled else { return }
-                guard let self else { return }
-                self.state = .refreshFailed(.networkUnavailable)
-                self.isRefreshing = false
             }
+            self.isRefreshing = false
         }
     }
 }

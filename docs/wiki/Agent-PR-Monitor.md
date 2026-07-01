@@ -33,8 +33,8 @@ The feature should follow the existing CodingBuddy layers:
 
 | Layer | Proposed types | Responsibility |
 |---|---|---|
-| `Views/` | `AgentPRMonitorView` | Searchable native table, repository picker, refresh action, status badges, empty/error states. |
-| `Stores/` | `AgentPRMonitorStore` | Main-actor observable state, selected repository/account, refresh cancellation, last snapshot, last error. |
+| `Views/` | `AgentPRMonitorView` | Searchable native table, watched-repository picker, refresh action, status badges, scoped empty/error states. |
+| `Stores/` | `AgentPRMonitorStore` | Main-actor observable state, watched repositories, refresh cancellation, last aggregate snapshot, per-repository refresh states. |
 | `Services/` | `GitHubClient`, `GitHubGraphQLRequest`, `GitHubTokenStore` | Foundation-only URLSession requests, GraphQL decoding, REST fallback requests, keychain storage. |
 | `Models/` | `AgentPullRequest`, `AgentPRCheckSummary`, `AgentPRReviewSummary`, `GitHubRepositoryRef` | Small `Sendable` value types with stable IDs and search helpers. |
 
@@ -53,13 +53,18 @@ The shipped monitor no longer requires users to type a repository manually as
 the primary setup path. The repository setup sheet loads repositories visible to
 the saved GitHub token through `GET /user/repos`, then shows a native searchable
 list. Search matches owner, repository name, full `owner/name`, and visible
-descriptions.
+descriptions. Users can add multiple repositories to the watched list and
+remove individual repositories without clearing the remaining list.
 
 The picker keeps manual `owner/name` entry as a fallback when listing
 repositories is unavailable or the desired repository is not returned. Reload
 failures do not clear the current pull request snapshot, and a failed repository
 list reload keeps cached repository choices selectable while showing a retry or
 Settings recovery action.
+
+The watched repository list is persisted as non-secret `owner/name` references
+in UserDefaults. Existing single-repository selections migrate into the watched
+list on first launch after the upgrade.
 
 Repository listing is page-capped for v1. If GitHub exposes more pages after
 the cap, the picker shows a truncation notice and keeps manual entry available.
@@ -257,8 +262,8 @@ or "needs reply".
 | No token | Do not call GitHub. Offer Settings → Security setup. |
 | Invalid token | Show an authentication error and allow token replacement in Settings → Security. |
 | Missing scope | Surface the missing permission if GitHub returns `X-Accepted-GitHub-Permissions`; otherwise show a scoped access error. |
-| Private repo denied | Show `Denied` for that repository without deleting the saved repo. |
-| Network offline | Keep the last snapshot and show that refresh failed. |
+| Private repo denied | Show `Denied` for that repository without deleting the saved repo or hiding successful repositories. |
+| Network offline | Keep the last snapshot and show that refresh failed for the affected repository where possible. |
 | Rate limited | Stop refreshing until GitHub's reset time; show reset time in local time. |
 | Secondary rate limit | Back off aggressively and keep manual refresh disabled until retry is safe. |
 | GraphQL partial data | Mark affected rows as partial and fetch REST fallback only for visible rows if needed. |
