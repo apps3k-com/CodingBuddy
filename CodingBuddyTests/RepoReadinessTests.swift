@@ -40,6 +40,17 @@ struct RepoReadinessTests {
         return dir
     }
 
+    /// Loads String Catalog entries for focused source-key checks.
+    private func catalogStrings() throws -> [String: [String: Any]] {
+        let catalogURL = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("CodingBuddy/Localizable.xcstrings")
+        let data = try Data(contentsOf: catalogURL)
+        let root = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        return try #require(root?["strings"] as? [String: [String: Any]])
+    }
+
     /// Writes UTF-8 content while creating any missing parent directories.
     private func write(_ contents: String, to url: URL) throws {
         try FileManager.default.createDirectory(
@@ -351,9 +362,22 @@ struct RepoReadinessTests {
 
         #expect(item.matches(searchText: "ciWorkflow"))
         #expect(item.matches(searchText: "warn"))
+        #expect(item.matches(searchText: item.status.displayName))
         #expect(item.matches(searchText: "CI workflow"))
         #expect(item.matches(searchText: ".github/workflows"))
         #expect(item.matches(searchText: "documented build"))
         #expect(!item.matches(searchText: "feature flags"))
+    }
+
+    /// Verifies readiness status labels are outcome labels, not terse commands.
+    @Test func statusDisplaySourceKeysUseOutcomeLabels() throws {
+        let strings = try catalogStrings()
+
+        #expect(strings.keys.contains("Passed"))
+        #expect(strings.keys.contains("Repo Readiness status warning"))
+        #expect(strings.keys.contains("Failed"))
+        #expect(!strings.keys.contains("Pass"))
+        #expect(!strings.keys.contains("Warn"))
+        #expect(!strings.keys.contains("Fail"))
     }
 }

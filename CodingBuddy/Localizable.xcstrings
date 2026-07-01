@@ -3213,7 +3213,7 @@
         }
       }
     },
-    "Fail" : {
+    "Failed" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3483,12 +3483,23 @@
         }
       }
     },
-    "Pass" : {
+    "Passed" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bestanden"
+          }
+        }
+      }
+    },
+    "Repo Readiness status warning" : {
+      "comment" : "Status label for a Repo Readiness checklist item that has a partial or ambiguous local signal.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warnung"
           }
         }
       }
@@ -3629,16 +3640,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Versuche eine andere Prüfung, einen anderen Status, eine andere Quelle oder Behebung."
-          }
-        }
-      }
-    },
-    "Warn" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warnung"
           }
         }
       }
