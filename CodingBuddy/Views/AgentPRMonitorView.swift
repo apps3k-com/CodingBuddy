@@ -360,7 +360,7 @@ private extension AgentPRMonitorState {
         case .rateLimited(let resetAt):
             if let resetAt {
                 return String(
-                    format: String(localized: "GitHub rate limit for %@ until %@."),
+                    format: String(localized: "GitHub rate limit for %1$@ until %2$@."),
                     repository.displayName,
                     resetAt.formatted(date: .omitted, time: .shortened)
                 )
@@ -368,7 +368,7 @@ private extension AgentPRMonitorState {
             return String(format: String(localized: "GitHub rate limit for %@."), repository.displayName)
         case .refreshFailed(let error):
             return String(
-                format: String(localized: "Reload failed for %@: %@"),
+                format: String(localized: "Reload failed for %1$@: %2$@"),
                 repository.displayName,
                 error.localizedDescription
             )
@@ -660,6 +660,7 @@ private struct RepositorySetupSheet: View {
 
     /// Persists a watched repository and refreshes the monitor.
     private func add(_ repository: GitHubRepositoryRef) {
+        guard !store.watchedRepositories.contains(repository) else { return }
         store.addWatchedRepository(repository)
         store.refresh()
     }

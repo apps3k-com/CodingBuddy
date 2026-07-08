@@ -89,6 +89,7 @@ struct AgentPRMonitorTests {
 
         #expect(row.matches(searchText: "Website"))
         #expect(row.matches(searchText: "apps3k-com/Website"))
+        #expect(row.url.absoluteString == "https://github.com/apps3k-com/Website/pull/12")
     }
 
     /// Verifies ready state requires green checks, approved review, no findings, and non-draft status.
@@ -582,6 +583,25 @@ struct AgentPRMonitorTests {
         #expect(defaults.string(forKey: AgentPRMonitorStore.watchedRepositoriesKey) == "apps3k-com/CodingBuddy\napps3k-com/Docs")
     }
 
+    /// Verifies adding the first repository after clearing setup leaves the monitor refreshable.
+    @Test func storeAddingFirstRepositoryAfterClearResetsSetupState() {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let website = GitHubRepositoryRef(owner: "apps3k-com", name: "Website")
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: StubAgentPRMonitorClient(results: []),
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.selectRepository(repository)
+        store.clearRepository()
+        store.addWatchedRepository(website)
+
+        #expect(store.state == .idle)
+        #expect(store.selectedRepository == website)
+        #expect(store.repositoryRefreshStates[website] == .idle)
+    }
+
     /// Verifies refreshes aggregate successful repositories while keeping per-repository failures visible.
     @Test func storeRefreshAggregatesWatchedRepositoriesAndKeepsPartialFailuresScoped() async throws {
         let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
@@ -603,6 +623,35 @@ struct AgentPRMonitorTests {
 
         #expect(store.state == .loaded)
         #expect(store.rows.map(\.id) == ["apps3k-com/CodingBuddy#66"])
+        #expect(store.repositoryRefreshStates[repository] == .loaded)
+        #expect(store.repositoryRefreshStates[website] == .refreshFailed(.repositoryDenied(website)))
+    }
+
+    /// Verifies partial refresh failures keep that repository's last visible rows.
+    @Test func storeRefreshFailureKeepsCachedRowsForFailedWatchedRepository() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let website = GitHubRepositoryRef(owner: "apps3k-com", name: "Website")
+        let client = StubAgentPRMonitorClient(results: [
+            .success(AgentPRMonitorSnapshot(rows: [samplePullRequest(number: 66)], rateLimit: nil)),
+            .success(AgentPRMonitorSnapshot(rows: [samplePullRequest(number: 12, repository: website)], rateLimit: nil)),
+            .success(AgentPRMonitorSnapshot(rows: [samplePullRequest(number: 67)], rateLimit: nil)),
+            .failure(.repositoryDenied(website)),
+        ])
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.addWatchedRepository(repository)
+        store.addWatchedRepository(website)
+        store.refresh()
+        try await waitForRefresh(in: store)
+        store.refresh()
+        try await waitForRefresh(in: store)
+
+        #expect(store.state == .loaded)
+        #expect(store.rows.map(\.id) == ["apps3k-com/CodingBuddy#67", "apps3k-com/Website#12"])
         #expect(store.repositoryRefreshStates[repository] == .loaded)
         #expect(store.repositoryRefreshStates[website] == .refreshFailed(.repositoryDenied(website)))
     }
@@ -630,6 +679,31 @@ struct AgentPRMonitorTests {
         #expect(store.rows.map(\.id) == ["apps3k-com/CodingBuddy#66", "apps3k-com/Website#12"])
         #expect(store.repositoryRefreshStates[repository] == .loaded)
         #expect(store.repositoryRefreshStates[website] == .loaded)
+    }
+
+    /// Verifies removing a repository while refreshing resets loading states for remaining entries.
+    @Test func storeRemovingRepositoryDuringRefreshReconcilesRemainingLoadingStates() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let website = GitHubRepositoryRef(owner: "apps3k-com", name: "Website")
+        let delayedSnapshot = AgentPRMonitorSnapshot(rows: [], rateLimit: nil)
+        let client = DelayedAgentPRMonitorClient(snapshot: delayedSnapshot, delayNanoseconds: 200_000_000)
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: client,
+            defaults: MemoryAgentPRMonitorDefaults()
+        )
+
+        store.addWatchedRepository(repository)
+        store.addWatchedRepository(website)
+        store.refresh()
+        try await waitUntilRefreshStarted(in: store)
+        store.removeWatchedRepository(repository)
+        try await waitUntilRefreshStopped(in: store)
+
+        #expect(store.watchedRepositories == [website])
+        #expect(store.repositoryRefreshStates[website] == .idle)
+        #expect(store.state == .empty)
+        #expect(!store.isRefreshing)
     }
 
     /// Verifies repository picker failures do not clear the visible pull request snapshot.
@@ -860,7 +934,7 @@ struct AgentPRMonitorTests {
             repository: repository,
             number: number,
             title: "docs: document native Agent PR Monitor architecture design",
-            url: URL(string: "https://github.com/apps3k-com/CodingBuddy/pull/\(number)")!,
+            url: URL(string: "https://github.com/\(repository.displayName)/pull/\(number)")!,
             isDraft: false,
             authorLogin: "apps3000",
             source: .likelyAgent,

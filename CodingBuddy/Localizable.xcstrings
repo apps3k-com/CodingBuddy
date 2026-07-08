@@ -4154,12 +4154,12 @@
         }
       }
     },
-    "GitHub rate limit for %@ until %@." : {
+    "GitHub rate limit for %1$@ until %2$@." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GitHub-Rate-Limit für %@ bis %@."
+            "value" : "GitHub-Rate-Limit für %1$@ bis %2$@."
           }
         }
       }
@@ -4514,12 +4514,12 @@
         }
       }
     },
-    "Reload failed for %@: %@" : {
+    "Reload failed for %1$@: %2$@" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neu laden für %@ fehlgeschlagen: %@"
+            "value" : "Neu laden für %1$@ fehlgeschlagen: %2$@"
           }
         }
       }

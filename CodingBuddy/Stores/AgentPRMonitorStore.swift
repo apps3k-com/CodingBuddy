@@ -111,6 +111,9 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
     /// Current refresh task, cancelled when a newer refresh starts.
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
 
+    /// Last successful pull request snapshot per repository.
+    @ObservationIgnored private var repositorySnapshots: [GitHubRepositoryRef: [AgentPullRequest]] = [:]
+
     /// Current repository-list task, cancelled when a newer load starts.
     @ObservationIgnored private var repositoryListTask: Task<Void, Never>?
 
@@ -156,6 +159,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         selectedRepository = repository
         watchedRepositories = [repository]
         persistWatchedRepositories()
+        repositorySnapshots = [:]
         rows = []
         rateLimit = nil
         repositoryRefreshStates = [:]
@@ -166,26 +170,46 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
     /// Adds a repository to the watchlist without disturbing existing entries.
     func addWatchedRepository(_ repository: GitHubRepositoryRef) {
         guard !watchedRepositories.contains(repository) else { return }
+        let wasEmpty = watchedRepositories.isEmpty
         watchedRepositories.append(repository)
         selectedRepository = selectedRepository ?? repository
         repositoryRefreshStates[repository] = .idle
+        if wasEmpty {
+            state = .idle
+        }
         persistWatchedRepositories()
     }
 
     /// Removes one repository from the watchlist while keeping the remaining entries.
     func removeWatchedRepository(_ repository: GitHubRepositoryRef) {
         guard watchedRepositories.contains(repository) else { return }
+        let wasRefreshing = isRefreshing
         refreshTask?.cancel()
         watchedRepositories.removeAll { $0 == repository }
         if selectedRepository == repository {
             selectedRepository = watchedRepositories.first
         }
         persistWatchedRepositories()
+        repositorySnapshots.removeValue(forKey: repository)
         repositoryRefreshStates.removeValue(forKey: repository)
-        rows.removeAll { $0.repository == repository }
+        rows = cachedRows(for: watchedRepositories)
         if watchedRepositories.isEmpty {
             rateLimit = nil
             state = .needsRepository
+        } else {
+            if wasRefreshing {
+                for remainingRepository in watchedRepositories
+                where repositoryRefreshStates[remainingRepository] == .loading {
+                    repositoryRefreshStates[remainingRepository] = rows.contains { $0.repository == remainingRepository }
+                        ? .loaded
+                        : .idle
+                }
+            }
+            if rows.isEmpty, state == .loaded || state == .loading {
+                state = .empty
+            } else if !rows.isEmpty, state == .loading {
+                state = .loaded
+            }
         }
         isRefreshing = false
     }
@@ -195,6 +219,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         refreshTask?.cancel()
         selectedRepository = nil
         watchedRepositories = []
+        repositorySnapshots = [:]
         rows = []
         rateLimit = nil
         repositoryRefreshStates = [:]
@@ -309,6 +334,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
             }
         case .removed:
             refreshTask?.cancel()
+            repositorySnapshots = [:]
             rows = []
             rateLimit = nil
             isRefreshing = false
@@ -344,7 +370,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
 
         let client = client
         refreshTask = Task { [weak self, repositories, client] in
-            var refreshedRows: [AgentPullRequest] = []
+            var refreshedSnapshots: [GitHubRepositoryRef: [AgentPullRequest]] = [:]
             var latestRateLimit: GitHubRateLimitState?
             var repositoryStates: [GitHubRepositoryRef: AgentPRMonitorState] = [:]
             var failures: [GitHubClientError] = []
@@ -353,7 +379,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
                 do {
                     let snapshot = try await client.fetchOpenPullRequests(repository: repository)
                     try Task.checkCancellation()
-                    refreshedRows.append(contentsOf: snapshot.rows)
+                    refreshedSnapshots[repository] = snapshot.rows
                     latestRateLimit = snapshot.rateLimit ?? latestRateLimit
                     repositoryStates[repository] = snapshot.rows.isEmpty ? .empty : .loaded
                 } catch let error as GitHubClientError {
@@ -376,11 +402,15 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
 
             guard !Task.isCancelled else { return }
             guard let self else { return }
+            for (repository, rows) in refreshedSnapshots {
+                self.repositorySnapshots[repository] = rows
+            }
+            let visibleRows = self.cachedRows(for: repositories)
             self.repositoryRefreshStates = repositoryStates
-            if !refreshedRows.isEmpty || failures.count < repositories.count {
-                self.rows = refreshedRows
+            if failures.count < repositories.count {
+                self.rows = visibleRows
                 self.rateLimit = latestRateLimit
-                self.state = refreshedRows.isEmpty ? .empty : .loaded
+                self.state = visibleRows.isEmpty ? .empty : .loaded
             } else if let failure = failures.first {
                 switch failure {
                 case .noToken:
@@ -393,5 +423,10 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
             }
             self.isRefreshing = false
         }
+    }
+
+    /// Returns the latest cached rows in watchlist order.
+    private func cachedRows(for repositories: [GitHubRepositoryRef]) -> [AgentPullRequest] {
+        repositories.flatMap { repositorySnapshots[$0] ?? [] }
     }
 }
