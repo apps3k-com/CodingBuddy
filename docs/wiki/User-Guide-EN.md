@@ -4,8 +4,8 @@ CodingBuddy is a native macOS app for managing the environment variables that li
 
 ## Browsing variables
 
-- The **sidebar** shows *All variables* plus one entry per dotfile with a count badge. Files that don't exist yet are dimmed; adding a variable to one creates it.
-- Top-level sidebar groups can be collapsed and expanded. CodingBuddy remembers which groups you collapsed.
+- The **sidebar** groups destinations by task: **Environment**, **Agent Tools**, **Health & Security**, **Repositories**, and **Maintenance**. Environment contains *All Variables* plus one entry per dotfile with a count badge. Files that don't exist yet are dimmed; adding a variable to one creates it.
+- Top-level sidebar groups can be collapsed and expanded. CodingBuddy remembers both the collapsed groups and the last selected destination.
 - The **table** lists name, value and source file. Use the search field (⌘F) to filter by name or value.
 - A 🔒 **lock icon** marks complex lines (command substitution like `$(date)`, multi-assignments like `export A=1 B=2`). CodingBuddy shows them honestly but never rewrites them — edit those in your editor of choice.
 - An orange **overridden** badge means a later assignment wins: zsh loads `.zshenv → .zprofile → .zshrc`, and within a file the last assignment of a name takes effect.
@@ -32,7 +32,7 @@ CodingBuddy is a native macOS app for managing the environment variables that li
 Before every change CodingBuddy writes a timestamped backup to
 `~/Library/Application Support/CodingBuddy/Backups/` (the last 20 per file are kept). Writes are atomic, follow symlinks (dotfile managers stay intact) and preserve file permissions. If a file changed outside the app mid-edit, the write is refused and the view reloads.
 
-The **Safety → Backups** entry (alpha) lists those backups for zsh dotfiles and
+The **Maintenance → Backups** entry (alpha) lists those backups for zsh dotfiles and
 supported agent config/env files (`~/.codex/mcp.env`, Claude Code settings,
 Cursor `mcp.json`). Select a backup to compare a redacted **Backup** preview
 with the current target. **Restore…** writes the selected backup through the
@@ -59,7 +59,7 @@ Variables whose names look like credentials (`GITHUB_TOKEN`, `AWS_SECRET_ACCESS_
 
 ## MCP credentials (~/.mcp-auth)
 
-The **Credentials → MCP Auth** sidebar section manages the OAuth cache that `mcp-remote` keeps for remote MCP servers — the directory you previously had to wipe with `rm -rf ~/.mcp-auth`.
+The **Health & Security → MCP Auth** sidebar section manages the OAuth cache that `mcp-remote` keeps for remote MCP servers — the directory you previously had to wipe with `rm -rf ~/.mcp-auth`.
 
 - Each entry is one server. CodingBuddy resolves the cryptic file hashes back to server URLs by matching them against your Claude configuration (`~/.claude.json`, Claude Desktop config); unresolved entries show their hash plus the OAuth scope as a hint.
 - The **status column** shows whether the access token is still active (with its estimated expiry), expired, or the entry is incomplete (a login that never finished).
@@ -81,11 +81,13 @@ The **Agent Doctor** entry (alpha) is a read-only health check for local agent s
 - Credential files whose permissions are too open.
 - Expired or incomplete entries in `~/.mcp-auth`.
 
+The compact table keeps severity, finding and tool visible. Select a finding to inspect its full source and explanation, then use **Open Tool** or **Open Source** for direct follow-up.
+
 v1 limits: Agent Doctor does not test network reachability, restart agent processes, apply auto-fixes, or show secret values.
 
 ### Agent Context
 
-The **Agent Context** entry (alpha, under Inventory) is a read-only inspector for one repository folder. It helps you see which instruction and setup files an agent would likely pick up before you start a coding session.
+The **Repositories → Agent Context** entry (alpha) is a read-only inspector for one repository folder. It helps you see which instruction and setup files an agent would likely pick up before you start a coding session.
 
 - Choose a repository folder; CodingBuddy remembers the last selected folder.
 - The table checks a fixed allowlist: `AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, `.mcp.json`, `.codex` project config and obvious developer documentation such as `README.md`, `CONTRIBUTING.md` and development setup docs.
@@ -96,7 +98,7 @@ v1 limits: Agent Context is deterministic discovery only. It does not recurse th
 
 ### Repo Readiness
 
-The **Repo Readiness** entry (alpha, under Inventory) is a read-only checklist for a repository folder before you hand work to a coding agent.
+The **Repositories → Repo Readiness** entry (alpha) is a read-only checklist for a repository folder before you hand work to a coding agent.
 
 - Choose a repository folder; CodingBuddy remembers the last selected folder.
 - The table checks agent governance, README coverage, documented build/test commands, contribution workflow docs, GitHub issue/PR templates, feature-flag docs for Swift app repos, setup scripts and hooks, CI workflows and lightweight `.git` in-progress markers.
@@ -109,7 +111,7 @@ v1 limits: Repo Readiness is deterministic and advisory. It does not inspect rem
 
 The **MCP Inventory** entry (alpha) is a read-only table of MCP servers discovered across Codex, Claude Code and Cursor.
 
-- It shows source tool, server name, repository or workspace name, scope or project path, transport, a safe command or URL summary, referenced environment variable names, header keys and source file.
+- The compact table shows server, source tool, repository or workspace and configuration health. Select a row to inspect scope, transport, safe command or URL summary, referenced environment variable names, header keys and source file.
 - Search filters by server name, tool, repository or workspace name, scope, command or URL summary, and environment variable name.
 - Codex servers that reference variables missing from `~/.codex/mcp.env` are highlighted. Use **Open Tool** to jump from a selected Codex, Claude Code or Cursor row to the existing tool editor.
 - Secret values are never shown: URL user info, query strings, fragments and token-like command arguments are redacted.
@@ -118,11 +120,11 @@ v1 limits: MCP Inventory does not edit, install, or network-test servers. Claude
 
 ### Agent PR Monitor
 
-The **Agent PR Monitor** entry (alpha, under Inventory) is a read-only table for open GitHub pull requests across a watched repository list. Each row is classified as likely agent, likely human or unknown.
+The **Repositories → Agent PR Monitor** entry (alpha) is a read-only table for open GitHub pull requests across a watched repository list. Each row is classified as likely agent, likely human or unknown.
 
 - Add or replace the fine-grained read-only GitHub token in **Settings → Security**; CodingBuddy stores it in Keychain, not in UserDefaults or files. If no token is saved or GitHub rejects it, the monitor sends you back to Settings.
 - Add or remove watched repositories from the searchable picker; search matches owner, repository name, full `owner/name` and visible descriptions. The manual `owner/name` fallback remains available when repository listing is unavailable.
-- The table shows PR title, repository, author/source classification, linked closing issues, CI status, review status, unresolved findings, advisory readiness and last update time.
+- The compact table shows PR title, repository, advisory readiness and last update time. Select a row to inspect author/source classification, branches, linked closing issues, CI status, review status and unresolved findings.
 - Use **Refresh** to reload manually and **Open PR** to continue in the browser. The monitor never comments, approves, resolves threads or merges PRs.
 - Rate limits, missing permissions, denied repositories and offline errors are shown as UI-safe states while the last successful snapshot stays visible where possible. Repository-specific failures are scoped, so successful repositories remain visible when another watched repository fails.
 
@@ -176,4 +178,4 @@ CodingBuddy watches your dotfiles. Edits made in a terminal or editor show up in
 | A variable doesn't show up | Only `~/.zshenv`, `~/.zprofile`, `~/.zshrc` are read — not `.bashrc` or files sourced from elsewhere. |
 | A row has a lock icon | The line is too complex to rewrite safely. Edit it in a text editor. |
 | "The file was changed externally" | Something else modified the dotfile while you edited. The app reloaded — just redo the edit. |
-| Restore an old state | Use **Safety → Backups**, select a supported backup, preview it, then choose **Restore…**. Unknown backup names can still be inspected but are preview-only. |
+| Restore an old state | Use **Maintenance → Backups**, select a supported backup, preview it, then choose **Restore…**. Unknown backup names can still be inspected but are preview-only. |

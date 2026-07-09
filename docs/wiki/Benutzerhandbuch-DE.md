@@ -4,8 +4,8 @@ CodingBuddy ist eine native macOS-App zur Verwaltung der Environment Variables i
 
 ## Variablen durchsuchen
 
-- Die **Seitenleiste** zeigt *Alle Variablen* plus einen Eintrag pro Dotfile mit Zähler. Noch nicht existierende Dateien sind ausgegraut; legst du dort eine Variable an, wird die Datei erstellt.
-- Die obersten Seitenleisten-Gruppen lassen sich ein- und ausklappen. CodingBuddy merkt sich, welche Gruppen du eingeklappt hast.
+- Die **Seitenleiste** ordnet Ziele nach Aufgaben: **Umgebung**, **AI-Tools**, **Zustand & Sicherheit**, **Repositories** und **Wartung**. Unter Umgebung stehen *Alle Variablen* und je ein Eintrag pro Dotfile mit Zähler. Noch nicht existierende Dateien sind ausgegraut; legst du dort eine Variable an, wird die Datei erstellt.
+- Die obersten Seitenleisten-Gruppen lassen sich ein- und ausklappen. CodingBuddy merkt sich sowohl eingeklappte Gruppen als auch das zuletzt gewählte Ziel.
 - Die **Tabelle** zeigt Name, Wert und Quelldatei. Mit dem Suchfeld (⌘F) filterst du nach Name oder Wert.
 - Ein 🔒 **Schloss-Symbol** markiert komplexe Zeilen (Command Substitution wie `$(date)`, Mehrfach-Zuweisungen wie `export A=1 B=2`). CodingBuddy zeigt sie ehrlich an, schreibt sie aber nie um — solche Zeilen bearbeitest du besser im Texteditor.
 - Ein oranges **überschrieben**-Badge bedeutet: Eine spätere Zuweisung gewinnt. zsh lädt `.zshenv → .zprofile → .zshrc`, innerhalb einer Datei gilt die letzte Zuweisung.
@@ -32,7 +32,7 @@ CodingBuddy ist eine native macOS-App zur Verwaltung der Environment Variables i
 Vor jeder Änderung schreibt CodingBuddy ein Backup mit Zeitstempel nach
 `~/Library/Application Support/CodingBuddy/Backups/` (die letzten 20 pro Datei bleiben erhalten). Geschrieben wird atomar, symlink-sicher (Dotfile-Manager bleiben intakt) und unter Erhalt der Dateirechte. Wurde die Datei währenddessen extern geändert, wird der Schreibvorgang verweigert und die Ansicht neu geladen.
 
-Der Eintrag **Sicherheit → Backups** (Alpha) listet diese Backups für
+Der Eintrag **Wartung → Backups** (Alpha) listet diese Backups für
 zsh-Dotfiles und unterstützte Agent-Konfigurations-/Env-Dateien
 (`~/.codex/mcp.env`, Claude-Code-Settings, Cursor `mcp.json`). Wähle ein
 Backup aus, um eine redigierte **Backup**-Vorschau mit dem aktuellen Ziel zu
@@ -60,7 +60,7 @@ Variablen, deren Namen nach Zugangsdaten aussehen (`GITHUB_TOKEN`, `AWS_SECRET_A
 
 ## MCP-Zugangsdaten (~/.mcp-auth)
 
-Der Sidebar-Bereich **Zugangsdaten → MCP Auth** verwaltet den OAuth-Cache, den `mcp-remote` für entfernte MCP-Server anlegt — das Verzeichnis, das du bisher mit `rm -rf ~/.mcp-auth` löschen musstest.
+Der Sidebar-Bereich **Zustand & Sicherheit → MCP Auth** verwaltet den OAuth-Cache, den `mcp-remote` für entfernte MCP-Server anlegt — das Verzeichnis, das du bisher mit `rm -rf ~/.mcp-auth` löschen musstest.
 
 - Jeder Eintrag ist ein Server. CodingBuddy löst die kryptischen Datei-Hashes über deine Claude-Konfiguration (`~/.claude.json`, Claude-Desktop-Config) zu Server-URLs auf; nicht auflösbare Einträge zeigen den Hash plus den OAuth-Scope als Hinweis.
 - Die **Status-Spalte** zeigt, ob der Access-Token noch aktiv ist (mit geschätztem Ablauf), abgelaufen ist oder der Eintrag unvollständig ist (ein nie abgeschlossener Login).
@@ -82,11 +82,13 @@ Der Seitenleisten-Eintrag **Agent Doctor** (Alpha) ist ein Nur-Lese-Gesundheitsc
 - Credential-Dateien mit zu offenen Dateirechten.
 - Abgelaufene oder unvollständige Einträge in `~/.mcp-auth`.
 
+Die kompakte Tabelle hält Schweregrad, Befund und Tool sichtbar. Wähle einen Befund, um Quelle und Erklärung vollständig im Inspector zu prüfen, und nutze anschließend **Tool öffnen** oder **Quelle öffnen**.
+
 v1-Grenzen: Agent Doctor prüft keine Netzwerk-Erreichbarkeit, startet keine Agent-Prozesse neu, nimmt keine Auto-Fixes vor und zeigt keine Secret-Werte an.
 
 ### Agent Context
 
-Der Seitenleisten-Eintrag **Agent Context** (Alpha, unter Inventar) ist ein Nur-Lese-Inspector für einen Repository-Ordner. Er zeigt, welche Instruktions- und Setup-Dateien ein Agent vor einer Coding-Session wahrscheinlich berücksichtigen würde.
+Der Seitenleisten-Eintrag **Repositories → Agent Context** (Alpha) ist ein Nur-Lese-Inspector für einen Repository-Ordner. Er zeigt, welche Instruktions- und Setup-Dateien ein Agent vor einer Coding-Session wahrscheinlich berücksichtigen würde.
 
 - Wähle einen Repository-Ordner; CodingBuddy merkt sich den zuletzt gewählten Ordner.
 - Die Tabelle prüft eine feste Allowlist: `AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, `.mcp.json`, `.codex`-Projektkonfiguration und offensichtliche Entwicklerdokumentation wie `README.md`, `CONTRIBUTING.md` und Development-Setup-Dokumente.
@@ -97,7 +99,7 @@ v1-Grenzen: Agent Context ist ausschließlich deterministische Erkennung. Er dur
 
 ### Repo Readiness
 
-Der Seitenleisten-Eintrag **Repo Readiness** (Alpha, unter Inventar) ist eine Nur-Lese-Checkliste für einen Repository-Ordner, bevor du Arbeit an einen Coding-Agent übergibst.
+Der Seitenleisten-Eintrag **Repositories → Repo Readiness** (Alpha) ist eine Nur-Lese-Checkliste für einen Repository-Ordner, bevor du Arbeit an einen Coding-Agent übergibst.
 
 - Wähle einen Repository-Ordner; CodingBuddy merkt sich den zuletzt gewählten Ordner.
 - Die Tabelle prüft Agent-Governance, README-Abdeckung, dokumentierte Build-/Testbefehle, Contribution-Workflow-Dokumente, GitHub-Issue-/PR-Templates, Feature-Flag-Dokumentation für Swift-App-Repositories, Setup-Skripte und Hooks, CI-Workflows sowie leichte `.git`-Marker für laufende Operationen.
@@ -110,7 +112,7 @@ v1-Grenzen: Repo Readiness ist deterministisch und beratend. Es prüft keinen en
 
 Der Seitenleisten-Eintrag **MCP Inventory** (Alpha) ist eine Nur-Lese-Tabelle der MCP-Server, die CodingBuddy in Codex, Claude Code und Cursor findet.
 
-- Die Tabelle zeigt Quell-Tool, Servername, Repository- oder Workspace-Name, Scope oder Projektpfad, Transport, sichere Command- oder URL-Zusammenfassung, referenzierte Environment-Variable-Namen, Header-Keys und Quelldatei.
+- Die kompakte Tabelle zeigt Server, Quell-Tool, Repository oder Workspace und den Konfigurationszustand. Wähle eine Zeile, um Scope, Transport, sichere Command- oder URL-Zusammenfassung, referenzierte Environment-Variable-Namen, Header-Keys und Quelldatei im Inspector zu prüfen.
 - Die Suche filtert nach Servername, Tool, Repository- oder Workspace-Name, Scope, Command- oder URL-Zusammenfassung und Environment-Variable-Name.
 - Codex-Server, die Variablen referenzieren, die in `~/.codex/mcp.env` fehlen, werden hervorgehoben. Mit **Tool öffnen** springst du aus einer ausgewählten Codex-, Claude-Code- oder Cursor-Zeile zum bestehenden Tool-Editor.
 - Secret-Werte werden nie angezeigt: URL-Userinfo, Query-Strings, Fragmente und tokenartige Command-Argumente werden redigiert.
@@ -119,11 +121,11 @@ v1-Grenzen: MCP Inventory bearbeitet, installiert und prüft keine Server im Net
 
 ### Agent PR Monitor
 
-Der Seitenleisten-Eintrag **Agent PR Monitor** (Alpha, unter Inventar) ist eine Nur-Lese-Tabelle für offene GitHub-Pull-Requests über eine überwachte Repository-Liste hinweg. Jede Zeile wird als vermutlich Agent, vermutlich Mensch oder unbekannt klassifiziert.
+Der Seitenleisten-Eintrag **Repositories → Agent PR Monitor** (Alpha) ist eine Nur-Lese-Tabelle für offene GitHub-Pull-Requests über eine überwachte Repository-Liste hinweg. Jede Zeile wird als vermutlich Agent, vermutlich Mensch oder unbekannt klassifiziert.
 
 - Füge den feingranularen GitHub-Nur-Lese-Token unter **Einstellungen → Sicherheit** hinzu oder ersetze ihn dort; CodingBuddy speichert ihn im Schlüsselbund, nicht in UserDefaults oder Dateien. Wenn kein Token gespeichert ist oder GitHub ihn ablehnt, führt dich der Monitor zurück in die Einstellungen.
 - Füge überwachte Repositories über die durchsuchbare Auswahl hinzu oder entferne sie dort; die Suche passt auf Owner, Repository-Namen, volles `owner/name` und sichtbare Beschreibungen. Die manuelle `owner/name`-Eingabe bleibt als Fallback verfügbar, wenn die Repository-Liste nicht geladen werden kann.
-- Die Tabelle zeigt PR-Titel, Repository, Autor-/Quellklassifizierung, verknüpfte Closing-Issues, CI-Status, Review-Status, ungelöste Befunde, beratende Merge-Bereitschaft und letzte Aktualisierung.
+- Die kompakte Tabelle zeigt PR-Titel, Repository, beratende Merge-Bereitschaft und letzte Aktualisierung. Wähle eine Zeile, um Autor-/Quellklassifizierung, Branches, verknüpfte Closing-Issues, CI-Status, Review-Status und ungelöste Befunde im Inspector zu prüfen.
 - Mit **Aktualisieren** lädst du manuell neu, mit **PR öffnen** arbeitest du im Browser weiter. Der Monitor kommentiert nie, genehmigt nie, löst keine Threads auf und führt keine Merges aus.
 - Rate-Limits, fehlende Rechte, verweigerte Repositories und Offline-Fehler erscheinen als UI-sichere Zustände; der letzte erfolgreiche Snapshot bleibt möglichst sichtbar. Repository-spezifische Fehler sind abgegrenzt, sodass erfolgreiche Repositories sichtbar bleiben, wenn ein anderes überwachtes Repository fehlschlägt.
 
@@ -177,4 +179,4 @@ CodingBuddy beobachtet deine Dotfiles. Änderungen aus Terminal oder Editor ersc
 | Eine Variable erscheint nicht | Gelesen werden nur `~/.zshenv`, `~/.zprofile`, `~/.zshrc` — nicht `.bashrc` oder anderswo gesourcte Dateien. |
 | Eine Zeile hat ein Schloss-Symbol | Die Zeile ist zu komplex, um sie sicher umzuschreiben. Bearbeite sie im Texteditor. |
 | „Die Datei wurde extern geändert" | Etwas anderes hat die Dotfile während der Bearbeitung verändert. Die App hat neu geladen — einfach erneut speichern. |
-| Alten Stand wiederherstellen | Nutze **Sicherheit → Backups**, wähle ein unterstütztes Backup, prüfe die Vorschau und klicke **Wiederherstellen …**. Unbekannte Backup-Namen lassen sich weiterhin ansehen, bleiben aber reine Vorschau. |
+| Alten Stand wiederherstellen | Nutze **Wartung → Backups**, wähle ein unterstütztes Backup, prüfe die Vorschau und klicke **Wiederherstellen …**. Unbekannte Backup-Namen lassen sich weiterhin ansehen, bleiben aber reine Vorschau. |
