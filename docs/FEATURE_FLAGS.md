@@ -112,6 +112,19 @@ v1 keeps all groups expanded for new users and preserves the current sidebar
 selection even when its parent group is collapsed. Legacy group identifiers
 are migrated to the closest task-oriented group.
 
+### `packageMaintenance` — maturity: alpha
+
+Adds **Maintenance → Software Updates** for a global Homebrew, npm, and pnpm
+inventory. Providers discover one active executable each, keep successful
+snapshots visible when another provider fails, and expose compatible or latest
+updates through a confirmation plan and sequential native process execution.
+
+v1 uses `Foundation.Process` with absolute executable paths and separated
+arguments only. It never invokes a shell, `sudo`, background updates,
+installation, removal, or pin management. Users can override each detected
+executable in Settings. Release notes are best-effort and load only for the
+selected package.
+
 ### `mcpAuthManager` — maturity: stable
 
 Manages the `~/.mcp-auth` credential cache of `mcp-remote`-connected MCP

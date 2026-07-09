@@ -25,6 +25,8 @@ nonisolated enum SidebarScope: Hashable, Sendable {
     case agentPRMonitor
     /// Local backup browser.
     case backupBrowser
+    /// Global package inventory and controlled updates.
+    case packageMaintenance
     /// Configuration for one supported AI coding tool.
     case aiTool(AITool)
 
@@ -40,6 +42,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case .mcpServerInventory: "mcpServerInventory"
         case .agentPRMonitor: "agentPRMonitor"
         case .backupBrowser: "backupBrowser"
+        case .packageMaintenance: "packageMaintenance"
         case .aiTool(let tool): "aiTool:\(tool.rawValue)"
         }
     }
@@ -65,6 +68,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case "mcpServerInventory": self = .mcpServerInventory
         case "agentPRMonitor": self = .agentPRMonitor
         case "backupBrowser": self = .backupBrowser
+        case "packageMaintenance": self = .packageMaintenance
         default: return nil
         }
     }
@@ -88,6 +92,8 @@ nonisolated enum SidebarScope: Hashable, Sendable {
             FeatureFlag.agentPRMonitor.isEnabled
         case .backupBrowser:
             FeatureFlag.backupBrowser.isEnabled
+        case .packageMaintenance:
+            FeatureFlag.packageMaintenance.isEnabled
         case .aiTool(let tool):
             tool.featureFlag.isEnabled
         }
@@ -111,6 +117,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case .mcpServerInventory: String(localized: "MCP Inventory")
         case .agentPRMonitor: String(localized: "Agent PR Monitor")
         case .backupBrowser: String(localized: "Backups")
+        case .packageMaintenance: String(localized: "Software Updates")
         case .aiTool(let tool): tool.displayName
         }
     }

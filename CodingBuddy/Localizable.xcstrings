@@ -5122,6 +5122,204 @@
         }
       }
     },
+    "%@ was not found. Choose its executable in Settings." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ wurde nicht gefunden. Wähle das Programm in den Einstellungen aus." } } }
+    },
+    "All" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Alle" } } }
+    },
+    "Automatic" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Automatisch" } } }
+    },
+    "Available" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Verfügbar" } } }
+    },
+    "Cancelled" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Abgebrochen" } } }
+    },
+    "Change the filter or search text." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Ändere den Filter oder den Suchtext." } } }
+    },
+    "Choose Executable" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Programm auswählen" } } }
+    },
+    "Choose %@ executable" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "%1$@-Programm auswählen" } } }
+    },
+    "Choose…" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Auswählen…" } } }
+    },
+    "Choose the %@ executable." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Wähle das %1$@-Programm aus." } } }
+    },
+    "CodingBuddy cannot update this installation without additional permissions." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "CodingBuddy kann diese Installation ohne zusätzliche Rechte nicht aktualisieren." } } }
+    },
+    "CodingBuddy could not read the %@ package list." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "CodingBuddy konnte die %1$@-Paketliste nicht lesen." } } }
+    },
+    "Compatible" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Kompatibel" } } }
+    },
+    "Direct" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Direkt" } } }
+    },
+    "Executable path for %@" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Programmpfad für %1$@" } } }
+    },
+    "Dependency" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Abhängigkeit" } } }
+    },
+    "Filter" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Filter" } } }
+    },
+    "Install a supported package manager or choose its executable in Settings." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Installiere einen unterstützten Paketmanager oder wähle sein Programm in den Einstellungen aus." } } }
+    },
+    "Installed" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Installiert" } } }
+    },
+    "Latest" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Neueste" } } }
+    },
+    "Leave a path empty to use automatic discovery. CodingBuddy never starts a login shell or requests administrator privileges." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Lass einen Pfad leer, um die automatische Erkennung zu verwenden. CodingBuddy startet nie eine Login-Shell und fordert keine Administratorrechte an." } } }
+    },
+    "Major update" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Hauptversions-Update" } } }
+    },
+    "Manager" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Paketmanager" } } }
+    },
+    "No matching packages" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine passenden Pakete" } } }
+    },
+    "No packages found" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine Pakete gefunden" } } }
+    },
+    "No release notes available" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine Versionshinweise verfügbar" } } }
+    },
+    "No target version is available for this package." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Für dieses Paket ist keine Zielversion verfügbar." } } }
+    },
+    "No version-specific release notes found" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine versionsspezifischen Hinweise gefunden" } } }
+    },
+    "Not started" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht gestartet" } } }
+    },
+    "Not writable" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht beschreibbar" } } }
+    },
+    "Open Release Notes" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Versionshinweise öffnen" } } }
+    },
+    "Package manager executables" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Paketmanager-Programme" } } }
+    },
+    "Package type" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Pakettyp" } } }
+    },
+    "Pinned" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Angeheftet" } } }
+    },
+    "Pinned packages must be unpinned in Homebrew before they can be updated." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Angeheftete Pakete müssen zuerst in Homebrew gelöst werden, bevor sie aktualisiert werden können." } } }
+    },
+    "Queued" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "In Warteschlange" } } }
+    },
+    "Release Notes" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Versionshinweise" } } }
+    },
+    "Review selected package updates" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Ausgewählte Paket-Updates prüfen" } } }
+    },
+    "Run Updates" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Updates ausführen" } } }
+    },
+    "Reset %@ executable" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "%1$@-Programmpfad zurücksetzen" } } }
+    },
+    "Running" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Läuft" } } }
+    },
+    "Scan all package managers" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Alle Paketmanager prüfen" } } }
+    },
+    "Scanning package managers…" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Paketmanager werden geprüft …" } } }
+    },
+    "Search packages" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Pakete durchsuchen" } } }
+    },
+    "Self-updating" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Aktualisiert sich selbst" } } }
+    },
+    "Software Updates" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Software-Updates" } } }
+    },
+    "Stop" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Stoppen" } } }
+    },
+    "Stop before the next package starts" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Vor dem Start des nächsten Pakets stoppen" } } }
+    },
+    "Succeeded" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Erfolgreich" } } }
+    },
+    "The command could not be started." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Der Befehl konnte nicht gestartet werden." } } }
+    },
+    "The command failed with exit code %lld." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Der Befehl ist mit Exit-Code %lld fehlgeschlagen." } } }
+    },
+    "The command timed out." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Der Befehl hat das Zeitlimit überschritten." } } }
+    },
+    "The command was cancelled." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Der Befehl wurde abgebrochen." } } }
+    },
+    "The executable is unavailable: %@" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Das Programm ist nicht verfügbar: %1$@" } } }
+    },
+    "The executable path must be absolute." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Der Programmpfad muss absolut sein." } } }
+    },
+    "The package cannot be updated with %@." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Das Paket kann nicht mit %1$@ aktualisiert werden." } } }
+    },
+    "This cask updates itself and is not upgraded directly by CodingBuddy." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Dieses Cask aktualisiert sich selbst und wird nicht direkt von CodingBuddy aktualisiert." } } }
+    },
+    "Update Selected" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Ausgewählte aktualisieren" } } }
+    },
+    "Update available" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Update verfügbar" } } }
+    },
+    "Update log" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Update-Protokoll" } } }
+    },
+    "Update selected packages?" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Ausgewählte Pakete aktualisieren?" } } }
+    },
+    "Update target" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Update-Ziel" } } }
+    },
+    "Updates" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Updates" } } }
+    },
+    "Updated from %@ to %@." : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Von %1$@ auf %2$@ aktualisiert." } } }
+    },
+    "Validating Homebrew updates" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Homebrew-Updates werden geprüft" } } }
+    },
+    "Updating…" : {
+      "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Wird aktualisiert …" } } }
+    },
     "zsh" : {
       "localizations" : {
         "de" : {

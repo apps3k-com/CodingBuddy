@@ -158,6 +158,22 @@ The **Craft Agents** entry (alpha) shows what the Craft Agents app stores in `~/
 - **The encrypted credential store** (`credentials.enc`): CodingBuddy shows size and age but never opens it; its reset confirmation is separate from token-file resets and explains that every Craft connector asks to log in again.
 - When the folder exists but has no credential data yet, the empty state points you back to setting up Craft Agents or connecting a Craft connector. CodingBuddy waits for Craft to create the files.
 
+## Workstation maintenance
+
+The **Maintenance → Software Updates** entry (alpha) inventories global packages from one active Homebrew, npm and pnpm installation each.
+
+- The table shows package name, manager, installed version, available version and status. Filter it to updates, direct installations or all packages; search matches package and manager names.
+- **Compatible** uses npm/pnpm's wanted version. **Latest** explicitly includes newer major versions. Homebrew uses its reported current formula or cask version.
+- Select one or more updateable rows and choose **Update Selected**. CodingBuddy shows every package and exact version transition before any command starts.
+- Confirmed updates run sequentially with a visible per-package log. **Stop** cancels the current command and marks work that has not started; completed updates are not rolled back. CodingBuddy scans again after the run.
+- Pinned formulas, self-updating casks and non-writable installations explain why CodingBuddy will not update them directly.
+- Selecting one package loads version notes lazily. CodingBuddy prefers a matching GitHub Release and otherwise links to the repository, homepage or changelog source. No available release notes is a normal state.
+- If automatic executable discovery chooses the wrong installation, set an explicit Homebrew, npm or pnpm path under **Settings → Maintenance**.
+
+Commands use `Foundation.Process` with an absolute executable path and separate arguments. CodingBuddy never runs a login shell, `sudo`, or a freely assembled command string. A failed provider does not hide successful provider results.
+
+v1 limits: global packages only; one active installation per provider; no project dependencies, installation, removal, pin management, privilege escalation or automatic background updates. Bun, Yarn, pipx, uv, Cargo and editor extensions are not yet supported.
+
 ## Settings
 
 Open **CodingBuddy → Settings…** (⌘,). The settings appear as a panel attached to the main window; close them with **Done** before continuing to work in the app.
@@ -166,6 +182,7 @@ Open **CodingBuddy → Settings…** (⌘,). The settings appear as a panel atta
 - **Appearance** — Auto (follow the system), Light or Dark.
 - **Default editor** — choose the macOS app CodingBuddy should use when it opens Markdown, JSON, YAML and other text-like repository files, or reset to the system default.
 - **Security** — how long secrets stay revealed after authenticating, plus the GitHub token used by Agent PR Monitor.
+- **Maintenance** — optional executable overrides for Homebrew, npm and pnpm; empty fields use automatic discovery.
 
 ## Live reload
 

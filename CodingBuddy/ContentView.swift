@@ -39,6 +39,9 @@ struct ContentView: View {
     /// Backup Browser store when the feature flag is enabled.
     @State private var backupBrowserStore: BackupBrowserStore? =
         FeatureFlag.backupBrowser.isEnabled ? BackupBrowserStore() : nil
+    /// Software Updates store when package maintenance is enabled.
+    @State private var packageMaintenanceStore: PackageMaintenanceStore? =
+        FeatureFlag.packageMaintenance.isEnabled ? PackageMaintenanceStore() : nil
     /// Secret masking state shared across editors.
     @State private var secrets = SecretsGuard()
     /// Current sidebar selection.
@@ -151,16 +154,26 @@ struct ContentView: View {
                         }
                     }
                 }
-                if let backupBrowserStore {
+                if backupBrowserStore != nil || packageMaintenanceStore != nil {
                     sidebarSection(.maintenance) {
                         Text("Maintenance")
                     } content: {
-                        Label("Backups", systemImage: "clock.arrow.circlepath")
-                            .badge(backupBrowserStore.count)
-                            .tag(SidebarScope.backupBrowser)
+                        if let packageMaintenanceStore {
+                            Label("Software Updates", systemImage: "arrow.triangle.2.circlepath")
+                                .badge(packageMaintenanceStore.updateCount)
+                                .tag(SidebarScope.packageMaintenance)
+                        }
+                        if let backupBrowserStore {
+                            Label("Backups", systemImage: "clock.arrow.circlepath")
+                                .badge(backupBrowserStore.count)
+                                .tag(SidebarScope.backupBrowser)
+                        }
                     }
                     .onAppear {
-                        backupBrowserStore.reload()
+                        backupBrowserStore?.reload()
+                        if packageMaintenanceStore?.state == .idle {
+                            packageMaintenanceStore?.reload()
+                        }
                     }
                 }
             }
@@ -209,6 +222,15 @@ struct ContentView: View {
             case .backupBrowser:
                 if let backupBrowserStore {
                     BackupBrowserView(store: backupBrowserStore)
+                } else {
+                    VariableListView(store: store, secrets: secrets, scope: .all)
+                }
+            case .packageMaintenance:
+                if let packageMaintenanceStore {
+                    PackageMaintenanceView(store: packageMaintenanceStore) {
+                        requestedSettingsPane = .maintenance
+                        showSettings = true
+                    }
                 } else {
                     VariableListView(store: store, secrets: secrets, scope: .all)
                 }
