@@ -1,32 +1,32 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "%lld files" : {
+    "“%@” is already defined in %@ — the last assignment in load order wins." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld Dateien"
+            "value" : "„%1$@“ ist bereits in %2$@ definiert — es gilt die letzte Zuweisung in der Ladereihenfolge."
           }
         }
       }
     },
-    "%lld servers" : {
+    "“%@” is already defined." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld Server"
+            "value" : "„%@“ ist bereits definiert."
           }
         }
       }
     },
-    "%lld variables" : {
+    "“%@” is not a valid variable name." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld Variablen"
+            "value" : "„%@“ ist kein gültiger Variablenname."
           }
         }
       }
@@ -41,12 +41,122 @@
         }
       }
     },
+    "%@ needs a GitHub token." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ benötigt einen GitHub-Token."
+          }
+        }
+      }
+    },
     "%@ references %@, but CodingBuddy cannot find it in the tool environment file." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ referenziert %2$@, aber CodingBuddy findet sie nicht in der Tool-Umgebungsdatei."
+          }
+        }
+      }
+    },
+    "%lld files" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Dateien"
+          }
+        }
+      }
+    },
+    "%lld repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Repositories"
+          }
+        }
+      }
+    },
+    "%lld repositories need attention." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Repositories benötigen Aufmerksamkeit."
+          }
+        }
+      }
+    },
+    "%lld servers" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Server"
+          }
+        }
+      }
+    },
+    "%lld unresolved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ungelöst"
+          }
+        }
+      }
+    },
+    "%lld variables" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Variablen"
+          }
+        }
+      }
+    },
+    "~/.claude does not exist — Claude Code has not been set up on this Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~/.claude existiert nicht — Claude Code ist auf diesem Mac nicht eingerichtet."
+          }
+        }
+      }
+    },
+    "~/.codex does not exist — Codex has not been set up on this Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~/.codex existiert nicht — Codex ist auf diesem Mac nicht eingerichtet."
+          }
+        }
+      }
+    },
+    "~/.craft-agent does not exist — Craft Agents has not been set up on this Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~/.craft-agent existiert nicht — Craft Agents ist auf diesem Mac nicht eingerichtet."
+          }
+        }
+      }
+    },
+    "~/.cursor does not exist — Cursor has not been set up on this Mac." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~/.cursor existiert nicht — Cursor ist auf diesem Mac nicht eingerichtet."
           }
         }
       }
@@ -71,26 +181,6 @@
         }
       }
     },
-    "15 minutes" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "15 Minuten"
-          }
-        }
-      }
-    },
-    "5 minutes" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "5 Minuten"
-          }
-        }
-      }
-    },
     "1 server" : {
       "localizations" : {
         "de" : {
@@ -111,12 +201,72 @@
         }
       }
     },
+    "5 minutes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 Minuten"
+          }
+        }
+      }
+    },
+    "15 minutes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 Minuten"
+          }
+        }
+      }
+    },
     "A backup of the file is written automatically before the change." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vor der Änderung wird automatisch ein Backup der Datei angelegt."
+          }
+        }
+      }
+    },
+    "A Git index lock file is present." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Git-Index-Lock-Datei ist vorhanden."
+          }
+        }
+      }
+    },
+    "A Git merge, rebase, cherry-pick, or revert marker is present." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Git-Merge-, Rebase-, Cherry-Pick- oder Revert-Marker ist vorhanden."
+          }
+        }
+      }
+    },
+    "A GitHub Actions workflow appears to run build or test checks." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein GitHub-Actions-Workflow scheint Build- oder Testprüfungen auszuführen."
+          }
+        }
+      }
+    },
+    "A governance file exists but has no readable guidance." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Governance-Datei ist vorhanden, enthält aber keine lesbaren Anweisungen."
           }
         }
       }
@@ -131,94 +281,42 @@
         }
       }
     },
-    "Backup" : {
+    "A non-empty README is present." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Backup"
+            "value" : "Eine nicht leere README ist vorhanden."
           }
         }
       }
     },
-    "Backups" : {
+    "A README exists but is empty." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Backups"
+            "value" : "Eine README ist vorhanden, aber leer."
           }
         }
       }
     },
-    "Choose a backup to preview its current target and saved contents." : {
+    "A setup script and hook activation signal are present." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wähle ein Backup, um das aktuelle Ziel und die gespeicherten Inhalte in der Vorschau anzuzeigen."
+            "value" : "Ein Setup-Skript und ein Hook-Aktivierungssignal sind vorhanden."
           }
         }
       }
     },
-    "CodingBuddy cannot safely write to the selected target file." : {
+    "A setup script exists but no hook activation signal was found." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CodingBuddy kann nicht sicher in die ausgewählte Zieldatei schreiben."
-          }
-        }
-      }
-    },
-    "CodingBuddy did not find any backups in the managed backup folder." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy hat im verwalteten Backup-Ordner keine Backups gefunden."
-          }
-        }
-      }
-    },
-    "CodingBuddy will back up the current target before replacing it with the selected backup." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy sichert das aktuelle Ziel, bevor es durch das ausgewählte Backup ersetzt wird."
-          }
-        }
-      }
-    },
-    "Could not read file." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Datei konnte nicht gelesen werden."
-          }
-        }
-      }
-    },
-    "Current" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktuell"
-          }
-        }
-      }
-    },
-    "AI Tools" : {
-      "comment" : "A section header for AI tools in the sidebar.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AI-Tools"
+            "value" : "Ein Setup-Skript ist vorhanden, aber kein Hook-Aktivierungssignal wurde gefunden."
           }
         }
       }
@@ -233,6 +331,16 @@
         }
       }
     },
+    "Accessible repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugängliche Repositories"
+          }
+        }
+      }
+    },
     "Active" : {
       "localizations" : {
         "de" : {
@@ -243,212 +351,33 @@
         }
       }
     },
-    "Agent Doctor" : {
+    "Add a CI workflow that runs the documented build and test commands." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agent Doctor"
+            "value" : "Füge einen CI-Workflow hinzu, der die dokumentierten Build- und Testbefehle ausführt."
           }
         }
       }
     },
-    "Agent Doctor did not find anything that needs attention." : {
+    "Add a fine-grained read-only token to load pull request status." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agent Doctor hat nichts gefunden, das Aufmerksamkeit benötigt."
+            "value" : "Füge einen feingranularen Nur-Lese-Token hinzu, um Pull-Request-Status zu laden."
           }
         }
       }
     },
-    "Agent Context" : {
+    "Add a GitHub token to monitor pull requests." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agent Context"
-          }
-        }
-      }
-    },
-    "Both governance files present" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beide Governance-Dateien vorhanden"
-          }
-        }
-      }
-    },
-    "Choose Folder..." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ordner auswählen..."
-          }
-        }
-      }
-    },
-    "Choose App..." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App auswählen..."
-          }
-        }
-      }
-    },
-    "Choose Default Editor" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Standard-Editor auswählen"
-          }
-        }
-      }
-    },
-    "Choose the app CodingBuddy should use for Markdown and other text files." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wähle die App, die CodingBuddy für Markdown und andere Textdateien verwenden soll."
-          }
-        }
-      }
-    },
-    "Choose a repository folder" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repository-Ordner auswählen"
-          }
-        }
-      }
-    },
-    "Choose a repository folder to inspect agent context files." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wähle einen Repository-Ordner aus, um Agent-Kontextdateien zu prüfen."
-          }
-        }
-      }
-    },
-    "Choose repository folder" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repository-Ordner auswählen"
-          }
-        }
-      }
-    },
-    "Claude Code" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Claude Code"
-          }
-        }
-      }
-    },
-    "Claude Code settings.json" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Claude Code settings.json"
-          }
-        }
-      }
-    },
-    "Claude Code settings.local.json" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Claude Code settings.local.json"
-          }
-        }
-      }
-    },
-    "Codex" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codex"
-          }
-        }
-      }
-    },
-    "Codex Config" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codex-Konfiguration"
-          }
-        }
-      }
-    },
-    "Codex mcp.env" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codex mcp.env"
-          }
-        }
-      }
-    },
-    "Codex project config present" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codex-Projektkonfiguration vorhanden"
-          }
-        }
-      }
-    },
-    "Context" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontext"
-          }
-        }
-      }
-    },
-    "Cursor Rules" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cursor-Regeln"
-          }
-        }
-      }
-    },
-    "Add Entry" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eintrag hinzufügen"
+            "value" : "Füge einen GitHub-Token hinzu, um Pull Requests zu überwachen."
           }
         }
       }
@@ -493,6 +422,259 @@
         }
       }
     },
+    "Add a README that orients agents and humans before they change code." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge eine README hinzu, die Agents und Menschen vor Codeänderungen Orientierung gibt."
+          }
+        }
+      }
+    },
+    "Add a setup script that prepares local checks and hooks without network-only assumptions." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge ein Setup-Skript hinzu, das lokale Prüfungen und Hooks ohne reine Netzwerkannahmen vorbereitet."
+          }
+        }
+      }
+    },
+    "Add AGENTS.md or mirror the shared agent instructions there." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lege AGENTS.md an oder spiegele dort die gemeinsamen Agent-Anweisungen."
+          }
+        }
+      }
+    },
+    "Add an agent governance file that explains repo-specific coding rules." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge eine Agent-Governance-Datei hinzu, die repo-spezifische Coding-Regeln erklärt."
+          }
+        }
+      }
+    },
+    "Add at least one GitHub repository to monitor open pull requests." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge mindestens ein GitHub-Repository hinzu, um offene Pull Requests zu überwachen."
+          }
+        }
+      }
+    },
+    "Add build or test execution to CI, or document why another workflow provides validation." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge Build- oder Testausführung zur CI hinzu oder dokumentiere, warum ein anderer Workflow die Validierung übernimmt."
+          }
+        }
+      }
+    },
+    "Add CI that runs the repository build and test checks." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge CI hinzu, die die Build- und Testprüfungen des Repositories ausführt."
+          }
+        }
+      }
+    },
+    "Add contributing docs that explain issue, branch, test, and PR expectations." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge Contribution-Dokumentation hinzu, die Issue-, Branch-, Test- und PR-Erwartungen erklärt."
+          }
+        }
+      }
+    },
+    "Add copy-pasteable build and test commands to README or developer docs." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ergänze kopierbare Build- und Testbefehle in README oder Entwicklerdokumentation."
+          }
+        }
+      }
+    },
+    "Add Entry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintrag hinzufügen"
+          }
+        }
+      }
+    },
+    "Add feature flag documentation when repository features become flag-gated." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ergänze Feature-Flag-Dokumentation, sobald Repository-Funktionen per Flag gesteuert werden."
+          }
+        }
+      }
+    },
+    "Add GitHub issue and pull request templates for repeatable agent handoffs." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge GitHub-Issue- und Pull-Request-Templates für wiederholbare Agent-Handoffs hinzu."
+          }
+        }
+      }
+    },
+    "Add Manual Entry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuelle Eingabe hinzufügen"
+          }
+        }
+      }
+    },
+    "Add or replace the read-only GitHub token" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Read-only-GitHub-Token hinzufügen oder ersetzen"
+          }
+        }
+      }
+    },
+    "Add repositories visible to the saved GitHub token." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge Repositories hinzu, die für den gespeicherten GitHub-Token sichtbar sind."
+          }
+        }
+      }
+    },
+    "Add Repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository hinzufügen"
+          }
+        }
+      }
+    },
+    "Add the missing template so issues and PRs carry consistent context." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge das fehlende Template hinzu, damit Issues und PRs konsistenten Kontext enthalten."
+          }
+        }
+      }
+    },
+    "Add Token..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token hinzufügen ..."
+          }
+        }
+      }
+    },
+    "Agent Context" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent Context"
+          }
+        }
+      }
+    },
+    "Agent Doctor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent Doctor"
+          }
+        }
+      }
+    },
+    "Agent Doctor did not find anything that needs attention." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent Doctor hat nichts gefunden, das Aufmerksamkeit benötigt."
+          }
+        }
+      }
+    },
+    "Agent governance file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent-Governance-Datei"
+          }
+        }
+      }
+    },
+    "Agent PR Monitor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent PR Monitor"
+          }
+        }
+      }
+    },
+    "AGENTS.md is present at the repository root." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AGENTS.md ist im Repository-Root vorhanden."
+          }
+        }
+      }
+    },
+    "AI Tools" : {
+      "comment" : "A section header for AI tools in the sidebar.",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI-Tools"
+          }
+        }
+      }
+    },
     "All Variables" : {
       "localizations" : {
         "de" : {
@@ -509,6 +691,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Erscheinungsbild"
+          }
+        }
+      }
+    },
+    "apps3k-com" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "apps3k-com"
+          }
+        }
+      }
+    },
+    "Archived" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiviert"
           }
         }
       }
@@ -533,12 +736,62 @@
         }
       }
     },
+    "Backup" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup"
+          }
+        }
+      }
+    },
+    "Backups" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backups"
+          }
+        }
+      }
+    },
     "Bearer token environment variable" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bearer-Token-Umgebungsvariable"
+          }
+        }
+      }
+    },
+    "Blocked" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blockiert"
+          }
+        }
+      }
+    },
+    "Both governance files present" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beide Governance-Dateien vorhanden"
+          }
+        }
+      }
+    },
+    "Build and test commands" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Build- und Testbefehle"
           }
         }
       }
@@ -553,6 +806,291 @@
         }
       }
     },
+    "Changes requested" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Änderungen angefordert"
+          }
+        }
+      }
+    },
+    "Check" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfung"
+          }
+        }
+      }
+    },
+    "Choose a backup to preview its current target and saved contents." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle ein Backup, um das aktuelle Ziel und die gespeicherten Inhalte in der Vorschau anzuzeigen."
+          }
+        }
+      }
+    },
+    "Choose a GitHub repository in owner/name format to monitor open pull requests." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle ein GitHub-Repository im Format owner/name aus, um offene Pull Requests zu überwachen."
+          }
+        }
+      }
+    },
+    "Choose a repository folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Ordner auswählen"
+          }
+        }
+      }
+    },
+    "Choose a repository folder to inspect agent context files." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Repository-Ordner aus, um Agent-Kontextdateien zu prüfen."
+          }
+        }
+      }
+    },
+    "Choose a repository folder to run readiness checks." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Repository-Ordner aus, um Readiness-Prüfungen auszuführen."
+          }
+        }
+      }
+    },
+    "Choose a repository visible to the saved GitHub token." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle ein Repository aus, das für den gespeicherten GitHub-Token sichtbar ist."
+          }
+        }
+      }
+    },
+    "Choose App..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App auswählen..."
+          }
+        }
+      }
+    },
+    "Choose Default Editor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard-Editor auswählen"
+          }
+        }
+      }
+    },
+    "Choose Folder..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordner auswählen..."
+          }
+        }
+      }
+    },
+    "Choose Repositories..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repositories auswählen ..."
+          }
+        }
+      }
+    },
+    "Choose Repository" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository auswählen"
+          }
+        }
+      }
+    },
+    "Choose repository folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Ordner auswählen"
+          }
+        }
+      }
+    },
+    "Choose Repository..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository auswählen ..."
+          }
+        }
+      }
+    },
+    "Choose the app CodingBuddy should use for Markdown and other text files." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle die App, die CodingBuddy für Markdown und andere Textdateien verwenden soll."
+          }
+        }
+      }
+    },
+    "Choose the GitHub repositories to monitor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle die zu überwachenden GitHub-Repositories aus"
+          }
+        }
+      }
+    },
+    "Choose the GitHub repository to monitor" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle das zu überwachende GitHub-Repository aus"
+          }
+        }
+      }
+    },
+    "CI" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI"
+          }
+        }
+      }
+    },
+    "CI failed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "CI green" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI grün"
+          }
+        }
+      }
+    },
+    "CI pending" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI ausstehend"
+          }
+        }
+      }
+    },
+    "CI unknown" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI unbekannt"
+          }
+        }
+      }
+    },
+    "CI workflow" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI-Workflow"
+          }
+        }
+      }
+    },
+    "Claude Code" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code"
+          }
+        }
+      }
+    },
+    "Claude Code settings.json" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code settings.json"
+          }
+        }
+      }
+    },
+    "Claude Code settings.local.json" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code settings.local.json"
+          }
+        }
+      }
+    },
+    "CLAUDE.md is present, but AGENTS.md is missing." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CLAUDE.md ist vorhanden, aber AGENTS.md fehlt."
+          }
+        }
+      }
+    },
     "Close" : {
       "localizations" : {
         "de" : {
@@ -563,12 +1101,194 @@
         }
       }
     },
+    "Closed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geschlossen"
+          }
+        }
+      }
+    },
+    "Codex" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex"
+          }
+        }
+      }
+    },
+    "Codex Config" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex-Konfiguration"
+          }
+        }
+      }
+    },
+    "Codex mcp.env" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex mcp.env"
+          }
+        }
+      }
+    },
+    "Codex project config present" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex-Projektkonfiguration vorhanden"
+          }
+        }
+      }
+    },
+    "CodingBuddy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy"
+          }
+        }
+      }
+    },
+    "CodingBuddy cannot safely write to the selected target file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy kann nicht sicher in die ausgewählte Zieldatei schreiben."
+          }
+        }
+      }
+    },
+    "CodingBuddy could not access the saved GitHub token in Keychain." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte nicht auf den gespeicherten GitHub-Token im Schlüsselbund zugreifen."
+          }
+        }
+      }
+    },
+    "CodingBuddy could not parse this configuration file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte diese Konfigurationsdatei nicht lesen."
+          }
+        }
+      }
+    },
+    "CodingBuddy could not read the GitHub response." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte die GitHub-Antwort nicht lesen."
+          }
+        }
+      }
+    },
+    "CodingBuddy could not update the saved GitHub token in Keychain." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte den gespeicherten GitHub-Token im Schlüsselbund nicht aktualisieren."
+          }
+        }
+      }
+    },
+    "CodingBuddy did not find any backups in the managed backup folder." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat im verwalteten Backup-Ordner keine Backups gefunden."
+          }
+        }
+      }
+    },
+    "CodingBuddy did not find any managed zsh startup file in this home directory." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat in diesem Home-Verzeichnis keine verwaltete zsh-Startdatei gefunden."
+          }
+        }
+      }
+    },
+    "CodingBuddy did not find any MCP server definitions for Codex, Claude Code, or Cursor." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat keine MCP-Serverdefinitionen für Codex, Claude Code oder Cursor gefunden."
+          }
+        }
+      }
+    },
+    "CodingBuddy did not find open pull requests for the selected repository." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat keine offenen Pull Requests für das ausgewählte Repository gefunden."
+          }
+        }
+      }
+    },
+    "CodingBuddy did not find open pull requests for the watched repositories." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat keine offenen Pull Requests für die überwachten Repositories gefunden."
+          }
+        }
+      }
+    },
     "CodingBuddy Help" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "CodingBuddy-Hilfe"
+          }
+        }
+      }
+    },
+    "CodingBuddy will back up the current target before replacing it with the selected backup." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy sichert das aktuelle Ziel, bevor es durch das ausgewählte Backup ersetzt wird."
+          }
+        }
+      }
+    },
+    "Command / URL" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Befehl / URL"
           }
         }
       }
@@ -589,6 +1309,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Komplexe Zeile — CodingBuddy zeigt sie nur an und verändert sie nicht."
+          }
+        }
+      }
+    },
+    "Configuration directory missing" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konfigurationsverzeichnis fehlt"
+          }
+        }
+      }
+    },
+    "Configuration file is not valid JSON" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konfigurationsdatei ist kein gültiges JSON"
           }
         }
       }
@@ -623,6 +1363,46 @@
         }
       }
     },
+    "Context" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontext"
+          }
+        }
+      }
+    },
+    "Contribution docs cover issues, review, and validation workflow." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contribution-Dokumentation deckt Issues, Review und Validierungsworkflow ab."
+          }
+        }
+      }
+    },
+    "Contribution docs exist but do not cover the full issue-to-PR workflow." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contribution-Dokumentation ist vorhanden, deckt aber den vollständigen Issue-bis-PR-Workflow nicht ab."
+          }
+        }
+      }
+    },
+    "Contribution workflow" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contribution-Workflow"
+          }
+        }
+      }
+    },
     "Copy Line" : {
       "localizations" : {
         "de" : {
@@ -653,72 +1433,12 @@
         }
       }
     },
-    "Credentials" : {
+    "Could not read file." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zugangsdaten"
-          }
-        }
-      }
-    },
-    "Credential file permissions are too broad" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dateirechte der Zugangsdaten sind zu offen"
-          }
-        }
-      }
-    },
-    "CodingBuddy could not parse this configuration file." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy konnte diese Konfigurationsdatei nicht lesen."
-          }
-        }
-      }
-    },
-    "CodingBuddy did not find any managed zsh startup file in this home directory." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy hat in diesem Home-Verzeichnis keine verwaltete zsh-Startdatei gefunden."
-          }
-        }
-      }
-    },
-    "Configuration directory missing" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigurationsverzeichnis fehlt"
-          }
-        }
-      }
-    },
-    "Configuration file is not valid JSON" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigurationsdatei ist kein gültiges JSON"
-          }
-        }
-      }
-    },
-    "Current mode is %@; expected %@." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktueller Modus ist %@; erwartet wird %@."
+            "value" : "Datei konnte nicht gelesen werden."
           }
         }
       }
@@ -743,6 +1463,67 @@
         }
       }
     },
+    "Credential file permissions are too broad" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dateirechte der Zugangsdaten sind zu offen"
+          }
+        }
+      }
+    },
+    "Credentials" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugangsdaten"
+          }
+        }
+      }
+    },
+    "Current" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuell"
+          }
+        }
+      }
+    },
+    "Current mode is %@; expected %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktueller Modus ist %@; erwartet wird %@."
+          }
+        }
+      }
+    },
+    "Current repository" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuelles Repository"
+          }
+        }
+      }
+    },
+    "Currently watched" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuell überwacht"
+          }
+        }
+      }
+    },
     "Cursor" : {
       "localizations" : {
         "de" : {
@@ -759,6 +1540,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cursor mcp.json"
+          }
+        }
+      }
+    },
+    "Cursor Rules" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cursor-Regeln"
           }
         }
       }
@@ -783,12 +1574,32 @@
         }
       }
     },
+    "Define the variable in the matching tool environment file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lege die Variable in der passenden Tool-Umgebungsdatei an."
+          }
+        }
+      }
+    },
     "Define…" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Definieren …"
+          }
+        }
+      }
+    },
+    "Defined by server config" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durch Serverkonfiguration definiert"
           }
         }
       }
@@ -843,6 +1654,56 @@
         }
       }
     },
+    "Document both the build command and the test command agents should run." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentiere sowohl den Build-Befehl als auch den Testbefehl, den Agents ausführen sollen."
+          }
+        }
+      }
+    },
+    "Document feature flags, maturity, and rollout expectations in docs/FEATURE_FLAGS.md." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentiere Feature-Flags, Reifegrad und Rollout-Erwartungen in docs/FEATURE_FLAGS.md."
+          }
+        }
+      }
+    },
+    "Document how to start work, validate it, and submit it for review." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentiere, wie Arbeit gestartet, validiert und zur Prüfung eingereicht wird."
+          }
+        }
+      }
+    },
+    "Document or wire up git hook activation in the setup script." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentiere oder verdrahte die Git-Hook-Aktivierung im Setup-Skript."
+          }
+        }
+      }
+    },
+    "Document the local agent rules, ownership boundaries, and safety requirements." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentiere lokale Agent-Regeln, Verantwortungsgrenzen und Sicherheitsanforderungen."
+          }
+        }
+      }
+    },
     "Documentation" : {
       "localizations" : {
         "de" : {
@@ -863,22 +1724,22 @@
         }
       }
     },
+    "Documented build and test commands were found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentierte Build- und Testbefehle wurden gefunden."
+          }
+        }
+      }
+    },
     "Done" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fertig"
-          }
-        }
-      }
-    },
-    "Edit Variable" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Variable bearbeiten"
           }
         }
       }
@@ -893,22 +1754,22 @@
         }
       }
     },
+    "Edit Variable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variable bearbeiten"
+          }
+        }
+      }
+    },
     "Edit…" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bearbeiten…"
-          }
-        }
-      }
-    },
-    "Encrypted credential store" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verschlüsselter Credential-Speicher"
           }
         }
       }
@@ -923,12 +1784,43 @@
         }
       }
     },
+    "Encrypted credential store" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verschlüsselter Credential-Speicher"
+          }
+        }
+      }
+    },
+    "Enter the GitHub repository to monitor. CodingBuddy reads open pull requests only." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gib das zu überwachende GitHub-Repository ein. CodingBuddy liest nur offene Pull Requests."
+          }
+        }
+      }
+    },
     "Entry" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eintrag"
+          }
+        }
+      }
+    },
+    "Env Vars" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Env-Variablen"
           }
         }
       }
@@ -943,12 +1835,62 @@
         }
       }
     },
+    "Every connected server will ask you to log in again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeder verbundene Server verlangt danach eine neue Anmeldung."
+          }
+        }
+      }
+    },
+    "Every Craft connector will ask you to log in again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeder Craft-Connector verlangt danach eine neue Anmeldung."
+          }
+        }
+      }
+    },
+    "expires %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "läuft ab %@"
+          }
+        }
+      }
+    },
     "Export visible as .env…" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sichtbare als .env exportieren…"
+          }
+        }
+      }
+    },
+    "Failed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Feature flag documentation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feature-Flag-Dokumentation"
           }
         }
       }
@@ -973,12 +1915,42 @@
         }
       }
     },
+    "Fill in the README with the project purpose, setup, and primary workflows." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fülle die README mit Projektzweck, Setup und wichtigsten Workflows."
+          }
+        }
+      }
+    },
     "Finding" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Befund"
+          }
+        }
+      }
+    },
+    "Findings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Befunde"
+          }
+        }
+      }
+    },
+    "Finish or abort the in-progress Git operation before starting agent work." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beende oder brich die laufende Git-Operation ab, bevor Agent-Arbeit startet."
           }
         }
       }
@@ -993,12 +1965,213 @@
         }
       }
     },
+    "GitHub Actions workflows exist, but no obvious build or test command was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Actions-Workflows sind vorhanden, aber kein offensichtlicher Build- oder Testbefehl wurde gefunden."
+          }
+        }
+      }
+    },
+    "GitHub authorization needs attention" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Autorisierung benötigt Aufmerksamkeit"
+          }
+        }
+      }
+    },
+    "GitHub did not provide a reset time. Try again later." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub hat keine Reset-Zeit geliefert. Versuche es später erneut."
+          }
+        }
+      }
+    },
+    "GitHub is unreachable. Check your network connection and try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub ist nicht erreichbar. Prüfe die Netzwerkverbindung und versuche es erneut."
+          }
+        }
+      }
+    },
+    "GitHub rate limit for %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Rate-Limit für %@."
+          }
+        }
+      }
+    },
+    "GitHub rate limit for %1$@ until %2$@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Rate-Limit für %1$@ bis %2$@."
+          }
+        }
+      }
+    },
+    "GitHub rate limit reached" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Rate-Limit erreicht"
+          }
+        }
+      }
+    },
+    "GitHub rate limit reached. Try again after %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Rate-Limit erreicht. Versuche es nach %@ erneut."
+          }
+        }
+      }
+    },
+    "GitHub rate limit reached. Try again later." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Rate-Limit erreicht. Versuche es später erneut."
+          }
+        }
+      }
+    },
+    "GitHub rejected the saved token. Replace it and try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub hat den gespeicherten Token abgelehnt. Ersetze ihn und versuche es erneut."
+          }
+        }
+      }
+    },
+    "GitHub returned an error. Check the token permissions and try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub hat einen Fehler zurückgegeben. Prüfe die Token-Berechtigungen und versuche es erneut."
+          }
+        }
+      }
+    },
+    "GitHub returned an invalid response." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub hat eine ungültige Antwort zurückgegeben."
+          }
+        }
+      }
+    },
+    "GitHub returned HTTP %lld." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub hat HTTP %lld zurückgegeben."
+          }
+        }
+      }
+    },
+    "GitHub says more requests are available after %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub meldet, dass nach %@ wieder Anfragen verfügbar sind."
+          }
+        }
+      }
+    },
+    "GitHub templates" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Templates"
+          }
+        }
+      }
+    },
+    "GitHub token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Token"
+          }
+        }
+      }
+    },
+    "GitHub Token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Token"
+          }
+        }
+      }
+    },
+    "GitHub token required" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Token erforderlich"
+          }
+        }
+      }
+    },
+    "GitHub Token..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Token ..."
+          }
+        }
+      }
+    },
     "Governance" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Governance"
+          }
+        }
+      }
+    },
+    "Headers:" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Header:"
           }
         }
       }
@@ -1029,6 +2202,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Secrets ausblenden"
+          }
+        }
+      }
+    },
+    "HTTP" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTP"
           }
         }
       }
@@ -1103,6 +2286,66 @@
         }
       }
     },
+    "Invalid URL" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungültige URL"
+          }
+        }
+      }
+    },
+    "Inventory" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventar"
+          }
+        }
+      }
+    },
+    "Issue and pull request templates are present." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Issue- und Pull-Request-Templates sind vorhanden."
+          }
+        }
+      }
+    },
+    "Keep agent rules current as repository workflow decisions change." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte Agent-Regeln aktuell, wenn sich Workflow-Entscheidungen im Repository ändern."
+          }
+        }
+      }
+    },
+    "Keep CI aligned with the local commands documented for contributors." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte CI mit den lokal dokumentierten Befehlen für Mitwirkende synchron."
+          }
+        }
+      }
+    },
+    "Keep documented commands runnable from a fresh checkout." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte dokumentierte Befehle aus einem frischen Checkout heraus lauffähig."
+          }
+        }
+      }
+    },
     "Keep secrets revealed for" : {
       "localizations" : {
         "de" : {
@@ -1113,22 +2356,62 @@
         }
       }
     },
-    "LLM connections" : {
+    "Keep setup idempotent so agents and contributors can rerun it safely." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "LLM-Verbindungen"
+            "value" : "Halte das Setup idempotent, damit Agents und Mitwirkende es sicher erneut ausführen können."
           }
         }
       }
     },
-    "Large file" : {
+    "Keep templates focused on the information reviewers and agents need." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Große Datei"
+            "value" : "Halte Templates auf die Informationen fokussiert, die Reviewer und Agents benötigen."
+          }
+        }
+      }
+    },
+    "Keep the .git file in standard gitdir format or select the primary worktree root." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte die .git-Datei im Standard-gitdir-Format oder wähle den primären Worktree-Root aus."
+          }
+        }
+      }
+    },
+    "Keep the flag registry synchronized with feature flag code." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte das Flag-Register mit dem Feature-Flag-Code synchron."
+          }
+        }
+      }
+    },
+    "Keep the README aligned with the current project purpose and setup path." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte die README mit aktuellem Projektzweck und Setup-Pfad synchron."
+          }
+        }
+      }
+    },
+    "Keep workflow docs aligned with the current branching and review process." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte Workflow-Dokumentation mit dem aktuellen Branching- und Review-Prozess synchron."
           }
         }
       }
@@ -1143,6 +2426,16 @@
         }
       }
     },
+    "Large file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Große Datei"
+          }
+        }
+      }
+    },
     "Light" : {
       "localizations" : {
         "de" : {
@@ -1153,12 +2446,122 @@
         }
       }
     },
+    "Likely agent" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vermutlich Agent"
+          }
+        }
+      }
+    },
+    "Likely human" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vermutlich Mensch"
+          }
+        }
+      }
+    },
+    "Linked Issue" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verknüpftes Issue"
+          }
+        }
+      }
+    },
+    "LLM connections" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LLM-Verbindungen"
+          }
+        }
+      }
+    },
+    "Loaded" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geladen"
+          }
+        }
+      }
+    },
+    "Loading" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lädt"
+          }
+        }
+      }
+    },
+    "Loading pull requests..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Requests werden geladen ..."
+          }
+        }
+      }
+    },
+    "Loading repositories..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repositories werden geladen ..."
+          }
+        }
+      }
+    },
+    "Manual entry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuelle Eingabe"
+          }
+        }
+      }
+    },
+    "MCP Auth" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP Auth"
+          }
+        }
+      }
+    },
     "MCP Config" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "MCP-Konfiguration"
+          }
+        }
+      }
+    },
+    "MCP Inventory" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP Inventory"
           }
         }
       }
@@ -1179,6 +2582,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "MCP-Server aus config.toml (nur lesend)"
+          }
+        }
+      }
+    },
+    "Missing" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehlt"
+          }
+        }
+      }
+    },
+    "Missing AGENTS.md" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AGENTS.md fehlt"
+          }
+        }
+      }
+    },
+    "Missing CLAUDE.md" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CLAUDE.md fehlt"
+          }
+        }
+      }
+    },
+    "Missing in mcp.env" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehlt in mcp.env"
+          }
+        }
+      }
+    },
+    "Modified" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geändert"
+          }
+        }
+      }
+    },
+    "Move “%@” to the Trash?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%@“ in den Papierkorb legen?"
           }
         }
       }
@@ -1263,16 +2726,6 @@
         }
       }
     },
-    "Move “%@” to the Trash?" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "„%@“ in den Papierkorb legen?"
-          }
-        }
-      }
-    },
     "Name" : {
       "localizations" : {
         "de" : {
@@ -1289,6 +2742,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Namen bestehen aus Buchstaben, Ziffern und _ und beginnen nicht mit einer Ziffer."
+          }
+        }
+      }
+    },
+    "Needs attention" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benötigt Aufmerksamkeit"
           }
         }
       }
@@ -1313,6 +2776,36 @@
         }
       }
     },
+    "No .git entry was found in the selected folder." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im ausgewählten Ordner wurde kein .git-Eintrag gefunden."
+          }
+        }
+      }
+    },
+    "No AGENTS.md or CLAUDE.md file was found at the repository root." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Repository-Root wurde keine AGENTS.md- oder CLAUDE.md-Datei gefunden."
+          }
+        }
+      }
+    },
+    "No backups" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Backups"
+          }
+        }
+      }
+    },
     "No Claude Code configuration" : {
       "localizations" : {
         "de" : {
@@ -1329,6 +2822,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keine Codex-Konfiguration"
+          }
+        }
+      }
+    },
+    "No contribution workflow document was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde keine Contribution-Workflow-Dokumentation gefunden."
           }
         }
       }
@@ -1373,32 +2876,72 @@
         }
       }
     },
-    "No repository selected" : {
+    "No documented local build or test command was found." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kein Repository ausgewählt"
+            "value" : "Es wurde kein dokumentierter lokaler Build- oder Testbefehl gefunden."
           }
         }
       }
     },
-    "No signals" : {
+    "No env vars" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keine Signale"
+            "value" : "Keine Env-Variablen"
           }
         }
       }
     },
-    "MCP Auth" : {
+    "No findings" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MCP Auth"
+            "value" : "Keine Befunde"
+          }
+        }
+      }
+    },
+    "No GitHub Actions workflow was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde kein GitHub-Actions-Workflow gefunden."
+          }
+        }
+      }
+    },
+    "No GitHub issue or pull request template was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde kein GitHub-Issue- oder Pull-Request-Template gefunden."
+          }
+        }
+      }
+    },
+    "No lightweight .git lock or in-progress operation marker was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde kein leichter .git-Lock- oder Marker für laufende Operationen gefunden."
+          }
+        }
+      }
+    },
+    "No linked issue" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein verknüpftes Issue"
           }
         }
       }
@@ -1413,22 +2956,132 @@
         }
       }
     },
+    "No MCP servers" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine MCP-Server"
+          }
+        }
+      }
+    },
+    "No one-time setup script was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde kein einmaliges Setup-Skript gefunden."
+          }
+        }
+      }
+    },
+    "No open pull requests" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine offenen Pull Requests"
+          }
+        }
+      }
+    },
+    "No pull requests" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Pull Requests"
+          }
+        }
+      }
+    },
+    "No README file was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde keine README-Datei gefunden."
+          }
+        }
+      }
+    },
+    "No repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Repositories"
+          }
+        }
+      }
+    },
+    "No repository selected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Repository ausgewählt"
+          }
+        }
+      }
+    },
+    "No Results" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Ergebnisse"
+          }
+        }
+      }
+    },
+    "No signals" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Signale"
+          }
+        }
+      }
+    },
+    "No supported restore target." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein unterstütztes Wiederherstellungsziel."
+          }
+        }
+      }
+    },
+    "No Swift app feature flag convention was detected." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurde keine Swift-App-Feature-Flag-Konvention erkannt."
+          }
+        }
+      }
+    },
+    "No token saved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Token gespeichert"
+          }
+        }
+      }
+    },
     "No Variables" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keine Variablen"
-          }
-        }
-      }
-    },
-    "No zsh startup files found" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine zsh-Startdateien gefunden"
           }
         }
       }
@@ -1443,42 +3096,22 @@
         }
       }
     },
+    "No zsh startup files found" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine zsh-Startdateien gefunden"
+          }
+        }
+      }
+    },
     "Not valid JSON — the file was not saved." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kein gültiges JSON — die Datei wurde nicht gespeichert."
-          }
-        }
-      }
-    },
-    "OK" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        }
-      }
-    },
-    "Only text values can be edited." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nur Textwerte können bearbeitet werden."
-          }
-        }
-      }
-    },
-    "Open the file and fix the JSON syntax." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Öffne die Datei und korrigiere die JSON-Syntax."
           }
         }
       }
@@ -1499,6 +3132,269 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OAuth-Anmelde-Cache ist unvollständig"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Only one of issue or pull request templates was found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur eines von Issue- oder Pull-Request-Templates wurde gefunden."
+          }
+        }
+      }
+    },
+    "Only part of the local build/test workflow is documented." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur ein Teil des lokalen Build-/Test-Workflows ist dokumentiert."
+          }
+        }
+      }
+    },
+    "Only text values can be edited." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur Textwerte können bearbeitet werden."
+          }
+        }
+      }
+    },
+    "Open" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnen"
+          }
+        }
+      }
+    },
+    "Open Codex" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex öffnen"
+          }
+        }
+      }
+    },
+    "Open PR" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PR öffnen"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen öffnen"
+          }
+        }
+      }
+    },
+    "Open the Codex environment editor for the selected missing variable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codex-Environment-Editor für die ausgewählte fehlende Variable öffnen"
+          }
+        }
+      }
+    },
+    "Open the file and fix the JSON syntax." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne die Datei und korrigiere die JSON-Syntax."
+          }
+        }
+      }
+    },
+    "Open the selected context entry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewählten Kontexteintrag öffnen"
+          }
+        }
+      }
+    },
+    "Open the selected pull request in your browser" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne den ausgewählten Pull Request im Browser"
+          }
+        }
+      }
+    },
+    "Open the selected tool editor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editor für das ausgewählte Tool öffnen"
+          }
+        }
+      }
+    },
+    "Open Tool" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tool öffnen"
+          }
+        }
+      }
+    },
+    "overridden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "überschrieben"
+          }
+        }
+      }
+    },
+    "Owner" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Owner"
+          }
+        }
+      }
+    },
+    "owner/name" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "owner/name"
+          }
+        }
+      }
+    },
+    "Passed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bestanden"
+          }
+        }
+      }
+    },
+    "Preview only" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur Vorschau"
+          }
+        }
+      }
+    },
+    "Private repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privates Repository"
+          }
+        }
+      }
+    },
+    "Project MCP config present" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projekt-MCP-Konfiguration vorhanden"
+          }
+        }
+      }
+    },
+    "Public repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffentliches Repository"
+          }
+        }
+      }
+    },
+    "Pull Request" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Request"
+          }
+        }
+      }
+    },
+    "Readiness" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereitschaft"
+          }
+        }
+      }
+    },
+    "README" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "README"
+          }
+        }
+      }
+    },
+    "Ready" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit"
           }
         }
       }
@@ -1533,12 +3429,12 @@
         }
       }
     },
-    "Refresh diagnostics" : {
+    "Refresh backups" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diagnosen aktualisieren"
+            "value" : "Backups aktualisieren"
           }
         }
       }
@@ -1553,72 +3449,102 @@
         }
       }
     },
-    "Refresh backups" : {
+    "Refresh diagnostics" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Backups aktualisieren"
+            "value" : "Diagnosen aktualisieren"
           }
         }
       }
     },
-    "Restore Backup" : {
+    "Refresh failed" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Backup wiederherstellen"
+            "value" : "Aktualisierung fehlgeschlagen"
           }
         }
       }
     },
-    "Restore Failed" : {
+    "Refresh inventory" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wiederherstellung fehlgeschlagen"
+            "value" : "Inventar aktualisieren"
           }
         }
       }
     },
-    "Restore backup?" : {
+    "Refresh pull requests" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Backup wiederherstellen?"
+            "value" : "Pull Requests aktualisieren"
           }
         }
       }
     },
-    "Restore is only available for backups that CodingBuddy can map to a managed file." : {
+    "Refresh readiness checks" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wiederherstellen ist nur für Backups verfügbar, die CodingBuddy einer verwalteten Datei zuordnen kann."
+            "value" : "Readiness-Prüfungen aktualisieren"
           }
         }
       }
     },
-    "Restore the selected backup" : {
+    "Refresh this check after branch changes or interrupted Git operations." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ausgewähltes Backup wiederherstellen"
+            "value" : "Aktualisiere diese Prüfung nach Branch-Wechseln oder unterbrochenen Git-Operationen."
           }
         }
       }
     },
-    "Restore…" : {
+    "Reload" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wiederherstellen …"
+            "value" : "Neu laden"
+          }
+        }
+      }
+    },
+    "Reload failed for %1$@: %2$@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neu laden für %1$@ fehlgeschlagen: %2$@"
+          }
+        }
+      }
+    },
+    "Remediation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behebung"
+          }
+        }
+      }
+    },
+    "Remove %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ entfernen"
           }
         }
       }
@@ -1629,6 +3555,135 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eintrag entfernen"
+          }
+        }
+      }
+    },
+    "Remove GitHub token?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Token entfernen?"
+          }
+        }
+      }
+    },
+    "Remove Token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token entfernen"
+          }
+        }
+      }
+    },
+    "Replace Token..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token ersetzen ..."
+          }
+        }
+      }
+    },
+    "Repo Readiness" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repo Readiness"
+          }
+        }
+      }
+    },
+    "Repo Readiness status warning" : {
+      "comment" : "Status label for a Repo Readiness checklist item that has a partial or ambiguous local signal.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Warnung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Warning"
+          }
+        }
+      }
+    },
+    "Repositories unavailable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repositories nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Repositories..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repositories ..."
+          }
+        }
+      }
+    },
+    "Repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository"
+          }
+        }
+      }
+    },
+    "Repository refresh issues" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Aktualisierungsprobleme"
+          }
+        }
+      }
+    },
+    "Repository state" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Status"
+          }
+        }
+      }
+    },
+    "Repository..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository ..."
+          }
+        }
+      }
+    },
+    "Reset" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurücksetzen"
           }
         }
       }
@@ -1683,6 +3738,116 @@
         }
       }
     },
+    "Resolve the interrupted Git operation before asking agents to modify the repo." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löse die unterbrochene Git-Operation, bevor Agents das Repository ändern."
+          }
+        }
+      }
+    },
+    "Restore Backup" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup wiederherstellen"
+          }
+        }
+      }
+    },
+    "Restore backup?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup wiederherstellen?"
+          }
+        }
+      }
+    },
+    "Restore Failed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederherstellung fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Restore is only available for backups that CodingBuddy can map to a managed file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederherstellen ist nur für Backups verfügbar, die CodingBuddy einer verwalteten Datei zuordnen kann."
+          }
+        }
+      }
+    },
+    "Restore the selected backup" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewähltes Backup wiederherstellen"
+          }
+        }
+      }
+    },
+    "Restore…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederherstellen …"
+          }
+        }
+      }
+    },
+    "Restrict the file so only your user can read and write it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beschränke die Datei so, dass nur dein Benutzer sie lesen und schreiben kann."
+          }
+        }
+      }
+    },
+    "Retry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut versuchen"
+          }
+        }
+      }
+    },
+    "Reveal in Finder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Finder anzeigen"
+          }
+        }
+      }
+    },
+    "reveal secret values" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secret-Werte anzuzeigen"
+          }
+        }
+      }
+    },
     "Reveal secrets" : {
       "localizations" : {
         "de" : {
@@ -1693,22 +3858,72 @@
         }
       }
     },
-    "Save" : {
+    "Reveal the selected context entry in Finder" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sichern"
+            "value" : "Ausgewählten Kontexteintrag im Finder anzeigen"
           }
         }
       }
     },
-    "Search variables" : {
+    "Reveal the selected repository in Finder" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Variablen durchsuchen"
+            "value" : "Ausgewähltes Repository im Finder anzeigen"
+          }
+        }
+      }
+    },
+    "Review" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review"
+          }
+        }
+      }
+    },
+    "Review approved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review genehmigt"
+          }
+        }
+      }
+    },
+    "Review pending" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review ausstehend"
+          }
+        }
+      }
+    },
+    "Review required" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review erforderlich"
+          }
+        }
+      }
+    },
+    "Review unknown" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review unbekannt"
           }
         }
       }
@@ -1723,12 +3938,53 @@
         }
       }
     },
+    "Save" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sichern"
+          }
+        }
+      }
+    },
+    "Save Repository" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository speichern"
+          }
+        }
+      }
+    },
+    "Save Token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token speichern"
+          }
+        }
+      }
+    },
     "Saved" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gespeichert"
+          }
+        }
+      }
+    },
+    "Scope" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scope"
           }
         }
       }
@@ -1743,12 +3999,62 @@
         }
       }
     },
-    "Select a backup" : {
+    "Search context files" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Backup auswählen"
+            "value" : "Kontextdateien suchen"
+          }
+        }
+      }
+    },
+    "Search MCP servers" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP-Server suchen"
+          }
+        }
+      }
+    },
+    "Search pull requests" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Requests suchen"
+          }
+        }
+      }
+    },
+    "Search readiness checks" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Readiness-Prüfungen suchen"
+          }
+        }
+      }
+    },
+    "Search repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repositories suchen"
+          }
+        }
+      }
+    },
+    "Search variables" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variablen durchsuchen"
           }
         }
       }
@@ -1763,6 +4069,26 @@
         }
       }
     },
+    "Select a backup" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup auswählen"
+          }
+        }
+      }
+    },
+    "Select the repository root or initialize Git before relying on repo-state checks." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle den Repository-Root oder initialisiere Git, bevor du Repo-Statusprüfungen nutzt."
+          }
+        }
+      }
+    },
     "Server" : {
       "localizations" : {
         "de" : {
@@ -1773,12 +4099,22 @@
         }
       }
     },
-    "Severity" : {
+    "Set up Craft Agents or connect a Craft connector. Credential files will appear here when Craft creates them." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Schweregrad"
+            "value" : "Richte Craft Agents ein oder verbinde einen Craft-Connector. Zugangsdaten-Dateien erscheinen hier, sobald Craft sie erstellt."
+          }
+        }
+      }
+    },
+    "Set up the tool first, then refresh Agent Doctor." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Richte das Tool zuerst ein und aktualisiere dann Agent Doctor."
           }
         }
       }
@@ -1793,12 +4129,22 @@
         }
       }
     },
-    "Set up Craft Agents or connect a Craft connector. Credential files will appear here when Craft creates them." : {
+    "Setup script and hooks" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Richte Craft Agents ein oder verbinde einen Craft-Connector. Zugangsdaten-Dateien erscheinen hier, sobald Craft sie erstellt."
+            "value" : "Setup-Skript und Hooks"
+          }
+        }
+      }
+    },
+    "Severity" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schweregrad"
           }
         }
       }
@@ -1823,12 +4169,62 @@
         }
       }
     },
+    "Signals" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signale"
+          }
+        }
+      }
+    },
+    "Size" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Größe"
+          }
+        }
+      }
+    },
+    "Some repositories are hidden because the picker reached its page limit." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einige Repositories sind ausgeblendet, weil die Auswahl die Seitengrenze erreicht hat."
+          }
+        }
+      }
+    },
     "Source" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quelle"
+          }
+        }
+      }
+    },
+    "SSE" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSE"
+          }
+        }
+      }
+    },
+    "State" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
           }
         }
       }
@@ -1843,6 +4239,16 @@
         }
       }
     },
+    "stdio" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "stdio"
+          }
+        }
+      }
+    },
     "Supported" : {
       "localizations" : {
         "de" : {
@@ -1853,62 +4259,42 @@
         }
       }
     },
-    "Target" : {
+    "Swift app feature flag documentation is present." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ziel"
+            "value" : "Swift-App-Feature-Flag-Dokumentation ist vorhanden."
           }
         }
       }
     },
-    "The target file does not exist yet." : {
+    "Swift app structure was detected without feature flag documentation." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Zieldatei existiert noch nicht."
+            "value" : "Swift-App-Struktur wurde ohne Feature-Flag-Dokumentation erkannt."
           }
         }
       }
     },
-    "Try a different source, backup file, target path, or status." : {
+    "Symlink" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Versuche eine andere Quelle, Backup-Datei, einen anderen Zielpfad oder Status."
+            "value" : "Symlink"
           }
         }
       }
     },
-    "Unsupported backup" : {
+    "Symlink target not inspected" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nicht unterstütztes Backup"
-          }
-        }
-      }
-    },
-    "Set up the tool first, then refresh Agent Doctor." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Richte das Tool zuerst ein und aktualisiere dann Agent Doctor."
-          }
-        }
-      }
-    },
-    "Define the variable in the matching tool environment file." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lege die Variable in der passenden Tool-Umgebungsdatei an."
+            "value" : "Symlink-Ziel nicht geprüft"
           }
         }
       }
@@ -1943,6 +4329,16 @@
         }
       }
     },
+    "Target" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziel"
+          }
+        }
+      }
+    },
     "Target:" : {
       "localizations" : {
         "de" : {
@@ -1953,12 +4349,42 @@
         }
       }
     },
+    "The .git file could not be resolved to a local Git directory." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die .git-Datei konnte nicht zu einem lokalen Git-Verzeichnis aufgelöst werden."
+          }
+        }
+      }
+    },
+    "The cached MCP credential may need a fresh login." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die zwischengespeicherten MCP-Zugangsdaten benötigen möglicherweise eine neue Anmeldung."
+          }
+        }
+      }
+    },
     "The change could not be applied safely — the file is left untouched." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Die Änderung konnte nicht sicher angewendet werden — die Datei bleibt unangetastet."
+          }
+        }
+      }
+    },
+    "The configured default editor is unavailable. CodingBuddy opened the file with the system default instead." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der konfigurierte Standard-Editor ist nicht verfügbar. CodingBuddy hat die Datei stattdessen mit dem Systemstandard geöffnet."
           }
         }
       }
@@ -2023,52 +4449,32 @@
         }
       }
     },
-    "The configured default editor is unavailable. CodingBuddy opened the file with the system default instead." : {
+    "The GitHub token cannot access %@." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der konfigurierte Standard-Editor ist nicht verfügbar. CodingBuddy hat die Datei stattdessen mit dem Systemstandard geöffnet."
+            "value" : "Der GitHub-Token kann nicht auf %@ zugreifen."
           }
         }
       }
     },
-    "The next connection will trigger a fresh OAuth login." : {
+    "The GitHub token is missing required read permissions: %@" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die nächste Verbindung startet einen neuen OAuth-Login."
+            "value" : "Dem GitHub-Token fehlen erforderliche Leserechte: %@"
           }
         }
       }
     },
-    "Every connected server will ask you to log in again." : {
+    "The GitHub token is missing required read permissions." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jeder verbundene Server verlangt danach eine neue Anmeldung."
-          }
-        }
-      }
-    },
-    "Every Craft connector will ask you to log in again." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jeder Craft-Connector verlangt danach eine neue Anmeldung."
-          }
-        }
-      }
-    },
-    "The cached MCP credential may need a fresh login." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die zwischengespeicherten MCP-Zugangsdaten benötigen möglicherweise eine neue Anmeldung."
+            "value" : "Dem GitHub-Token fehlen erforderliche Leserechte."
           }
         }
       }
@@ -2083,12 +4489,32 @@
         }
       }
     },
-    "Restrict the file so only your user can read and write it." : {
+    "The next connection will trigger a fresh OAuth login." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Beschränke die Datei so, dass nur dein Benutzer sie lesen und schreiben kann."
+            "value" : "Die nächste Verbindung startet einen neuen OAuth-Login."
+          }
+        }
+      }
+    },
+    "The saved GitHub token could not be read." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der gespeicherte GitHub-Token konnte nicht gelesen werden."
+          }
+        }
+      }
+    },
+    "The saved token did not return any accessible repositories." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der gespeicherte Token hat keine zugänglichen Repositories zurückgegeben."
           }
         }
       }
@@ -2099,6 +4525,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Der Server kann die Session automatisch erneuern; setze den Eintrag zurück, wenn sie festhängt."
+          }
+        }
+      }
+    },
+    "The target file does not exist yet." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zieldatei existiert noch nicht."
           }
         }
       }
@@ -2143,6 +4579,16 @@
         }
       }
     },
+    "This removes the token from Keychain. You will need to add a token again to use Agent PR Monitor." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dadurch wird der Token aus dem Schlüsselbund entfernt. Du musst erneut einen Token hinzufügen, um Agent PR Monitor zu verwenden."
+          }
+        }
+      }
+    },
     "This server has no “env” object — add one in Cursor first." : {
       "localizations" : {
         "de" : {
@@ -2153,12 +4599,43 @@
         }
       }
     },
+    "Token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token"
+          }
+        }
+      }
+    },
     "Token files" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Token-Dateien"
+          }
+        }
+      }
+    },
+    "Token saved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token gespeichert"
+          }
+        }
+      }
+    },
+    "Token update failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Token-Aktualisierung fehlgeschlagen"
           }
         }
       }
@@ -2183,12 +4660,133 @@
         }
       }
     },
+    "Transport" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transport"
+          }
+        }
+      }
+    },
+    "Try a different check, status, source, or remediation." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche eine andere Prüfung, einen anderen Status, eine andere Quelle oder Behebung."
+          }
+        }
+      }
+    },
+    "Try a different file, warning, or path." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche es mit einer anderen Datei, Warnung oder einem anderen Pfad."
+          }
+        }
+      }
+    },
+    "Try a different owner, name, or description." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche es mit einem anderen Owner, Namen oder einer anderen Beschreibung."
+          }
+        }
+      }
+    },
+    "Try a different server, tool, repository, scope, or environment variable name." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche es mit einem anderen Server, Tool, Repository, Scope oder Environment-Variable-Namen."
+          }
+        }
+      }
+    },
+    "Try a different server, tool, scope, or environment variable name." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche es mit einem anderen Server, Tool, Scope oder Environment-Variable-Namen."
+          }
+        }
+      }
+    },
+    "Try a different source, backup file, target path, or status." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche eine andere Quelle, Backup-Datei, einen anderen Zielpfad oder Status."
+          }
+        }
+      }
+    },
+    "Try a different title, branch, issue, status, or author." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuche einen anderen Titel, Branch, Issue, Status oder Autor."
+          }
+        }
+      }
+    },
+    "Unexpected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unerwartet"
+          }
+        }
+      }
+    },
+    "Unexpected file type" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unerwarteter Dateityp"
+          }
+        }
+      }
+    },
+    "Unknown" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unbekannt"
+          }
+        }
+      }
+    },
     "Unlock to view and edit" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zum Ansehen und Bearbeiten entsperren"
+          }
+        }
+      }
+    },
+    "Unsupported backup" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht unterstütztes Backup"
           }
         }
       }
@@ -2203,12 +4801,12 @@
         }
       }
     },
-    "Used when CodingBuddy opens Markdown, JSON, YAML, and other text files from repository tools." : {
+    "Updated" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wird verwendet, wenn CodingBuddy Markdown, JSON, YAML und andere Textdateien aus Repository-Tools öffnet."
+            "value" : "Aktualisiert"
           }
         }
       }
@@ -2219,6 +4817,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mit ＋ legst du die erste Variable an."
+          }
+        }
+      }
+    },
+    "Use a fine-grained personal access token with read-only Metadata, Pull requests, Issues, Checks, and Commit statuses permissions." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwende einen feingranularen Personal Access Token mit Nur-Lese-Berechtigungen für Metadata, Pull requests, Issues, Checks und Commit statuses."
+          }
+        }
+      }
+    },
+    "Use Manual Entry" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuelle Eingabe verwenden"
+          }
+        }
+      }
+    },
+    "Used by Agent PR Monitor to read pull request, issue, check, and review status from GitHub." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird vom Agent PR Monitor verwendet, um Pull-Request-, Issue-, Check- und Review-Status von GitHub zu lesen."
+          }
+        }
+      }
+    },
+    "Used when CodingBuddy opens Markdown, JSON, YAML, and other text files from repository tools." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird verwendet, wenn CodingBuddy Markdown, JSON, YAML und andere Textdateien aus Repository-Tools öffnet."
+          }
+        }
+      }
+    },
+    "User" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benutzer"
           }
         }
       }
@@ -2283,2583 +4932,22 @@
         }
       }
     },
+    "Waiting" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wartet"
+          }
+        }
+      }
+    },
     "Warning" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Warnung"
-          }
-        }
-      }
-    },
-    "expires %@" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "läuft ab %@"
-          }
-        }
-      }
-    },
-    "overridden" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "überschrieben"
-          }
-        }
-      }
-    },
-    "reveal secret values" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Secret-Werte anzuzeigen"
-          }
-        }
-      }
-    },
-    "CodingBuddy did not find any MCP server definitions for Codex, Claude Code, or Cursor." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy hat keine MCP-Serverdefinitionen für Codex, Claude Code oder Cursor gefunden."
-          }
-        }
-      }
-    },
-    "Command / URL" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Befehl / URL"
-          }
-        }
-      }
-    },
-    "Defined by server config" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Durch Serverkonfiguration definiert"
-          }
-        }
-      }
-    },
-    "Env Vars" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Env-Variablen"
-          }
-        }
-      }
-    },
-    "Headers:" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Header:"
-          }
-        }
-      }
-    },
-    "HTTP" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "HTTP"
-          }
-        }
-      }
-    },
-    "Inventory" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventar"
-          }
-        }
-      }
-    },
-    "Invalid URL" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ungültige URL"
-          }
-        }
-      }
-    },
-    "MCP Inventory" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MCP Inventory"
-          }
-        }
-      }
-    },
-    "Missing" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fehlt"
-          }
-        }
-      }
-    },
-    "Missing AGENTS.md" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AGENTS.md fehlt"
-          }
-        }
-      }
-    },
-    "Missing CLAUDE.md" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CLAUDE.md fehlt"
-          }
-        }
-      }
-    },
-    "Missing in mcp.env" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fehlt in mcp.env"
-          }
-        }
-      }
-    },
-    "Modified" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geändert"
-          }
-        }
-      }
-    },
-    "No MCP servers" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine MCP-Server"
-          }
-        }
-      }
-    },
-    "No Results" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine Ergebnisse"
-          }
-        }
-      }
-    },
-    "No backups" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine Backups"
-          }
-        }
-      }
-    },
-    "No env vars" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine Env-Variablen"
-          }
-        }
-      }
-    },
-    "No supported restore target." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kein unterstütztes Wiederherstellungsziel."
-          }
-        }
-      }
-    },
-    "Open" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Öffnen"
-          }
-        }
-      }
-    },
-    "Open Codex" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codex öffnen"
-          }
-        }
-      }
-    },
-    "Open the Codex environment editor for the selected missing variable" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codex-Environment-Editor für die ausgewählte fehlende Variable öffnen"
-          }
-        }
-      }
-    },
-    "Open the selected context entry" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ausgewählten Kontexteintrag öffnen"
-          }
-        }
-      }
-    },
-    "Open the selected tool editor" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editor für das ausgewählte Tool öffnen"
-          }
-        }
-      }
-    },
-    "Open Tool" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tool öffnen"
-          }
-        }
-      }
-    },
-    "Project MCP config present" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Projekt-MCP-Konfiguration vorhanden"
-          }
-        }
-      }
-    },
-    "Refresh inventory" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventar aktualisieren"
-          }
-        }
-      }
-    },
-    "Reveal in Finder" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Im Finder anzeigen"
-          }
-        }
-      }
-    },
-    "Reveal the selected context entry in Finder" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ausgewählten Kontexteintrag im Finder anzeigen"
-          }
-        }
-      }
-    },
-    "Preview only" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nur Vorschau"
-          }
-        }
-      }
-    },
-    "SSE" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSE"
-          }
-        }
-      }
-    },
-    "Scope" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scope"
-          }
-        }
-      }
-    },
-    "Search MCP servers" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MCP-Server suchen"
-          }
-        }
-      }
-    },
-    "Search context files" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontextdateien suchen"
-          }
-        }
-      }
-    },
-    "Signals" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Signale"
-          }
-        }
-      }
-    },
-    "Size" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Größe"
-          }
-        }
-      }
-    },
-    "State" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Status"
-          }
-        }
-      }
-    },
-    "Symlink" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Symlink"
-          }
-        }
-      }
-    },
-    "Symlink target not inspected" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Symlink-Ziel nicht geprüft"
-          }
-        }
-      }
-    },
-    "Transport" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transport"
-          }
-        }
-      }
-    },
-    "Try a different server, tool, scope, or environment variable name." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versuche es mit einem anderen Server, Tool, Scope oder Environment-Variable-Namen."
-          }
-        }
-      }
-    },
-    "Try a different server, tool, repository, scope, or environment variable name." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versuche es mit einem anderen Server, Tool, Repository, Scope oder Environment-Variable-Namen."
-          }
-        }
-      }
-    },
-    "Try a different file, warning, or path." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versuche es mit einer anderen Datei, Warnung oder einem anderen Pfad."
-          }
-        }
-      }
-    },
-    "Unknown" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unbekannt"
-          }
-        }
-      }
-    },
-    "Unexpected" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unerwartet"
-          }
-        }
-      }
-    },
-    "Unexpected file type" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unerwarteter Dateityp"
-          }
-        }
-      }
-    },
-    "User" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Benutzer"
-          }
-        }
-      }
-    },
-    "stdio" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "stdio"
-          }
-        }
-      }
-    },
-    "~/.claude does not exist — Claude Code has not been set up on this Mac." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~/.claude existiert nicht — Claude Code ist auf diesem Mac nicht eingerichtet."
-          }
-        }
-      }
-    },
-    "~/.codex does not exist — Codex has not been set up on this Mac." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~/.codex existiert nicht — Codex ist auf diesem Mac nicht eingerichtet."
-          }
-        }
-      }
-    },
-    "~/.craft-agent does not exist — Craft Agents has not been set up on this Mac." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~/.craft-agent existiert nicht — Craft Agents ist auf diesem Mac nicht eingerichtet."
-          }
-        }
-      }
-    },
-    "~/.cursor does not exist — Cursor has not been set up on this Mac." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~/.cursor existiert nicht — Cursor ist auf diesem Mac nicht eingerichtet."
-          }
-        }
-      }
-    },
-    "zsh" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "zsh"
-          }
-        }
-      }
-    },
-    "“%@” is already defined in %@ — the last assignment in load order wins." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "„%1$@“ ist bereits in %2$@ definiert — es gilt die letzte Zuweisung in der Ladereihenfolge."
-          }
-        }
-      }
-    },
-    "“%@” is already defined." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "„%@“ ist bereits definiert."
-          }
-        }
-      }
-    },
-    "“%@” is not a valid variable name." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "„%@“ ist kein gültiger Variablenname."
-          }
-        }
-      }
-    },
-    "A Git index lock file is present." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eine Git-Index-Lock-Datei ist vorhanden."
-          }
-        }
-      }
-    },
-    "A Git merge, rebase, cherry-pick, or revert marker is present." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Git-Merge-, Rebase-, Cherry-Pick- oder Revert-Marker ist vorhanden."
-          }
-        }
-      }
-    },
-    "A GitHub Actions workflow appears to run build or test checks." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein GitHub-Actions-Workflow scheint Build- oder Testprüfungen auszuführen."
-          }
-        }
-      }
-    },
-    "A README exists but is empty." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eine README ist vorhanden, aber leer."
-          }
-        }
-      }
-    },
-    "A governance file exists but has no readable guidance." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eine Governance-Datei ist vorhanden, enthält aber keine lesbaren Anweisungen."
-          }
-        }
-      }
-    },
-    "A non-empty README is present." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eine nicht leere README ist vorhanden."
-          }
-        }
-      }
-    },
-    "A setup script and hook activation signal are present." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Setup-Skript und ein Hook-Aktivierungssignal sind vorhanden."
-          }
-        }
-      }
-    },
-    "A setup script exists but no hook activation signal was found." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Setup-Skript ist vorhanden, aber kein Hook-Aktivierungssignal wurde gefunden."
-          }
-        }
-      }
-    },
-    "AGENTS.md is present at the repository root." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AGENTS.md ist im Repository-Root vorhanden."
-          }
-        }
-      }
-    },
-    "Add AGENTS.md or mirror the shared agent instructions there." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lege AGENTS.md an oder spiegele dort die gemeinsamen Agent-Anweisungen."
-          }
-        }
-      }
-    },
-    "Add CI that runs the repository build and test checks." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge CI hinzu, die die Build- und Testprüfungen des Repositories ausführt."
-          }
-        }
-      }
-    },
-    "Add GitHub issue and pull request templates for repeatable agent handoffs." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge GitHub-Issue- und Pull-Request-Templates für wiederholbare Agent-Handoffs hinzu."
-          }
-        }
-      }
-    },
-    "Add a CI workflow that runs the documented build and test commands." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge einen CI-Workflow hinzu, der die dokumentierten Build- und Testbefehle ausführt."
-          }
-        }
-      }
-    },
-    "Add a README that orients agents and humans before they change code." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge eine README hinzu, die Agents und Menschen vor Codeänderungen Orientierung gibt."
-          }
-        }
-      }
-    },
-    "Add a setup script that prepares local checks and hooks without network-only assumptions." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge ein Setup-Skript hinzu, das lokale Prüfungen und Hooks ohne reine Netzwerkannahmen vorbereitet."
-          }
-        }
-      }
-    },
-    "Add an agent governance file that explains repo-specific coding rules." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge eine Agent-Governance-Datei hinzu, die repo-spezifische Coding-Regeln erklärt."
-          }
-        }
-      }
-    },
-    "Add contributing docs that explain issue, branch, test, and PR expectations." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge Contribution-Dokumentation hinzu, die Issue-, Branch-, Test- und PR-Erwartungen erklärt."
-          }
-        }
-      }
-    },
-    "Add copy-pasteable build and test commands to README or developer docs." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ergänze kopierbare Build- und Testbefehle in README oder Entwicklerdokumentation."
-          }
-        }
-      }
-    },
-    "Add feature flag documentation when repository features become flag-gated." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ergänze Feature-Flag-Dokumentation, sobald Repository-Funktionen per Flag gesteuert werden."
-          }
-        }
-      }
-    },
-    "Add the missing template so issues and PRs carry consistent context." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge das fehlende Template hinzu, damit Issues und PRs konsistenten Kontext enthalten."
-          }
-        }
-      }
-    },
-    "Agent governance file" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Agent-Governance-Datei"
-          }
-        }
-      }
-    },
-    "Build and test commands" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Build- und Testbefehle"
-          }
-        }
-      }
-    },
-    "CI workflow" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CI-Workflow"
-          }
-        }
-      }
-    },
-    "CLAUDE.md is present, but AGENTS.md is missing." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CLAUDE.md ist vorhanden, aber AGENTS.md fehlt."
-          }
-        }
-      }
-    },
-    "Check" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prüfung"
-          }
-        }
-      }
-    },
-    "Choose a repository folder to run readiness checks." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wähle einen Repository-Ordner aus, um Readiness-Prüfungen auszuführen."
-          }
-        }
-      }
-    },
-    "Contribution docs cover issues, review, and validation workflow." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contribution-Dokumentation deckt Issues, Review und Validierungsworkflow ab."
-          }
-        }
-      }
-    },
-    "Contribution docs exist but do not cover the full issue-to-PR workflow." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contribution-Dokumentation ist vorhanden, deckt aber den vollständigen Issue-bis-PR-Workflow nicht ab."
-          }
-        }
-      }
-    },
-    "Contribution workflow" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Contribution-Workflow"
-          }
-        }
-      }
-    },
-    "Document both the build command and the test command agents should run." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dokumentiere sowohl den Build-Befehl als auch den Testbefehl, den Agents ausführen sollen."
-          }
-        }
-      }
-    },
-    "Document feature flags, maturity, and rollout expectations in docs/FEATURE_FLAGS.md." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dokumentiere Feature-Flags, Reifegrad und Rollout-Erwartungen in docs/FEATURE_FLAGS.md."
-          }
-        }
-      }
-    },
-    "Document how to start work, validate it, and submit it for review." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dokumentiere, wie Arbeit gestartet, validiert und zur Prüfung eingereicht wird."
-          }
-        }
-      }
-    },
-    "Document or wire up git hook activation in the setup script." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dokumentiere oder verdrahte die Git-Hook-Aktivierung im Setup-Skript."
-          }
-        }
-      }
-    },
-    "Document the local agent rules, ownership boundaries, and safety requirements." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dokumentiere lokale Agent-Regeln, Verantwortungsgrenzen und Sicherheitsanforderungen."
-          }
-        }
-      }
-    },
-    "Documented build and test commands were found." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dokumentierte Build- und Testbefehle wurden gefunden."
-          }
-        }
-      }
-    },
-    "Failed" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fehlgeschlagen"
-          }
-        }
-      }
-    },
-    "Feature flag documentation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feature-Flag-Dokumentation"
-          }
-        }
-      }
-    },
-    "Fill in the README with the project purpose, setup, and primary workflows." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fülle die README mit Projektzweck, Setup und wichtigsten Workflows."
-          }
-        }
-      }
-    },
-    "Finish or abort the in-progress Git operation before starting agent work." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beende oder brich die laufende Git-Operation ab, bevor Agent-Arbeit startet."
-          }
-        }
-      }
-    },
-    "GitHub Actions workflows exist, but no obvious build or test command was found." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Actions-Workflows sind vorhanden, aber kein offensichtlicher Build- oder Testbefehl wurde gefunden."
-          }
-        }
-      }
-    },
-    "GitHub templates" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Templates"
-          }
-        }
-      }
-    },
-    "Issue and pull request templates are present." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Issue- und Pull-Request-Templates sind vorhanden."
-          }
-        }
-      }
-    },
-    "Keep CI aligned with the local commands documented for contributors." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halte CI mit den lokal dokumentierten Befehlen für Mitwirkende synchron."
-          }
-        }
-      }
-    },
-    "Keep agent rules current as repository workflow decisions change." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halte Agent-Regeln aktuell, wenn sich Workflow-Entscheidungen im Repository ändern."
-          }
-        }
-      }
-    },
-    "Keep documented commands runnable from a fresh checkout." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halte dokumentierte Befehle aus einem frischen Checkout heraus lauffähig."
-          }
-        }
-      }
-    },
-    "Keep setup idempotent so agents and contributors can rerun it safely." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halte das Setup idempotent, damit Agents und Mitwirkende es sicher erneut ausführen können."
-          }
-        }
-      }
-    },
-    "Keep templates focused on the information reviewers and agents need." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halte Templates auf die Informationen fokussiert, die Reviewer und Agents benötigen."
-          }
-        }
-      }
-    },
-    "Keep the README aligned with the current project purpose and setup path." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halte die README mit aktuellem Projektzweck und Setup-Pfad synchron."
-          }
-        }
-      }
-    },
-    "Keep the flag registry synchronized with feature flag code." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halte das Flag-Register mit dem Feature-Flag-Code synchron."
-          }
-        }
-      }
-    },
-    "Keep workflow docs aligned with the current branching and review process." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halte Workflow-Dokumentation mit dem aktuellen Branching- und Review-Prozess synchron."
-          }
-        }
-      }
-    },
-    "No .git entry was found in the selected folder." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Im ausgewählten Ordner wurde kein .git-Eintrag gefunden."
-          }
-        }
-      }
-    },
-    "No AGENTS.md or CLAUDE.md file was found at the repository root." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Im Repository-Root wurde keine AGENTS.md- oder CLAUDE.md-Datei gefunden."
-          }
-        }
-      }
-    },
-    "No GitHub Actions workflow was found." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Es wurde kein GitHub-Actions-Workflow gefunden."
-          }
-        }
-      }
-    },
-    "No GitHub issue or pull request template was found." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Es wurde kein GitHub-Issue- oder Pull-Request-Template gefunden."
-          }
-        }
-      }
-    },
-    "No README file was found." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Es wurde keine README-Datei gefunden."
-          }
-        }
-      }
-    },
-    "No Swift app feature flag convention was detected." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Es wurde keine Swift-App-Feature-Flag-Konvention erkannt."
-          }
-        }
-      }
-    },
-    "No contribution workflow document was found." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Es wurde keine Contribution-Workflow-Dokumentation gefunden."
-          }
-        }
-      }
-    },
-    "No documented local build or test command was found." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Es wurde kein dokumentierter lokaler Build- oder Testbefehl gefunden."
-          }
-        }
-      }
-    },
-    "No lightweight .git lock or in-progress operation marker was found." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Es wurde kein leichter .git-Lock- oder Marker für laufende Operationen gefunden."
-          }
-        }
-      }
-    },
-    "No one-time setup script was found." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Es wurde kein einmaliges Setup-Skript gefunden."
-          }
-        }
-      }
-    },
-    "Only one of issue or pull request templates was found." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nur eines von Issue- oder Pull-Request-Templates wurde gefunden."
-          }
-        }
-      }
-    },
-    "Only part of the local build/test workflow is documented." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nur ein Teil des lokalen Build-/Test-Workflows ist dokumentiert."
-          }
-        }
-      }
-    },
-    "Passed" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bestanden"
-          }
-        }
-      }
-    },
-    "Repo Readiness status warning" : {
-      "comment" : "Status label for a Repo Readiness checklist item that has a partial or ambiguous local signal.",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warnung"
-          }
-        }
-      }
-    },
-    "README" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "README"
-          }
-        }
-      }
-    },
-    "Refresh readiness checks" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Readiness-Prüfungen aktualisieren"
-          }
-        }
-      }
-    },
-    "Remediation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Behebung"
-          }
-        }
-      }
-    },
-    "Repo Readiness" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repo Readiness"
-          }
-        }
-      }
-    },
-    "Repository state" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repository-Status"
-          }
-        }
-      }
-    },
-    "Reset" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zurücksetzen"
-          }
-        }
-      }
-    },
-    "Resolve the interrupted Git operation before asking agents to modify the repo." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Löse die unterbrochene Git-Operation, bevor Agents das Repository ändern."
-          }
-        }
-      }
-    },
-    "Reveal the selected repository in Finder" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ausgewähltes Repository im Finder anzeigen"
-          }
-        }
-      }
-    },
-    "Search readiness checks" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Readiness-Prüfungen suchen"
-          }
-        }
-      }
-    },
-    "Select the repository root or initialize Git before relying on repo-state checks." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wähle den Repository-Root oder initialisiere Git, bevor du Repo-Statusprüfungen nutzt."
-          }
-        }
-      }
-    },
-    "Setup script and hooks" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Setup-Skript und Hooks"
-          }
-        }
-      }
-    },
-    "Swift app feature flag documentation is present." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Swift-App-Feature-Flag-Dokumentation ist vorhanden."
-          }
-        }
-      }
-    },
-    "Swift app structure was detected without feature flag documentation." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Swift-App-Struktur wurde ohne Feature-Flag-Dokumentation erkannt."
-          }
-        }
-      }
-    },
-    "Try a different check, status, source, or remediation." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versuche eine andere Prüfung, einen anderen Status, eine andere Quelle oder Behebung."
-          }
-        }
-      }
-    },
-    "Add build or test execution to CI, or document why another workflow provides validation." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge Build- oder Testausführung zur CI hinzu oder dokumentiere, warum ein anderer Workflow die Validierung übernimmt."
-          }
-        }
-      }
-    },
-    "Keep the .git file in standard gitdir format or select the primary worktree root." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halte die .git-Datei im Standard-gitdir-Format oder wähle den primären Worktree-Root aus."
-          }
-        }
-      }
-    },
-    "Refresh this check after branch changes or interrupted Git operations." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktualisiere diese Prüfung nach Branch-Wechseln oder unterbrochenen Git-Operationen."
-          }
-        }
-      }
-    },
-    "The .git file could not be resolved to a local Git directory." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die .git-Datei konnte nicht zu einem lokalen Git-Verzeichnis aufgelöst werden."
-          }
-        }
-      }
-    },
-    "%lld unresolved" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld ungelöst"
-          }
-        }
-      }
-    },
-    "Add Token..." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Token hinzufügen ..."
-          }
-        }
-      }
-    },
-    "Add a fine-grained read-only token to load pull request status." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge einen feingranularen Nur-Lese-Token hinzu, um Pull-Request-Status zu laden."
-          }
-        }
-      }
-    },
-    "Add a GitHub token to monitor pull requests." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge einen GitHub-Token hinzu, um Pull Requests zu überwachen."
-          }
-        }
-      }
-    },
-    "Add or replace the read-only GitHub token" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Read-only-GitHub-Token hinzufügen oder ersetzen"
-          }
-        }
-      }
-    },
-    "Add Manual Entry" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manuelle Eingabe hinzufügen"
-          }
-        }
-      }
-    },
-    "Add Repository" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repository hinzufügen"
-          }
-        }
-      }
-    },
-    "Add at least one GitHub repository to monitor open pull requests." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge mindestens ein GitHub-Repository hinzu, um offene Pull Requests zu überwachen."
-          }
-        }
-      }
-    },
-    "Add repositories visible to the saved GitHub token." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Füge Repositories hinzu, die für den gespeicherten GitHub-Token sichtbar sind."
-          }
-        }
-      }
-    },
-    "Agent PR Monitor" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Agent PR Monitor"
-          }
-        }
-      }
-    },
-    "Accessible repositories" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zugängliche Repositories"
-          }
-        }
-      }
-    },
-    "Archived" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Archiviert"
-          }
-        }
-      }
-    },
-    "Blocked" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blockiert"
-          }
-        }
-      }
-    },
-    "CI" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CI"
-          }
-        }
-      }
-    },
-    "CI failed" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CI fehlgeschlagen"
-          }
-        }
-      }
-    },
-    "CI green" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CI grün"
-          }
-        }
-      }
-    },
-    "CI pending" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CI ausstehend"
-          }
-        }
-      }
-    },
-    "CI unknown" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CI unbekannt"
-          }
-        }
-      }
-    },
-    "Changes requested" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Änderungen angefordert"
-          }
-        }
-      }
-    },
-    "Choose Repository..." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repository auswählen ..."
-          }
-        }
-      }
-    },
-    "Choose Repositories..." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repositories auswählen ..."
-          }
-        }
-      }
-    },
-    "Choose Repository" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repository auswählen"
-          }
-        }
-      }
-    },
-    "Choose a GitHub repository in owner/name format to monitor open pull requests." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wähle ein GitHub-Repository im Format owner/name aus, um offene Pull Requests zu überwachen."
-          }
-        }
-      }
-    },
-    "Choose a repository visible to the saved GitHub token." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wähle ein Repository aus, das für den gespeicherten GitHub-Token sichtbar ist."
-          }
-        }
-      }
-    },
-    "Choose the GitHub repository to monitor" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wähle das zu überwachende GitHub-Repository aus"
-          }
-        }
-      }
-    },
-    "Choose the GitHub repositories to monitor" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wähle die zu überwachenden GitHub-Repositories aus"
-          }
-        }
-      }
-    },
-    "Closed" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geschlossen"
-          }
-        }
-      }
-    },
-    "CodingBuddy" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy"
-          }
-        }
-      }
-    },
-    "CodingBuddy could not access the saved GitHub token in Keychain." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy konnte nicht auf den gespeicherten GitHub-Token im Schlüsselbund zugreifen."
-          }
-        }
-      }
-    },
-    "CodingBuddy could not read the GitHub response." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy konnte die GitHub-Antwort nicht lesen."
-          }
-        }
-      }
-    },
-    "CodingBuddy could not update the saved GitHub token in Keychain." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy konnte den gespeicherten GitHub-Token im Schlüsselbund nicht aktualisieren."
-          }
-        }
-      }
-    },
-    "CodingBuddy did not find open pull requests for the selected repository." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy hat keine offenen Pull Requests für das ausgewählte Repository gefunden."
-          }
-        }
-      }
-    },
-    "CodingBuddy did not find open pull requests for the watched repositories." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy hat keine offenen Pull Requests für die überwachten Repositories gefunden."
-          }
-        }
-      }
-    },
-    "Current repository" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktuelles Repository"
-          }
-        }
-      }
-    },
-    "Currently watched" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktuell überwacht"
-          }
-        }
-      }
-    },
-    "Enter the GitHub repository to monitor. CodingBuddy reads open pull requests only." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gib das zu überwachende GitHub-Repository ein. CodingBuddy liest nur offene Pull Requests."
-          }
-        }
-      }
-    },
-    "Findings" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Befunde"
-          }
-        }
-      }
-    },
-    "GitHub Token" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Token"
-          }
-        }
-      }
-    },
-    "GitHub Token..." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Token ..."
-          }
-        }
-      }
-    },
-    "GitHub did not provide a reset time. Try again later." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub hat keine Reset-Zeit geliefert. Versuche es später erneut."
-          }
-        }
-      }
-    },
-    "GitHub is unreachable. Check your network connection and try again." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub ist nicht erreichbar. Prüfe die Netzwerkverbindung und versuche es erneut."
-          }
-        }
-      }
-    },
-    "GitHub rate limit reached" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Rate-Limit erreicht"
-          }
-        }
-      }
-    },
-    "GitHub rate limit reached. Try again after %@." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Rate-Limit erreicht. Versuche es nach %@ erneut."
-          }
-        }
-      }
-    },
-    "GitHub rate limit reached. Try again later." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Rate-Limit erreicht. Versuche es später erneut."
-          }
-        }
-      }
-    },
-    "GitHub rate limit for %@." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Rate-Limit für %@."
-          }
-        }
-      }
-    },
-    "GitHub rate limit for %1$@ until %2$@." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Rate-Limit für %1$@ bis %2$@."
-          }
-        }
-      }
-    },
-    "GitHub rejected the saved token. Replace it and try again." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub hat den gespeicherten Token abgelehnt. Ersetze ihn und versuche es erneut."
-          }
-        }
-      }
-    },
-    "GitHub returned HTTP %lld." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub hat HTTP %lld zurückgegeben."
-          }
-        }
-      }
-    },
-    "GitHub returned an invalid response." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub hat eine ungültige Antwort zurückgegeben."
-          }
-        }
-      }
-    },
-    "GitHub returned an error. Check the token permissions and try again." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub hat einen Fehler zurückgegeben. Prüfe die Token-Berechtigungen und versuche es erneut."
-          }
-        }
-      }
-    },
-    "GitHub says more requests are available after %@." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub meldet, dass nach %@ wieder Anfragen verfügbar sind."
-          }
-        }
-      }
-    },
-    "GitHub token required" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Token erforderlich"
-          }
-        }
-      }
-    },
-    "GitHub token" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Token"
-          }
-        }
-      }
-    },
-    "GitHub authorization needs attention" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Autorisierung benötigt Aufmerksamkeit"
-          }
-        }
-      }
-    },
-    "Likely agent" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vermutlich Agent"
-          }
-        }
-      }
-    },
-    "Likely human" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vermutlich Mensch"
-          }
-        }
-      }
-    },
-    "Linked Issue" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verknüpftes Issue"
-          }
-        }
-      }
-    },
-    "Loaded" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geladen"
-          }
-        }
-      }
-    },
-    "Loading" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lädt"
-          }
-        }
-      }
-    },
-    "Loading pull requests..." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pull Requests werden geladen ..."
-          }
-        }
-      }
-    },
-    "Loading repositories..." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repositories werden geladen ..."
-          }
-        }
-      }
-    },
-    "Manual entry" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manuelle Eingabe"
-          }
-        }
-      }
-    },
-    "Needs attention" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Benötigt Aufmerksamkeit"
-          }
-        }
-      }
-    },
-    "No findings" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine Befunde"
-          }
-        }
-      }
-    },
-    "No linked issue" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kein verknüpftes Issue"
-          }
-        }
-      }
-    },
-    "No open pull requests" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine offenen Pull Requests"
-          }
-        }
-      }
-    },
-    "No pull requests" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine Pull Requests"
-          }
-        }
-      }
-    },
-    "No repositories" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine Repositories"
-          }
-        }
-      }
-    },
-    "No token saved" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kein Token gespeichert"
-          }
-        }
-      }
-    },
-    "Open PR" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PR öffnen"
-          }
-        }
-      }
-    },
-    "Open Settings" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Einstellungen öffnen"
-          }
-        }
-      }
-    },
-    "Open the selected pull request in your browser" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Öffne den ausgewählten Pull Request im Browser"
-          }
-        }
-      }
-    },
-    "Owner" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Owner"
-          }
-        }
-      }
-    },
-    "Pull Request" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pull Request"
-          }
-        }
-      }
-    },
-    "Private repository" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Privates Repository"
-          }
-        }
-      }
-    },
-    "Public repository" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Öffentliches Repository"
-          }
-        }
-      }
-    },
-    "Readiness" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bereitschaft"
-          }
-        }
-      }
-    },
-    "Ready" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bereit"
-          }
-        }
-      }
-    },
-    "Refresh failed" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktualisierung fehlgeschlagen"
-          }
-        }
-      }
-    },
-    "Refresh pull requests" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pull Requests aktualisieren"
-          }
-        }
-      }
-    },
-    "Reload" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neu laden"
-          }
-        }
-      }
-    },
-    "Reload failed for %1$@: %2$@" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neu laden für %1$@ fehlgeschlagen: %2$@"
-          }
-        }
-      }
-    },
-    "Repository" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repository"
-          }
-        }
-      }
-    },
-    "Repositories unavailable" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repositories nicht verfügbar"
-          }
-        }
-      }
-    },
-    "Repositories..." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repositories ..."
-          }
-        }
-      }
-    },
-    "Repository..." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repository ..."
-          }
-        }
-      }
-    },
-    "Repository refresh issues" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repository-Aktualisierungsprobleme"
-          }
-        }
-      }
-    },
-    "Remove GitHub token?" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub-Token entfernen?"
-          }
-        }
-      }
-    },
-    "Remove Token" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Token entfernen"
-          }
-        }
-      }
-    },
-    "Remove %@" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ entfernen"
-          }
-        }
-      }
-    },
-    "Replace Token..." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Token ersetzen ..."
-          }
-        }
-      }
-    },
-    "Review" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Review"
-          }
-        }
-      }
-    },
-    "Review approved" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Review genehmigt"
-          }
-        }
-      }
-    },
-    "Review pending" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Review ausstehend"
-          }
-        }
-      }
-    },
-    "Review required" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Review erforderlich"
-          }
-        }
-      }
-    },
-    "Review unknown" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Review unbekannt"
-          }
-        }
-      }
-    },
-    "Retry" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erneut versuchen"
-          }
-        }
-      }
-    },
-    "Save Repository" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repository speichern"
-          }
-        }
-      }
-    },
-    "Save Token" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Token speichern"
-          }
-        }
-      }
-    },
-    "Search pull requests" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pull Requests suchen"
-          }
-        }
-      }
-    },
-    "Search repositories" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repositories suchen"
-          }
-        }
-      }
-    },
-    "Some repositories are hidden because the picker reached its page limit." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Einige Repositories sind ausgeblendet, weil die Auswahl die Seitengrenze erreicht hat."
-          }
-        }
-      }
-    },
-    "The GitHub token cannot access %@." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der GitHub-Token kann nicht auf %@ zugreifen."
-          }
-        }
-      }
-    },
-    "The GitHub token is missing required read permissions." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dem GitHub-Token fehlen erforderliche Leserechte."
-          }
-        }
-      }
-    },
-    "The GitHub token is missing required read permissions: %@" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dem GitHub-Token fehlen erforderliche Leserechte: %@"
-          }
-        }
-      }
-    },
-    "The saved GitHub token could not be read." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der gespeicherte GitHub-Token konnte nicht gelesen werden."
-          }
-        }
-      }
-    },
-    "The saved token did not return any accessible repositories." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der gespeicherte Token hat keine zugänglichen Repositories zurückgegeben."
-          }
-        }
-      }
-    },
-    "This removes the token from Keychain. You will need to add a token again to use Agent PR Monitor." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dadurch wird der Token aus dem Schlüsselbund entfernt. Du musst erneut einen Token hinzufügen, um Agent PR Monitor zu verwenden."
-          }
-        }
-      }
-    },
-    "Token" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Token"
-          }
-        }
-      }
-    },
-    "Token saved" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Token gespeichert"
-          }
-        }
-      }
-    },
-    "Token update failed" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Token-Aktualisierung fehlgeschlagen"
-          }
-        }
-      }
-    },
-    "Try a different title, branch, issue, status, or author." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versuche einen anderen Titel, Branch, Issue, Status oder Autor."
-          }
-        }
-      }
-    },
-    "Updated" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktualisiert"
-          }
-        }
-      }
-    },
-    "Try a different owner, name, or description." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versuche es mit einem anderen Owner, Namen oder einer anderen Beschreibung."
-          }
-        }
-      }
-    },
-    "Use Manual Entry" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manuelle Eingabe verwenden"
-          }
-        }
-      }
-    },
-    "Used by Agent PR Monitor to read pull request, issue, check, and review status from GitHub." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wird vom Agent PR Monitor verwendet, um Pull-Request-, Issue-, Check- und Review-Status von GitHub zu lesen."
           }
         }
       }
@@ -4884,72 +4972,12 @@
         }
       }
     },
-    "%@ needs a GitHub token." : {
+    "zsh" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ benötigt einen GitHub-Token."
-          }
-        }
-      }
-    },
-    "%lld repositories" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld Repositories"
-          }
-        }
-      }
-    },
-    "%lld repositories need attention." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld Repositories benötigen Aufmerksamkeit."
-          }
-        }
-      }
-    },
-    "owner/name" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "owner/name"
-          }
-        }
-      }
-    },
-    "Use a fine-grained personal access token with read-only Metadata, Pull requests, Issues, Checks, and Commit statuses permissions." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verwende einen feingranularen Personal Access Token mit Nur-Lese-Berechtigungen für Metadata, Pull requests, Issues, Checks und Commit statuses."
-          }
-        }
-      }
-    },
-    "Waiting" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wartet"
-          }
-        }
-      }
-    },
-    "apps3k-com" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "apps3k-com"
+            "value" : "zsh"
           }
         }
       }
