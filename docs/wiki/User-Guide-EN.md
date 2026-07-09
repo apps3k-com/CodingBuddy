@@ -118,15 +118,15 @@ v1 limits: MCP Inventory does not edit, install, or network-test servers. Claude
 
 ### Agent PR Monitor
 
-The **Agent PR Monitor** entry (alpha, under Inventory) is a read-only table for open GitHub pull requests in one selected repository. Each row is classified as likely agent, likely human or unknown.
+The **Agent PR Monitor** entry (alpha, under Inventory) is a read-only table for open GitHub pull requests across a watched repository list. Each row is classified as likely agent, likely human or unknown.
 
 - Add or replace the fine-grained read-only GitHub token in **Settings → Security**; CodingBuddy stores it in Keychain, not in UserDefaults or files. If no token is saved or GitHub rejects it, the monitor sends you back to Settings.
-- Choose one repository from the searchable picker; search matches owner, repository name, full `owner/name` and visible descriptions. The manual `owner/name` fallback remains available when repository listing is unavailable.
-- The table shows PR title, author/source classification, linked closing issues, CI status, review status, unresolved findings, advisory readiness and last update time.
+- Add or remove watched repositories from the searchable picker; search matches owner, repository name, full `owner/name` and visible descriptions. The manual `owner/name` fallback remains available when repository listing is unavailable.
+- The table shows PR title, repository, author/source classification, linked closing issues, CI status, review status, unresolved findings, advisory readiness and last update time.
 - Use **Refresh** to reload manually and **Open PR** to continue in the browser. The monitor never comments, approves, resolves threads or merges PRs.
-- Rate limits, missing permissions, denied repositories and offline errors are shown as UI-safe states while the last successful snapshot stays visible where possible.
+- Rate limits, missing permissions, denied repositories and offline errors are shown as UI-safe states while the last successful snapshot stays visible where possible. Repository-specific failures are scoped, so successful repositories remain visible when another watched repository fails.
 
-v1 limits: Agent PR Monitor reads GitHub.com only, monitors one repository at a time and does not update GitHub Projects or run in the background after CodingBuddy quits.
+v1 limits: Agent PR Monitor reads GitHub.com only, does not update GitHub Projects and does not run in the background after CodingBuddy quits.
 
 ### Codex
 

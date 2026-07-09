@@ -167,19 +167,22 @@ command arguments.
 
 ### `agentPRMonitor` — maturity: alpha
 
-Read-only monitor for open GitHub pull requests in one selected repository. It
-classifies each row as likely agent, likely human, or unknown, uses a
+Read-only monitor for open GitHub pull requests across a watched repository
+list. It classifies each row as likely agent, likely human, or unknown, uses a
 Keychain-stored fine-grained GitHub token configured in Settings → Security,
-and shows linked closing issues, CI/check status, review decision, unresolved
-review-thread findings, rate-limit state, and advisory merge readiness.
-Repository setup loads repositories visible to the saved token through GitHub's
-REST API, caps pagination for bounded UI work, and keeps an `owner/name` manual
+and shows the owning repository, linked closing issues, CI/check status, review
+decision, unresolved review-thread findings, rate-limit state, and advisory
+merge readiness. Repository setup loads repositories visible to the saved token
+through GitHub's REST API, caps pagination for bounded UI work, supports adding
+and removing multiple watched repositories, and keeps an `owner/name` manual
 fallback for recovery when listing is unavailable.
 
 v1 never comments, approves, resolves threads, merges pull requests, mutates
 GitHub Projects, shells out to `gh`/`git`, or stores token values outside
-Keychain. REST fallback is limited to missing status/check data when GraphQL
-does not return a status rollup.
+Keychain. Refresh failures are scoped per repository where possible, so one
+denied or rate-limited repository does not hide successful rows from other
+watched repositories. REST fallback is limited to missing status/check data
+when GraphQL does not return a status rollup.
 
 ### `backupBrowser` — maturity: alpha
 
