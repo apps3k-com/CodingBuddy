@@ -71,6 +71,22 @@ Der Sidebar-Bereich **Zustand & Sicherheit → MCP Auth** verwaltet den OAuth-Ca
 
 ## AI-Tools
 
+### Grundlage für verständliche Empfehlungen
+
+CodingBuddy führt ein gemeinsames Erklärungsmuster für technische Befunde ein.
+Sobald ein Alpha-Bereich darauf umgestellt ist, trennt sein Inspector **Einfach
+erklärt**, **Warum wichtig**, **Empfohlener nächster Schritt** und eingeklappte
+**Technische Details**. Wiederkehrende Entwicklerbegriffe verweisen auf ein
+kurzes eingebautes Glossar, statt Git-, CI-, MCP-, OAuth- oder
+Paketmanager-Wissen vorauszusetzen.
+
+Die Empfehlungen sind redaktionell gepflegt und deterministisch. CodingBuddy
+sendet Befunde nicht an einen KI-Dienst, erfindet keine Aktionen und umgeht
+keine bestehende Bestätigung oder Sicherheitsprüfung. Kann eine empfohlene
+Aktion nicht ausgeführt werden, erklärt die App den Grund, statt eine wirkungslose
+Schaltfläche anzuzeigen. Ein gesunder Zustand kann ausdrücklich sagen, dass
+keine Aktion nötig ist, ohne wie ein Blocker zu wirken.
+
 ### Agent Doctor
 
 Der Seitenleisten-Eintrag **Agent Doctor** (Alpha) ist ein Nur-Lese-Gesundheitscheck für die lokale Agent-Einrichtung. Er markiert:

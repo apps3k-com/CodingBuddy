@@ -5320,6 +5320,554 @@
     "Updating…" : {
       "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Wird aktualisiert …" } } }
     },
+    "Alternative. Expected result: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alternative. Erwartetes Ergebnis: %@"
+          }
+        }
+      }
+    },
+    "Alternatives" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alternativen"
+          }
+        }
+      }
+    },
+    "What could happen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was passieren könnte"
+          }
+        }
+      }
+    },
+    "Developer glossary ahead behind definition" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Voraus“ zählt lokale Commits, die nicht im Remote-Branch vorhanden sind; „zurück“ zählt Remote-Commits, die im lokalen Branch fehlen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Ahead counts local commits not on the remote branch; behind counts remote commits not in your local branch."
+          }
+        }
+      }
+    },
+    "Developer glossary ahead behind title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commits voraus/zurück"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Ahead/behind"
+          }
+        }
+      }
+    },
+    "Developer glossary CI definition" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuous Integration (CI) erstellt und testet Codeänderungen automatisch."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Continuous integration (CI) automatically builds and tests code changes."
+          }
+        }
+      }
+    },
+    "Developer glossary CI title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "CI"
+          }
+        }
+      }
+    },
+    "Developer glossary direct dependency definition" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine direkte Abhängigkeit ist ein Paket, das du selbst installiert oder angegeben hast, statt eines Pakets, das nur von einem anderen Paket benötigt wird."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "A direct dependency is a package you explicitly installed or declared, rather than one required by another package."
+          }
+        }
+      }
+    },
+    "Developer glossary direct dependency title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direkte Abhängigkeit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Direct dependency"
+          }
+        }
+      }
+    },
+    "Developer glossary dirty worktree definition" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Worktree mit lokalen Änderungen enthält Dateiänderungen, die noch nicht in einem Commit gespeichert wurden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "A dirty worktree has local file changes that have not been committed."
+          }
+        }
+      }
+    },
+    "Developer glossary dirty worktree title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Worktree mit lokalen Änderungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Dirty worktree"
+          }
+        }
+      }
+    },
+    "Developer glossary MCP definition" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Model Context Protocol (MCP) verbindet KI-Tools mit externen Tools und Datenquellen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The Model Context Protocol (MCP) lets AI tools connect to external tools and data sources."
+          }
+        }
+      }
+    },
+    "Developer glossary MCP title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "MCP"
+          }
+        }
+      }
+    },
+    "Developer glossary OAuth definition" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OAuth erlaubt einer App mit deiner Zustimmung den Zugriff auf einen anderen Dienst, ohne dein Passwort weiterzugeben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "OAuth lets an app access another service with your approval without sharing your password."
+          }
+        }
+      }
+    },
+    "Developer glossary OAuth title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OAuth"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "OAuth"
+          }
+        }
+      }
+    },
+    "Developer glossary package pin definition" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Paket-Pin hält ein Paket auf seiner aktuellen Version, bis der Pin entfernt wird."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "A package pin keeps a package at its current version until the pin is removed."
+          }
+        }
+      }
+    },
+    "Developer glossary package pin title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paket-Pin"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Package pin"
+          }
+        }
+      }
+    },
+    "Developer glossary PR definition" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Pull Request (PR) schlägt Codeänderungen zur Prüfung vor, bevor sie zusammengeführt werden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "A pull request (PR) proposes code changes for review before they are merged."
+          }
+        }
+      }
+    },
+    "Developer glossary PR title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PR"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "PR"
+          }
+        }
+      }
+    },
+    "Developer glossary scope definition" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Geltungsbereich beschreibt eine Grenze: welche Berechtigungen eine Anmeldung erhält oder wo eine Einstellung gilt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scope describes a boundary: which permissions a login receives or where a setting applies."
+          }
+        }
+      }
+    },
+    "Developer glossary scope title" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geltungsbereich"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scope"
+          }
+        }
+      }
+    },
+    "Effort" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufwand"
+          }
+        }
+      }
+    },
+    "Evidence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nachweise"
+          }
+        }
+      }
+    },
+    "Expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erwartetes Ergebnis"
+          }
+        }
+      }
+    },
+    "Glossary" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glossar"
+          }
+        }
+      }
+    },
+    "Guidance effort high" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "High"
+          }
+        }
+      }
+    },
+    "Guidance effort low" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niedrig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Low"
+          }
+        }
+      }
+    },
+    "Guidance effort medium" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mittel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Medium"
+          }
+        }
+      }
+    },
+    "Guidance safety read only" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur-Lesezugriff"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Read-only"
+          }
+        }
+      }
+    },
+    "Guidance safety requires confirmation" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bestätigung erforderlich"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Requires confirmation"
+          }
+        }
+      }
+    },
+    "Guidance safety reversible" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rückgängig machbar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reversible"
+          }
+        }
+      }
+    },
+    "Recommended. Expected result: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empfohlen. Erwartetes Ergebnis: %@"
+          }
+        }
+      }
+    },
+    "Recommended next step" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empfohlener nächster Schritt"
+          }
+        }
+      }
+    },
+    "Show or hide technical evidence and glossary definitions." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Technische Nachweise und Glossardefinitionen ein- oder ausblenden."
+          }
+        }
+      }
+    },
+    "Technical details" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Technische Details"
+          }
+        }
+      }
+    },
+    "Unavailable: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht verfügbar: %@"
+          }
+        }
+      }
+    },
+    "What this means" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einfach erklärt"
+          }
+        }
+      }
+    },
+    "Why it matters" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warum wichtig"
+          }
+        }
+      }
+    },
     "zsh" : {
       "localizations" : {
         "de" : {
