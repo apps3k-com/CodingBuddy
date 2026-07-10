@@ -117,6 +117,26 @@ struct MCPServerGuidanceTests {
         #expect(!sourceReason.isEmpty)
     }
 
+    @Test func missingVariablesExplainWhenNeitherActionCanOpen() {
+        let guidance = MCPServerGuidance.guidance(
+            for: makeItem(missingEnvVarNames: ["SERVICE_API_KEY"]),
+            canOpenTool: false,
+            canOpenSource: false
+        )
+
+        #expect(guidance.recommendedAction.id == MCPServerGuidance.openToolActionID)
+        guard case let .unavailable(toolReason) = guidance.recommendedAction.availability else {
+            Issue.record("Expected the primary tool action to be unavailable")
+            return
+        }
+        guard case let .unavailable(sourceReason) = guidance.alternatives[0].availability else {
+            Issue.record("Expected the source alternative to be unavailable")
+            return
+        }
+        #expect(!toolReason.isEmpty)
+        #expect(!sourceReason.isEmpty)
+    }
+
     @Test func actionAndEvidenceIdentifiersAreStableAndDeterministic() {
         let item = makeItem(missingEnvVarNames: ["SERVICE_API_KEY", "TEAM_ID"])
         let first = MCPServerGuidance.guidance(for: item, canOpenTool: true, canOpenSource: false)

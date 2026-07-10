@@ -21,7 +21,9 @@ struct HealthGuidanceLocalizationTests {
             repositoryRoot.appendingPathComponent("CodingBuddy/Services/AgentDoctorGuidance.swift"),
             repositoryRoot.appendingPathComponent("CodingBuddy/Services/RepoReadinessGuidance.swift"),
             repositoryRoot.appendingPathComponent("CodingBuddy/Services/MCPServerGuidance.swift"),
+            repositoryRoot.appendingPathComponent("CodingBuddy/Views/AgentDoctorView.swift"),
             repositoryRoot.appendingPathComponent("CodingBuddy/Views/MCPServerInventoryView.swift"),
+            repositoryRoot.appendingPathComponent("CodingBuddy/Views/RepoReadinessView.swift"),
         ]
     }
 
@@ -73,6 +75,29 @@ struct HealthGuidanceLocalizationTests {
             #expect(source.contains(".accessibilityLabel("))
             for fragment in contextFragments {
                 #expect(source.contains(fragment))
+            }
+        }
+    }
+
+    /// Dynamic VoiceOver sentences retain every positional value in German.
+    @Test func inspectorAccessibilityFormatsRetainPositionalPlaceholders() throws {
+        let strings = try catalogStrings()
+        let keys = [
+            "Agent Doctor inspector header accessibility label",
+            "MCP inventory item accessibility label",
+            "Repo readiness inspector header accessibility label",
+        ]
+
+        for key in keys {
+            let entry = try #require(strings[key])
+            let localizations = try #require(entry["localizations"] as? [String: Any])
+            let german = try #require(localizations["de"] as? [String: Any])
+            let unit = try #require(german["stringUnit"] as? [String: Any])
+            let value = try #require(unit["value"] as? String)
+            #expect(value.contains("%1$@"))
+            #expect(value.contains("%2$@"))
+            if key == "MCP inventory item accessibility label" {
+                #expect(value.contains("%3$@"))
             }
         }
     }

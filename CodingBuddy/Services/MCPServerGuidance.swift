@@ -273,6 +273,7 @@ nonisolated enum MCPServerGuidance {
         }
     }
 
+    /// Returns whether one UTF-8 byte is an ASCII alphabetic character.
     private static func isASCIILetter(_ byte: UInt8) -> Bool {
         (65...90).contains(byte) || (97...122).contains(byte)
     }

@@ -214,10 +214,21 @@ private struct MCPServerInspector: View {
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isHeader)
         .accessibilityLabel(
-            Text(
-                verbatim:
-                    "\(item.name), \(item.tool.displayName), \(item.inventoryConfigurationStatusTitle)"
-            )
+            Text(verbatim: inspectorHeaderAccessibilityLabel)
+        )
+    }
+
+    /// Localized VoiceOver sentence for the selected server header.
+    private var inspectorHeaderAccessibilityLabel: String {
+        String(
+            format: String(
+                localized: "MCP inventory item accessibility label",
+                defaultValue: "%1$@. Tool: %2$@. Status: %3$@."
+            ),
+            locale: .current,
+            item.name,
+            item.tool.displayName,
+            item.inventoryConfigurationStatusTitle
         )
     }
 
@@ -277,36 +288,57 @@ private struct MCPServerInspector: View {
 }
 
 private extension MCPServerInventoryItem {
+    /// One source of truth for title, symbol, and tint in inventory status presentation.
+    enum ConfigurationStatus {
+        case missingVariables
+        case unknownTransport
+        case configured
+    }
+
+    /// Feature-aware configuration status used by every visual representation.
+    var configurationStatus: ConfigurationStatus {
+        if hasMissingEnvVars {
+            .missingVariables
+        } else if FeatureFlag.explainableGuidance.isEnabled && transport == .unknown {
+            .unknownTransport
+        } else {
+            .configured
+        }
+    }
+
     /// Localized status shared by the compact cell and its VoiceOver header.
     var inventoryConfigurationStatusTitle: String {
-        if hasMissingEnvVars {
+        switch configurationStatus {
+        case .missingVariables:
             String(localized: "Missing variables")
-        } else if FeatureFlag.explainableGuidance.isEnabled && transport == .unknown {
+        case .unknownTransport:
             String(
                 localized: "MCP inventory unknown transport status",
                 defaultValue: "Unknown transport"
             )
-        } else {
+        case .configured:
             String(localized: "Configured")
         }
     }
 
     /// Symbol matching the current configuration status.
     var inventoryConfigurationStatusSymbol: String {
-        if hasMissingEnvVars {
+        switch configurationStatus {
+        case .missingVariables:
             "exclamationmark.triangle.fill"
-        } else if FeatureFlag.explainableGuidance.isEnabled && transport == .unknown {
+        case .unknownTransport:
             "exclamationmark.triangle"
-        } else {
+        case .configured:
             "checkmark.circle"
         }
     }
 
     /// Semantic tint matching the current configuration status.
     var inventoryConfigurationStatusTint: Color {
-        if hasMissingEnvVars || (FeatureFlag.explainableGuidance.isEnabled && transport == .unknown) {
+        switch configurationStatus {
+        case .missingVariables, .unknownTransport:
             .orange
-        } else {
+        case .configured:
             .secondary
         }
     }

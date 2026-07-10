@@ -83,6 +83,11 @@ struct RepoReadinessView: View {
         .navigationTitle("Repo Readiness")
         .navigationSubtitle(Text(verbatim: store.selectedRepositoryURL?.path ?? String(localized: "No repository selected")))
         .searchable(text: $searchText, prompt: "Search readiness checks")
+        .onChange(of: filteredItems.map(\.id)) {
+            guard let selection,
+                  !filteredItems.contains(where: { $0.id == selection }) else { return }
+            self.selection = nil
+        }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button("Reveal in Finder", systemImage: "folder") {
@@ -167,9 +172,7 @@ private struct RepoReadinessInspector: View {
                 }
                 .accessibilityElement(children: .combine)
                 .accessibilityAddTraits(.isHeader)
-                .accessibilityLabel(
-                    Text(verbatim: "\(item.status.displayName): \(item.title)")
-                )
+                .accessibilityLabel(Text(verbatim: inspectorHeaderAccessibilityLabel))
 
                 Divider()
 
@@ -180,7 +183,20 @@ private struct RepoReadinessInspector: View {
             }
             .padding(16)
         }
-        .navigationTitle("Details")
+        .navigationTitle(String(localized: "Details"))
+    }
+
+    /// Localized VoiceOver sentence for the selected readiness check.
+    private var inspectorHeaderAccessibilityLabel: String {
+        String(
+            format: String(
+                localized: "Repo readiness inspector header accessibility label",
+                defaultValue: "%1$@: %2$@."
+            ),
+            locale: .current,
+            item.status.displayName,
+            item.title
+        )
     }
 }
 

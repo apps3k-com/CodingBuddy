@@ -123,24 +123,40 @@ private struct AgentDiagnosticInspector: View {
     /// Opens the source file in the configured editor.
     var openSource: () -> Void
 
+    /// Shared selected-diagnostic context for both feature-flag branches.
+    private var diagnosticHeader: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            SeverityCell(severity: diagnostic.severity)
+            Text(diagnostic.title)
+                .font(.title3)
+                .fontWeight(.semibold)
+            Text(diagnostic.detail)
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+        .accessibilityLabel(Text(verbatim: diagnosticHeaderAccessibilityLabel))
+    }
+
+    /// Localized VoiceOver sentence for the selected diagnostic header.
+    private var diagnosticHeaderAccessibilityLabel: String {
+        String(
+            format: String(
+                localized: "Agent Doctor inspector header accessibility label",
+                defaultValue: "%1$@: %2$@."
+            ),
+            locale: .current,
+            diagnostic.severity.localizedTitle,
+            diagnostic.title
+        )
+    }
+
     /// Quiet, unframed detail layout that keeps the table focused on triage.
     var body: some View {
         if FeatureFlag.explainableGuidance.isEnabled {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        SeverityCell(severity: diagnostic.severity)
-                        Text(diagnostic.title)
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                        Text(diagnostic.detail)
-                            .foregroundStyle(.secondary)
-                    }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityAddTraits(.isHeader)
-                    .accessibilityLabel(
-                        Text(verbatim: "\(diagnostic.severity.localizedTitle): \(diagnostic.title)")
-                    )
+                    diagnosticHeader
 
                     Divider()
 
@@ -158,19 +174,7 @@ private struct AgentDiagnosticInspector: View {
         } else {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        SeverityCell(severity: diagnostic.severity)
-                        Text(diagnostic.title)
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                        Text(diagnostic.detail)
-                            .foregroundStyle(.secondary)
-                    }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityAddTraits(.isHeader)
-                    .accessibilityLabel(
-                        Text(verbatim: "\(diagnostic.severity.localizedTitle): \(diagnostic.title)")
-                    )
+                    diagnosticHeader
 
                     Divider()
 

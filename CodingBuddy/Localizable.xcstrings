@@ -643,6 +643,16 @@
         }
       }
     },
+    "Agent Doctor inspector header accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@."
+          }
+        }
+      }
+    },
     "Agent Doctor guidance evidence credential entry label" : {
       "localizations" : {
         "de" : {
@@ -3132,6 +3142,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ohne bekannten Transport kann CodingBuddy nicht bestätigen, wie das zuständige Tool den Server starten oder erreichen soll."
+          }
+        }
+      }
+    },
+    "MCP inventory item accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. Tool: %2$@. Status: %3$@."
           }
         }
       }
@@ -5678,6 +5698,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ausgewählte Quelldatei öffnen"
+          }
+        }
+      }
+    },
+    "Repo readiness inspector header accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@."
           }
         }
       }

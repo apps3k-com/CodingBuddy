@@ -208,6 +208,7 @@ nonisolated enum AgentDoctorGuidance {
         }
     }
 
+    /// Keeps guidance identity tied to the selected diagnostic instance.
     private static func guidanceID(for diagnostic: AgentDiagnostic) -> String {
         "agent-doctor.guidance.\(diagnostic.id)"
     }
@@ -227,6 +228,7 @@ nonisolated enum AgentDoctorGuidance {
         }
     }
 
+    /// Builds the existing read-only route to the diagnostic's owning tool.
     private static func openToolAction(expectedResult: String) -> RecommendedAction {
         RecommendedAction(
             id: openDestinationActionID,
@@ -238,6 +240,7 @@ nonisolated enum AgentDoctorGuidance {
         )
     }
 
+    /// Builds the read-only route to CodingBuddy's environment-variable list.
     private static func openVariablesAction() -> RecommendedAction {
         RecommendedAction(
             id: openDestinationActionID,
@@ -256,6 +259,7 @@ nonisolated enum AgentDoctorGuidance {
         )
     }
 
+    /// Builds the read-only route to MCP Auth for credential inspection.
     private static func openMCPAuthAction() -> RecommendedAction {
         RecommendedAction(
             id: openDestinationActionID,
@@ -271,6 +275,7 @@ nonisolated enum AgentDoctorGuidance {
         )
     }
 
+    /// Builds a source-file action with an explicit unavailable reason when needed.
     private static func openSourceAction(canOpenSource: Bool) -> RecommendedAction {
         RecommendedAction(
             id: openSourceActionID,
@@ -297,10 +302,12 @@ nonisolated enum AgentDoctorGuidance {
         )
     }
 
+    /// Omits a secondary source action when no existing local file can be opened.
     private static func optionalSourceAction(canOpenSource: Bool) -> [RecommendedAction] {
         canOpenSource ? [openSourceAction(canOpenSource: true)] : []
     }
 
+    /// Describes the desired permission repair without offering unsupported mutation.
     private static func restrictPermissionsAction() -> RecommendedAction {
         RecommendedAction(
             id: restrictPermissionsActionID,
@@ -395,6 +402,7 @@ nonisolated enum AgentDoctorGuidance {
         return evidence
     }
 
+    /// Appends source evidence only after validating it as a local display-safe path.
     private static func appendLocalSourceEvidence(
         from source: String,
         to evidence: inout [TechnicalEvidence]
@@ -409,6 +417,7 @@ nonisolated enum AgentDoctorGuidance {
         )
     }
 
+    /// Rejects URLs and control-bearing values from local path evidence.
     private static func isLocalPath(_ value: String) -> Bool {
         value.hasPrefix("/")
             && !value.contains("://")
@@ -417,6 +426,7 @@ nonisolated enum AgentDoctorGuidance {
             }
     }
 
+    /// Accepts only the portable ASCII shape used for environment-variable names.
     private static func isEnvironmentVariableName(_ value: String) -> Bool {
         guard let first = value.utf8.first, isASCIILetter(first) || first == 95 else { return false }
         return value.utf8.dropFirst().allSatisfy { byte in
@@ -424,10 +434,12 @@ nonisolated enum AgentDoctorGuidance {
         }
     }
 
+    /// Returns whether one UTF-8 byte is an ASCII alphabetic character.
     private static func isASCIILetter(_ byte: UInt8) -> Bool {
         (65...90).contains(byte) || (97...122).contains(byte)
     }
 
+    /// Accepts only compact octal permission modes safe for evidence display.
     private static func isFileMode(_ value: String) -> Bool {
         (3...4).contains(value.count) && value.allSatisfy { character in
             guard let digit = character.wholeNumberValue else { return false }
@@ -435,6 +447,7 @@ nonisolated enum AgentDoctorGuidance {
         }
     }
 
+    /// Accepts only bounded hexadecimal credential identifiers, never credential values.
     private static func isCredentialIdentifier(_ value: String) -> Bool {
         (8...32).contains(value.count) && value.unicodeScalars.allSatisfy { scalar in
             switch scalar.value {
