@@ -99,6 +99,11 @@ struct PackageMaintenanceGuidanceTests {
 
         #expect(PackageMaintenanceGuidance.selectedStatus(for: package, mode: .compatible) == .current)
         #expect(PackageMaintenanceGuidance.selectedStatus(for: package, mode: .latest) == .majorUpdateAvailable)
+
+        let compatible = makeGuidance(for: package, mode: .compatible)
+        #expect(compatible.id.contains(".current."))
+        expectNotNeeded(compatible.recommendedAction)
+        #expect(route(for: compatible.recommendedAction, guidance: compatible, package: package) == nil)
     }
 
     @Test func semanticMajorComparisonIsSmallAndDeterministic() {
@@ -116,18 +121,9 @@ struct PackageMaintenanceGuidanceTests {
             wantedVersion: nil,
             latestVersion: nil
         )
-        let unchangedTarget = makePackage(
-            status: .majorUpdateAvailable,
-            installedVersion: "5.4.0",
-            wantedVersion: "5.4.0",
-            latestVersion: "6.0.0"
-        )
-
-        for (package, mode) in [(missingTarget, PackageUpdateMode.compatible), (unchangedTarget, .compatible)] {
-            let guidance = makeGuidance(for: package, mode: mode)
-            expectUnavailable(guidance.recommendedAction)
-            #expect(route(for: guidance.recommendedAction, guidance: guidance, package: package) == nil)
-        }
+        let guidance = makeGuidance(for: missingTarget)
+        expectUnavailable(guidance.recommendedAction)
+        #expect(route(for: guidance.recommendedAction, guidance: guidance, package: missingTarget) == nil)
     }
 
     @Test func missingOrLoadingReleaseNotesDoNotBlockUpdateGuidance() {
@@ -264,34 +260,40 @@ struct PackageMaintenanceGuidanceTests {
         #expect(!complete.localizedCaseInsensitiveContains("remain visible"))
     }
 
-    @Test func inspectorPreservesFeatureOffReleaseNotesAndConfirmationRoute() throws {
-        let source = try String(contentsOf: packageMaintenanceViewURL, encoding: .utf8)
+    @Test func featureBoundaryPreservesLegacyPresentationAndEnablesGuidanceExplicitly() throws {
+        let package = makePackage(
+            status: .majorUpdateAvailable,
+            installedVersion: "5.4.0",
+            wantedVersion: "5.4.0",
+            latestVersion: "6.0.0"
+        )
+        let legacy = PackageMaintenanceGuidanceViewPolicy.inspectorPresentation(
+            isGuidanceEnabled: false,
+            package: package,
+            mode: .compatible,
+            releaseNotes: .loaded,
+            actionAvailability: .allAvailable
+        )
+        let guided = PackageMaintenanceGuidanceViewPolicy.inspectorPresentation(
+            isGuidanceEnabled: true,
+            package: package,
+            mode: .compatible,
+            releaseNotes: .loaded,
+            actionAvailability: .allAvailable
+        )
 
-        #expect(source.contains("if FeatureFlag.explainableGuidance.isEnabled"))
-        #expect(source.contains(
-            "PackageInspector(package: inspectedPackage, releaseNotesState: store.releaseNotesState)"
-        ))
-        #expect(source.contains("case .prepareUpdatePlan:"))
-        #expect(source.contains("store.prepareUpdatePlan()"))
-        #expect(source.contains(".confirmationDialog("))
-        #expect(source.contains("store.confirmPendingPlan()"))
-        #expect(source.contains("UpdateEventLog(events: store.updateEvents)"))
-        #expect(source.contains("Text(\"Release Notes\")"))
-        #expect(source.contains("NSWorkspace.shared.open(notes.sourceURL)"))
-        #expect(source.contains(".accessibilityAddTraits(.isHeader)"))
-        #expect(source.contains("package.name"))
-        #expect(source.contains("displayedStatus.displayName"))
-        #expect(source.contains("displayedStatus(for: package).isUpdateAvailable"))
-        #expect(source.contains("store.selection == Set([package.id])"))
-        #expect(source.contains("guard store.state == .loaded"))
-        #expect(source.contains("if guidance == nil"))
+        #expect(legacy.displayedStatus == .majorUpdateAvailable)
+        #expect(legacy.guidance == nil)
+        #expect(guided.displayedStatus == .current)
+        #expect(try #require(guided.guidance).id.contains(".current."))
     }
 
-    private var packageMaintenanceViewURL: URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .appendingPathComponent("CodingBuddy/Views/PackageMaintenanceView.swift")
+    @Test func updateGuidanceDeclaresTheExistingConfirmationBoundary() {
+        let package = makePackage(status: .updateAvailable)
+        let guidance = makeGuidance(for: package)
+
+        #expect(guidance.recommendedAction.safetyClass == .requiresConfirmation)
+        #expect(route(for: guidance.recommendedAction, guidance: guidance, package: package) == .prepareUpdatePlan)
     }
 
     private func makeGuidance(

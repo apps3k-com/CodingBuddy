@@ -380,12 +380,8 @@ nonisolated enum AgentPRGuidanceCatalog {
             )
         case .unresolvedFindings:
             Copy(
-                explanation: String(
-                    format: String(
-                        localized: "Agent PR guidance unresolved findings explanation",
-                        defaultValue: "This pull request has %lld unresolved review findings."
-                    ),
-                    Int64(row.review.unresolvedFindingCount)
+                explanation: unresolvedFindingsExplanation(
+                    count: row.review.unresolvedFindingCount
                 ),
                 relevance: String(
                     localized: "Agent PR guidance unresolved findings relevance",
@@ -422,6 +418,24 @@ nonisolated enum AgentPRGuidanceCatalog {
                 noActionReason: nil
             )
         }
+    }
+
+    /// Uses explicit singular and plural copy because String Catalog extraction cannot infer
+    /// plural variations from a formatted fallback value.
+    private static func unresolvedFindingsExplanation(count: Int) -> String {
+        if count == 1 {
+            return String(
+                localized: "Agent PR guidance one unresolved finding explanation",
+                defaultValue: "This pull request has 1 unresolved review finding."
+            )
+        }
+        return String(
+            format: String(
+                localized: "Agent PR guidance unresolved findings explanation",
+                defaultValue: "This pull request has %lld unresolved review findings."
+            ),
+            Int64(count)
+        )
     }
 
     /// Builds the one primary action while keeping unavailable routes explicit.

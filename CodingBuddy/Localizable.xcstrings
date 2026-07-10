@@ -1133,6 +1133,16 @@
         }
       }
     },
+    "Agent PR guidance one unresolved finding explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Pull Request hat einen nicht gelösten Review-Befund."
+          }
+        }
+      }
+    },
     "Agent PR guidance unresolved findings explanation" : {
       "localizations" : {
         "de" : {

@@ -176,24 +176,19 @@ struct PackageMaintenanceView: View {
         }
         .inspector(isPresented: inspectorBinding) {
             if let inspectedPackage {
-                Group {
-                    if FeatureFlag.explainableGuidance.isEnabled {
-                        let guidance = PackageMaintenanceGuidance.guidance(
-                            for: inspectedPackage,
-                            mode: store.updateMode,
-                            releaseNotes: guidanceReleaseNotesState,
-                            actionAvailability: guidanceActionAvailability
+                let presentation = guidancePresentation(for: inspectedPackage)
+                PackageInspector(
+                    package: inspectedPackage,
+                    releaseNotesState: store.releaseNotesState,
+                    displayedStatus: presentation.displayedStatus,
+                    guidance: presentation.guidance
+                ) { actionID in
+                    if let guidance = presentation.guidance {
+                        performGuidanceAction(
+                            actionID,
+                            guidance: guidance,
+                            package: inspectedPackage
                         )
-                        PackageInspector(
-                            package: inspectedPackage,
-                            releaseNotesState: store.releaseNotesState,
-                            displayedStatus: displayedStatus(for: inspectedPackage),
-                            guidance: guidance
-                        ) { actionID in
-                            performGuidanceAction(actionID, guidance: guidance, package: inspectedPackage)
-                        }
-                    } else {
-                        PackageInspector(package: inspectedPackage, releaseNotesState: store.releaseNotesState)
                     }
                 }
                 .inspectorColumnWidth(min: 300, ideal: 360, max: 480)
@@ -229,8 +224,22 @@ struct PackageMaintenanceView: View {
 
     /// Uses target-aware status copy only when explainable guidance is enabled.
     private func displayedStatus(for package: InstalledPackage) -> PackageStatus {
-        guard FeatureFlag.explainableGuidance.isEnabled else { return package.status }
-        return PackageMaintenanceGuidance.selectedStatus(for: package, mode: store.updateMode)
+        PackageMaintenanceGuidanceViewPolicy.displayedStatus(
+            isGuidanceEnabled: FeatureFlag.explainableGuidance.isEnabled,
+            package: package,
+            mode: store.updateMode
+        )
+    }
+
+    /// Resolves legacy or guided inspector inputs through the testable feature boundary.
+    private func guidancePresentation(for package: InstalledPackage) -> PackageMaintenanceInspectorPresentation {
+        PackageMaintenanceGuidanceViewPolicy.inspectorPresentation(
+            isGuidanceEnabled: FeatureFlag.explainableGuidance.isEnabled,
+            package: package,
+            mode: store.updateMode,
+            releaseNotes: guidanceReleaseNotesState,
+            actionAvailability: guidanceActionAvailability
+        )
     }
 
     /// Mirrors the existing toolbar and route guards so guidance never offers a no-op action.
@@ -250,33 +259,63 @@ struct PackageMaintenanceView: View {
         guidance: Guidance,
         package: InstalledPackage
     ) {
-        guard FeatureFlag.explainableGuidance.isEnabled,
+        PackageMaintenanceViewActions.perform(
+            actionID: actionID,
+            guidance: guidance,
+            package: package,
+            inspectedPackageID: inspectedPackageID,
+            isGuidanceEnabled: FeatureFlag.explainableGuidance.isEnabled,
+            store: store,
+            openURL: { _ = NSWorkspace.shared.open($0) },
+            openSettings: openSettings
+        )
+    }
+}
+
+/// Executes guidance through the existing store boundaries so behavior can be tested without SwiftUI inspection.
+@MainActor
+enum PackageMaintenanceViewActions {
+    @discardableResult
+    static func perform(
+        actionID: String,
+        guidance: Guidance,
+        package: InstalledPackage,
+        inspectedPackageID: InstalledPackage.ID?,
+        isGuidanceEnabled: Bool,
+        store: PackageMaintenanceStore,
+        openURL: (URL) -> Void,
+        openSettings: () -> Void
+    ) -> PackageMaintenanceGuidanceRoute? {
+        guard isGuidanceEnabled,
               inspectedPackageID == package.id,
+              let currentPackage = store.packages.first(where: { $0.id == package.id }),
+              currentPackage == package,
               let route = PackageMaintenanceGuidance.route(
                 for: actionID,
                 in: guidance,
                 package: package
               ) else {
-            return
+            return nil
         }
 
         switch route {
         case .prepareUpdatePlan:
             guard store.state == .loaded,
                   store.selection == Set([package.id]),
-                  store.packages.contains(where: {
-                      $0.id == package.id && $0.isUpdateAvailable(for: store.updateMode)
-                  }) else { return }
+                  currentPackage.isUpdateAvailable(for: store.updateMode) else {
+                return nil
+            }
             store.prepareUpdatePlan()
         case .openReleaseNotes:
-            guard case .loaded(let notes) = store.releaseNotesState else { return }
-            NSWorkspace.shared.open(notes.sourceURL)
+            guard case .loaded(let notes) = store.releaseNotesState else { return nil }
+            openURL(notes.sourceURL)
         case .openSettings:
             openSettings()
         case .reload:
-            guard !store.isUpdating, !store.isPreparing else { return }
+            guard !store.isUpdating, !store.isPreparing else { return nil }
             store.reload()
         }
+        return route
     }
 }
 

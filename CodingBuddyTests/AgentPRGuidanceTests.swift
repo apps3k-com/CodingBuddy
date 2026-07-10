@@ -70,6 +70,15 @@ struct AgentPRGuidanceTests {
         #expect(guidance.glossaryTerms == [.pr])
     }
 
+    @Test func unresolvedFindingExplanationUsesGrammaticalSingularAndPluralCopy() {
+        let singular = guidance(for: makeRow(unresolvedFindingCount: 1))
+        let plural = guidance(for: makeRow(unresolvedFindingCount: 2))
+
+        #expect(singular.explanation.localizedCaseInsensitiveContains("1 unresolved review finding"))
+        #expect(!singular.explanation.localizedCaseInsensitiveContains("1 unresolved review findings"))
+        #expect(plural.explanation.localizedCaseInsensitiveContains("2 unresolved review findings"))
+    }
+
     @Test func draftRoutesToPullRequestBeforeOtherRowSignals() {
         let row = makeRow(isDraft: true, checkState: .failed, reviewDecision: .changesRequested)
         let guidance = guidance(for: row)

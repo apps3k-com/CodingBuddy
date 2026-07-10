@@ -37,6 +37,52 @@ nonisolated struct PackageMaintenanceGuidanceActionAvailability: Equatable, Send
     )
 }
 
+/// Inspector inputs resolved at the feature boundary so executable tests can cover legacy and guided behavior.
+nonisolated struct PackageMaintenanceInspectorPresentation: Equatable, Sendable {
+    let displayedStatus: PackageStatus
+    let guidance: Guidance?
+}
+
+/// Testable feature-gate seam used by the package maintenance inspector.
+nonisolated enum PackageMaintenanceGuidanceViewPolicy {
+    static func displayedStatus(
+        isGuidanceEnabled: Bool,
+        package: InstalledPackage,
+        mode: PackageUpdateMode
+    ) -> PackageStatus {
+        guard isGuidanceEnabled else { return package.status }
+        return PackageMaintenanceGuidance.selectedStatus(for: package, mode: mode)
+    }
+
+    static func inspectorPresentation(
+        isGuidanceEnabled: Bool,
+        package: InstalledPackage,
+        mode: PackageUpdateMode,
+        releaseNotes: PackageGuidanceReleaseNotesState,
+        actionAvailability: PackageMaintenanceGuidanceActionAvailability
+    ) -> PackageMaintenanceInspectorPresentation {
+        guard isGuidanceEnabled else {
+            return PackageMaintenanceInspectorPresentation(
+                displayedStatus: package.status,
+                guidance: nil
+            )
+        }
+        return PackageMaintenanceInspectorPresentation(
+            displayedStatus: displayedStatus(
+                isGuidanceEnabled: isGuidanceEnabled,
+                package: package,
+                mode: mode
+            ),
+            guidance: PackageMaintenanceGuidance.guidance(
+                for: package,
+                mode: mode,
+                releaseNotes: releaseNotes,
+                actionAvailability: actionAvailability
+            )
+        )
+    }
+}
+
 /// Pure deterministic guidance for one package and its selected update target.
 nonisolated enum PackageMaintenanceGuidance {
     private static let maximumEvidenceLength = 160
@@ -378,10 +424,10 @@ nonisolated enum PackageMaintenanceGuidance {
         case .current:
             return .current
         case .updateAvailable, .majorUpdateAvailable:
-            guard package.isUpdateAvailable(for: mode),
-                  let target = package.targetVersion(for: mode) else {
+            guard let target = package.targetVersion(for: mode) else {
                 return .unavailableUpdate
             }
+            guard target != package.installedVersion else { return .current }
             return crossesMajorVersion(from: package.installedVersion, to: target)
                 ? .majorUpdate
                 : .routineUpdate
