@@ -7,6 +7,8 @@ import Foundation
 
 /// Navigation destinations shown in the app sidebar.
 nonisolated enum SidebarScope: Hashable, Sendable {
+    /// Explainable cross-repository queue for the next useful PR action.
+    case attentionQueue
     /// Environment variables across all managed dotfiles.
     case all
     /// Environment variables from one managed dotfile.
@@ -33,6 +35,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
     /// Stable identifier persisted between app launches.
     var storageID: String {
         switch self {
+        case .attentionQueue: "attentionQueue"
         case .all: "all"
         case .file(let file): "file:\(file.rawValue)"
         case .mcpAuth: "mcpAuth"
@@ -60,6 +63,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
             return
         }
         switch storageID {
+        case "attentionQueue": self = .attentionQueue
         case "all": self = .all
         case "mcpAuth": self = .mcpAuth
         case "agentDoctor": self = .agentDoctor
@@ -76,6 +80,10 @@ nonisolated enum SidebarScope: Hashable, Sendable {
     /// Whether the destination is enabled in the current release channel.
     var isEnabled: Bool {
         switch self {
+        case .attentionQueue:
+            FeatureFlag.attentionCockpit.isEnabled
+                && FeatureFlag.agentPRMonitor.isEnabled
+                && FeatureFlag.explainableGuidance.isEnabled
         case .all, .file:
             true
         case .mcpAuth:
@@ -108,6 +116,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
     /// Localized sidebar title for the scope.
     var title: String {
         switch self {
+        case .attentionQueue: String(localized: "Attention Queue")
         case .all: String(localized: "All Variables")
         case .file(let file): file.rawValue
         case .mcpAuth: "MCP Auth"

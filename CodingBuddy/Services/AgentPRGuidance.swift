@@ -54,6 +54,22 @@ nonisolated struct AgentPRGuidanceActionAvailability: Equatable, Sendable {
     )
 }
 
+/// Shared deterministic PR classification used by guidance and attention ranking.
+nonisolated enum AgentPRGuidanceState: String, Equatable, Sendable {
+    case staleAuthorization = "stale-authorization"
+    case staleRateLimit = "stale-rate-limit"
+    case staleRefreshFailure = "stale-refresh-failure"
+    case refreshing
+    case ready
+    case waitingForContinuousIntegration = "waiting-for-ci"
+    case waitingForReview = "waiting-for-review"
+    case waitingForSignals = "waiting-for-signals"
+    case failedContinuousIntegration = "failed-ci"
+    case changesRequested = "changes-requested"
+    case unresolvedFindings = "unresolved-findings"
+    case draft
+}
+
 /// Pure deterministic guidance catalog for one Agent PR Monitor row.
 nonisolated enum AgentPRGuidanceCatalog {
     /// Non-routable action identity used for healthy and honestly waiting states.
@@ -69,7 +85,7 @@ nonisolated enum AgentPRGuidanceCatalog {
         freshness: AgentPRGuidanceFreshness,
         actionAvailability: AgentPRGuidanceActionAvailability
     ) -> Guidance {
-        let state = guidanceState(for: row, freshness: freshness)
+        let state = state(for: row, freshness: freshness)
         let copy = copy(for: state, row: row)
 
         return Guidance(
@@ -88,20 +104,13 @@ nonisolated enum AgentPRGuidanceCatalog {
         )
     }
 
-    /// Guidance state after stale data has taken precedence over row readiness.
-    private enum State: String {
-        case staleAuthorization = "stale-authorization"
-        case staleRateLimit = "stale-rate-limit"
-        case staleRefreshFailure = "stale-refresh-failure"
-        case refreshing
-        case ready
-        case waitingForContinuousIntegration = "waiting-for-ci"
-        case waitingForReview = "waiting-for-review"
-        case waitingForSignals = "waiting-for-signals"
-        case failedContinuousIntegration = "failed-ci"
-        case changesRequested = "changes-requested"
-        case unresolvedFindings = "unresolved-findings"
-        case draft
+    /// Resolves only the available primary action emitted by this exact guidance value.
+    static func route(for actionID: String, in guidance: Guidance) -> AgentPRGuidanceRoute? {
+        guard guidance.recommendedAction.id == actionID,
+              guidance.recommendedAction.availability == .available else {
+            return nil
+        }
+        return AgentPRGuidanceRoute(rawValue: actionID)
     }
 
     /// Localized copy associated with one deterministic state.
@@ -114,10 +123,10 @@ nonisolated enum AgentPRGuidanceCatalog {
     }
 
     /// Applies freshness precedence before examining advisory merge readiness.
-    private static func guidanceState(
+    static func state(
         for row: AgentPullRequest,
         freshness: AgentPRGuidanceFreshness
-    ) -> State {
+    ) -> AgentPRGuidanceState {
         switch freshness {
         case .refreshing:
             return .refreshing
@@ -156,7 +165,7 @@ nonisolated enum AgentPRGuidanceCatalog {
     }
 
     /// Localized content that never incorporates provider-supplied error text.
-    private static func copy(for state: State, row: AgentPullRequest) -> Copy {
+    private static func copy(for state: AgentPRGuidanceState, row: AgentPullRequest) -> Copy {
         switch state {
         case .refreshing:
             Copy(
@@ -440,7 +449,7 @@ nonisolated enum AgentPRGuidanceCatalog {
 
     /// Builds the one primary action while keeping unavailable routes explicit.
     private static func recommendedAction(
-        for state: State,
+        for state: AgentPRGuidanceState,
         copy: Copy,
         availability: AgentPRGuidanceActionAvailability
     ) -> RecommendedAction {
@@ -643,7 +652,7 @@ nonisolated enum AgentPRGuidanceCatalog {
     }
 
     /// Attaches only glossary terms directly used by the current explanation.
-    private static func glossaryTerms(for state: State) -> [DeveloperTerm] {
+    private static func glossaryTerms(for state: AgentPRGuidanceState) -> [DeveloperTerm] {
         switch state {
         case .ready, .waitingForContinuousIntegration, .failedContinuousIntegration:
             [.pr, .ci]

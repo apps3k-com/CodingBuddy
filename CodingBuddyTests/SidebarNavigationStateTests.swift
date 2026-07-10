@@ -11,6 +11,7 @@ struct SidebarNavigationStateTests {
     /// Every destination with associated data round-trips through its stable identifier.
     @Test func scopesRoundTripThroughStorageIdentifiers() {
         let scopes: [SidebarScope] = [
+            .attentionQueue,
             .all,
             .file(.zshrc),
             .mcpAuth,

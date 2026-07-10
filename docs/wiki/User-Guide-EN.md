@@ -4,7 +4,7 @@ CodingBuddy is a native macOS app for managing the environment variables that li
 
 ## Browsing variables
 
-- The **sidebar** groups destinations by task: **Environment**, **Agent Tools**, **Health & Security**, **Repositories**, and **Maintenance**. Environment contains *All Variables* plus one entry per dotfile with a count badge. Files that don't exist yet are dimmed; adding a variable to one creates it.
+- The **sidebar** groups destinations by task: **Focus**, **Environment**, **Agent Tools**, **Health & Security**, **Repositories**, and **Maintenance**. Environment contains *All Variables* plus one entry per dotfile with a count badge. Files that don't exist yet are dimmed; adding a variable to one creates it.
 - Top-level sidebar groups can be collapsed and expanded. CodingBuddy remembers both the collapsed groups and the last selected destination.
 - The **table** lists name, value and source file. Use the search field (⌘F) to filter by name or value.
 - A 🔒 **lock icon** marks complex lines (command substitution like `$(date)`, multi-assignments like `export A=1 B=2`). CodingBuddy shows them honestly but never rewrites them — edit those in your editor of choice.
@@ -48,6 +48,33 @@ preview-only.
 ## Help menu
 
 **Help → CodingBuddy Help** (⌘?) opens this documentation in your app language — the German Benutzerhandbuch when the app runs in German, this guide otherwise. **Help → Documentation (Wiki)** opens the full wiki.
+
+## Focus and Attention Queue
+
+The **Focus → Attention Queue** entry (alpha) turns the pull requests already
+loaded by Agent PR Monitor into one cross-repository next-action list. It does
+not create another repository list or fetch GitHub independently.
+
+- **Act now** contains confirmed blockers such as failed CI, requested changes,
+  unresolved current review findings, or missing GitHub visibility.
+- **Next** contains bounded follow-up without a confirmed immediate blocker,
+  such as a draft or a repository snapshot that should be refreshed.
+- **Waiting** means another process or person must finish first. Running CI,
+  pending review, an active refresh, and GitHub rate limiting do not create
+  false urgency.
+- **Ready** stays visible for completion or merge follow-up but never outranks
+  actionable work.
+
+The first row is the recommendation. Select any row to see **Why now**, the
+plain explanation, the consequence, and the existing safe next action. A
+repository-wide refresh problem appears once instead of being repeated for
+every stale PR. Valid snapshots from other watched repositories remain in the
+queue.
+
+v1 limits: the queue does not snooze work, send notifications, run in the
+background, mutate GitHub, or rank Health, Security, and package signals yet.
+Those sources will join the same deterministic queue after their guidance
+contracts land.
 
 ## Secrets stay masked
 

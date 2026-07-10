@@ -377,11 +377,7 @@ private struct AgentPullRequestInspector: View {
 
                 if FeatureFlag.explainableGuidance.isEnabled {
                     GuidanceInspectorSection(
-                        guidance: AgentPRGuidanceCatalog.guidance(
-                            for: row,
-                            freshness: freshness,
-                            actionAvailability: guidanceActionAvailability
-                        ),
+                        guidance: currentGuidance,
                         onPerformAction: performGuidanceAction
                     )
 
@@ -512,29 +508,56 @@ private struct AgentPullRequestInspector: View {
         )
     }
 
+    /// Guidance value shared by rendering and guarded route resolution.
+    private var currentGuidance: Guidance {
+        AgentPRGuidanceCatalog.guidance(
+            for: row,
+            freshness: freshness,
+            actionAvailability: guidanceActionAvailability
+        )
+    }
+
     /// Executes only the existing read-only monitor routes represented by typed identifiers.
     private func performGuidanceAction(_ actionID: String) {
-        guard let route = AgentPRGuidanceRoute(rawValue: actionID) else {
-            assertionFailure("Unexpected Agent PR guidance route: \(actionID)")
-            return
+        AgentPRViewActions.perform(
+            actionID: actionID,
+            guidance: currentGuidance,
+            row: row,
+            openURL: { _ = NSWorkspace.shared.open($0) },
+            refresh: refresh,
+            openSettings: openSettings
+        )
+    }
+}
+
+/// Executes Agent PR guidance through one shared set of typed, read-only routes.
+@MainActor
+enum AgentPRViewActions {
+    /// Performs only the available primary route emitted by the supplied guidance.
+    @discardableResult
+    static func perform(
+        actionID: String,
+        guidance: Guidance,
+        row: AgentPullRequest,
+        openURL: (URL) -> Void,
+        refresh: (() -> Void)?,
+        openSettings: (() -> Void)?
+    ) -> AgentPRGuidanceRoute? {
+        guard let route = AgentPRGuidanceCatalog.route(for: actionID, in: guidance) else {
+            return nil
         }
 
         switch route {
         case .openPullRequest:
-            NSWorkspace.shared.open(row.url)
+            openURL(row.url)
         case .refresh:
-            guard let refresh else {
-                assertionFailure("Agent PR refresh route was presented while unavailable")
-                return
-            }
+            guard let refresh else { return nil }
             refresh()
         case .openSettings:
-            guard let openSettings else {
-                assertionFailure("Agent PR Settings route was presented while unavailable")
-                return
-            }
+            guard let openSettings else { return nil }
             openSettings()
         }
+        return route
     }
 }
 

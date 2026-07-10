@@ -7270,6 +7270,406 @@
         }
       }
     },
+    "Add a fine-grained read-only token before CodingBuddy can rank pull request work." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge einen feingranularen Nur-Lese-Token hinzu, bevor CodingBuddy die Pull-Request-Arbeit priorisieren kann."
+          }
+        }
+      }
+    },
+    "Attention inspector header accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, Pull Request %2$lld: %3$@. Priorität: %4$@."
+          }
+        }
+      }
+    },
+    "Attention priority act now" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt"
+          }
+        }
+      }
+    },
+    "Attention priority act now explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein bestätigter Blocker benötigt Arbeit, oder CodingBuddy kann den aktuellen Repository-Status nicht verifizieren."
+          }
+        }
+      }
+    },
+    "Attention priority next" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als Nächstes"
+          }
+        }
+      }
+    },
+    "Attention priority next explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine sinnvolle Folgeaktion ist verfügbar, aber es ist kein bestätigter unmittelbarer Blocker sichtbar."
+          }
+        }
+      }
+    },
+    "Attention priority ready" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit"
+          }
+        }
+      }
+    },
+    "Attention priority ready explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es ist kein bekannter Blocker sichtbar; dieser Pull Request bleibt für den Abschluss in der Liste."
+          }
+        }
+      }
+    },
+    "Attention priority waiting" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warten"
+          }
+        }
+      }
+    },
+    "Attention priority waiting explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein anderer Prozess oder eine andere Person muss zuerst fertig werden, bevor eine weitere Aktion sinnvoll ist."
+          }
+        }
+      }
+    },
+    "Attention Queue" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokusliste"
+          }
+        }
+      }
+    },
+    "Attention queue unavailable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokusliste nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Some repository snapshots are not current. Other results remain available." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einige Repository-Momentaufnahmen sind nicht aktuell. Die übrigen Ergebnisse bleiben verfügbar."
+          }
+        }
+      }
+    },
+    "Attention reason changes requested" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Änderungen wurden angefordert"
+          }
+        }
+      }
+    },
+    "Attention reason draft" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull-Request-Entwurf"
+          }
+        }
+      }
+    },
+    "Attention reason failed CI" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Attention reason GitHub access" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Zugriff ist nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Attention reason rate limited" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub begrenzt Aktualisierungen"
+          }
+        }
+      }
+    },
+    "Attention reason ready" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit zum Abschließen"
+          }
+        }
+      }
+    },
+    "Attention reason refresh failed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Aktualisierung fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Attention reason refreshing" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository wird aktualisiert"
+          }
+        }
+      }
+    },
+    "Attention reason unresolved findings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review-Hinweise sind ungelöst"
+          }
+        }
+      }
+    },
+    "Attention reason waiting for CI" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI läuft noch"
+          }
+        }
+      }
+    },
+    "Attention reason waiting for review" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review steht noch aus"
+          }
+        }
+      }
+    },
+    "Attention reason waiting for signals" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Readiness-Signale sind unvollständig"
+          }
+        }
+      }
+    },
+    "Choose a queue row to understand its priority and recommended next action." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Listeneintrag aus, um seine Priorität und die empfohlene nächste Aktion zu verstehen."
+          }
+        }
+      }
+    },
+    "Choose repositories in Agent PR Monitor to build your attention queue." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle im Agent PR Monitor Repositories aus, um deine Fokusliste zu erstellen."
+          }
+        }
+      }
+    },
+    "CodingBuddy did not find open pull requests in the current repository snapshots." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat in den aktuellen Repository-Snapshots keine offenen Pull Requests gefunden."
+          }
+        }
+      }
+    },
+    "Focus" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokus"
+          }
+        }
+      }
+    },
+    "Loading attention queue..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokusliste wird geladen …"
+          }
+        }
+      }
+    },
+    "No pull requests need sorting" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Pull Requests müssen sortiert werden"
+          }
+        }
+      }
+    },
+    "No watched repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine beobachteten Repositories"
+          }
+        }
+      }
+    },
+    "Open PR Monitor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PR-Monitor öffnen"
+          }
+        }
+      }
+    },
+    "Open the full pull request monitor" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vollständigen Pull-Request-Monitor öffnen"
+          }
+        }
+      }
+    },
+    "Priority" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Priorität"
+          }
+        }
+      }
+    },
+    "Recommended" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empfohlen"
+          }
+        }
+      }
+    },
+    "Refresh watched repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beobachtete Repositories aktualisieren"
+          }
+        }
+      }
+    },
+    "Select a pull request" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Request auswählen"
+          }
+        }
+      }
+    },
+    "Signal" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signal"
+          }
+        }
+      }
+    },
+    "Why now" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warum jetzt"
+          }
+        }
+      }
+    },
     "zsh" : {
       "localizations" : {
         "de" : {
