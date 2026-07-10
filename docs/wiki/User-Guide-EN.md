@@ -139,6 +139,8 @@ The **Repositories → Agent PR Monitor** entry (alpha) is a read-only table for
 - Add or replace the fine-grained read-only GitHub token in **Settings → Security**; CodingBuddy stores it in Keychain, not in UserDefaults or files. If no token is saved or GitHub rejects it, the monitor sends you back to Settings.
 - Add or remove watched repositories from the searchable picker; search matches owner, repository name, full `owner/name` and visible descriptions. The manual `owner/name` fallback remains available when repository listing is unavailable.
 - The compact table shows PR title, repository, advisory readiness and last update time. Select a row to inspect author/source classification, branches, linked closing issues, CI status, review status and unresolved findings.
+- With explainable guidance enabled, the selected PR first states what its current readiness means, why it matters, and what to do next. Green and genuinely waiting states say that no action is needed now; failed checks, requested changes, unresolved findings and drafts recommend opening the PR.
+- A snapshot refresh in progress or a stale repository snapshot takes priority over the old readiness result. Authorization problems lead to Settings, ordinary refresh failures recommend a refresh, and active refreshes or rate limits explain that waiting is the useful next step instead of creating false urgency.
 - Use **Refresh** to reload manually and **Open PR** to continue in the browser. The monitor never comments, approves, resolves threads or merges PRs.
 - Rate limits, missing permissions, denied repositories and offline errors are shown as UI-safe states while the last successful snapshot stays visible where possible. Repository-specific failures are scoped, so successful repositories remain visible when another watched repository fails.
 
@@ -181,10 +183,11 @@ The **Maintenance → Software Updates** entry (alpha) inventories global packag
 - Select one or more updateable rows and choose **Update Selected**. CodingBuddy shows every package and exact version transition before any command starts.
 - Confirmed updates run sequentially with a visible per-package log. **Stop** cancels the current command and marks work that has not started; completed updates are not rolled back. CodingBuddy scans again after the run.
 - Pinned formulas, self-updating casks and non-writable installations explain why CodingBuddy will not update them directly.
+- With explainable guidance enabled, the visible status follows the selected target policy. Selecting one package distinguishes a routine compatible update from an explicit major update, explains direct versus dependency installations, and recommends one next step. **Review update** still opens the existing version preview and confirmation; it never starts an update directly from the explanation.
 - Selecting one package loads version notes lazily. CodingBuddy prefers a matching GitHub Release and otherwise links to the repository, homepage or changelog source. No available release notes is a normal state.
 - If automatic executable discovery chooses the wrong installation, set an explicit Homebrew, npm or pnpm path under **Settings → Maintenance**.
 
-Commands use `Foundation.Process` with an absolute executable path and separate arguments. CodingBuddy never runs a login shell, `sudo`, or a freely assembled command string. A failed provider does not hide successful provider results.
+Commands use `Foundation.Process` with an absolute executable path and separate arguments. CodingBuddy never runs a login shell, `sudo`, or a freely assembled command string. A failed provider does not hide successful provider results; the issue strip says which manager failed and that results from other managers remain visible.
 
 v1 limits: global packages only; one active installation per provider; no project dependencies, installation, removal, pin management, privilege escalation or automatic background updates. Bun, Yarn, pipx, uv, Cargo and editor extensions are not yet supported.
 

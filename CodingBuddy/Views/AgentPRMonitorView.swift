@@ -11,7 +11,9 @@ struct AgentPRMonitorView: View {
     /// Observable monitor state.
     var store: AgentPRMonitorStore
     /// Opens the app Settings sheet for GitHub authorization changes.
-    var openSettings: () -> Void = {}
+    var openSettings: () -> Void
+    /// Whether the Settings closure was supplied rather than using the compatibility no-op.
+    private let canOpenSettings: Bool
 
     /// Currently selected pull request row.
     @State private var selection: AgentPullRequest.ID?
@@ -19,6 +21,13 @@ struct AgentPRMonitorView: View {
     @State private var searchText = ""
     /// Whether the repository setup sheet is visible.
     @State private var showsRepositorySheet = false
+
+    /// Creates the monitor with an optional Settings route while preserving the existing default behavior.
+    init(store: AgentPRMonitorStore, openSettings: (() -> Void)? = nil) {
+        self.store = store
+        self.openSettings = openSettings ?? {}
+        canOpenSettings = openSettings != nil
+    }
 
     /// Rows after applying the current search filter.
     private var filteredRows: [AgentPullRequest] {
@@ -28,6 +37,18 @@ struct AgentPRMonitorView: View {
     /// Currently selected row object.
     private var selectedRow: AgentPullRequest? {
         selection.flatMap { id in filteredRows.first { $0.id == id } }
+    }
+
+    /// Existing refresh route when a new refresh can be started from guidance.
+    private var guidanceRefreshRoute: (() -> Void)? {
+        guard !store.watchedRepositories.isEmpty, !store.isRefreshing else { return nil }
+        return { store.refresh() }
+    }
+
+    /// Existing Settings route when the monitor was given one by its owner.
+    private var guidanceOpenSettingsRoute: (() -> Void)? {
+        guard canOpenSettings else { return nil }
+        return openSettings
     }
 
     /// Inspector visibility follows table selection and clears it when dismissed.
@@ -153,7 +174,12 @@ struct AgentPRMonitorView: View {
         }
         .inspector(isPresented: inspectorBinding) {
             if let selectedRow {
-                AgentPullRequestInspector(row: selectedRow)
+                AgentPullRequestInspector(
+                    row: selectedRow,
+                    freshness: guidanceFreshness(for: selectedRow),
+                    refresh: guidanceRefreshRoute,
+                    openSettings: guidanceOpenSettingsRoute
+                )
                     .inspectorColumnWidth(min: 320, ideal: 380, max: 500)
             }
         }
@@ -291,6 +317,34 @@ struct AgentPRMonitorView: View {
         NSWorkspace.shared.open(selectedRow.url)
     }
 
+    /// Derives freshness from the selected row's repository-scoped refresh state.
+    private func guidanceFreshness(for row: AgentPullRequest) -> AgentPRGuidanceFreshness {
+        let repositoryState = store.repositoryRefreshStates[row.repository] ?? store.state
+        return Self.guidanceFreshness(for: repositoryState)
+    }
+
+    /// Removes raw provider error details while mapping repository state into guidance input.
+    nonisolated static func guidanceFreshness(for state: AgentPRMonitorState) -> AgentPRGuidanceFreshness {
+        switch state {
+        case .needsToken:
+            return .authorizationRequired
+        case .rateLimited:
+            return .rateLimited
+        case .refreshFailed(let error):
+            if error.isGitHubAuthorizationRecoverable {
+                return .authorizationRequired
+            }
+            if case .rateLimited = error {
+                return .rateLimited
+            }
+            return .refreshFailed
+        case .loading:
+            return .refreshing
+        case .idle, .needsRepository, .loaded, .empty:
+            return .fresh
+        }
+    }
+
     /// Localized rate-limit help text.
     private func rateLimitMessage(resetAt: Date?) -> String {
         if let resetAt {
@@ -307,24 +361,32 @@ struct AgentPRMonitorView: View {
 private struct AgentPullRequestInspector: View {
     /// Pull request represented by the inspector.
     var row: AgentPullRequest
+    /// Whether the row reflects a successful repository refresh.
+    var freshness: AgentPRGuidanceFreshness
+    /// Existing monitor refresh route, when currently available.
+    var refresh: (() -> Void)?
+    /// Existing Settings route, when supplied by the owning view.
+    var openSettings: (() -> Void)?
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(verbatim: row.repository.displayName)
-                        .foregroundStyle(.secondary)
-                    Text(row.title)
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                    HStack {
-                        Text(verbatim: "#\(row.number)")
-                            .monospaced()
-                        ReadinessStateCell(state: row.readiness.state)
-                    }
-                }
+                inspectorHeader
 
                 Divider()
+
+                if FeatureFlag.explainableGuidance.isEnabled {
+                    GuidanceInspectorSection(
+                        guidance: AgentPRGuidanceCatalog.guidance(
+                            for: row,
+                            freshness: freshness,
+                            actionAvailability: guidanceActionAvailability
+                        ),
+                        onPerformAction: performGuidanceAction
+                    )
+
+                    Divider()
+                }
 
                 VStack(alignment: .leading, spacing: 10) {
                     LabeledContent("Author", value: row.authorLogin ?? String(localized: "Unknown"))
@@ -398,6 +460,81 @@ private struct AgentPullRequestInspector: View {
             .padding(16)
         }
         .navigationTitle("Details")
+    }
+
+    /// Existing header with richer VoiceOver context only while guidance is enabled.
+    @ViewBuilder private var inspectorHeader: some View {
+        if FeatureFlag.explainableGuidance.isEnabled {
+            headerContent
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(Text(headerAccessibilityLabel))
+                .accessibilityAddTraits(.isHeader)
+        } else {
+            headerContent
+        }
+    }
+
+    /// Original inspector header content retained for feature-off parity.
+    private var headerContent: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(verbatim: row.repository.displayName)
+                .foregroundStyle(.secondary)
+            Text(row.title)
+                .font(.title3)
+                .fontWeight(.semibold)
+            HStack {
+                Text(verbatim: "#\(row.number)")
+                    .monospaced()
+                ReadinessStateCell(state: row.readiness.state)
+            }
+        }
+    }
+
+    /// VoiceOver label that names both the pull request and its advisory status.
+    private var headerAccessibilityLabel: String {
+        String(
+            format: String(
+                localized: "Agent PR inspector header accessibility label",
+                defaultValue: "Pull request %1$lld: %2$@. Status: %3$@."
+            ),
+            Int64(row.number),
+            row.title,
+            row.readiness.state.displayName
+        )
+    }
+
+    /// Route availability used to prevent the guidance component from presenting no-op controls.
+    private var guidanceActionAvailability: AgentPRGuidanceActionAvailability {
+        AgentPRGuidanceActionAvailability(
+            canOpenPullRequest: true,
+            canRefresh: refresh != nil,
+            canOpenSettings: openSettings != nil
+        )
+    }
+
+    /// Executes only the existing read-only monitor routes represented by typed identifiers.
+    private func performGuidanceAction(_ actionID: String) {
+        guard let route = AgentPRGuidanceRoute(rawValue: actionID) else {
+            assertionFailure("Unexpected Agent PR guidance route: \(actionID)")
+            return
+        }
+
+        switch route {
+        case .openPullRequest:
+            NSWorkspace.shared.open(row.url)
+        case .refresh:
+            guard let refresh else {
+                assertionFailure("Agent PR refresh route was presented while unavailable")
+                return
+            }
+            refresh()
+        case .openSettings:
+            guard let openSettings else {
+                assertionFailure("Agent PR Settings route was presented while unavailable")
+                return
+            }
+            openSettings()
+        }
     }
 }
 
