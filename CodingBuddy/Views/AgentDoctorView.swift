@@ -93,6 +93,7 @@ struct AgentDoctorView: View {
                     diagnostic: selectedDiagnostic,
                     canOpenSource: selectedSourceURL != nil,
                     openDestination: { onOpenDestination(selectedDiagnostic.tool) },
+                    openMCPAuth: { onOpenDestination(.mcpAuth) },
                     openSource: openSelectedSource
                 )
                 .inspectorColumnWidth(min: 280, ideal: 340, max: 440)
@@ -117,57 +118,116 @@ private struct AgentDiagnosticInspector: View {
     var canOpenSource: Bool
     /// Opens the owning CodingBuddy destination.
     var openDestination: () -> Void
+    /// Opens MCP Auth for credential findings regardless of diagnostic metadata.
+    var openMCPAuth: () -> Void
     /// Opens the source file in the configured editor.
     var openSource: () -> Void
 
     /// Quiet, unframed detail layout that keeps the table focused on triage.
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 5) {
-                    SeverityCell(severity: diagnostic.severity)
-                    Text(diagnostic.title)
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                    Text(diagnostic.detail)
-                        .foregroundStyle(.secondary)
-                }
-
-                Divider()
-
-                VStack(alignment: .leading, spacing: 10) {
-                    LabeledContent("Tool", value: diagnostic.tool.displayName)
-                    LabeledContent("Source") {
-                        Text(verbatim: diagnostic.source)
-                            .monospaced()
-                            .textSelection(.enabled)
-                            .multilineTextAlignment(.trailing)
+        if FeatureFlag.explainableGuidance.isEnabled {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        SeverityCell(severity: diagnostic.severity)
+                        Text(diagnostic.title)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                        Text(diagnostic.detail)
+                            .foregroundStyle(.secondary)
                     }
-                    if let subject = diagnostic.subject, !subject.isEmpty {
-                        LabeledContent("Subject") {
-                            Text(verbatim: subject)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityLabel(
+                        Text(verbatim: "\(diagnostic.severity.localizedTitle): \(diagnostic.title)")
+                    )
+
+                    Divider()
+
+                    GuidanceInspectorSection(
+                        guidance: AgentDoctorGuidance.guidance(
+                            for: diagnostic,
+                            canOpenSource: canOpenSource
+                        ),
+                        onPerformAction: performGuidanceAction
+                    )
+                }
+                .padding(16)
+            }
+            .navigationTitle("Details")
+        } else {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        SeverityCell(severity: diagnostic.severity)
+                        Text(diagnostic.title)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                        Text(diagnostic.detail)
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityLabel(
+                        Text(verbatim: "\(diagnostic.severity.localizedTitle): \(diagnostic.title)")
+                    )
+
+                    Divider()
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        LabeledContent("Tool", value: diagnostic.tool.displayName)
+                        LabeledContent("Source") {
+                            Text(verbatim: diagnostic.source)
                                 .monospaced()
                                 .textSelection(.enabled)
+                                .multilineTextAlignment(.trailing)
+                        }
+                        if let subject = diagnostic.subject, !subject.isEmpty {
+                            LabeledContent("Subject") {
+                                Text(verbatim: subject)
+                                    .monospaced()
+                                    .textSelection(.enabled)
+                            }
                         }
                     }
-                }
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Next Action")
-                        .font(.headline)
-                    Text(diagnostic.suggestion)
-                        .foregroundStyle(.secondary)
-                }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Next Action")
+                            .font(.headline)
+                        Text(diagnostic.suggestion)
+                            .foregroundStyle(.secondary)
+                    }
 
-                HStack {
-                    Button("Open Tool", systemImage: "arrow.right.circle", action: openDestination)
-                    Button("Open Source", systemImage: "doc.text", action: openSource)
-                        .disabled(!canOpenSource)
+                    HStack {
+                        Button("Open Tool", systemImage: "arrow.right.circle", action: openDestination)
+                        Button("Open Source", systemImage: "doc.text", action: openSource)
+                            .disabled(!canOpenSource)
+                    }
                 }
+                .padding(16)
             }
-            .padding(16)
+            .navigationTitle("Details")
         }
-        .navigationTitle("Details")
+    }
+
+    /// Dispatches only stable catalog action identifiers to existing owners.
+    private func performGuidanceAction(_ actionID: String) {
+        switch actionID {
+        case AgentDoctorGuidance.openDestinationActionID:
+            let destination = AgentDoctorGuidance.destinationTool(for: diagnostic)
+            if destination == .mcpAuth {
+                openMCPAuth()
+            } else {
+                openDestination()
+            }
+        case AgentDoctorGuidance.openSourceActionID:
+            guard canOpenSource else { return }
+            openSource()
+        case AgentDoctorGuidance.restrictPermissionsActionID:
+            break
+        default:
+            break
+        }
     }
 }
 
