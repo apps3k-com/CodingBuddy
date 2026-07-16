@@ -102,8 +102,8 @@ restore flows, or any file writing behavior.
 
 ### `collapsibleSidebarSections` — maturity: alpha
 
-Top-level sidebar destinations are grouped by user task: Environment, Agent
-Tools, Health & Security, Repositories, and Maintenance. The groups use native
+Top-level sidebar destinations are grouped by user task: Focus, Environment,
+Agent Tools, Health & Security, Repositories, and Maintenance. The groups use native
 macOS expandable sections, and both collapsed groups and the selected
 destination are stored in app preferences so the sidebar keeps its working
 context across window recreation and relaunch.
@@ -140,6 +140,22 @@ routing remain owned by the feature that produced the finding, and unavailable
 actions must explain why they cannot be run. Healthy or informational states
 can explicitly say that no action is needed without presenting a disabled
 control.
+
+### `attentionCockpit` — maturity: alpha
+
+Adds **Focus → Attention Queue**, a deterministic cross-repository ordering of
+the pull requests already loaded by Agent PR Monitor. The queue shows one
+recommended next item, calm urgency bands instead of an opaque score, a plain
+reason for the ordering, and the existing detailed guidance and safe action.
+The destination is visible only while both `agentPRMonitor` and
+`explainableGuidance` are enabled.
+
+v1 adds no second repository registry, network client, task database,
+notification service, or background process. Repository-wide refresh problems
+are represented once instead of repeated for every stale PR, while successful
+snapshots from other repositories remain visible. Actions use Agent PR
+Monitor's typed read-only routes for opening a PR, refreshing, or opening
+Settings.
 
 ### `mcpAuthManager` — maturity: stable
 

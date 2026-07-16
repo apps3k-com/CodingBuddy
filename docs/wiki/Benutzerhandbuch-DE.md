@@ -4,7 +4,7 @@ CodingBuddy ist eine native macOS-App zur Verwaltung der Environment Variables i
 
 ## Variablen durchsuchen
 
-- Die **Seitenleiste** ordnet Ziele nach Aufgaben: **Umgebung**, **AI-Tools**, **Zustand & Sicherheit**, **Repositories** und **Wartung**. Unter Umgebung stehen *Alle Variablen* und je ein Eintrag pro Dotfile mit Zähler. Noch nicht existierende Dateien sind ausgegraut; legst du dort eine Variable an, wird die Datei erstellt.
+- Die **Seitenleiste** ordnet Ziele nach Aufgaben: **Fokus**, **Umgebung**, **AI-Tools**, **Zustand & Sicherheit**, **Repositories** und **Wartung**. Unter Umgebung stehen *Alle Variablen* und je ein Eintrag pro Dotfile mit Zähler. Noch nicht existierende Dateien sind ausgegraut; legst du dort eine Variable an, wird die Datei erstellt.
 - Die obersten Seitenleisten-Gruppen lassen sich ein- und ausklappen. CodingBuddy merkt sich sowohl eingeklappte Gruppen als auch das zuletzt gewählte Ziel.
 - Die **Tabelle** zeigt Name, Wert und Quelldatei. Mit dem Suchfeld (⌘F) filterst du nach Name oder Wert.
 - Ein 🔒 **Schloss-Symbol** markiert komplexe Zeilen (Command Substitution wie `$(date)`, Mehrfach-Zuweisungen wie `export A=1 B=2`). CodingBuddy zeigt sie ehrlich an, schreibt sie aber nie um — solche Zeilen bearbeitest du besser im Texteditor.
@@ -49,6 +49,36 @@ verwalteten Ziel zugeordnet werden können, bleiben reine Vorschau.
 ## Hilfe-Menü
 
 **Hilfe → CodingBuddy-Hilfe** (⌘?) öffnet diese Dokumentation in deiner App-Sprache — das deutsche Benutzerhandbuch, wenn die App auf Deutsch läuft, sonst den englischen Guide. **Hilfe → Dokumentation (Wiki)** öffnet das vollständige Wiki.
+
+## Fokusliste
+
+Der Eintrag **Fokus → Fokusliste** (Alpha) ordnet die bereits vom
+Agent PR Monitor geladenen Pull Requests projektübergreifend zu einer einzigen
+Liste nächster Aktionen. Er legt keine zweite Repository-Liste an und ruft
+GitHub nicht eigenständig ab.
+
+- **Jetzt** enthält bestätigte Blocker wie fehlgeschlagene CI,
+  angeforderte Änderungen, aktuelle ungelöste Review-Hinweise oder fehlende
+  GitHub-Sichtbarkeit.
+- **Als Nächstes** enthält begrenzte Folgearbeit ohne bestätigten unmittelbaren
+  Blocker, etwa einen Entwurf oder einen erneut zu ladenden Repository-Snapshot.
+- **Warten** bedeutet, dass zuerst ein anderer Prozess oder eine andere Person
+  fertig werden muss. Laufende CI, ausstehendes Review, eine aktive
+  Aktualisierung und GitHub-Rate-Limits erzeugen keine falsche Dringlichkeit.
+- **Bereit** bleibt für Abschluss oder Merge-Nachverfolgung sichtbar, steht aber
+  nie vor tatsächlich bearbeitbarer Arbeit.
+
+Die erste Zeile ist die Empfehlung. Wähle einen Eintrag aus, um **Warum jetzt**,
+die einfache Erklärung, mögliche Folgen und die vorhandene sichere nächste
+Aktion zu sehen. Ein Repository-weites Aktualisierungsproblem erscheint nur
+einmal statt für jeden veralteten PR. Gültige Snapshots anderer beobachteter
+Repositories bleiben in der Liste.
+
+v1-Grenzen: Die Liste stellt Arbeit nicht zurück, sendet keine
+Benachrichtigungen, läuft nicht im Hintergrund, verändert GitHub nicht und
+priorisiert noch keine Zustands-, Sicherheits- oder Paketsignale. Diese Quellen
+werden nach ihren Guidance-Verträgen in dieselbe deterministische Liste
+aufgenommen.
 
 ## Secrets bleiben maskiert
 

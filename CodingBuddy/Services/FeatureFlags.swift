@@ -83,6 +83,8 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
     case packageMaintenance
     /// Enables the shared plain-language guidance and developer glossary foundation.
     case explainableGuidance
+    /// Enables the calm cross-repository attention queue.
+    case attentionCockpit
 
     /// The most stable channel in which the feature is active. `.alpha` means
     /// alpha builds only, `.beta` means alpha + beta, `.stable` means everyone.
@@ -108,6 +110,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
         case .collapsibleSidebarSections: .alpha
         case .packageMaintenance: .alpha
         case .explainableGuidance: .alpha
+        case .attentionCockpit: .alpha
         }
     }
 

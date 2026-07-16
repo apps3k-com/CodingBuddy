@@ -7,6 +7,8 @@ import Foundation
 
 /// Stable identifiers for collapsible top-level sidebar groups.
 nonisolated enum SidebarSectionID: String, CaseIterable, Sendable {
+    /// The bounded next-action queue across developer projects.
+    case focus
     /// Environment variables and managed zsh startup files.
     case environment
     /// Supported AI coding tool configuration sections.

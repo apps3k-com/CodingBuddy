@@ -67,6 +67,21 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             List(selection: $scope) {
+                if SidebarScope.attentionQueue.isEnabled, let agentPRMonitorStore {
+                    sidebarSection(.focus) {
+                        Text("Focus")
+                    } content: {
+                        Label("Attention Queue", systemImage: "scope")
+                            .badge(attentionQueueBadgeCount(for: agentPRMonitorStore))
+                            .tag(SidebarScope.attentionQueue)
+                    }
+                    .onAppear {
+                        if agentPRMonitorStore.state == .idle,
+                           !agentPRMonitorStore.watchedRepositories.isEmpty {
+                            agentPRMonitorStore.refresh()
+                        }
+                    }
+                }
                 sidebarSection(.environment) {
                     Text("Environment")
                 } content: {
@@ -180,6 +195,21 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 180, ideal: 210)
         } detail: {
             switch scope {
+            case .attentionQueue:
+                if let agentPRMonitorStore {
+                    PRAttentionQueueView(
+                        store: agentPRMonitorStore,
+                        openSettings: {
+                            requestedSettingsPane = .security
+                            showSettings = true
+                        },
+                        showPRMonitor: {
+                            scope = .agentPRMonitor
+                        }
+                    )
+                } else {
+                    VariableListView(store: store, secrets: secrets, scope: .all)
+                }
             case .mcpAuth:
                 MCPAuthListView(store: mcpAuthStore, secrets: secrets)
             case .agentDoctor:
@@ -280,6 +310,21 @@ struct ContentView: View {
         } message: {
             Text(store.lastError ?? "")
         }
+    }
+
+    /// Uses the queue's complete freshness-aware policy so navigation and table urgency stay aligned.
+    private func attentionQueueBadgeCount(for store: AgentPRMonitorStore) -> Int {
+        let freshnessByRepository = Dictionary(
+            uniqueKeysWithValues: store.watchedRepositories.map { repository in
+                let state = store.repositoryRefreshStates[repository] ?? store.state
+                return (repository, AgentPRMonitorView.guidanceFreshness(for: state))
+            }
+        )
+        return PRAttentionQueueBuilder.snapshot(
+            rows: store.rows,
+            freshnessByRepository: freshnessByRepository,
+            defaultFreshness: AgentPRMonitorView.guidanceFreshness(for: store.state)
+        ).actNowCount
     }
 
     /// Wraps a sidebar group in native collapsible sections when the feature is enabled.
