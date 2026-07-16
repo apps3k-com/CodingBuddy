@@ -643,747 +643,426 @@
         }
       }
     },
-    "Agent PR guidance changes requested consequence" : {
+    "Agent Doctor inspector header accessibility label" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Pull Request bleibt blockiert, bis die gewünschten Änderungen umgesetzt und erneut geprüft wurden."
+            "value" : "%1$@: %2$@."
           }
         }
       }
     },
-    "Agent PR guidance changes requested explanation" : {
+    "Agent Doctor guidance evidence credential entry label" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Für diesen Pull Request wurden Änderungen angefordert."
+            "value" : "Credential-Eintrag"
           }
         }
       }
     },
-    "Agent PR guidance changes requested relevance" : {
+    "Agent Doctor guidance evidence diagnostic code label" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Review-Entscheidung verhindert derzeit die Freigabe des Pull Requests."
+            "value" : "Diagnosecode"
           }
         }
       }
     },
-    "Agent PR guidance CI state evidence label" : {
+    "Agent Doctor guidance evidence file mode label" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CI-Status"
+            "value" : "Gemeldeter Dateimodus"
           }
         }
       }
     },
-    "Agent PR guidance draft consequence" : {
+    "Agent Doctor guidance evidence referenced variable label" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Pull Request bleibt blockiert, bis sein Entwurfsstatus auf GitHub geändert wird."
+            "value" : "Referenzierte Variable"
           }
         }
       }
     },
-    "Agent PR guidance draft explanation" : {
+    "Agent Doctor guidance evidence source label" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GitHub kennzeichnet diesen Pull Request als Entwurf."
+            "value" : "Quelle"
           }
         }
       }
     },
-    "Agent PR guidance draft relevance" : {
+    "Agent Doctor guidance evidence tool label" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ein Entwurf ist noch nicht für den normalen Review- und Merge-Ablauf bereit."
+            "value" : "Tool"
           }
         }
       }
     },
-    "Agent PR guidance failed CI consequence" : {
+    "Agent Doctor guidance expired credential consequence" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Pull Request bleibt durch CI blockiert, bis der Fehler behoben oder der Check erneut ausgeführt wurde."
+            "value" : "Die Verbindung kann nach einer automatischen Aktualisierung weiter funktionieren, eine erneute Anmeldung verlangen oder fehlschlagen, bis die Anmeldung erneuert wurde."
           }
         }
       }
     },
-    "Agent PR guidance failed CI explanation" : {
+    "Agent Doctor guidance expired credential explanation" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mindestens ein sichtbarer CI-Check ist für diesen Pull Request fehlgeschlagen."
+            "value" : "Das zwischengespeicherte OAuth-Zugriffstoken scheint laut gespeichertem Ablaufzeitpunkt abgelaufen zu sein. Ein OAuth-Client kann es eventuell automatisch aktualisieren, aber Agent Doctor kann nicht bestätigen, ob das gelingt."
           }
         }
       }
     },
-    "Agent PR guidance failed CI relevance" : {
+    "Agent Doctor guidance expired credential relevance" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fehlgeschlagene Checks können verhindern, dass der Pull Request bereit wird."
+            "value" : "Eine MCP-Serververbindung benötigt eine aktuelle OAuth-Anmeldung oder eine erfolgreiche Token-Aktualisierung."
           }
         }
       }
     },
-    "Agent PR guidance head SHA evidence label" : {
+    "Agent Doctor guidance incomplete credential consequence" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Head-Commit"
+            "value" : "Die Verbindung kann eine erneute Anmeldung verlangen oder fehlschlagen, bis vollständige Zugangsdaten erstellt wurden."
           }
         }
       }
     },
-    "Agent PR guidance no action expected result" : {
+    "Agent Doctor guidance incomplete credential explanation" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Pull Request bleibt unverändert."
+            "value" : "Ein OAuth-Cache-Eintrag ist vorhanden, aber die für eine vollständige Anmeldung benötigte Token-Datei fehlt. Agent Doctor kann nicht erkennen, ob die Anmeldung unterbrochen, abgebrochen oder nie abgeschlossen wurde."
           }
         }
       }
     },
-    "Agent PR guidance no action title" : {
+    "Agent Doctor guidance incomplete credential relevance" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keine Aktion nötig"
+            "value" : "Der MCP-Client benötigt einen vollständigen OAuth-Cache-Eintrag, bevor er diese Anmeldung wiederverwenden kann."
           }
         }
       }
     },
-    "Agent PR guidance open draft expected result" : {
+    "Agent Doctor guidance invalid config file consequence" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Pull Request wird im Browser geöffnet, damit du seinen Entwurfsstatus prüfen kannst."
+            "value" : "Einstellungen oder Verbindungen aus dieser Datei können ignoriert werden, bis die JSON-Syntax korrigiert ist."
           }
         }
       }
     },
-    "Agent PR guidance open failed CI expected result" : {
+    "Agent Doctor guidance invalid config file explanation" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Pull Request wird im Browser geöffnet, damit du die fehlgeschlagenen Checks prüfen kannst."
+            "value" : "Eine Konfigurationsdatei ist vorhanden, ihr Inhalt ist jedoch kein gültiges JSON."
           }
         }
       }
     },
-    "Agent PR guidance open PR action title" : {
+    "Agent Doctor guidance invalid config file open tool result" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pull Request öffnen"
+            "value" : "Der zuständige Konfigurationsbereich wird geöffnet, damit du die Datei mit der aktuellen Tool-Einrichtung vergleichen kannst."
           }
         }
       }
     },
-    "Agent PR guidance open PR unavailable reason" : {
+    "Agent Doctor guidance invalid config file relevance" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Pull Request kann aus dieser Ansicht nicht geöffnet werden."
+            "value" : "Das zuständige Tool kann Einstellungen aus einer Datei, die es nicht einlesen kann, möglicherweise nicht verwenden."
           }
         }
       }
     },
-    "Agent PR guidance open requested changes expected result" : {
+    "Agent Doctor guidance missing directory consequence" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Pull Request wird im Browser geöffnet, damit du die angeforderten Änderungen prüfen kannst."
+            "value" : "Wenn du das Tool nicht verwendest, hat dies keine Auswirkung. Andernfalls können konfigurationsabhängige Funktionen fehlen, bis das Tool seine Dateien erstellt."
           }
         }
       }
     },
-    "Agent PR guidance open Settings action title" : {
+    "Agent Doctor guidance missing directory explanation" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Einstellungen öffnen"
+            "value" : "Das erwartete lokale Konfigurationsverzeichnis ist nicht vorhanden."
           }
         }
       }
     },
-    "Agent PR guidance open Settings expected result" : {
+    "Agent Doctor guidance missing directory open tool result" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Einstellungen werden geöffnet, damit du den gespeicherten GitHub-Token prüfen kannst."
+            "value" : "Der zuständige Konfigurationsbereich wird geöffnet. Möglicherweise musst du das Tool trotzdem zuerst starten oder einrichten, bevor das Verzeichnis erscheint."
           }
         }
       }
     },
-    "Agent PR guidance open Settings unavailable reason" : {
+    "Agent Doctor guidance missing directory relevance" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Einstellungen können aus dieser Ansicht nicht geöffnet werden."
+            "value" : "Agent Doctor verwendet dieses Verzeichnis, um die lokale Einrichtung des Tools zu prüfen. Wenn es fehlt, wurde das Tool für diesen macOS-Account meist noch nicht eingerichtet oder verwendet."
           }
         }
       }
     },
-    "Agent PR guidance open unresolved findings expected result" : {
+    "Agent Doctor guidance missing referenced env var consequence" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Pull Request wird im Browser geöffnet, damit du die nicht gelösten Befunde prüfen kannst."
+            "value" : "Die zugehörige MCP-Verbindung kann fehlschlagen, weil das Tool die referenzierte Variable nicht auflösen kann."
           }
         }
       }
     },
-    "Agent PR guidance PR number evidence label" : {
+    "Agent Doctor guidance missing referenced env var explanation" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pull-Request-Nummer"
+            "value" : "Die Tool-Konfiguration verweist auf eine Umgebungsvariable, die CodingBuddy in der zugehörigen Umgebungsdatei nicht findet."
           }
         }
       }
     },
-    "Agent PR guidance readiness evidence label" : {
+    "Agent Doctor guidance missing referenced env var open tool result" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bereitschaft"
+            "value" : "Die Umgebungskonfiguration des zuständigen Tools wird geöffnet, damit du die fehlende Variable über den bestehenden Ablauf definieren kannst."
           }
         }
       }
     },
-    "Agent PR guidance ready consequence" : {
+    "Agent Doctor guidance missing referenced env var relevance" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Status kann sich durch neue Commits, Checks oder Reviews ändern."
+            "value" : "MCP-Konfigurationen verwenden häufig Umgebungsvariablen, um Zugangsdaten oder Einstellungen bereitzustellen, ohne deren Werte direkt in die Konfiguration zu schreiben."
           }
         }
       }
     },
-    "Agent PR guidance ready explanation" : {
+    "Agent Doctor guidance missing zsh startup files consequence" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die sichtbaren CI-Checks sind grün und die Review-Signale zeigen keinen bekannten Blocker für diesen Pull Request."
+            "value" : "Neue Terminal-Sitzungen erhalten möglicherweise nicht die Umgebungsvariablen, die deine Tools erwarten."
           }
         }
       }
     },
-    "Agent PR guidance ready no action reason" : {
+    "Agent Doctor guidance missing zsh startup files explanation" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auf Grundlage der sichtbaren CI- und Review-Signale ist keine Aktion nötig."
+            "value" : "In diesem Benutzerverzeichnis ist keine der von CodingBuddy verwalteten zsh-Startdateien vorhanden."
           }
         }
       }
     },
-    "Agent PR guidance ready relevance" : {
+    "Agent Doctor guidance missing zsh startup files relevance" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nach dem aktuellen Snapshot braucht dieser Pull Request im Monitor keine weitere Aufmerksamkeit."
+            "value" : "CodingBuddy liest diese Dateien, um Umgebungsvariablen für Terminal-Sitzungen und Entwickler-Tools zu verwalten."
           }
         }
       }
     },
-    "Agent PR guidance refresh action title" : {
+    "Agent Doctor guidance open MCP Auth action result" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktualisieren"
+            "value" : "MCP Auth wird geöffnet, damit du den Eintrag prüfen und nur dann zurücksetzen kannst, wenn die Verbindung weiterhin fehlschlägt. Das Öffnen startet keine neue Anmeldung."
           }
         }
       }
     },
-    "Agent PR guidance refresh expected result" : {
+    "Agent Doctor guidance open MCP Auth action title" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CodingBuddy lädt einen neuen schreibgeschützten Pull-Request-Snapshot."
+            "value" : "MCP Auth öffnen"
           }
         }
       }
     },
-    "Agent PR guidance refresh unavailable reason" : {
+    "Agent Doctor guidance open source action result" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Während einer laufenden Aktualisierung ist keine weitere Aktualisierung möglich."
+            "value" : "Die gemeldete Datei wird in deinem konfigurierten externen Editor geöffnet, damit du sie prüfen kannst."
           }
         }
       }
     },
-    "Agent PR guidance refreshing consequence" : {
+    "Agent Doctor guidance open source action title" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Pull Request bleibt unverändert, während CodingBuddy GitHub auf neuere Signale prüft."
+            "value" : "Quelle öffnen"
           }
         }
       }
     },
-    "Agent PR guidance refreshing explanation" : {
+    "Agent Doctor guidance open tool action title" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CodingBuddy aktualisiert dieses Repository. Der Pull Request zeigt deshalb noch den vorherigen Snapshot."
+            "value" : "Tool öffnen"
           }
         }
       }
     },
-    "Agent PR guidance refreshing relevance" : {
+    "Agent Doctor guidance open variables action result" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der sichtbare Status kann sich ändern, sobald die laufende schreibgeschützte Aktualisierung abgeschlossen ist."
+            "value" : "Die Liste der Umgebungsvariablen wird geöffnet, damit du eine Variable über den bestehenden CodingBuddy-Ablauf anlegen kannst."
           }
         }
       }
     },
-    "Agent PR guidance repository evidence label" : {
+    "Agent Doctor guidance open variables action title" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Repository"
+            "value" : "Variablen öffnen"
           }
         }
       }
     },
-    "Agent PR guidance review state evidence label" : {
+    "Agent Doctor guidance restrict permissions action result" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Review-Status"
+            "value" : "Die Credential-Datei wäre nur für deinen macOS-Benutzer les- und beschreibbar."
           }
         }
       }
     },
-    "Agent PR guidance stale authorization consequence" : {
+    "Agent Doctor guidance restrict permissions action title" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die sichtbaren Bereitschafts- und Review-Signale können veraltet sein."
+            "value" : "Dateirechte einschränken"
           }
         }
       }
     },
-    "Agent PR guidance stale authorization explanation" : {
+    "Agent Doctor guidance restrict permissions unavailable reason" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dieser Pull Request zeigt den letzten erfolgreichen Snapshot, weil die GitHub-Autorisierung geprüft werden muss."
+            "value" : "CodingBuddy kann keine Dateirechte ändern. Öffne die Quelle, um sie zu prüfen, und nimm die Änderung außerhalb der App vor."
           }
         }
       }
     },
-    "Agent PR guidance stale authorization relevance" : {
+    "Agent Doctor guidance source unavailable reason" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CodingBuddy kann Änderungen am Pull Request erst bestätigen, wenn die Autorisierung wieder funktioniert."
+            "value" : "Die gemeldete Quelle ist keine vorhandene lokale Datei. CodingBuddy kann sie daher nicht öffnen."
           }
         }
       }
     },
-    "Agent PR guidance stale rate limit consequence" : {
+    "Agent Doctor guidance unsafe permissions consequence" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der sichtbare Pull-Request-Status bleibt veraltet, bis eine spätere Aktualisierung erfolgreich ist."
+            "value" : "Abhängig vom aktuellen Dateimodus könnte ein anderer lokaler Account Zugangsdaten lesen oder verändern."
           }
         }
       }
     },
-    "Agent PR guidance stale rate limit explanation" : {
+    "Agent Doctor guidance unsafe permissions explanation" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dieser Pull Request zeigt einen älteren Snapshot, weil GitHub Anfragen vorübergehend begrenzt."
+            "value" : "Eine Datei mit Zugangsdaten erlaubt Gruppenmitgliedern oder anderen Benutzern mehr Zugriff, als Agent Doctor erwartet."
           }
         }
       }
     },
-    "Agent PR guidance stale rate limit relevance" : {
+    "Agent Doctor guidance unsafe permissions relevance" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eine Aktualisierung liefert keine neueren Daten, solange GitHub weitere Anfragen ablehnt."
+            "value" : "Zu weit gefasste Dateirechte können Zugangsdaten für einen anderen Account auf demselben Mac offenlegen."
           }
         }
       }
     },
-    "Agent PR guidance stale refresh failure consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bereitschafts- und Review-Informationen können weiterhin veraltet sein."
-          }
-        }
-      }
-    },
-    "Agent PR guidance stale refresh failure explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die letzte Aktualisierung ist fehlgeschlagen. Dieser Pull Request zeigt deshalb weiterhin den letzten erfolgreichen Snapshot."
-          }
-        }
-      }
-    },
-    "Agent PR guidance stale refresh failure relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erst nach einer erfolgreichen Aktualisierung kann CodingBuddy den aktuellen Pull-Request-Status bestätigen."
-          }
-        }
-      }
-    },
-    "Agent PR guidance unavailable head SHA evidence value" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nicht verfügbar"
-          }
-        }
-      }
-    },
-    "Agent PR guidance unknown repository evidence value" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unbekanntes Repository"
-          }
-        }
-      }
-    },
-    "Agent PR guidance unresolved findings consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Pull Request braucht weiterhin Aufmerksamkeit, solange Befunde nicht gelöst sind."
-          }
-        }
-      }
-    },
-    "Agent PR guidance unresolved findings evidence label" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nicht gelöste Befunde"
-          }
-        }
-      }
-    },
-    "Agent PR guidance one unresolved finding explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dieser Pull Request hat einen nicht gelösten Review-Befund."
-          }
-        }
-      }
-    },
-    "Agent PR guidance unresolved findings explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nicht gelöste Review-Befunde: %lld."
-          }
-        }
-      }
-    },
-    "Agent PR guidance unresolved findings relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die aktuellen Review-Befunde sollten bearbeitet werden, bevor der Pull Request als bereit gilt."
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for CI expected result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Pull Request bleibt unverändert, während CI abgeschlossen wird."
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for CI no action reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Während CI noch läuft, ist keine Aktion nötig."
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for GitHub action title" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auf GitHub warten"
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for GitHub expected result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Während GitHub den Monitor begrenzt, wird keine Anfrage gesendet."
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for GitHub reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abwarten ist jetzt der sinnvolle Schritt; eine weitere Aktualisierung würde abgelehnt."
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for refresh action title" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktualisierung abwarten"
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for refresh expected result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Während die laufende Aktualisierung abgeschlossen wird, sendet CodingBuddy keine zusätzliche Anfrage."
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for refresh reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Während die Repository-Aktualisierung läuft, ist keine Aktion nötig."
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for review expected result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Pull Request bleibt unverändert, während das Review aussteht."
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for review no action reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Während das Review aussteht, ist keine Aktion nötig."
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for signals expected result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Pull Request bleibt unverändert, während sich sein Status entwickelt."
-          }
-        }
-      }
-    },
-    "Agent PR guidance wait for signals no action reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aus diesem unvollständigen Status allein ergibt sich keine nötige Aktion."
-          }
-        }
-      }
-    },
-    "Agent PR guidance waiting for CI consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Pull Request bleibt im Wartezustand, bis CI ein Ergebnis meldet."
-          }
-        }
-      }
-    },
-    "Agent PR guidance waiting for CI explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CI-Checks für diesen Pull Request laufen noch oder warten auf ihre Ausführung."
-          }
-        }
-      }
-    },
-    "Agent PR guidance waiting for CI relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Bereitschaft kann sich nach Abschluss der Checks ohne eine Änderung von dir aktualisieren."
-          }
-        }
-      }
-    },
-    "Agent PR guidance waiting for review consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Pull Request bleibt im Wartezustand, bis das Review abgeschlossen ist."
-          }
-        }
-      }
-    },
-    "Agent PR guidance waiting for review explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dieser Pull Request wartet auf eine Review-Entscheidung."
-          }
-        }
-      }
-    },
-    "Agent PR guidance waiting for review relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Bereitschaft kann sich aktualisieren, sobald ein Reviewer reagiert."
-          }
-        }
-      }
-    },
-    "Agent PR guidance waiting for signals consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Monitor hält diesen Pull Request im Wartezustand, bis eindeutigere Signale vorliegen."
-          }
-        }
-      }
-    },
-    "Agent PR guidance waiting for signals explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die sichtbaren Signale reichen noch nicht aus, um diesen Pull Request als bereit einzustufen."
-          }
-        }
-      }
-    },
-    "Agent PR guidance waiting for signals relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein unvollständiger Status ist nicht dasselbe wie ein fehlgeschlagener Check oder eine angeforderte Änderung."
-          }
-        }
-      }
-    },
-    "Agent PR inspector header accessibility label" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pull Request %1$lld: %2$@. Status: %3$@."
-          }
-        }
-      }
-    },
-
     "Agent PR Monitor" : {
       "localizations" : {
         "de" : {
@@ -3303,6 +2982,186 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "MCP Inventory"
+          }
+        }
+      }
+    },
+    "MCP guidance configured consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Server kann zur Laufzeit trotzdem fehlschlagen, wenn sein Prozess, Netzwerk-Endpunkt oder seine Authentifizierung nicht verfügbar ist."
+          }
+        }
+      }
+    },
+    "MCP guidance configured explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat den Transport dieses Servers erkannt und keine Umgebungsvariable gefunden, deren Fehlen sich sicher belegen lässt."
+          }
+        }
+      }
+    },
+    "MCP guidance configured relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dies ist ausschließlich ein Ergebnis zur Konfiguration. CodingBuddy hat weder die Netzwerk-Erreichbarkeit noch die Authentifizierung geprüft."
+          }
+        }
+      }
+    },
+    "MCP guidance missing environment variables consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Server startet möglicherweise nicht oder die Authentifizierung schlägt fehl, bis die fehlenden Variablen definiert sind."
+          }
+        }
+      }
+    },
+    "MCP guidance missing environment variables explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte eine oder mehrere Umgebungsvariablen, auf die dieser MCP-Server verweist, nicht finden."
+          }
+        }
+      }
+    },
+    "MCP guidance missing environment variables relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das zuständige Tool benötigt diese Variablen möglicherweise, um den Server zu starten oder sich bei ihm zu authentifizieren."
+          }
+        }
+      }
+    },
+    "MCP guidance no configuration change expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus den lokalen Nachweisen, die dieses Inventar prüfen kann, ergibt sich kein weiterer Schritt."
+          }
+        }
+      }
+    },
+    "MCP guidance no configuration change reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat in diesen Inventardaten kein Konfigurationsproblem gefunden, das sich sicher belegen lässt."
+          }
+        }
+      }
+    },
+    "MCP guidance no configuration change title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Scan hat kein Problem erkannt"
+          }
+        }
+      }
+    },
+    "MCP guidance open source expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Konfigurationsquelle wird zur Prüfung geöffnet."
+          }
+        }
+      }
+    },
+    "MCP guidance open source unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Konfigurationsquelle ist keine vorhandene lokale Datei."
+          }
+        }
+      }
+    },
+    "MCP guidance open tool expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die MCP-Konfiguration des zuständigen Tools wird zur Prüfung geöffnet."
+          }
+        }
+      }
+    },
+    "MCP guidance open tool unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy besitzt für dieses Tool keine Konfigurationsansicht."
+          }
+        }
+      }
+    },
+    "MCP guidance unknown transport consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das zuständige Tool kann den Server möglicherweise nicht verwenden oder die Konfiguration nutzt einen Transport, den CodingBuddy nicht versteht."
+          }
+        }
+      }
+    },
+    "MCP guidance unknown transport explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Serverkonfiguration nennt keinen Transport, den CodingBuddy erkennt."
+          }
+        }
+      }
+    },
+    "MCP guidance unknown transport relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne bekannten Transport kann CodingBuddy nicht bestätigen, wie das zuständige Tool den Server starten oder erreichen soll."
+          }
+        }
+      }
+    },
+    "MCP inventory item accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. Tool: %2$@. Status: %3$@."
+          }
+        }
+      }
+    },
+    "MCP inventory unknown transport status" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unbekannter Transport"
           }
         }
       }
@@ -5843,6 +5702,176 @@
         }
       }
     },
+    "Repo readiness inspector header accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance consequence failure" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Zustand kann zuverlässige Arbeit blockieren oder Mitwirkende und Coding-Agenten ohne eine erforderliche Absicherung lassen, bis er behoben ist."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance consequence pass" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Prüfung ist unauffällig und erhöht derzeit nicht die Unsicherheit bei Repository-Einrichtung oder Arbeitsablauf."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance consequence warning" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das teilweise oder mehrdeutige Signal kann zu unterschiedlichen Annahmen bei Mitwirkenden und Coding-Agenten führen, bis es geprüft wurde."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance no action expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Readiness-Prüfung bleibt unauffällig."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance no action reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Repository enthält derzeit das für diese Prüfung erwartete Signal."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance no action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Aktion nötig"
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance build and test documentation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentierte Befehle machen die Validierung wiederholbar und reduzieren Vermutungen darüber, wie das Repository gebaut und getestet wird."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance CI workflow" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI liefert vor dem Merge ein unabhängiges Build- oder Testergebnis."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance contribution workflow" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein dokumentierter Contribution-Ablauf hält Issue-, Branch-, Review- und Validierungsschritte konsistent."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance feature flag documentation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Feature-Flag-Dokumentation zeigt, welches Verhalten von einem Flag gesteuert wird, wie ausgereift es ist und wie die Einführung abläuft."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance GitHub templates" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Issue- und Pull-Request-Vorlagen bewahren den Kontext, den Umsetzende und Prüfende für wiederholbare Übergaben benötigen."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance governance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-spezifische Agent-Anweisungen definieren Zuständigkeiten, Sicherheitsregeln und Validierungserwartungen, bevor Codeänderungen beginnen."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance readme" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine README gibt Mitwirkenden und Coding-Agenten einen gemeinsamen Ausgangspunkt für Zweck und Einrichtung des Projekts."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance repository state" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marker für Git-Operationen können auf einen unterbrochenen oder laufenden Vorgang hinweisen, der vor neuen Änderungen verstanden werden sollte."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance setup and hooks" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein leicht auffindbarer Einrichtungsweg hilft, lokale Prüfungen und Git-Hooks für alle Mitwirkenden konsistent auszuführen."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance reveal repository expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das ausgewählte Repository wird im Finder geöffnet, damit du seine Dateien prüfen oder bearbeiten kannst."
+          }
+        }
+      }
+    },
     "Repositories" : {
       "localizations" : {
         "de" : {
@@ -5956,667 +5985,6 @@
     "Open Release Notes" : {
       "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Versionshinweise öffnen" } } }
     },
-    "Package guidance current consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wenn du nichts änderst, bleibt die installierte Version erhalten."
-          }
-        }
-      }
-    },
-    "Package guidance current explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Paketmanager meldet dieses Paket als aktuell."
-          }
-        }
-      }
-    },
-    "Package guidance current relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Für das ausgewählte Ziel muss kein Paket-Update geprüft werden."
-          }
-        }
-      }
-    },
-    "Package guidance dependency direct" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Direkt"
-          }
-        }
-      }
-    },
-    "Package guidance dependency transitive" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abhängigkeit"
-          }
-        }
-      }
-    },
-    "Package guidance direct dependency context" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dieses Paket wurde von dir direkt installiert oder ausdrücklich angegeben."
-          }
-        }
-      }
-    },
-    "Package guidance evidence dependency classification" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abhängigkeitstyp"
-          }
-        }
-      }
-    },
-    "Package guidance evidence installed version" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Installierte Version"
-          }
-        }
-      }
-    },
-    "Package guidance evidence latest version" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neueste Version"
-          }
-        }
-      }
-    },
-    "Package guidance evidence manager" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Paketmanager"
-          }
-        }
-      }
-    },
-    "Package guidance evidence not reported" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nicht gemeldet"
-          }
-        }
-      }
-    },
-    "Package guidance evidence package kind" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Paketart"
-          }
-        }
-      }
-    },
-    "Package guidance evidence package name" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Paket"
-          }
-        }
-      }
-    },
-    "Package guidance evidence selected target version" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ausgewähltes Ziel"
-          }
-        }
-      }
-    },
-    "Package guidance evidence status" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Paketmanager-Status"
-          }
-        }
-      }
-    },
-    "Package guidance evidence wanted version" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kompatible Version"
-          }
-        }
-      }
-    },
-    "Package guidance inspector header accessibility label" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@. Status: %2$@."
-          }
-        }
-      }
-    },
-    "Package guidance kind cask" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cask"
-          }
-        }
-      }
-    },
-    "Package guidance kind formula" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Formel"
-          }
-        }
-      }
-    },
-    "Package guidance kind node package" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Node-Paket"
-          }
-        }
-      }
-    },
-    "Package guidance major update consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Update ohne Kompatibilitätsprüfung könnte Tools oder Projekte stören, die von der aktuellen Hauptversion abhängen."
-          }
-        }
-      }
-    },
-    "Package guidance major update explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das ausgewählte Ziel wechselt auf eine andere Hauptversion und kann inkompatible Änderungen enthalten."
-          }
-        }
-      }
-    },
-    "Package guidance major update relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Kompatibilität kann sich zwischen Hauptversionen ändern. Prüfe deshalb Ziel und Versionshinweise vor der Bestätigung."
-          }
-        }
-      }
-    },
-    "Package guidance no update action reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Paketmanager meldet für das ausgewählte Ziel kein verfügbares Update."
-          }
-        }
-      }
-    },
-    "Package guidance no update action result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Paket bleibt auf der aktuell installierten Version."
-          }
-        }
-      }
-    },
-    "Package guidance no update action title" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kein Update nötig"
-          }
-        }
-      }
-    },
-    "Package guidance not writable consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Paket-Updates über CodingBuddy bleiben für diese Installation nicht verfügbar."
-          }
-        }
-      }
-    },
-    "Package guidance not writable explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy kann nicht in die ausgewählte Paketmanager-Installation schreiben."
-          }
-        }
-      }
-    },
-    "Package guidance not writable relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Solange diese Installation nicht beschreibbar ist, kann ein Update nicht sicher vorbereitet werden."
-          }
-        }
-      }
-    },
-    "Package guidance open release notes action result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die verfügbaren Versionshinweise werden im Standardbrowser geöffnet."
-          }
-        }
-      }
-    },
-    "Package guidance open settings action result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Paketmanager-Einstellungen werden geöffnet, damit du das ausgewählte Programm prüfen kannst."
-          }
-        }
-      }
-    },
-    "Package guidance open settings unavailable reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Einstellungen können aus dieser Ansicht nicht geöffnet werden."
-          }
-        }
-      }
-    },
-    "Package guidance operation busy unavailable reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warte, bis der laufende Paketvorgang abgeschlossen ist."
-          }
-        }
-      }
-    },
-    "Package guidance partial provider failure summary" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Einige Paketmanager konnten nicht geprüft werden. Ergebnisse erfolgreicher Paketmanager bleiben sichtbar."
-          }
-        }
-      }
-    },
-    "Package guidance pinned consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Paket bleibt auf dieser Version, bis seine Fixierung außerhalb von CodingBuddy aufgehoben wird."
-          }
-        }
-      }
-    },
-    "Package guidance pinned explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eine Homebrew-Fixierung hält dieses Paket auf der installierten Version."
-          }
-        }
-      }
-    },
-    "Package guidance pinned relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy respektiert Paket-Fixierungen und hebt sie weder auf noch aktualisiert es daran vorbei."
-          }
-        }
-      }
-    },
-    "Package guidance provider failure summary" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Einige Paketmanager konnten nicht geprüft werden."
-          }
-        }
-      }
-    },
-    "Package guidance refresh action result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy prüft die Paketmanager erneut und aktualisiert die gemeldeten Zustände."
-          }
-        }
-      }
-    },
-    "Package guidance refresh unavailable reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Während eines laufenden Paketvorgangs ist keine Aktualisierung möglich."
-          }
-        }
-      }
-    },
-    "Package guidance release notes loading context" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Versionshinweise werden noch gesucht und blockieren die Paketempfehlung nicht."
-          }
-        }
-      }
-    },
-    "Package guidance release notes unavailable context" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Für das ausgewählte Ziel wurden keine Versionshinweise gefunden. Das ist bei manchen Paketen normal und ändert den Paketstatus nicht."
-          }
-        }
-      }
-    },
-    "Package guidance release notes unavailable reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Versionshinweise können aus dieser Ansicht nicht geöffnet werden."
-          }
-        }
-      }
-    },
-    "Package guidance review major update action title" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Major-Update prüfen"
-          }
-        }
-      }
-    },
-    "Package guidance review update action result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy bereitet den vorhandenen Update-Plan vor und fragt vor der Ausführung nach deiner Bestätigung."
-          }
-        }
-      }
-    },
-    "Package guidance review update action title" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Update prüfen"
-          }
-        }
-      }
-    },
-    "Package guidance review update unavailable reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die ausgewählte Richtlinie liefert keine andere Zielversion."
-          }
-        }
-      }
-    },
-    "Package guidance routine update consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bis zum Update bleiben Korrekturen und Verbesserungen der ausgewählten Version nicht verfügbar."
-          }
-        }
-      }
-    },
-    "Package guidance routine update explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das ausgewählte Ziel ist eine neuere Version, die CodingBuddy zur Prüfung vorbereiten kann."
-          }
-        }
-      }
-    },
-    "Package guidance routine update relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Plan zeigt den genauen Versionswechsel, bevor CodingBuddy ein Update ausführt."
-          }
-        }
-      }
-    },
-    "Package guidance self updating action reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy aktualisiert selbstaktualisierende Casks nicht direkt."
-          }
-        }
-      }
-    },
-    "Package guidance self updating action result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Anwendung verwendet weiterhin ihren eigenen Update-Mechanismus."
-          }
-        }
-      }
-    },
-    "Package guidance self updating action title" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kein CodingBuddy-Update nötig"
-          }
-        }
-      }
-    },
-    "Package guidance self updating consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Anwendung bleibt selbst dafür verantwortlich, Updates zu suchen und anzuwenden."
-          }
-        }
-      }
-    },
-    "Package guidance self updating explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dieser Cask verwaltet die Updates seiner Anwendung selbst."
-          }
-        }
-      }
-    },
-    "Package guidance self updating relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy führt für selbstaktualisierende Casks kein separates Paketmanager-Update aus."
-          }
-        }
-      }
-    },
-    "Package guidance transitive dependency context" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diese Abhängigkeit wurde installiert, weil ein anderes Paket sie benötigt."
-          }
-        }
-      }
-    },
-    "Package guidance unavailable update consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Update kann erst geprüft werden, wenn der Paketmanager eine verwendbare Zielversion meldet."
-          }
-        }
-      }
-    },
-    "Package guidance unavailable update explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Paketmanager meldet ein Update, aber die ausgewählte Richtlinie liefert keine andere Zielversion."
-          }
-        }
-      }
-    },
-    "Package guidance unavailable update relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy benötigt eine andere Zielversion, bevor es einen Update-Plan vorbereiten kann."
-          }
-        }
-      }
-    },
-    "Package guidance unknown consequence" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Solange der Paketstatus unbekannt ist, kann CodingBuddy kein Update anbieten."
-          }
-        }
-      }
-    },
-    "Package guidance unknown explanation" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beim letzten Scan konnte nicht bestimmt werden, ob dieses Paket aktualisiert werden kann."
-          }
-        }
-      }
-    },
-    "Package guidance unknown relevance" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein neuer Paketmanager-Scan kann den unbekannten Zustand durch aktuelle Update-Informationen ersetzen."
-          }
-        }
-      }
-    },
-    "Package guidance unpin action result" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nachdem die Fixierung außerhalb von CodingBuddy aufgehoben wurde, kann eine Aktualisierung nach verfügbaren Updates suchen."
-          }
-        }
-      }
-    },
-    "Package guidance unpin action title" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In Homebrew entpinnen"
-          }
-        }
-      }
-    },
-    "Package guidance unpin unavailable reason" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CodingBuddy hebt Homebrew-Paket-Fixierungen nicht auf."
-          }
-        }
-      }
-    },
-
     "Package manager executables" : {
       "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Paketmanager-Programme" } } }
     },
@@ -7276,6 +6644,1406 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "zsh"
+          }
+        }
+      }
+    },
+    "Agent PR guidance changes requested consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request bleibt blockiert, bis die gewünschten Änderungen umgesetzt und erneut geprüft wurden."
+          }
+        }
+      }
+    },
+    "Agent PR guidance changes requested explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für diesen Pull Request wurden Änderungen angefordert."
+          }
+        }
+      }
+    },
+    "Agent PR guidance changes requested relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Review-Entscheidung verhindert derzeit die Freigabe des Pull Requests."
+          }
+        }
+      }
+    },
+    "Agent PR guidance CI state evidence label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI-Status"
+          }
+        }
+      }
+    },
+    "Agent PR guidance draft consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request bleibt blockiert, bis sein Entwurfsstatus auf GitHub geändert wird."
+          }
+        }
+      }
+    },
+    "Agent PR guidance draft explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub kennzeichnet diesen Pull Request als Entwurf."
+          }
+        }
+      }
+    },
+    "Agent PR guidance draft relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Entwurf ist noch nicht für den normalen Review- und Merge-Ablauf bereit."
+          }
+        }
+      }
+    },
+    "Agent PR guidance failed CI consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request bleibt durch CI blockiert, bis der Fehler behoben oder der Check erneut ausgeführt wurde."
+          }
+        }
+      }
+    },
+    "Agent PR guidance failed CI explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mindestens ein sichtbarer CI-Check ist für diesen Pull Request fehlgeschlagen."
+          }
+        }
+      }
+    },
+    "Agent PR guidance failed CI relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehlgeschlagene Checks können verhindern, dass der Pull Request bereit wird."
+          }
+        }
+      }
+    },
+    "Agent PR guidance head SHA evidence label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Head-Commit"
+          }
+        }
+      }
+    },
+    "Agent PR guidance no action expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request bleibt unverändert."
+          }
+        }
+      }
+    },
+    "Agent PR guidance no action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Aktion nötig"
+          }
+        }
+      }
+    },
+    "Agent PR guidance one unresolved finding explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Pull Request hat einen nicht gelösten Review-Befund."
+          }
+        }
+      }
+    },
+    "Agent PR guidance open draft expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request wird im Browser geöffnet, damit du seinen Entwurfsstatus prüfen kannst."
+          }
+        }
+      }
+    },
+    "Agent PR guidance open failed CI expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request wird im Browser geöffnet, damit du die fehlgeschlagenen Checks prüfen kannst."
+          }
+        }
+      }
+    },
+    "Agent PR guidance open PR action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Request öffnen"
+          }
+        }
+      }
+    },
+    "Agent PR guidance open PR unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request kann aus dieser Ansicht nicht geöffnet werden."
+          }
+        }
+      }
+    },
+    "Agent PR guidance open requested changes expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request wird im Browser geöffnet, damit du die angeforderten Änderungen prüfen kannst."
+          }
+        }
+      }
+    },
+    "Agent PR guidance open Settings action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen öffnen"
+          }
+        }
+      }
+    },
+    "Agent PR guidance open Settings expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Einstellungen werden geöffnet, damit du den gespeicherten GitHub-Token prüfen kannst."
+          }
+        }
+      }
+    },
+    "Agent PR guidance open Settings unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Einstellungen können aus dieser Ansicht nicht geöffnet werden."
+          }
+        }
+      }
+    },
+    "Agent PR guidance open unresolved findings expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request wird im Browser geöffnet, damit du die nicht gelösten Befunde prüfen kannst."
+          }
+        }
+      }
+    },
+    "Agent PR guidance PR number evidence label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull-Request-Nummer"
+          }
+        }
+      }
+    },
+    "Agent PR guidance readiness evidence label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereitschaft"
+          }
+        }
+      }
+    },
+    "Agent PR guidance ready consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Status kann sich durch neue Commits, Checks oder Reviews ändern."
+          }
+        }
+      }
+    },
+    "Agent PR guidance ready explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die sichtbaren CI-Checks sind grün und die Review-Signale zeigen keinen bekannten Blocker für diesen Pull Request."
+          }
+        }
+      }
+    },
+    "Agent PR guidance ready no action reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf Grundlage der sichtbaren CI- und Review-Signale ist keine Aktion nötig."
+          }
+        }
+      }
+    },
+    "Agent PR guidance ready relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach dem aktuellen Snapshot braucht dieser Pull Request im Monitor keine weitere Aufmerksamkeit."
+          }
+        }
+      }
+    },
+    "Agent PR guidance refresh action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktualisieren"
+          }
+        }
+      }
+    },
+    "Agent PR guidance refresh expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy lädt einen neuen schreibgeschützten Pull-Request-Snapshot."
+          }
+        }
+      }
+    },
+    "Agent PR guidance refresh unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während einer laufenden Aktualisierung ist keine weitere Aktualisierung möglich."
+          }
+        }
+      }
+    },
+    "Agent PR guidance refreshing consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request bleibt unverändert, während CodingBuddy GitHub auf neuere Signale prüft."
+          }
+        }
+      }
+    },
+    "Agent PR guidance refreshing explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy aktualisiert dieses Repository. Der Pull Request zeigt deshalb noch den vorherigen Snapshot."
+          }
+        }
+      }
+    },
+    "Agent PR guidance refreshing relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der sichtbare Status kann sich ändern, sobald die laufende schreibgeschützte Aktualisierung abgeschlossen ist."
+          }
+        }
+      }
+    },
+    "Agent PR guidance repository evidence label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository"
+          }
+        }
+      }
+    },
+    "Agent PR guidance review state evidence label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review-Status"
+          }
+        }
+      }
+    },
+    "Agent PR guidance stale authorization consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die sichtbaren Bereitschafts- und Review-Signale können veraltet sein."
+          }
+        }
+      }
+    },
+    "Agent PR guidance stale authorization explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Pull Request zeigt den letzten erfolgreichen Snapshot, weil die GitHub-Autorisierung geprüft werden muss."
+          }
+        }
+      }
+    },
+    "Agent PR guidance stale authorization relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy kann Änderungen am Pull Request erst bestätigen, wenn die Autorisierung wieder funktioniert."
+          }
+        }
+      }
+    },
+    "Agent PR guidance stale rate limit consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der sichtbare Pull-Request-Status bleibt veraltet, bis eine spätere Aktualisierung erfolgreich ist."
+          }
+        }
+      }
+    },
+    "Agent PR guidance stale rate limit explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Pull Request zeigt einen älteren Snapshot, weil GitHub Anfragen vorübergehend begrenzt."
+          }
+        }
+      }
+    },
+    "Agent PR guidance stale rate limit relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Aktualisierung liefert keine neueren Daten, solange GitHub weitere Anfragen ablehnt."
+          }
+        }
+      }
+    },
+    "Agent PR guidance stale refresh failure consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereitschafts- und Review-Informationen können weiterhin veraltet sein."
+          }
+        }
+      }
+    },
+    "Agent PR guidance stale refresh failure explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die letzte Aktualisierung ist fehlgeschlagen. Dieser Pull Request zeigt deshalb weiterhin den letzten erfolgreichen Snapshot."
+          }
+        }
+      }
+    },
+    "Agent PR guidance stale refresh failure relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erst nach einer erfolgreichen Aktualisierung kann CodingBuddy den aktuellen Pull-Request-Status bestätigen."
+          }
+        }
+      }
+    },
+    "Agent PR guidance unavailable head SHA evidence value" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Agent PR guidance unknown repository evidence value" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unbekanntes Repository"
+          }
+        }
+      }
+    },
+    "Agent PR guidance unresolved findings consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request braucht weiterhin Aufmerksamkeit, solange Befunde nicht gelöst sind."
+          }
+        }
+      }
+    },
+    "Agent PR guidance unresolved findings evidence label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht gelöste Befunde"
+          }
+        }
+      }
+    },
+    "Agent PR guidance unresolved findings explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht gelöste Review-Befunde: %lld."
+          }
+        }
+      }
+    },
+    "Agent PR guidance unresolved findings relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die aktuellen Review-Befunde sollten bearbeitet werden, bevor der Pull Request als bereit gilt."
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for CI expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request bleibt unverändert, während CI abgeschlossen wird."
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for CI no action reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während CI noch läuft, ist keine Aktion nötig."
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for GitHub action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf GitHub warten"
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for GitHub expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während GitHub den Monitor begrenzt, wird keine Anfrage gesendet."
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for GitHub reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abwarten ist jetzt der sinnvolle Schritt; eine weitere Aktualisierung würde abgelehnt."
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for refresh action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktualisierung abwarten"
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for refresh expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während die laufende Aktualisierung abgeschlossen wird, sendet CodingBuddy keine zusätzliche Anfrage."
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for refresh reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während die Repository-Aktualisierung läuft, ist keine Aktion nötig."
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for review expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request bleibt unverändert, während das Review aussteht."
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for review no action reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während das Review aussteht, ist keine Aktion nötig."
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for signals expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request bleibt unverändert, während sich sein Status entwickelt."
+          }
+        }
+      }
+    },
+    "Agent PR guidance wait for signals no action reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus diesem unvollständigen Status allein ergibt sich keine nötige Aktion."
+          }
+        }
+      }
+    },
+    "Agent PR guidance waiting for CI consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request bleibt im Wartezustand, bis CI ein Ergebnis meldet."
+          }
+        }
+      }
+    },
+    "Agent PR guidance waiting for CI explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI-Checks für diesen Pull Request laufen noch oder warten auf ihre Ausführung."
+          }
+        }
+      }
+    },
+    "Agent PR guidance waiting for CI relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Bereitschaft kann sich nach Abschluss der Checks ohne eine Änderung von dir aktualisieren."
+          }
+        }
+      }
+    },
+    "Agent PR guidance waiting for review consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request bleibt im Wartezustand, bis das Review abgeschlossen ist."
+          }
+        }
+      }
+    },
+    "Agent PR guidance waiting for review explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Pull Request wartet auf eine Review-Entscheidung."
+          }
+        }
+      }
+    },
+    "Agent PR guidance waiting for review relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Bereitschaft kann sich aktualisieren, sobald ein Reviewer reagiert."
+          }
+        }
+      }
+    },
+    "Agent PR guidance waiting for signals consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Monitor hält diesen Pull Request im Wartezustand, bis eindeutigere Signale vorliegen."
+          }
+        }
+      }
+    },
+    "Agent PR guidance waiting for signals explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die sichtbaren Signale reichen noch nicht aus, um diesen Pull Request als bereit einzustufen."
+          }
+        }
+      }
+    },
+    "Agent PR guidance waiting for signals relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein unvollständiger Status ist nicht dasselbe wie ein fehlgeschlagener Check oder eine angeforderte Änderung."
+          }
+        }
+      }
+    },
+    "Agent PR inspector header accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Request %1$lld: %2$@. Status: %3$@."
+          }
+        }
+      }
+    },
+    "Package guidance current consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn du nichts änderst, bleibt die installierte Version erhalten."
+          }
+        }
+      }
+    },
+    "Package guidance current explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Paketmanager meldet dieses Paket als aktuell."
+          }
+        }
+      }
+    },
+    "Package guidance current relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für das ausgewählte Ziel muss kein Paket-Update geprüft werden."
+          }
+        }
+      }
+    },
+    "Package guidance dependency direct" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direkt"
+          }
+        }
+      }
+    },
+    "Package guidance dependency transitive" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abhängigkeit"
+          }
+        }
+      }
+    },
+    "Package guidance direct dependency context" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Paket wurde von dir direkt installiert oder ausdrücklich angegeben."
+          }
+        }
+      }
+    },
+    "Package guidance evidence dependency classification" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abhängigkeitstyp"
+          }
+        }
+      }
+    },
+    "Package guidance evidence installed version" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installierte Version"
+          }
+        }
+      }
+    },
+    "Package guidance evidence latest version" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neueste Version"
+          }
+        }
+      }
+    },
+    "Package guidance evidence manager" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paketmanager"
+          }
+        }
+      }
+    },
+    "Package guidance evidence not reported" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht gemeldet"
+          }
+        }
+      }
+    },
+    "Package guidance evidence package kind" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paketart"
+          }
+        }
+      }
+    },
+    "Package guidance evidence package name" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paket"
+          }
+        }
+      }
+    },
+    "Package guidance evidence selected target version" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewähltes Ziel"
+          }
+        }
+      }
+    },
+    "Package guidance evidence status" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paketmanager-Status"
+          }
+        }
+      }
+    },
+    "Package guidance evidence wanted version" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kompatible Version"
+          }
+        }
+      }
+    },
+    "Package guidance inspector header accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. Status: %2$@."
+          }
+        }
+      }
+    },
+    "Package guidance kind cask" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask"
+          }
+        }
+      }
+    },
+    "Package guidance kind formula" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formel"
+          }
+        }
+      }
+    },
+    "Package guidance kind node package" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Node-Paket"
+          }
+        }
+      }
+    },
+    "Package guidance major update consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Update ohne Kompatibilitätsprüfung könnte Tools oder Projekte stören, die von der aktuellen Hauptversion abhängen."
+          }
+        }
+      }
+    },
+    "Package guidance major update explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das ausgewählte Ziel wechselt auf eine andere Hauptversion und kann inkompatible Änderungen enthalten."
+          }
+        }
+      }
+    },
+    "Package guidance major update relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Kompatibilität kann sich zwischen Hauptversionen ändern. Prüfe deshalb Ziel und Versionshinweise vor der Bestätigung."
+          }
+        }
+      }
+    },
+    "Package guidance no update action reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Paketmanager meldet für das ausgewählte Ziel kein verfügbares Update."
+          }
+        }
+      }
+    },
+    "Package guidance no update action result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Paket bleibt auf der aktuell installierten Version."
+          }
+        }
+      }
+    },
+    "Package guidance no update action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Update nötig"
+          }
+        }
+      }
+    },
+    "Package guidance not writable consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paket-Updates über CodingBuddy bleiben für diese Installation nicht verfügbar."
+          }
+        }
+      }
+    },
+    "Package guidance not writable explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy kann nicht in die ausgewählte Paketmanager-Installation schreiben."
+          }
+        }
+      }
+    },
+    "Package guidance not writable relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solange diese Installation nicht beschreibbar ist, kann ein Update nicht sicher vorbereitet werden."
+          }
+        }
+      }
+    },
+    "Package guidance open release notes action result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die verfügbaren Versionshinweise werden im Standardbrowser geöffnet."
+          }
+        }
+      }
+    },
+    "Package guidance open settings action result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Paketmanager-Einstellungen werden geöffnet, damit du das ausgewählte Programm prüfen kannst."
+          }
+        }
+      }
+    },
+    "Package guidance open settings unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Einstellungen können aus dieser Ansicht nicht geöffnet werden."
+          }
+        }
+      }
+    },
+    "Package guidance operation busy unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warte, bis der laufende Paketvorgang abgeschlossen ist."
+          }
+        }
+      }
+    },
+    "Package guidance partial provider failure summary" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einige Paketmanager konnten nicht geprüft werden. Ergebnisse erfolgreicher Paketmanager bleiben sichtbar."
+          }
+        }
+      }
+    },
+    "Package guidance pinned consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Paket bleibt auf dieser Version, bis seine Fixierung außerhalb von CodingBuddy aufgehoben wird."
+          }
+        }
+      }
+    },
+    "Package guidance pinned explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Homebrew-Fixierung hält dieses Paket auf der installierten Version."
+          }
+        }
+      }
+    },
+    "Package guidance pinned relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy respektiert Paket-Fixierungen und hebt sie weder auf noch aktualisiert es daran vorbei."
+          }
+        }
+      }
+    },
+    "Package guidance provider failure summary" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einige Paketmanager konnten nicht geprüft werden."
+          }
+        }
+      }
+    },
+    "Package guidance refresh action result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy prüft die Paketmanager erneut und aktualisiert die gemeldeten Zustände."
+          }
+        }
+      }
+    },
+    "Package guidance refresh unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während eines laufenden Paketvorgangs ist keine Aktualisierung möglich."
+          }
+        }
+      }
+    },
+    "Package guidance release notes loading context" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Versionshinweise werden noch gesucht und blockieren die Paketempfehlung nicht."
+          }
+        }
+      }
+    },
+    "Package guidance release notes unavailable context" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für das ausgewählte Ziel wurden keine Versionshinweise gefunden. Das ist bei manchen Paketen normal und ändert den Paketstatus nicht."
+          }
+        }
+      }
+    },
+    "Package guidance release notes unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Versionshinweise können aus dieser Ansicht nicht geöffnet werden."
+          }
+        }
+      }
+    },
+    "Package guidance review major update action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Major-Update prüfen"
+          }
+        }
+      }
+    },
+    "Package guidance review update action result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy bereitet den vorhandenen Update-Plan vor und fragt vor der Ausführung nach deiner Bestätigung."
+          }
+        }
+      }
+    },
+    "Package guidance review update action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update prüfen"
+          }
+        }
+      }
+    },
+    "Package guidance review update unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die ausgewählte Richtlinie liefert keine andere Zielversion."
+          }
+        }
+      }
+    },
+    "Package guidance routine update consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bis zum Update bleiben Korrekturen und Verbesserungen der ausgewählten Version nicht verfügbar."
+          }
+        }
+      }
+    },
+    "Package guidance routine update explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das ausgewählte Ziel ist eine neuere Version, die CodingBuddy zur Prüfung vorbereiten kann."
+          }
+        }
+      }
+    },
+    "Package guidance routine update relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Plan zeigt den genauen Versionswechsel, bevor CodingBuddy ein Update ausführt."
+          }
+        }
+      }
+    },
+    "Package guidance self updating action reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy aktualisiert selbstaktualisierende Casks nicht direkt."
+          }
+        }
+      }
+    },
+    "Package guidance self updating action result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Anwendung verwendet weiterhin ihren eigenen Update-Mechanismus."
+          }
+        }
+      }
+    },
+    "Package guidance self updating action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein CodingBuddy-Update nötig"
+          }
+        }
+      }
+    },
+    "Package guidance self updating consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Anwendung bleibt selbst dafür verantwortlich, Updates zu suchen und anzuwenden."
+          }
+        }
+      }
+    },
+    "Package guidance self updating explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Cask verwaltet die Updates seiner Anwendung selbst."
+          }
+        }
+      }
+    },
+    "Package guidance self updating relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy führt für selbstaktualisierende Casks kein separates Paketmanager-Update aus."
+          }
+        }
+      }
+    },
+    "Package guidance transitive dependency context" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Abhängigkeit wurde installiert, weil ein anderes Paket sie benötigt."
+          }
+        }
+      }
+    },
+    "Package guidance unavailable update consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Update kann erst geprüft werden, wenn der Paketmanager eine verwendbare Zielversion meldet."
+          }
+        }
+      }
+    },
+    "Package guidance unavailable update explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Paketmanager meldet ein Update, aber die ausgewählte Richtlinie liefert keine andere Zielversion."
+          }
+        }
+      }
+    },
+    "Package guidance unavailable update relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy benötigt eine andere Zielversion, bevor es einen Update-Plan vorbereiten kann."
+          }
+        }
+      }
+    },
+    "Package guidance unknown consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solange der Paketstatus unbekannt ist, kann CodingBuddy kein Update anbieten."
+          }
+        }
+      }
+    },
+    "Package guidance unknown explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim letzten Scan konnte nicht bestimmt werden, ob dieses Paket aktualisiert werden kann."
+          }
+        }
+      }
+    },
+    "Package guidance unknown relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein neuer Paketmanager-Scan kann den unbekannten Zustand durch aktuelle Update-Informationen ersetzen."
+          }
+        }
+      }
+    },
+    "Package guidance unpin action result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nachdem die Fixierung außerhalb von CodingBuddy aufgehoben wurde, kann eine Aktualisierung nach verfügbaren Updates suchen."
+          }
+        }
+      }
+    },
+    "Package guidance unpin action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Homebrew entpinnen"
+          }
+        }
+      }
+    },
+    "Package guidance unpin unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hebt Homebrew-Paket-Fixierungen nicht auf."
           }
         }
       }

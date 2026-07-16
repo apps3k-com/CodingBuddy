@@ -98,7 +98,9 @@ Der Seitenleisten-Eintrag **Agent Doctor** (Alpha) ist ein Nur-Lese-Gesundheitsc
 - Credential-Dateien mit zu offenen Dateirechten.
 - Abgelaufene oder unvollständige Einträge in `~/.mcp-auth`.
 
-Die kompakte Tabelle hält Schweregrad, Befund und Tool sichtbar. Wähle einen Befund, um Quelle und Erklärung vollständig im Inspector zu prüfen, und nutze anschließend **Tool öffnen** oder **Quelle öffnen**.
+Die kompakte Tabelle hält Schweregrad, Befund und Tool sichtbar. Wähle einen Befund, um in einfachen Worten zu erfahren, was erkannt wurde, warum es wichtig ist, was passieren könnte und welcher nächste Schritt am sichersten ist. CodingBuddy empfiehlt genau eine Aktion und führt zum zuständigen Tool, zur MCP-Authentifizierung oder zur Quelldatei, wenn dieser Weg bereits existiert. Kann CodingBuddy eine empfohlene Aktion nicht selbst ausführen, etwa Dateirechte zu ändern, nennt der Inspector den Grund statt eine wirkungslose Schaltfläche anzuzeigen.
+
+Technische Nachweise bleiben standardmäßig eingeklappt und enthalten ausschließlich bereinigte Felder wie Diagnosecode, Tool, Quelle und betroffenes Subjekt. Credential-Werte, OAuth-URLs oder rohe Konfiguration mit Secrets werden nie angezeigt.
 
 v1-Grenzen: Agent Doctor prüft keine Netzwerk-Erreichbarkeit, startet keine Agent-Prozesse neu, nimmt keine Auto-Fixes vor und zeigt keine Secret-Werte an.
 
@@ -120,6 +122,7 @@ Der Seitenleisten-Eintrag **Repositories → Repo Readiness** (Alpha) ist eine N
 - Wähle einen Repository-Ordner; CodingBuddy merkt sich den zuletzt gewählten Ordner.
 - Die Tabelle prüft Agent-Governance, README-Abdeckung, dokumentierte Build-/Testbefehle, Contribution-Workflow-Dokumente, GitHub-Issue-/PR-Templates, Feature-Flag-Dokumentation für Swift-App-Repositories, Setup-Skripte und Hooks, CI-Workflows sowie leichte `.git`-Marker für laufende Operationen.
 - Jede Zeile ist **Bestanden**, **Warnung** oder **Fehlgeschlagen** und enthält einen kurzen Hinweis zur Behebung. Warnungen bedeuten, dass die App ein teilweises oder mehrdeutiges Signal gefunden hat.
+- Wähle eine Zeile, um die Prüfung in einfachen Worten zu verstehen. Bestandene Prüfungen sagen ausdrücklich, dass keine Aktion nötig ist; Warnungen und Fehler empfehlen, das Repository anzuzeigen, damit du die relevante Datei prüfen oder ergänzen kannst, ohne dass CodingBuddy sie verändert.
 - Die Checkliste bearbeitet keine Dateien, ruft GitHub nicht auf, startet kein `git` und prüft nicht, ob Befehle tatsächlich erfolgreich laufen.
 
 v1-Grenzen: Repo Readiness ist deterministisch und beratend. Es prüft keinen entfernten Project-Status, erstellt keine fehlenden Templates und entscheidet nicht, ob ein Repository merge-sicher ist.
@@ -131,9 +134,10 @@ Der Seitenleisten-Eintrag **MCP Inventory** (Alpha) ist eine Nur-Lese-Tabelle de
 - Die kompakte Tabelle zeigt Server, Quell-Tool, Repository oder Workspace und den Konfigurationszustand. Wähle eine Zeile, um Scope, Transport, sichere Command- oder URL-Zusammenfassung, referenzierte Environment-Variable-Namen, Header-Keys und Quelldatei im Inspector zu prüfen.
 - Die Suche filtert nach Servername, Tool, Repository- oder Workspace-Name, Scope, Command- oder URL-Zusammenfassung und Environment-Variable-Name.
 - Codex-Server, die Variablen referenzieren, die in `~/.codex/mcp.env` fehlen, werden hervorgehoben. Mit **Tool öffnen** springst du aus einer ausgewählten Codex-, Claude-Code- oder Cursor-Zeile zum bestehenden Tool-Editor.
+- Der Inspector erklärt jeweils den Zustand eines Servers. Fehlende Variablen empfehlen das zuständige Tool zu öffnen, ein unbekannter Transport wird als Konfigurationswarnung erklärt und eine konfigurierte Zeile sagt anhand der lokalen Dateinachweise klar, dass keine Aktion nötig ist.
 - Secret-Werte werden nie angezeigt: URL-Userinfo, Query-Strings, Fragmente und tokenartige Command-Argumente werden redigiert.
 
-v1-Grenzen: MCP Inventory bearbeitet, installiert und prüft keine Server im Netzwerk. Claude-Code- und Cursor-Zeilen zeigen nur konfigurierte `env`- und Header-Keys; sie leiten keine fehlenden Variablen aus Command-Text ab.
+v1-Grenzen: MCP Inventory bearbeitet, installiert, prüft und authentifiziert keine Server. **Konfiguriert** bedeutet, dass der Scan die lokale Definition erkannt und keine sicher fehlende Variable festgestellt hat; es beweist weder die Vollständigkeit der Definition noch Erreichbarkeit oder erfolgreiche Authentifizierung. Claude-Code- und Cursor-Zeilen zeigen nur konfigurierte `env`- und Header-Keys; sie leiten keine fehlenden Variablen aus Command-Text ab.
 
 ### Agent PR Monitor
 

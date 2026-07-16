@@ -95,7 +95,9 @@ The **Agent Doctor** entry (alpha) is a read-only health check for local agent s
 - Credential files whose permissions are too open.
 - Expired or incomplete entries in `~/.mcp-auth`.
 
-The compact table keeps severity, finding and tool visible. Select a finding to inspect its full source and explanation, then use **Open Tool** or **Open Source** for direct follow-up.
+The compact table keeps severity, finding and tool visible. Select a finding to see a plain-language explanation of what was detected, why it matters, what could happen, and the safest next step. CodingBuddy recommends one action and routes it to the owning tool, MCP authentication view, or source file when that route already exists. If CodingBuddy cannot perform a recommendation, such as changing file permissions, the inspector explains the limitation instead of showing an inert button.
+
+Technical evidence stays collapsed by default and contains only sanitized fields such as the diagnostic code, tool, source, and affected subject. It never includes credential values, OAuth URLs, or raw secret-bearing configuration.
 
 v1 limits: Agent Doctor does not test network reachability, restart agent processes, apply auto-fixes, or show secret values.
 
@@ -117,6 +119,7 @@ The **Repositories → Repo Readiness** entry (alpha) is a read-only checklist f
 - Choose a repository folder; CodingBuddy remembers the last selected folder.
 - The table checks agent governance, README coverage, documented build/test commands, contribution workflow docs, GitHub issue/PR templates, feature-flag docs for Swift app repos, setup scripts and hooks, CI workflows and lightweight `.git` in-progress markers.
 - Each row is **Passed**, **Warning** or **Failed** and includes a short remediation hint. Warnings mean the app found a partial or ambiguous signal.
+- Select a row to understand the check in plain language. Passed checks explicitly say that no action is needed; warnings and failures recommend revealing the repository so you can inspect or add the relevant file without CodingBuddy changing it.
 - The checklist never edits files, calls GitHub, shells out to `git` or validates that commands actually pass.
 
 v1 limits: Repo Readiness is deterministic and advisory. It does not inspect remote Project state, create missing templates or decide whether a repository is safe to merge.
@@ -128,9 +131,10 @@ The **MCP Inventory** entry (alpha) is a read-only table of MCP servers discover
 - The compact table shows server, source tool, repository or workspace and configuration health. Select a row to inspect scope, transport, safe command or URL summary, referenced environment variable names, header keys and source file.
 - Search filters by server name, tool, repository or workspace name, scope, command or URL summary, and environment variable name.
 - Codex servers that reference variables missing from `~/.codex/mcp.env` are highlighted. Use **Open Tool** to jump from a selected Codex, Claude Code or Cursor row to the existing tool editor.
+- The inspector explains one server state at a time. Missing variables recommend opening the owning tool, an unknown transport is called out as a configuration warning, and a configured row clearly states that no action is needed based on the local file evidence.
 - Secret values are never shown: URL user info, query strings, fragments and token-like command arguments are redacted.
 
-v1 limits: MCP Inventory does not edit, install, or network-test servers. Claude Code and Cursor rows show configured `env` and header keys only; they do not infer missing variables from command text.
+v1 limits: MCP Inventory does not edit, install, network-test, or authenticate with servers. **Configured** means that the scan recognized the local definition and did not prove a missing variable; it does not prove that the definition is complete, the server is reachable, or authentication will succeed. Claude Code and Cursor rows show configured `env` and header keys only; they do not infer missing variables from command text.
 
 ### Agent PR Monitor
 

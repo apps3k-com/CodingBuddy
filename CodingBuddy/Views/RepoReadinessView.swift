@@ -17,8 +17,41 @@ struct RepoReadinessView: View {
         store.items.filter { $0.matches(searchText: searchText) }
     }
 
-    /// Table-based checklist layout with native folder selection.
+    /// Selected row object, if it still exists in the filtered checklist.
+    private var selectedItem: RepoReadinessItem? {
+        selection.flatMap { id in filteredItems.first { $0.id == id } }
+    }
+
+    /// Inspector visibility follows table selection and clears it when dismissed.
+    private var inspectorBinding: Binding<Bool> {
+        Binding {
+            selectedItem != nil
+        } set: { isPresented in
+            if !isPresented { selection = nil }
+        }
+    }
+
+    /// Adds explainable guidance only when its feature flag is active.
+    @ViewBuilder
     var body: some View {
+        if FeatureFlag.explainableGuidance.isEnabled {
+            readinessTable
+                .inspector(isPresented: inspectorBinding) {
+                    if let selectedItem {
+                        RepoReadinessInspector(
+                            item: selectedItem,
+                            onPerformAction: performGuidanceAction
+                        )
+                        .inspectorColumnWidth(min: 300, ideal: 360, max: 480)
+                    }
+                }
+        } else {
+            readinessTable
+        }
+    }
+
+    /// Existing table layout shared by the guidance-on and legacy branches.
+    private var readinessTable: some View {
         Table(filteredItems, selection: $selection) {
             TableColumn("Check") { item in
                 CheckSummaryCell(item: item)
@@ -50,6 +83,11 @@ struct RepoReadinessView: View {
         .navigationTitle("Repo Readiness")
         .navigationSubtitle(Text(verbatim: store.selectedRepositoryURL?.path ?? String(localized: "No repository selected")))
         .searchable(text: $searchText, prompt: "Search readiness checks")
+        .onChange(of: filteredItems.map(\.id)) {
+            guard let selection,
+                  !filteredItems.contains(where: { $0.id == selection }) else { return }
+            self.selection = nil
+        }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button("Reveal in Finder", systemImage: "folder") {
@@ -87,6 +125,12 @@ struct RepoReadinessView: View {
         }
     }
 
+    /// Routes stable guidance actions to functionality already owned by this view.
+    private func performGuidanceAction(_ actionID: String) {
+        guard actionID == RepoReadinessGuidance.revealRepositoryActionID else { return }
+        revealRepository()
+    }
+
     /// Presents a native macOS folder picker and persists the selected repository.
     private func chooseRepositoryFolder() {
         let panel = NSOpenPanel()
@@ -105,6 +149,54 @@ struct RepoReadinessView: View {
     private func revealRepository() {
         guard let selectedRepositoryURL = store.selectedRepositoryURL else { return }
         NSWorkspace.shared.activateFileViewerSelecting([selectedRepositoryURL])
+    }
+}
+
+/// Selection-driven explainable guidance for one readiness check.
+private struct RepoReadinessInspector: View {
+    /// Selected checklist item represented by the inspector.
+    var item: RepoReadinessItem
+    /// Routes a stable guidance action identifier to the owning feature surface.
+    var onPerformAction: (String) -> Void
+
+    /// Native unframed inspector content with the selected check as its header.
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 5) {
+                    ReadinessStatusCell(status: item.status)
+                    Text(item.title)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityLabel(Text(verbatim: inspectorHeaderAccessibilityLabel))
+
+                Divider()
+
+                GuidanceInspectorSection(
+                    guidance: RepoReadinessGuidance.guidance(for: item),
+                    onPerformAction: onPerformAction
+                )
+            }
+            .padding(16)
+        }
+        .navigationTitle(String(localized: "Details"))
+    }
+
+    /// Localized VoiceOver sentence for the selected readiness check.
+    private var inspectorHeaderAccessibilityLabel: String {
+        String(
+            format: String(
+                localized: "Repo readiness inspector header accessibility label",
+                defaultValue: "%1$@: %2$@."
+            ),
+            locale: .current,
+            item.status.displayName,
+            item.title
+        )
     }
 }
 
