@@ -30,6 +30,15 @@ struct AgentPRMonitorView: View {
         selection.flatMap { id in filteredRows.first { $0.id == id } }
     }
 
+    /// Inspector visibility follows table selection and clears it when dismissed.
+    private var inspectorBinding: Binding<Bool> {
+        Binding {
+            selectedRow != nil
+        } set: { isPresented in
+            if !isPresented { selection = nil }
+        }
+    }
+
     /// Subtitle summarizing the currently watched repositories.
     private var repositorySubtitle: String {
         switch store.watchedRepositories.count {
@@ -92,49 +101,6 @@ struct AgentPRMonitorView: View {
             }
             .width(min: 150, ideal: 190)
 
-            TableColumn("Source") { row in
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(verbatim: row.authorLogin ?? String(localized: "Unknown"))
-                        .lineLimit(1)
-                    Text(row.source.displayName)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .width(min: 115, ideal: 145)
-
-            TableColumn("Linked Issue") { row in
-                if let issue = row.linkedIssues.first {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(verbatim: "#\(issue.number)")
-                            .fontWeight(.medium)
-                        Text(issue.title)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                } else {
-                    Text("No linked issue")
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .width(min: 140, ideal: 210)
-
-            TableColumn("CI") { row in
-                CheckStateCell(summary: row.checks)
-            }
-            .width(min: 110, ideal: 130)
-
-            TableColumn("Review") { row in
-                ReviewStateCell(summary: row.review)
-            }
-            .width(min: 135, ideal: 155)
-
-            TableColumn("Findings") { row in
-                FindingsStateCell(state: row.review.findingsState)
-            }
-            .width(min: 135, ideal: 155)
-
             TableColumn("Readiness") { row in
                 ReadinessStateCell(state: row.readiness.state)
             }
@@ -184,6 +150,12 @@ struct AgentPRMonitorView: View {
         }
         .sheet(isPresented: $showsRepositorySheet) {
             RepositorySetupSheet(store: store, openSettings: openSettings)
+        }
+        .inspector(isPresented: inspectorBinding) {
+            if let selectedRow {
+                AgentPullRequestInspector(row: selectedRow)
+                    .inspectorColumnWidth(min: 320, ideal: 380, max: 500)
+            }
         }
         .onAppear {
             if !store.watchedRepositories.isEmpty, store.rows.isEmpty, store.state == .idle {
@@ -328,6 +300,104 @@ struct AgentPRMonitorView: View {
             )
         }
         return String(localized: "GitHub did not provide a reset time. Try again later.")
+    }
+}
+
+/// Complete pull request status and browser follow-up for one selected row.
+private struct AgentPullRequestInspector: View {
+    /// Pull request represented by the inspector.
+    var row: AgentPullRequest
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(verbatim: row.repository.displayName)
+                        .foregroundStyle(.secondary)
+                    Text(row.title)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    HStack {
+                        Text(verbatim: "#\(row.number)")
+                            .monospaced()
+                        ReadinessStateCell(state: row.readiness.state)
+                    }
+                }
+
+                Divider()
+
+                VStack(alignment: .leading, spacing: 10) {
+                    LabeledContent("Author", value: row.authorLogin ?? String(localized: "Unknown"))
+                    LabeledContent("Source", value: row.source.displayName)
+                    LabeledContent("Branch") {
+                        Text(verbatim: "\(row.headRefName) → \(row.baseRefName)")
+                            .monospaced()
+                            .textSelection(.enabled)
+                    }
+                    LabeledContent("Updated") {
+                        Text(row.updatedAt, format: .dateTime)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("CI")
+                        .font(.headline)
+                    CheckStateCell(summary: row.checks)
+                    ForEach(row.checks.contexts) { context in
+                        HStack {
+                            Text(verbatim: context.name)
+                                .lineLimit(1)
+                            Spacer()
+                            if let detailsURL = context.detailsURL {
+                                Button("Open", systemImage: "arrow.up.right.square") {
+                                    NSWorkspace.shared.open(detailsURL)
+                                }
+                                .buttonStyle(.borderless)
+                            }
+                        }
+                        .font(.caption)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Review")
+                        .font(.headline)
+                    ReviewStateCell(summary: row.review)
+                    FindingsStateCell(state: row.review.findingsState)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Linked Issues")
+                        .font(.headline)
+                    if row.linkedIssues.isEmpty {
+                        Text("No linked issue")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(row.linkedIssues) { issue in
+                            Button {
+                                NSWorkspace.shared.open(issue.url)
+                            } label: {
+                                HStack {
+                                    Text(verbatim: "#\(issue.number)")
+                                        .monospaced()
+                                    Text(issue.title)
+                                        .lineLimit(1)
+                                    Spacer()
+                                    Image(systemName: "arrow.up.right.square")
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+
+                Button("Open PR", systemImage: "arrow.up.right.square") {
+                    NSWorkspace.shared.open(row.url)
+                }
+            }
+            .padding(16)
+        }
+        .navigationTitle("Details")
     }
 }
 

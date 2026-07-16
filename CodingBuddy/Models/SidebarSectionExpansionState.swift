@@ -7,18 +7,16 @@ import Foundation
 
 /// Stable identifiers for collapsible top-level sidebar groups.
 nonisolated enum SidebarSectionID: String, CaseIterable, Sendable {
-    /// Managed zsh startup files.
-    case files
+    /// Environment variables and managed zsh startup files.
+    case environment
     /// Supported AI coding tool configuration sections.
-    case aiTools
-    /// Credential cache management sections.
-    case credentials
-    /// Local setup health checks.
-    case health
-    /// Read-only inventory and monitor sections.
-    case inventory
-    /// Safety and recovery sections.
-    case safety
+    case agentTools
+    /// Local setup health, credentials, and security inventory.
+    case healthSecurity
+    /// Repository context, readiness, and pull request follow-up.
+    case repositories
+    /// Software maintenance, backup, and recovery sections.
+    case maintenance
 }
 
 /// Encodes which sidebar groups the user collapsed.
@@ -33,9 +31,27 @@ nonisolated struct SidebarSectionExpansionState: Equatable, Sendable {
 
     /// Restores expansion state from the compact `AppStorage` representation.
     init(storageValue: String) {
-        collapsedSections = Set(storageValue
-            .split(separator: ",")
-            .compactMap { SidebarSectionID(rawValue: String($0)) })
+        collapsedSections = []
+        for token in storageValue.split(separator: ",").map(String.init) {
+            if let section = SidebarSectionID(rawValue: token) {
+                collapsedSections.insert(section)
+                continue
+            }
+            switch token {
+            case "files":
+                collapsedSections.insert(.environment)
+            case "aiTools":
+                collapsedSections.insert(.agentTools)
+            case "credentials", "health":
+                collapsedSections.insert(.healthSecurity)
+            case "inventory":
+                collapsedSections.formUnion([.healthSecurity, .repositories])
+            case "safety":
+                collapsedSections.insert(.maintenance)
+            default:
+                break
+            }
+        }
     }
 
     /// Compact representation suitable for `AppStorage`.

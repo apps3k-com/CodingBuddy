@@ -102,12 +102,15 @@ restore flows, or any file writing behavior.
 
 ### `collapsibleSidebarSections` — maturity: alpha
 
-Top-level sidebar groups use native macOS expandable sections, and the user's
-collapsed groups are stored in app preferences so the sidebar keeps its shape
-across window recreation and relaunch.
+Top-level sidebar destinations are grouped by user task: Environment, Agent
+Tools, Health & Security, Repositories, and Maintenance. The groups use native
+macOS expandable sections, and both collapsed groups and the selected
+destination are stored in app preferences so the sidebar keeps its working
+context across window recreation and relaunch.
 
 v1 keeps all groups expanded for new users and preserves the current sidebar
-selection even when its parent group is collapsed.
+selection even when its parent group is collapsed. Legacy group identifiers
+are migrated to the closest task-oriented group.
 
 ### `mcpAuthManager` — maturity: stable
 

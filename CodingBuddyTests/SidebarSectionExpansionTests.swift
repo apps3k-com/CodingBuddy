@@ -22,23 +22,36 @@ struct SidebarSectionExpansionTests {
     @Test func collapsedSectionsRoundTripThroughStorageValue() {
         var state = SidebarSectionExpansionState()
 
-        state.setExpanded(false, for: .inventory)
-        state.setExpanded(false, for: .safety)
+        state.setExpanded(false, for: .repositories)
+        state.setExpanded(false, for: .maintenance)
 
         let restored = SidebarSectionExpansionState(storageValue: state.storageValue)
 
-        #expect(restored.isExpanded(.files))
-        #expect(!restored.isExpanded(.inventory))
-        #expect(!restored.isExpanded(.safety))
-        #expect(restored.storageValue == "inventory,safety")
+        #expect(restored.isExpanded(.environment))
+        #expect(!restored.isExpanded(.repositories))
+        #expect(!restored.isExpanded(.maintenance))
+        #expect(restored.storageValue == "maintenance,repositories")
     }
 
     /// Unknown stored tokens are ignored so old preferences cannot break the sidebar.
     @Test func storedStateIgnoresUnknownSidebarSectionTokens() {
-        let state = SidebarSectionExpansionState(storageValue: "inventory,unknown,safety")
+        let state = SidebarSectionExpansionState(storageValue: "repositories,unknown,maintenance")
 
-        #expect(!state.isExpanded(.inventory))
-        #expect(!state.isExpanded(.safety))
-        #expect(state.storageValue == "inventory,safety")
+        #expect(!state.isExpanded(.repositories))
+        #expect(!state.isExpanded(.maintenance))
+        #expect(state.storageValue == "maintenance,repositories")
+    }
+
+    /// Old group identifiers migrate to the new task-oriented sections.
+    @Test func legacySectionIdentifiersMigrateToTaskGroups() {
+        let state = SidebarSectionExpansionState(
+            storageValue: "files,aiTools,credentials,inventory,safety"
+        )
+
+        #expect(!state.isExpanded(.environment))
+        #expect(!state.isExpanded(.agentTools))
+        #expect(!state.isExpanded(.healthSecurity))
+        #expect(!state.isExpanded(.repositories))
+        #expect(!state.isExpanded(.maintenance))
     }
 }

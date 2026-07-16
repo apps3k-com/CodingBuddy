@@ -5,52 +5,6 @@
 
 import SwiftUI
 
-/// Navigation destinations shown in the app sidebar.
-enum SidebarScope: Hashable {
-    /// Environment variables across all managed dotfiles.
-    case all
-    /// Environment variables from one managed dotfile.
-    case file(ShellConfigFile)
-    /// Local MCP authentication entries.
-    case mcpAuth
-    /// Agent setup diagnostics.
-    case agentDoctor
-    /// Agent governance and context inspection.
-    case agentContextInspector
-    /// Repository readiness checklist.
-    case repoReadinessChecklist
-    /// Cross-tool MCP server inventory.
-    case mcpServerInventory
-    /// GitHub pull request monitor for agent follow-up.
-    case agentPRMonitor
-    /// Local backup browser.
-    case backupBrowser
-    /// Configuration for one supported AI coding tool.
-    case aiTool(AITool)
-
-    /// Dotfile represented by this scope when it is file-backed.
-    var file: ShellConfigFile? {
-        if case .file(let file) = self { return file }
-        return nil
-    }
-
-    /// Localized sidebar title for the scope.
-    var title: String {
-        switch self {
-        case .all: String(localized: "All Variables")
-        case .file(let file): file.rawValue
-        case .mcpAuth: "MCP Auth"
-        case .agentDoctor: String(localized: "Agent Doctor")
-        case .agentContextInspector: String(localized: "Agent Context")
-        case .repoReadinessChecklist: String(localized: "Repo Readiness")
-        case .mcpServerInventory: String(localized: "MCP Inventory")
-        case .agentPRMonitor: String(localized: "Agent PR Monitor")
-        case .backupBrowser: String(localized: "Backups")
-        case .aiTool(let tool): tool.displayName
-        }
-    }
-}
-
 /// Root split-view container for CodingBuddy.
 struct ContentView: View {
     /// Shared menu command bridge.
@@ -89,6 +43,8 @@ struct ContentView: View {
     @State private var secrets = SecretsGuard()
     /// Current sidebar selection.
     @State private var scope: SidebarScope? = .all
+    /// Persisted sidebar destination restored on relaunch.
+    @AppStorage(SidebarSelectionState.storageKey) private var storedSidebarScope = SidebarScope.all.storageID
     /// Persisted collapsed top-level sidebar groups.
     @AppStorage("sidebar.collapsedSections") private var collapsedSidebarSections = ""
     /// Whether the settings sheet is visible.
@@ -108,11 +64,11 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             List(selection: $scope) {
-                Label("All Variables", systemImage: "list.bullet")
-                    .tag(SidebarScope.all)
-                sidebarSection(.files) {
-                    Text("Files")
+                sidebarSection(.environment) {
+                    Text("Environment")
                 } content: {
+                    Label("All Variables", systemImage: "list.bullet")
+                        .tag(SidebarScope.all)
                     ForEach(ShellConfigFile.allCases) { file in
                         Label(file.rawValue, systemImage: "doc.text")
                             .foregroundStyle(store.existingFiles.contains(file) ? .primary : .secondary)
@@ -121,7 +77,7 @@ struct ContentView: View {
                     }
                 }
                 if AITool.allCases.contains(where: { $0.featureFlag.isEnabled }) {
-                    sidebarSection(.aiTools) {
+                    sidebarSection(.agentTools) {
                         Text("AI Tools")
                     } content: {
                         ForEach(AITool.allCases.filter { $0.featureFlag.isEnabled }) { tool in
@@ -136,36 +92,40 @@ struct ContentView: View {
                         }
                     }
                 }
-                if FeatureFlag.mcpAuthManager.isEnabled {
-                    sidebarSection(.credentials) {
-                        Text("Credentials")
+                if FeatureFlag.mcpAuthManager.isEnabled || agentDoctorStore != nil || mcpServerInventoryStore != nil {
+                    sidebarSection(.healthSecurity) {
+                        Text("Health & Security")
                     } content: {
-                        Label {
-                            Text(verbatim: "MCP Auth")
-                        } icon: {
-                            Image(systemName: "key.radiowaves.forward")
+                        if FeatureFlag.mcpAuthManager.isEnabled {
+                            Label {
+                                Text(verbatim: "MCP Auth")
+                            } icon: {
+                                Image(systemName: "key.radiowaves.forward")
+                            }
+                            .foregroundStyle(mcpAuthStore.rootExists ? .primary : .secondary)
+                            .badge(mcpAuthStore.entries.count)
+                            .tag(SidebarScope.mcpAuth)
                         }
-                        .foregroundStyle(mcpAuthStore.rootExists ? .primary : .secondary)
-                        .badge(mcpAuthStore.entries.count)
-                        .tag(SidebarScope.mcpAuth)
-                    }
-                }
-                if let agentDoctorStore {
-                    sidebarSection(.health) {
-                        Text("Health")
-                    } content: {
-                        Label("Agent Doctor", systemImage: "stethoscope")
-                            .badge(agentDoctorStore.problemCount)
-                            .tag(SidebarScope.agentDoctor)
+                        if let agentDoctorStore {
+                            Label("Agent Doctor", systemImage: "stethoscope")
+                                .badge(agentDoctorStore.problemCount)
+                                .tag(SidebarScope.agentDoctor)
+                        }
+                        if let mcpServerInventoryStore {
+                            Label("MCP Inventory", systemImage: "server.rack")
+                                .badge(mcpServerInventoryStore.count)
+                                .tag(SidebarScope.mcpServerInventory)
+                        }
                     }
                     .onAppear {
-                        agentDoctorStore.reload()
+                        agentDoctorStore?.reload()
+                        mcpServerInventoryStore?.reload()
                     }
                 }
                 if agentContextInspectorStore != nil || repoReadinessStore != nil
-                    || mcpServerInventoryStore != nil || agentPRMonitorStore != nil {
-                    sidebarSection(.inventory) {
-                        Text("Inventory")
+                    || agentPRMonitorStore != nil {
+                    sidebarSection(.repositories) {
+                        Text("Repositories")
                     } content: {
                         if let agentContextInspectorStore {
                             Label("Agent Context", systemImage: "text.book.closed")
@@ -177,11 +137,6 @@ struct ContentView: View {
                                 .badge(repoReadinessStore.problemCount)
                                 .tag(SidebarScope.repoReadinessChecklist)
                         }
-                        if let mcpServerInventoryStore {
-                            Label("MCP Inventory", systemImage: "server.rack")
-                                .badge(mcpServerInventoryStore.count)
-                                .tag(SidebarScope.mcpServerInventory)
-                        }
                         if let agentPRMonitorStore {
                             Label("Agent PR Monitor", systemImage: "arrow.triangle.pull")
                                 .badge(agentPRMonitorStore.attentionCount)
@@ -191,15 +146,14 @@ struct ContentView: View {
                     .onAppear {
                         agentContextInspectorStore?.reload()
                         repoReadinessStore?.reload()
-                        mcpServerInventoryStore?.reload()
                         if agentPRMonitorStore?.selectedRepository != nil {
                             agentPRMonitorStore?.refresh()
                         }
                     }
                 }
                 if let backupBrowserStore {
-                    sidebarSection(.safety) {
-                        Text("Safety")
+                    sidebarSection(.maintenance) {
+                        Text("Maintenance")
                     } content: {
                         Label("Backups", systemImage: "clock.arrow.circlepath")
                             .badge(backupBrowserStore.count)
@@ -217,7 +171,9 @@ struct ContentView: View {
                 MCPAuthListView(store: mcpAuthStore, secrets: secrets)
             case .agentDoctor:
                 if let agentDoctorStore {
-                    AgentDoctorView(store: agentDoctorStore)
+                    AgentDoctorView(store: agentDoctorStore) { tool in
+                        scope = SidebarScope.followUpScope(for: tool)
+                    }
                 } else {
                     VariableListView(store: store, secrets: secrets, scope: .all)
                 }
@@ -281,6 +237,14 @@ struct ContentView: View {
                 requestedSettingsPane = .general
                 showSettings = true
                 menuActions.settingsRequested = false
+            }
+        }
+        .onAppear {
+            scope = SidebarSelectionState.restoredScope(storageValue: storedSidebarScope)
+        }
+        .onChange(of: scope) {
+            if let scope, scope.isEnabled {
+                storedSidebarScope = scope.storageID
             }
         }
         .alert(
