@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.10.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.9.0...v0.10.0) (2026-07-16)
+
+
+### Features
+
+* add collapsible sidebar groups ([641f98e](https://github.com/apps3k-com/CodingBuddy/commit/641f98eec61974b525ddf98e3c344df52e03d034))
+* add controlled package maintenance ([#91](https://github.com/apps3k-com/CodingBuddy/issues/91)) ([5ce9192](https://github.com/apps3k-com/CodingBuddy/commit/5ce9192f53b713d5621044e2c5e746b88074d4a9))
+* add explainable guidance foundation ([#99](https://github.com/apps3k-com/CodingBuddy/issues/99)) ([498daf7](https://github.com/apps3k-com/CodingBuddy/commit/498daf7d1b1cbc6d11773b0c1fee08bd26397e84))
+* add explainable pull request attention queue ([3447e70](https://github.com/apps3k-com/CodingBuddy/commit/3447e7023af1eaaaf1070bd36d566becaad842e3))
+* add persistent collapsible sidebar section groups ([1752344](https://github.com/apps3k-com/CodingBuddy/commit/1752344b3133502e74d00e04552c8d18da1a9b96))
+* add plain-language guidance and developer glossary foundation ([0f16e03](https://github.com/apps3k-com/CodingBuddy/commit/0f16e03f32a0a820153ad5230b51182b18c99969))
+* add safe package inventory, updates, and release notes ([97bb444](https://github.com/apps3k-com/CodingBuddy/commit/97bb444dbeb2a43c5d36b417c22c4c2edd7cd72f))
+* explain health and security findings ([#101](https://github.com/apps3k-com/CodingBuddy/issues/101)) ([40193af](https://github.com/apps3k-com/CodingBuddy/commit/40193af83d201cb254af1de43c7f3acdceb54e4f))
+* explain health and security findings with safe next actions ([3fdd93e](https://github.com/apps3k-com/CodingBuddy/commit/3fdd93e5f78520cd8bcf372aae131e87b10cab31))
+* explain pull request and software update decisions ([1052144](https://github.com/apps3k-com/CodingBuddy/commit/10521442b78b679cb82db0a374c4091529aeb2ff))
+* explain pull requests and software updates ([#100](https://github.com/apps3k-com/CodingBuddy/issues/100)) ([7ed8b8c](https://github.com/apps3k-com/CodingBuddy/commit/7ed8b8caedf165dc1e47adfceffceffa99584c97))
+* rank monitored pull requests into a calm attention queue ([0094989](https://github.com/apps3k-com/CodingBuddy/commit/00949895ba27f4a30e208207c15e8a731415a796))
+* streamline CodingBuddy navigation and operational detail workflows ([db43640](https://github.com/apps3k-com/CodingBuddy/commit/db4364094bbac497427a02ff4d27a68badb8e69b))
+* streamline navigation and operational tables ([#90](https://github.com/apps3k-com/CodingBuddy/issues/90)) ([d787b66](https://github.com/apps3k-com/CodingBuddy/commit/d787b663f0b4709ba0b0f2dcc28a3f4a6d3cdb8a))
+* watch multiple repositories in Agent PR Monitor ([#89](https://github.com/apps3k-com/CodingBuddy/issues/89)) ([af1be22](https://github.com/apps3k-com/CodingBuddy/commit/af1be22fb0c5dfefb082999bdbf7d004387d081e))
+
+
+### Bug Fixes
+
+* address health guidance review feedback ([#101](https://github.com/apps3k-com/CodingBuddy/issues/101)) ([5cd5bf8](https://github.com/apps3k-com/CodingBuddy/commit/5cd5bf8896e82cb6d590e57bcd651adbee2f8d12))
+* address workflow guidance review findings ([29bfab1](https://github.com/apps3k-com/CodingBuddy/commit/29bfab15d1683d0277376b1762798a0adf8b4d4b))
+* clarify credential empty states ([303fe99](https://github.com/apps3k-com/CodingBuddy/commit/303fe99c63ab523178470ac19c76d4b331661058))
+* make credential empty states explain next steps ([9edaacb](https://github.com/apps3k-com/CodingBuddy/commit/9edaacb4c361a586663f971cee6bc640439f2389))
+
 ## [0.9.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.8.0...v0.9.0) (2026-07-01)
 
 
