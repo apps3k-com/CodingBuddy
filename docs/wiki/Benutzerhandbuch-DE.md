@@ -159,6 +159,22 @@ Der Eintrag **Craft Agents** (Alpha) zeigt, was die Craft-Agents-App in `~/.craf
 - **Der verschlüsselte Credential-Speicher** (`credentials.enc`): CodingBuddy zeigt Größe und Alter, öffnet die Datei aber nie; seine Reset-Bestätigung ist getrennt von Token-Datei-Resets und erklärt, dass jeder Craft-Connector eine neue Anmeldung verlangt.
 - Ist der Ordner vorhanden, enthält aber noch keine Zugangsdaten, verweist der leere Zustand zurück auf die Einrichtung von Craft Agents oder die Verbindung eines Craft-Connectors. CodingBuddy wartet, bis Craft die Dateien erstellt.
 
+## Workstation-Wartung
+
+Der Eintrag **Wartung → Software-Updates** (Alpha) inventarisiert globale Pakete aus je einer aktiven Homebrew-, npm- und pnpm-Installation.
+
+- Die Tabelle zeigt Paketname, Manager, installierte Version, verfügbare Version und Status. Filtere nach Updates, direkten Installationen oder allen Paketen; die Suche berücksichtigt Paket- und Managernamen.
+- **Kompatibel** verwendet bei npm/pnpm die Wanted-Version. **Neueste** schließt ausdrücklich neuere Hauptversionen ein. Homebrew verwendet die gemeldete aktuelle Formel- oder Cask-Version.
+- Wähle eine oder mehrere aktualisierbare Zeilen und klicke **Ausgewählte aktualisieren**. CodingBuddy zeigt jedes Paket und den exakten Versionswechsel, bevor ein Befehl startet.
+- Bestätigte Updates laufen nacheinander mit sichtbarem Protokoll pro Paket. **Stoppen** bricht den aktuellen Befehl ab und markiert noch nicht gestartete Arbeit; abgeschlossene Updates werden nicht zurückgerollt. Danach prüft CodingBuddy den Bestand erneut.
+- Angeheftete Formeln, selbstaktualisierende Casks und nicht beschreibbare Installationen erklären, warum CodingBuddy sie nicht direkt aktualisiert.
+- Die Auswahl eines Pakets lädt Versionshinweise verzögert. CodingBuddy bevorzugt ein passendes GitHub Release und verlinkt sonst Repository, Homepage oder Changelog-Quelle. Fehlende Versionshinweise sind ein normaler Zustand.
+- Falls die automatische Erkennung die falsche Installation wählt, hinterlege unter **Einstellungen → Wartung** einen expliziten Homebrew-, npm- oder pnpm-Pfad.
+
+Alle Befehle verwenden `Foundation.Process` mit absolutem Programmpfad und getrennten Argumenten. CodingBuddy startet nie eine Login-Shell, `sudo` oder einen frei zusammengesetzten Befehlsstring. Der Fehler eines Providers blendet erfolgreiche Ergebnisse anderer Provider nicht aus.
+
+v1-Grenzen: nur globale Pakete; eine aktive Installation pro Provider; keine Projekt-Abhängigkeiten, Installation, Deinstallation, Pin-Verwaltung, Rechteerhöhung oder automatischen Hintergrundupdates. Bun, Yarn, pipx, uv, Cargo und Editor-Erweiterungen werden noch nicht unterstützt.
+
 ## Einstellungen
 
 Öffne **CodingBuddy → Einstellungen…** (⌘,). Die Einstellungen erscheinen als Panel direkt am Hauptfenster; schließe sie mit **Fertig**, um in der App weiterzuarbeiten.
@@ -167,6 +183,7 @@ Der Eintrag **Craft Agents** (Alpha) zeigt, was die Craft-Agents-App in `~/.craf
 - **Erscheinungsbild** — Auto (folgt dem System), Hell oder Dunkel.
 - **Standard-Editor** — wähle die macOS-App, die CodingBuddy beim Öffnen von Markdown, JSON, YAML und anderen textartigen Repository-Dateien verwenden soll, oder setze auf den Systemstandard zurück.
 - **Sicherheit** — wie lange Secrets nach der Authentifizierung sichtbar bleiben, plus der GitHub-Token für den Agent PR Monitor.
+- **Wartung** — optionale Programmpfade für Homebrew, npm und pnpm; leere Felder verwenden die automatische Erkennung.
 
 ## Live-Aktualisierung
 

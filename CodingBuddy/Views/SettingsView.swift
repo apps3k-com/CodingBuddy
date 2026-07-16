@@ -13,6 +13,8 @@ nonisolated enum SettingsInitialPane: Hashable {
     case general
     /// Security and authorization preferences.
     case security
+    /// Package-manager executable selection.
+    case maintenance
 }
 
 /// Presented as a sheet over the main window — window-modal on purpose, so
@@ -24,6 +26,8 @@ struct SettingsView: View {
         case general
         /// Security-sensitive credentials and unlock timing settings.
         case security
+        /// Package-manager command paths.
+        case maintenance
     }
 
     @Environment(\.dismiss) private var dismiss
@@ -34,6 +38,9 @@ struct SettingsView: View {
     @AppStorage(DefaultTextEditorPreference.applicationPathKey) private var editorApplicationPath = ""
     @AppStorage(DefaultTextEditorPreference.displayNameKey) private var editorDisplayName = ""
     @AppStorage(SecretsGuard.unlockDurationKey) private var unlockDuration = SecretsGuard.defaultUnlockDuration
+    @AppStorage(PackageExecutablePreference.key(for: .homebrew)) private var homebrewExecutablePath = ""
+    @AppStorage(PackageExecutablePreference.key(for: .npm)) private var npmExecutablePath = ""
+    @AppStorage(PackageExecutablePreference.key(for: .pnpm)) private var pnpmExecutablePath = ""
     /// GitHub authorization state shared with Agent PR Monitor.
     var githubAuthorizationStore: GitHubAuthorizationStore
     /// Called after Settings saves or removes GitHub authorization.
@@ -51,7 +58,11 @@ struct SettingsView: View {
     ) {
         self.githubAuthorizationStore = githubAuthorizationStore
         self.onGitHubAuthorizationChange = onGitHubAuthorizationChange
-        _pane = State(initialValue: initialPane == .security ? .security : .general)
+        switch initialPane {
+        case .general: _pane = State(initialValue: .general)
+        case .security: _pane = State(initialValue: .security)
+        case .maintenance: _pane = State(initialValue: .maintenance)
+        }
     }
 
     /// Segmented settings sheet content.
@@ -62,6 +73,9 @@ struct SettingsView: View {
             Picker(selection: $pane) {
                 Text("General").tag(Pane.general)
                 Text("Security").tag(Pane.security)
+                if FeatureFlag.packageMaintenance.isEnabled {
+                    Text("Maintenance").tag(Pane.maintenance)
+                }
             } label: {
                 EmptyView()
             }
@@ -74,6 +88,7 @@ struct SettingsView: View {
                 switch pane {
                 case .general: generalPane
                 case .security: securityPane
+                case .maintenance: maintenancePane
                 }
             }
             .scrollContentBackground(.hidden)
@@ -89,7 +104,55 @@ struct SettingsView: View {
             }
             .padding(12)
         }
-        .frame(width: 480, height: 430)
+        .frame(width: 540, height: 460)
+    }
+
+    /// Explicit executable overrides for package managers that are not auto-detected.
+    private var maintenancePane: some View {
+        Form {
+            Section {
+                ForEach(PackageManagerKind.allCases, id: \.self) { manager in
+                    PackageExecutableSettingsRow(
+                        manager: manager,
+                        path: packageExecutablePath(for: manager)
+                    ) {
+                        choosePackageExecutable(manager: manager, path: packageExecutablePath(for: manager))
+                    }
+                        .id(manager)
+                }
+            } header: {
+                Text("Package manager executables")
+            } footer: {
+                Text("Leave a path empty to use automatic discovery. CodingBuddy never starts a login shell or requests administrator privileges.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    /// Binding for the explicit executable override of one manager.
+    private func packageExecutablePath(for manager: PackageManagerKind) -> Binding<String> {
+        switch manager {
+        case .homebrew: $homebrewExecutablePath
+        case .npm: $npmExecutablePath
+        case .pnpm: $pnpmExecutablePath
+        }
+    }
+
+    /// Selects one executable file without invoking or validating it in Settings.
+    private func choosePackageExecutable(manager: PackageManagerKind, path: Binding<String>) {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.message = String(
+            format: String(localized: "Choose the %@ executable."),
+            manager.displayName
+        )
+        panel.prompt = String(localized: "Choose Executable")
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        path.wrappedValue = url.path
     }
 
     /// Security-related settings, including GitHub authorization.
@@ -270,6 +333,40 @@ struct SettingsView: View {
         editorBundleIdentifier = ""
         editorApplicationPath = ""
         editorDisplayName = ""
+    }
+}
+
+/// One independently identified package-manager executable preference row.
+private struct PackageExecutableSettingsRow: View {
+    let manager: PackageManagerKind
+    @Binding var path: String
+    var choose: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Label(manager.displayName, systemImage: manager.systemImage)
+                .lineLimit(1)
+                .frame(width: 100, alignment: .leading)
+            TextField(text: $path, prompt: Text("Automatic")) {
+                EmptyView()
+            }
+                .labelsHidden()
+                .textFieldStyle(.roundedBorder)
+                .frame(minWidth: 100)
+                .layoutPriority(1)
+                .accessibilityLabel(formattedLabel("Executable path for %@"))
+            Button("Choose…", action: choose)
+                .fixedSize()
+                .accessibilityLabel(formattedLabel("Choose %@ executable"))
+            Button("Reset") { path = "" }
+                .fixedSize()
+                .disabled(path.isEmpty)
+                .accessibilityLabel(formattedLabel("Reset %@ executable"))
+        }
+    }
+
+    private func formattedLabel(_ key: LocalizedStringResource) -> String {
+        String(format: String(localized: key), manager.displayName)
     }
 }
 
