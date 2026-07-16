@@ -239,6 +239,91 @@ struct PackageMaintenanceTests {
         #expect(requests.map { $0.arguments.last } == ["first@2.0.0", "second@2.0.0"])
     }
 
+    @Test @MainActor func guidanceActionPreparesAPlanButCannotBypassConfirmation() async throws {
+        let package = nodePackage(name: "guided", status: .updateAvailable)
+        let provider = FixturePackageProvider(
+            manager: .npm,
+            result: .success(snapshot(.npm, packages: [package]))
+        )
+        let runner = StubCommandRunner(outputs: [
+            .success(CommandResult(exitCode: 0, standardOutput: Data("done".utf8), standardError: Data())),
+        ])
+        let store = PackageMaintenanceStore(
+            service: PackageMaintenanceService(
+                providers: [provider],
+                locator: StubLocator(installations: [.npm: installation(.npm)])
+            ),
+            runner: runner,
+            releaseNotesProvider: StubReleaseNotesProvider()
+        )
+
+        store.reload()
+        await waitUntil { store.state == .loaded }
+        let guidance = PackageMaintenanceGuidance.guidance(
+            for: package,
+            mode: .compatible,
+            releaseNotes: .unavailable
+        )
+        var openedURL: URL?
+        var openedSettings = false
+
+        #expect(PackageMaintenanceViewActions.perform(
+            actionID: guidance.recommendedAction.id,
+            guidance: guidance,
+            package: package,
+            inspectedPackageID: package.id,
+            isGuidanceEnabled: false,
+            store: store,
+            openURL: { openedURL = $0 },
+            openSettings: { openedSettings = true }
+        ) == nil)
+        store.selection = []
+        #expect(PackageMaintenanceViewActions.perform(
+            actionID: guidance.recommendedAction.id,
+            guidance: guidance,
+            package: package,
+            inspectedPackageID: package.id,
+            isGuidanceEnabled: true,
+            store: store,
+            openURL: { openedURL = $0 },
+            openSettings: { openedSettings = true }
+        ) == nil)
+        store.selection = [package.id]
+        #expect(PackageMaintenanceViewActions.perform(
+            actionID: guidance.recommendedAction.id,
+            guidance: guidance,
+            package: package,
+            inspectedPackageID: "stale-package-id",
+            isGuidanceEnabled: true,
+            store: store,
+            openURL: { openedURL = $0 },
+            openSettings: { openedSettings = true }
+        ) == nil)
+
+        let route = PackageMaintenanceViewActions.perform(
+            actionID: guidance.recommendedAction.id,
+            guidance: guidance,
+            package: package,
+            inspectedPackageID: package.id,
+            isGuidanceEnabled: true,
+            store: store,
+            openURL: { openedURL = $0 },
+            openSettings: { openedSettings = true }
+        )
+        #expect(route == .prepareUpdatePlan)
+        await waitUntil { store.pendingPlan != nil }
+
+        #expect(store.pendingPlan?.items.map(\.package.id) == [package.id])
+        #expect(store.updateEvents.isEmpty)
+        #expect((await runner.requests).isEmpty)
+        #expect(openedURL == nil)
+        #expect(!openedSettings)
+
+        store.confirmPendingPlan()
+        await waitUntil { store.updateEvents.first?.state == .succeeded && store.state == .loaded }
+        #expect((await runner.requests).map { $0.arguments.last } == ["guided@2.0.0"])
+    }
+
     @Test func cancellingUpdatesStopsQueuedPackagesWithoutRollback() async throws {
         let first = nodePackage(name: "first", status: .updateAvailable)
         let second = nodePackage(name: "second", status: .updateAvailable)

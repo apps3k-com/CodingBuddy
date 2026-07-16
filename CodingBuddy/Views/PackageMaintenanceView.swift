@@ -39,7 +39,15 @@ struct PackageMaintenanceView: View {
     var body: some View {
         VStack(spacing: 0) {
             if !store.issues.isEmpty {
-                ProviderIssueStrip(issues: store.issues, openSettings: openSettings)
+                ProviderIssueStrip(
+                    issues: store.issues,
+                    guidanceSummary: FeatureFlag.explainableGuidance.isEnabled
+                        ? PackageMaintenanceGuidance.providerIssueSummary(
+                            hasSuccessfulResults: !store.snapshots.isEmpty
+                        )
+                        : nil,
+                    openSettings: openSettings
+                )
                 Divider()
             }
 
@@ -68,12 +76,12 @@ struct PackageMaintenanceView: View {
                     Text(verbatim: package.targetVersion(for: store.updateMode) ?? "—")
                         .monospaced()
                         .lineLimit(1)
-                        .foregroundStyle(package.status.isUpdateAvailable ? .primary : .secondary)
+                        .foregroundStyle(displayedStatus(for: package).isUpdateAvailable ? .primary : .secondary)
                 }
                 .width(min: 80, ideal: 95, max: 130)
 
                 TableColumn("Status") { package in
-                    PackageStatusLabel(status: package.status)
+                    PackageStatusLabel(status: displayedStatus(for: package))
                 }
                 .width(min: 110, ideal: 130, max: 170)
             }
@@ -168,8 +176,22 @@ struct PackageMaintenanceView: View {
         }
         .inspector(isPresented: inspectorBinding) {
             if let inspectedPackage {
-                PackageInspector(package: inspectedPackage, releaseNotesState: store.releaseNotesState)
-                    .inspectorColumnWidth(min: 300, ideal: 360, max: 480)
+                let presentation = guidancePresentation(for: inspectedPackage)
+                PackageInspector(
+                    package: inspectedPackage,
+                    releaseNotesState: store.releaseNotesState,
+                    displayedStatus: presentation.displayedStatus,
+                    guidance: presentation.guidance
+                ) { actionID in
+                    if let guidance = presentation.guidance {
+                        performGuidanceAction(
+                            actionID,
+                            guidance: guidance,
+                            package: inspectedPackage
+                        )
+                    }
+                }
+                .inspectorColumnWidth(min: 300, ideal: 360, max: 480)
             }
         }
         .onChange(of: store.selection) {
@@ -188,6 +210,112 @@ struct PackageMaintenanceView: View {
         .onAppear {
             if store.state == .idle { store.reload() }
         }
+    }
+
+    /// Reduces release-note content to the state needed by deterministic guidance.
+    private var guidanceReleaseNotesState: PackageGuidanceReleaseNotesState {
+        switch store.releaseNotesState {
+        case .idle: .idle
+        case .loading: .loading
+        case .loaded: .loaded
+        case .unavailable: .unavailable
+        }
+    }
+
+    /// Uses target-aware status copy only when explainable guidance is enabled.
+    private func displayedStatus(for package: InstalledPackage) -> PackageStatus {
+        PackageMaintenanceGuidanceViewPolicy.displayedStatus(
+            isGuidanceEnabled: FeatureFlag.explainableGuidance.isEnabled,
+            package: package,
+            mode: store.updateMode
+        )
+    }
+
+    /// Resolves legacy or guided inspector inputs through the testable feature boundary.
+    private func guidancePresentation(for package: InstalledPackage) -> PackageMaintenanceInspectorPresentation {
+        PackageMaintenanceGuidanceViewPolicy.inspectorPresentation(
+            isGuidanceEnabled: FeatureFlag.explainableGuidance.isEnabled,
+            package: package,
+            mode: store.updateMode,
+            releaseNotes: guidanceReleaseNotesState,
+            actionAvailability: guidanceActionAvailability
+        )
+    }
+
+    /// Mirrors the existing toolbar and route guards so guidance never offers a no-op action.
+    private var guidanceActionAvailability: PackageMaintenanceGuidanceActionAvailability {
+        let packageOperationIsRunning = store.isUpdating || store.isPreparing
+        return PackageMaintenanceGuidanceActionAvailability(
+            canPrepareUpdatePlan: store.state == .loaded,
+            canOpenReleaseNotes: true,
+            canOpenSettings: true,
+            canReload: !packageOperationIsRunning
+        )
+    }
+
+    /// Routes available guidance actions through existing guarded package workflows.
+    private func performGuidanceAction(
+        _ actionID: String,
+        guidance: Guidance,
+        package: InstalledPackage
+    ) {
+        PackageMaintenanceViewActions.perform(
+            actionID: actionID,
+            guidance: guidance,
+            package: package,
+            inspectedPackageID: inspectedPackageID,
+            isGuidanceEnabled: FeatureFlag.explainableGuidance.isEnabled,
+            store: store,
+            openURL: { _ = NSWorkspace.shared.open($0) },
+            openSettings: openSettings
+        )
+    }
+}
+
+/// Executes guidance through the existing store boundaries so behavior can be tested without SwiftUI inspection.
+@MainActor
+enum PackageMaintenanceViewActions {
+    @discardableResult
+    static func perform(
+        actionID: String,
+        guidance: Guidance,
+        package: InstalledPackage,
+        inspectedPackageID: InstalledPackage.ID?,
+        isGuidanceEnabled: Bool,
+        store: PackageMaintenanceStore,
+        openURL: (URL) -> Void,
+        openSettings: () -> Void
+    ) -> PackageMaintenanceGuidanceRoute? {
+        guard isGuidanceEnabled,
+              inspectedPackageID == package.id,
+              let currentPackage = store.packages.first(where: { $0.id == package.id }),
+              currentPackage == package,
+              let route = PackageMaintenanceGuidance.route(
+                for: actionID,
+                in: guidance,
+                package: package
+              ) else {
+            return nil
+        }
+
+        switch route {
+        case .prepareUpdatePlan:
+            guard store.state == .loaded,
+                  store.selection == Set([package.id]),
+                  currentPackage.isUpdateAvailable(for: store.updateMode) else {
+                return nil
+            }
+            store.prepareUpdatePlan()
+        case .openReleaseNotes:
+            guard case .loaded(let notes) = store.releaseNotesState else { return nil }
+            openURL(notes.sourceURL)
+        case .openSettings:
+            openSettings()
+        case .reload:
+            guard !store.isUpdating, !store.isPreparing else { return nil }
+            store.reload()
+        }
+        return route
     }
 }
 
@@ -223,6 +351,7 @@ private struct PackageStatusLabel: View {
 
 private struct ProviderIssueStrip: View {
     var issues: [PackageProviderIssue]
+    var guidanceSummary: String?
     var openSettings: () -> Void
 
     var body: some View {
@@ -230,6 +359,11 @@ private struct ProviderIssueStrip: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.orange)
             VStack(alignment: .leading, spacing: 3) {
+                if let guidanceSummary {
+                    Text(verbatim: guidanceSummary)
+                        .font(.caption.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 ForEach(issues) { issue in
                     Text(verbatim: "\(issue.manager.displayName): \(issue.message)")
                         .font(.caption)
@@ -287,20 +421,39 @@ private extension PackageUpdateEventState {
 private struct PackageInspector: View {
     var package: InstalledPackage
     var releaseNotesState: PackageReleaseNotesState
+    var displayedStatus: PackageStatus
+    var guidance: Guidance?
+    var onPerformGuidanceAction: (String) -> Void
+
+    init(
+        package: InstalledPackage,
+        releaseNotesState: PackageReleaseNotesState,
+        displayedStatus: PackageStatus? = nil,
+        guidance: Guidance? = nil,
+        onPerformGuidanceAction: @escaping (String) -> Void = { _ in }
+    ) {
+        self.package = package
+        self.releaseNotesState = releaseNotesState
+        self.displayedStatus = displayedStatus ?? package.status
+        self.guidance = guidance
+        self.onPerformGuidanceAction = onPerformGuidanceAction
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Label(package.manager.displayName, systemImage: package.manager.systemImage)
-                        .foregroundStyle(.secondary)
-                    Text(verbatim: package.name)
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                    PackageStatusLabel(status: package.status)
-                }
+                packageHeader
 
                 Divider()
+
+                if let guidance {
+                    GuidanceInspectorSection(
+                        guidance: guidance,
+                        onPerformAction: onPerformGuidanceAction
+                    )
+
+                    Divider()
+                }
 
                 VStack(alignment: .leading, spacing: 10) {
                     LabeledContent("Installed", value: package.installedVersion)
@@ -318,7 +471,7 @@ private struct PackageInspector: View {
                     }
                 }
 
-                if let explanation = statusExplanation {
+                if guidance == nil, let explanation = statusExplanation {
                     Text(explanation)
                         .foregroundStyle(.secondary)
                 }
@@ -340,8 +493,10 @@ private struct PackageInspector: View {
                                 .foregroundStyle(.secondary)
                                 .textSelection(.enabled)
                         }
-                        Button("Open Release Notes", systemImage: "arrow.up.right.square") {
-                            NSWorkspace.shared.open(notes.sourceURL)
+                        if guidance == nil {
+                            Button("Open Release Notes", systemImage: "arrow.up.right.square") {
+                                NSWorkspace.shared.open(notes.sourceURL)
+                            }
                         }
                     }
                 }
@@ -349,6 +504,41 @@ private struct PackageInspector: View {
             .padding(16)
         }
         .navigationTitle("Details")
+    }
+
+    @ViewBuilder
+    private var packageHeader: some View {
+        if guidance != nil {
+            packageHeaderContent
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(Text(verbatim: guidanceHeaderAccessibilityLabel))
+                .accessibilityAddTraits(.isHeader)
+        } else {
+            packageHeaderContent
+        }
+    }
+
+    private var packageHeaderContent: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Label(package.manager.displayName, systemImage: package.manager.systemImage)
+                .foregroundStyle(.secondary)
+            Text(verbatim: package.name)
+                .font(.title3)
+                .fontWeight(.semibold)
+            PackageStatusLabel(status: displayedStatus)
+        }
+    }
+
+    private var guidanceHeaderAccessibilityLabel: String {
+        String(
+            format: String(
+                localized: "Package guidance inspector header accessibility label",
+                defaultValue: "%1$@. Status: %2$@."
+            ),
+            locale: .current,
+            package.name,
+            displayedStatus.displayName
+        )
     }
 
     private var statusExplanation: String? {
