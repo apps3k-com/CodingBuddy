@@ -125,6 +125,22 @@ installation, removal, or pin management. Users can override each detected
 executable in Settings. Release notes are best-effort and load only for the
 selected package.
 
+### `explainableGuidance` — maturity: alpha
+
+Introduces the shared, deterministic explanation contract used as CodingBuddy
+features migrate to plain-language guidance. A guidance section separates what
+a finding means, why it matters, its likely consequence, one recommended next
+step, and collapsed technical evidence. It also provides a curated developer
+glossary for recurring terms such as CI, pull requests, MCP, OAuth, Git working
+state, and package-management concepts.
+
+The foundation does not scan additional files, call a network service, generate
+AI advice, or execute an action by itself. Feature-specific mappings and action
+routing remain owned by the feature that produced the finding, and unavailable
+actions must explain why they cannot be run. Healthy or informational states
+can explicitly say that no action is needed without presenting a disabled
+control.
+
 ### `mcpAuthManager` — maturity: stable
 
 Manages the `~/.mcp-auth` credential cache of `mcp-remote`-connected MCP

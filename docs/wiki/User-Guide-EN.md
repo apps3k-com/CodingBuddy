@@ -70,6 +70,20 @@ The **Health & Security → MCP Auth** sidebar section manages the OAuth cache t
 
 ## AI tools
 
+### Explainable guidance foundation
+
+CodingBuddy is introducing a shared explanation pattern for technical findings.
+As each alpha area adopts it, its inspector will separate **What this means**,
+**Why it matters**, **Recommended next step**, and collapsed **Technical
+details**. Repeated developer terms link to a short built-in glossary instead
+of assuming prior Git, CI, MCP, OAuth, or package-manager knowledge.
+
+The guidance is curated and deterministic. It does not send findings to an AI
+service, invent actions, or bypass an area's existing confirmation and safety
+flow. When CodingBuddy cannot perform a recommended action, it explains why
+instead of presenting an inert control. A healthy state can say that no action
+is needed without making it look blocked.
+
 ### Agent Doctor
 
 The **Agent Doctor** entry (alpha) is a read-only health check for local agent setup. It flags:
