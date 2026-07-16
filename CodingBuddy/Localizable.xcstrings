@@ -643,6 +643,426 @@
         }
       }
     },
+    "Agent Doctor inspector header accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance evidence credential entry label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credential-Eintrag"
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance evidence diagnostic code label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagnosecode"
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance evidence file mode label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemeldeter Dateimodus"
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance evidence referenced variable label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Referenzierte Variable"
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance evidence source label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelle"
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance evidence tool label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tool"
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance expired credential consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Verbindung kann nach einer automatischen Aktualisierung weiter funktionieren, eine erneute Anmeldung verlangen oder fehlschlagen, bis die Anmeldung erneuert wurde."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance expired credential explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das zwischengespeicherte OAuth-Zugriffstoken scheint laut gespeichertem Ablaufzeitpunkt abgelaufen zu sein. Ein OAuth-Client kann es eventuell automatisch aktualisieren, aber Agent Doctor kann nicht bestätigen, ob das gelingt."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance expired credential relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine MCP-Serververbindung benötigt eine aktuelle OAuth-Anmeldung oder eine erfolgreiche Token-Aktualisierung."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance incomplete credential consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Verbindung kann eine erneute Anmeldung verlangen oder fehlschlagen, bis vollständige Zugangsdaten erstellt wurden."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance incomplete credential explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein OAuth-Cache-Eintrag ist vorhanden, aber die für eine vollständige Anmeldung benötigte Token-Datei fehlt. Agent Doctor kann nicht erkennen, ob die Anmeldung unterbrochen, abgebrochen oder nie abgeschlossen wurde."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance incomplete credential relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der MCP-Client benötigt einen vollständigen OAuth-Cache-Eintrag, bevor er diese Anmeldung wiederverwenden kann."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance invalid config file consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen oder Verbindungen aus dieser Datei können ignoriert werden, bis die JSON-Syntax korrigiert ist."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance invalid config file explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Konfigurationsdatei ist vorhanden, ihr Inhalt ist jedoch kein gültiges JSON."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance invalid config file open tool result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der zuständige Konfigurationsbereich wird geöffnet, damit du die Datei mit der aktuellen Tool-Einrichtung vergleichen kannst."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance invalid config file relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das zuständige Tool kann Einstellungen aus einer Datei, die es nicht einlesen kann, möglicherweise nicht verwenden."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance missing directory consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn du das Tool nicht verwendest, hat dies keine Auswirkung. Andernfalls können konfigurationsabhängige Funktionen fehlen, bis das Tool seine Dateien erstellt."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance missing directory explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das erwartete lokale Konfigurationsverzeichnis ist nicht vorhanden."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance missing directory open tool result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der zuständige Konfigurationsbereich wird geöffnet. Möglicherweise musst du das Tool trotzdem zuerst starten oder einrichten, bevor das Verzeichnis erscheint."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance missing directory relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent Doctor verwendet dieses Verzeichnis, um die lokale Einrichtung des Tools zu prüfen. Wenn es fehlt, wurde das Tool für diesen macOS-Account meist noch nicht eingerichtet oder verwendet."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance missing referenced env var consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die zugehörige MCP-Verbindung kann fehlschlagen, weil das Tool die referenzierte Variable nicht auflösen kann."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance missing referenced env var explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Tool-Konfiguration verweist auf eine Umgebungsvariable, die CodingBuddy in der zugehörigen Umgebungsdatei nicht findet."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance missing referenced env var open tool result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Umgebungskonfiguration des zuständigen Tools wird geöffnet, damit du die fehlende Variable über den bestehenden Ablauf definieren kannst."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance missing referenced env var relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP-Konfigurationen verwenden häufig Umgebungsvariablen, um Zugangsdaten oder Einstellungen bereitzustellen, ohne deren Werte direkt in die Konfiguration zu schreiben."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance missing zsh startup files consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neue Terminal-Sitzungen erhalten möglicherweise nicht die Umgebungsvariablen, die deine Tools erwarten."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance missing zsh startup files explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In diesem Benutzerverzeichnis ist keine der von CodingBuddy verwalteten zsh-Startdateien vorhanden."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance missing zsh startup files relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy liest diese Dateien, um Umgebungsvariablen für Terminal-Sitzungen und Entwickler-Tools zu verwalten."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance open MCP Auth action result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP Auth wird geöffnet, damit du den Eintrag prüfen und nur dann zurücksetzen kannst, wenn die Verbindung weiterhin fehlschlägt. Das Öffnen startet keine neue Anmeldung."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance open MCP Auth action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP Auth öffnen"
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance open source action result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die gemeldete Datei wird in deinem konfigurierten externen Editor geöffnet, damit du sie prüfen kannst."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance open source action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelle öffnen"
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance open tool action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tool öffnen"
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance open variables action result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Liste der Umgebungsvariablen wird geöffnet, damit du eine Variable über den bestehenden CodingBuddy-Ablauf anlegen kannst."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance open variables action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Variablen öffnen"
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance restrict permissions action result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Credential-Datei wäre nur für deinen macOS-Benutzer les- und beschreibbar."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance restrict permissions action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dateirechte einschränken"
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance restrict permissions unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy kann keine Dateirechte ändern. Öffne die Quelle, um sie zu prüfen, und nimm die Änderung außerhalb der App vor."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance source unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die gemeldete Quelle ist keine vorhandene lokale Datei. CodingBuddy kann sie daher nicht öffnen."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance unsafe permissions consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abhängig vom aktuellen Dateimodus könnte ein anderer lokaler Account Zugangsdaten lesen oder verändern."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance unsafe permissions explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Datei mit Zugangsdaten erlaubt Gruppenmitgliedern oder anderen Benutzern mehr Zugriff, als Agent Doctor erwartet."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance unsafe permissions relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu weit gefasste Dateirechte können Zugangsdaten für einen anderen Account auf demselben Mac offenlegen."
+          }
+        }
+      }
+    },
     "Agent PR Monitor" : {
       "localizations" : {
         "de" : {
@@ -2562,6 +2982,186 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "MCP Inventory"
+          }
+        }
+      }
+    },
+    "MCP guidance configured consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Server kann zur Laufzeit trotzdem fehlschlagen, wenn sein Prozess, Netzwerk-Endpunkt oder seine Authentifizierung nicht verfügbar ist."
+          }
+        }
+      }
+    },
+    "MCP guidance configured explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat den Transport dieses Servers erkannt und keine Umgebungsvariable gefunden, deren Fehlen sich sicher belegen lässt."
+          }
+        }
+      }
+    },
+    "MCP guidance configured relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dies ist ausschließlich ein Ergebnis zur Konfiguration. CodingBuddy hat weder die Netzwerk-Erreichbarkeit noch die Authentifizierung geprüft."
+          }
+        }
+      }
+    },
+    "MCP guidance missing environment variables consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Server startet möglicherweise nicht oder die Authentifizierung schlägt fehl, bis die fehlenden Variablen definiert sind."
+          }
+        }
+      }
+    },
+    "MCP guidance missing environment variables explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte eine oder mehrere Umgebungsvariablen, auf die dieser MCP-Server verweist, nicht finden."
+          }
+        }
+      }
+    },
+    "MCP guidance missing environment variables relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das zuständige Tool benötigt diese Variablen möglicherweise, um den Server zu starten oder sich bei ihm zu authentifizieren."
+          }
+        }
+      }
+    },
+    "MCP guidance no configuration change expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus den lokalen Nachweisen, die dieses Inventar prüfen kann, ergibt sich kein weiterer Schritt."
+          }
+        }
+      }
+    },
+    "MCP guidance no configuration change reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat in diesen Inventardaten kein Konfigurationsproblem gefunden, das sich sicher belegen lässt."
+          }
+        }
+      }
+    },
+    "MCP guidance no configuration change title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Scan hat kein Problem erkannt"
+          }
+        }
+      }
+    },
+    "MCP guidance open source expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Konfigurationsquelle wird zur Prüfung geöffnet."
+          }
+        }
+      }
+    },
+    "MCP guidance open source unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Konfigurationsquelle ist keine vorhandene lokale Datei."
+          }
+        }
+      }
+    },
+    "MCP guidance open tool expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die MCP-Konfiguration des zuständigen Tools wird zur Prüfung geöffnet."
+          }
+        }
+      }
+    },
+    "MCP guidance open tool unavailable reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy besitzt für dieses Tool keine Konfigurationsansicht."
+          }
+        }
+      }
+    },
+    "MCP guidance unknown transport consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das zuständige Tool kann den Server möglicherweise nicht verwenden oder die Konfiguration nutzt einen Transport, den CodingBuddy nicht versteht."
+          }
+        }
+      }
+    },
+    "MCP guidance unknown transport explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Serverkonfiguration nennt keinen Transport, den CodingBuddy erkennt."
+          }
+        }
+      }
+    },
+    "MCP guidance unknown transport relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne bekannten Transport kann CodingBuddy nicht bestätigen, wie das zuständige Tool den Server starten oder erreichen soll."
+          }
+        }
+      }
+    },
+    "MCP inventory item accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. Tool: %2$@. Status: %3$@."
+          }
+        }
+      }
+    },
+    "MCP inventory unknown transport status" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unbekannter Transport"
           }
         }
       }
@@ -5098,6 +5698,176 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ausgewählte Quelldatei öffnen"
+          }
+        }
+      }
+    },
+    "Repo readiness inspector header accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance consequence failure" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Zustand kann zuverlässige Arbeit blockieren oder Mitwirkende und Coding-Agenten ohne eine erforderliche Absicherung lassen, bis er behoben ist."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance consequence pass" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Prüfung ist unauffällig und erhöht derzeit nicht die Unsicherheit bei Repository-Einrichtung oder Arbeitsablauf."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance consequence warning" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das teilweise oder mehrdeutige Signal kann zu unterschiedlichen Annahmen bei Mitwirkenden und Coding-Agenten führen, bis es geprüft wurde."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance no action expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Readiness-Prüfung bleibt unauffällig."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance no action reason" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Repository enthält derzeit das für diese Prüfung erwartete Signal."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance no action title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Aktion nötig"
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance build and test documentation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokumentierte Befehle machen die Validierung wiederholbar und reduzieren Vermutungen darüber, wie das Repository gebaut und getestet wird."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance CI workflow" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CI liefert vor dem Merge ein unabhängiges Build- oder Testergebnis."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance contribution workflow" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein dokumentierter Contribution-Ablauf hält Issue-, Branch-, Review- und Validierungsschritte konsistent."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance feature flag documentation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Feature-Flag-Dokumentation zeigt, welches Verhalten von einem Flag gesteuert wird, wie ausgereift es ist und wie die Einführung abläuft."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance GitHub templates" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Issue- und Pull-Request-Vorlagen bewahren den Kontext, den Umsetzende und Prüfende für wiederholbare Übergaben benötigen."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance governance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-spezifische Agent-Anweisungen definieren Zuständigkeiten, Sicherheitsregeln und Validierungserwartungen, bevor Codeänderungen beginnen."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance readme" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine README gibt Mitwirkenden und Coding-Agenten einen gemeinsamen Ausgangspunkt für Zweck und Einrichtung des Projekts."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance repository state" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marker für Git-Operationen können auf einen unterbrochenen oder laufenden Vorgang hinweisen, der vor neuen Änderungen verstanden werden sollte."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance relevance setup and hooks" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein leicht auffindbarer Einrichtungsweg hilft, lokale Prüfungen und Git-Hooks für alle Mitwirkenden konsistent auszuführen."
+          }
+        }
+      }
+    },
+    "Repo readiness guidance reveal repository expected result" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das ausgewählte Repository wird im Finder geöffnet, damit du seine Dateien prüfen oder bearbeiten kannst."
           }
         }
       }

@@ -153,13 +153,8 @@ private struct InventoryConfigurationCell: View {
     var item: MCPServerInventoryItem
 
     var body: some View {
-        if item.hasMissingEnvVars {
-            Label("Missing variables", systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
-        } else {
-            Label("Configured", systemImage: "checkmark.circle")
-                .foregroundStyle(.secondary)
-        }
+        Label(item.inventoryConfigurationStatusTitle, systemImage: item.inventoryConfigurationStatusSymbol)
+            .foregroundStyle(item.inventoryConfigurationStatusTint)
     }
 }
 
@@ -179,62 +174,173 @@ private struct MCPServerInspector: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Label {
-                        Text(verbatim: item.tool.displayName)
-                    } icon: {
-                        Image(systemName: item.tool.systemImage)
-                    }
-                    .foregroundStyle(.secondary)
-                    Text(verbatim: item.name)
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                    InventoryConfigurationCell(item: item)
-                }
+                inspectorHeader
 
                 Divider()
 
-                VStack(alignment: .leading, spacing: 10) {
-                    LabeledContent("Repository", value: item.repositoryName)
-                    LabeledContent("Transport", value: item.transport.displayName)
-                    LabeledContent("Scope") {
-                        Text(verbatim: item.scope)
-                            .monospaced()
-                            .textSelection(.enabled)
-                    }
-                    LabeledContent("Source") {
-                        Text(verbatim: item.sourcePath)
-                            .monospaced()
-                            .textSelection(.enabled)
-                            .multilineTextAlignment(.trailing)
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Command / URL")
-                        .font(.headline)
-                    Text(verbatim: item.summary)
-                        .font(.caption)
-                        .monospaced()
-                        .textSelection(.enabled)
-                }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Environment")
-                        .font(.headline)
-                    EnvVarsCell(item: item)
-                }
-
-                HStack {
-                    Button("Open Tool", systemImage: "arrow.right.circle", action: openTool)
-                        .disabled(!canOpenTool)
-                    Button("Open Source", systemImage: "doc.text", action: openSource)
-                        .disabled(!canOpenSource)
+                if FeatureFlag.explainableGuidance.isEnabled {
+                    GuidanceInspectorSection(
+                        guidance: MCPServerGuidance.guidance(
+                            for: item,
+                            canOpenTool: canOpenTool,
+                            canOpenSource: canOpenSource
+                        ),
+                        onPerformAction: performGuidanceAction
+                    )
+                    .id(item.id)
+                } else {
+                    existingInspectorContent
                 }
             }
             .padding(16)
         }
         .navigationTitle("Details")
+    }
+
+    /// Selected server identity and compact status shared by both inspector variants.
+    private var inspectorHeader: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Label {
+                Text(verbatim: item.tool.displayName)
+            } icon: {
+                Image(systemName: item.tool.systemImage)
+            }
+            .foregroundStyle(.secondary)
+            Text(verbatim: item.name)
+                .font(.title3)
+                .fontWeight(.semibold)
+            InventoryConfigurationCell(item: item)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+        .accessibilityLabel(
+            Text(verbatim: inspectorHeaderAccessibilityLabel)
+        )
+    }
+
+    /// Localized VoiceOver sentence for the selected server header.
+    private var inspectorHeaderAccessibilityLabel: String {
+        String(
+            format: String(
+                localized: "MCP inventory item accessibility label",
+                defaultValue: "%1$@. Tool: %2$@. Status: %3$@."
+            ),
+            locale: .current,
+            item.name,
+            item.tool.displayName,
+            item.inventoryConfigurationStatusTitle
+        )
+    }
+
+    /// Original inspector content retained unchanged while guidance is disabled.
+    @ViewBuilder
+    private var existingInspectorContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            LabeledContent("Repository", value: item.repositoryName)
+            LabeledContent("Transport", value: item.transport.displayName)
+            LabeledContent("Scope") {
+                Text(verbatim: item.scope)
+                    .monospaced()
+                    .textSelection(.enabled)
+            }
+            LabeledContent("Source") {
+                Text(verbatim: item.sourcePath)
+                    .monospaced()
+                    .textSelection(.enabled)
+                    .multilineTextAlignment(.trailing)
+            }
+        }
+
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Command / URL")
+                .font(.headline)
+            Text(verbatim: item.summary)
+                .font(.caption)
+                .monospaced()
+                .textSelection(.enabled)
+        }
+
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Environment")
+                .font(.headline)
+            EnvVarsCell(item: item)
+        }
+
+        HStack {
+            Button("Open Tool", systemImage: "arrow.right.circle", action: openTool)
+                .disabled(!canOpenTool)
+            Button("Open Source", systemImage: "doc.text", action: openSource)
+                .disabled(!canOpenSource)
+        }
+    }
+
+    /// Routes stable guidance action identifiers through the inventory's existing actions.
+    private func performGuidanceAction(_ actionID: String) {
+        switch actionID {
+        case MCPServerGuidance.openToolActionID where canOpenTool:
+            openTool()
+        case MCPServerGuidance.openSourceActionID where canOpenSource:
+            openSource()
+        default:
+            break
+        }
+    }
+}
+
+private extension MCPServerInventoryItem {
+    /// One source of truth for title, symbol, and tint in inventory status presentation.
+    enum ConfigurationStatus {
+        case missingVariables
+        case unknownTransport
+        case configured
+    }
+
+    /// Feature-aware configuration status used by every visual representation.
+    var configurationStatus: ConfigurationStatus {
+        if hasMissingEnvVars {
+            .missingVariables
+        } else if FeatureFlag.explainableGuidance.isEnabled && transport == .unknown {
+            .unknownTransport
+        } else {
+            .configured
+        }
+    }
+
+    /// Localized status shared by the compact cell and its VoiceOver header.
+    var inventoryConfigurationStatusTitle: String {
+        switch configurationStatus {
+        case .missingVariables:
+            String(localized: "Missing variables")
+        case .unknownTransport:
+            String(
+                localized: "MCP inventory unknown transport status",
+                defaultValue: "Unknown transport"
+            )
+        case .configured:
+            String(localized: "Configured")
+        }
+    }
+
+    /// Symbol matching the current configuration status.
+    var inventoryConfigurationStatusSymbol: String {
+        switch configurationStatus {
+        case .missingVariables:
+            "exclamationmark.triangle.fill"
+        case .unknownTransport:
+            "exclamationmark.triangle"
+        case .configured:
+            "checkmark.circle"
+        }
+    }
+
+    /// Semantic tint matching the current configuration status.
+    var inventoryConfigurationStatusTint: Color {
+        switch configurationStatus {
+        case .missingVariables, .unknownTransport:
+            .orange
+        case .configured:
+            .secondary
+        }
     }
 }
 
