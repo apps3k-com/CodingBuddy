@@ -246,6 +246,7 @@ struct PRAttentionQueueView: View {
 
 /// Compact native priority label shared by every queue row.
 private struct AttentionPriorityLabel: View {
+    /// Priority whose label, symbol, and accessibility explanation are rendered.
     var priority: AttentionPriority
 
     var body: some View {
@@ -277,8 +278,11 @@ private struct AttentionPriorityLabel: View {
 
 /// Plain-language inspector for the selected queue item.
 private struct PRAttentionInspector: View {
+    /// Currently selected queue item, or `nil` when no row is selected.
     var item: PRAttentionItem?
+    /// Whether the selected item is the queue's current recommendation.
     var isRecommended: Bool
+    /// Typed guidance action delegated to the queue owner.
     var performAction: (String) -> Void
 
     var body: some View {

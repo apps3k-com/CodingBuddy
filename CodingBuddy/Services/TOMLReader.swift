@@ -7,18 +7,26 @@ import Foundation
 
 /// A TOML value as far as CodingBuddy needs it (reading Codex configs).
 nonisolated indirect enum TOMLValue: Equatable {
+    /// A TOML string value.
     case string(String)
+    /// A TOML integer value.
     case int(Int)
+    /// A TOML floating-point value.
     case double(Double)
+    /// A TOML Boolean value.
     case bool(Bool)
+    /// An ordered TOML array.
     case array([TOMLValue])
+    /// A keyed TOML table.
     case table([String: TOMLValue])
 }
 
 /// Root table with path-based accessors.
 nonisolated struct TOMLTable: Equatable {
+    /// Root key-value storage for the parsed document.
     var values: [String: TOMLValue] = [:]
 
+    /// Returns the value at a nested key path, or `nil` when the path is empty or unresolved.
     func value(at path: [String]) -> TOMLValue? {
         var current: TOMLValue = .table(values)
         for key in path {
@@ -28,26 +36,31 @@ nonisolated struct TOMLTable: Equatable {
         return path.isEmpty ? nil : current
     }
 
+    /// Returns the string at a nested key path when its TOML type matches.
     func string(at path: [String]) -> String? {
         if case .string(let value) = value(at: path) { return value }
         return nil
     }
 
+    /// Returns the integer at a nested key path when its TOML type matches.
     func int(at path: [String]) -> Int? {
         if case .int(let value) = value(at: path) { return value }
         return nil
     }
 
+    /// Returns the Boolean at a nested key path when its TOML type matches.
     func bool(at path: [String]) -> Bool? {
         if case .bool(let value) = value(at: path) { return value }
         return nil
     }
 
+    /// Returns only string elements from the array at a nested key path.
     func stringArray(at path: [String]) -> [String]? {
         guard case .array(let items) = value(at: path) else { return nil }
         return items.compactMap { if case .string(let s) = $0 { s } else { nil } }
     }
 
+    /// Returns the table at a nested path, or the root values for an empty path.
     func table(at path: [String]) -> [String: TOMLValue]? {
         if path.isEmpty { return values }
         if case .table(let value) = value(at: path) { return value }
@@ -62,6 +75,7 @@ nonisolated struct TOMLTable: Equatable {
 /// display-only consumer.
 nonisolated enum TOMLReader {
 
+    /// Parses supported TOML constructs while skipping malformed or unsupported entries.
     static func parse(_ text: String) -> TOMLTable {
         var root: [String: TOMLValue] = [:]
         var currentPath: [String] = []

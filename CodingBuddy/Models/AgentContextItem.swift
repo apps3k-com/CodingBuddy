@@ -68,6 +68,24 @@ nonisolated enum AgentContextEntryType: String, CaseIterable, Sendable {
     }
 }
 
+/// Describes whether CodingBuddy may hand a scanned context path to another application.
+nonisolated enum AgentContextActionCapability: Equatable, Hashable, Sendable {
+    /// A regular in-repository file or directory may be opened or revealed.
+    case allowed
+
+    /// The expected entry is absent, so there is no target for an external action.
+    case blockedMissing
+
+    /// A leaf or intermediate symlink prevents safe external path traversal.
+    case blockedSymlink
+
+    /// An unsupported file-system entry must not be handed to another application.
+    case blockedUnexpectedEntry
+
+    /// Whether Open and Reveal actions may route this entry outside CodingBuddy.
+    var allowsExternalActions: Bool { self == .allowed }
+}
+
 /// Deterministic signals raised by the agent context scanner.
 nonisolated enum AgentContextWarningCode: String, CaseIterable, Sendable {
     /// AGENTS.md is absent from the selected repository root.
@@ -160,6 +178,20 @@ nonisolated struct AgentContextItem: Identifiable, Equatable, Hashable, Sendable
 
     /// Whether this entry exists on disk.
     var exists: Bool { entryType != .missing }
+
+    /// Safety capability shared by every Open and Reveal action route.
+    var actionCapability: AgentContextActionCapability {
+        switch entryType {
+        case .file, .directory:
+            .allowed
+        case .missing:
+            .blockedMissing
+        case .symlink:
+            .blockedSymlink
+        case .unexpected:
+            .blockedUnexpectedEntry
+        }
+    }
 
     /// Returns true when the item matches a free-text filter.
     func matches(searchText: String) -> Bool {

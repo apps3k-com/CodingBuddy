@@ -1,5 +1,19 @@
+import Accessibility
 import AppKit
 import SwiftUI
+
+/// Empty presentation shown after a repository scan has loaded successfully.
+nonisolated enum AgentContextInspectorEmptyState: Equatable {
+    /// The repository contains no supported context files.
+    case noContextFiles
+    /// The current search excludes all loaded context files.
+    case noSearchResults
+
+    /// Distinguishes an empty repository from an empty filtered result set.
+    init(searchText: String) {
+        self = searchText.isEmpty ? .noContextFiles : .noSearchResults
+    }
+}
 
 /// Read-only inspector for agent context files in a selected repository folder.
 struct AgentContextInspectorView: View {
@@ -17,6 +31,10 @@ struct AgentContextInspectorView: View {
     @State private var openWarning: String?
     /// Identifier that restarts the warning auto-dismiss timer.
     @State private var openWarningID = UUID()
+    /// Persistent Launch Services or validation failure presented as an alert.
+    @State private var openFailure: String?
+    /// VoiceOver destination for repository loading and safety-refusal states.
+    @AccessibilityFocusState private var unavailableAccessibilityFocus: AgentContextUnavailableFocus?
 
     /// Inspector rows after applying the current search filter.
     private var filteredItems: [AgentContextItem] {
@@ -28,7 +46,12 @@ struct AgentContextInspectorView: View {
         selection.flatMap { id in filteredItems.first { $0.id == id } }
     }
 
-    /// Table-based inspector layout with native folder selection and Finder actions.
+    /// Whether the current repository state can begin another scan.
+    private var canRefresh: Bool {
+        store.state.phase == .loaded || store.state.phase == .refused
+    }
+
+    /// Table-based inspector layout with native folder selection and safe snapshot opens.
     var body: some View {
         Table(filteredItems, selection: $selection) {
             TableColumn("Context") { item in
@@ -62,12 +85,11 @@ struct AgentContextInspectorView: View {
         .navigationSubtitle(Text(verbatim: store.selectedRepositoryURL?.path ?? String(localized: "No repository selected")))
         .searchable(text: $searchText, prompt: "Search context files")
         .contextMenu(forSelectionType: AgentContextItem.ID.self) { ids in
-            if let item = item(for: ids.first), item.exists {
+            if let item = item(for: ids.first), canOpen(item) {
                 Button("Open") { open(item) }
-                Button("Reveal in Finder") { reveal(item) }
             }
         } primaryAction: { ids in
-            if let item = item(for: ids.first), item.exists {
+            if let item = item(for: ids.first), canOpen(item) {
                 open(item)
             }
         }
@@ -79,21 +101,13 @@ struct AgentContextInspectorView: View {
                     }
                 }
                 .help("Open the selected context entry")
-                .disabled(selectedItem?.exists != true)
-
-                Button("Reveal in Finder", systemImage: "folder") {
-                    if let selectedItem {
-                        reveal(selectedItem)
-                    }
-                }
-                .help("Reveal the selected context entry in Finder")
-                .disabled(selectedItem?.exists != true)
+                .disabled(selectedItem.map(canOpen) != true)
 
                 Button("Refresh", systemImage: "arrow.clockwise") {
                     store.reload()
                 }
                 .help("Refresh context files")
-                .disabled(store.selectedRepositoryURL == nil)
+                .disabled(!canRefresh)
 
                 Button("Choose Folder...", systemImage: "folder.badge.plus") {
                     chooseRepositoryFolder()
@@ -102,18 +116,58 @@ struct AgentContextInspectorView: View {
             }
         }
         .overlay {
-            if store.selectedRepositoryURL == nil {
+            switch store.state {
+            case .noRepository:
                 ContentUnavailableView(
                     "No repository selected",
                     systemImage: "folder.badge.questionmark",
                     description: Text("Choose a repository folder to inspect agent context files.")
                 )
-            } else if filteredItems.isEmpty {
-                ContentUnavailableView(
-                    "No Results",
-                    systemImage: "magnifyingglass",
-                    description: Text("Try a different file, warning, or path.")
-                )
+            case .loading:
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .controlSize(.large)
+                    Text("Inspecting repository...")
+                        .font(.headline)
+                    Text("Context entries will appear after the safety check finishes.")
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Inspecting repository...")
+                .accessibilityHint("Context entries will appear after the safety check finishes.")
+                .accessibilityFocused($unavailableAccessibilityFocus, equals: .loading)
+            case let .refused(_, reason):
+                ContentUnavailableView {
+                    Label("Repository inspection blocked", systemImage: "exclamationmark.shield")
+                        .accessibilityFocused($unavailableAccessibilityFocus, equals: .refused)
+                } description: {
+                    Text(refusalDescription(for: reason))
+                } actions: {
+                    Button("Retry", systemImage: "arrow.clockwise") {
+                        store.reload()
+                    }
+                    Button("Choose Another Folder...", systemImage: "folder.badge.plus") {
+                        chooseRepositoryFolder()
+                    }
+                }
+            case .loaded:
+                if filteredItems.isEmpty {
+                    switch AgentContextInspectorEmptyState(searchText: searchText) {
+                    case .noContextFiles:
+                        ContentUnavailableView(
+                            "No context files",
+                            systemImage: "doc.text.magnifyingglass",
+                            description: Text("No supported agent context files were found in this repository.")
+                        )
+                    case .noSearchResults:
+                        ContentUnavailableView(
+                            "No Results",
+                            systemImage: "magnifyingglass",
+                            description: Text("Try a different file, warning, or path.")
+                        )
+                    }
+                }
             }
         }
         .overlay(alignment: .bottom) {
@@ -130,6 +184,30 @@ struct AgentContextInspectorView: View {
             guard openWarning != nil else { return }
             try? await Task.sleep(for: .seconds(4))
             openWarning = nil
+        }
+        .onChange(of: store.selectedRepositoryURL) {
+            selection = nil
+        }
+        .onChange(of: store.state.phase, initial: true) {
+            switch store.state.phase {
+            case .loading:
+                unavailableAccessibilityFocus = .loading
+            case .refused:
+                unavailableAccessibilityFocus = .refused
+            case .noRepository, .loaded:
+                unavailableAccessibilityFocus = nil
+            }
+        }
+        .alert(
+            "Could Not Open Snapshot",
+            isPresented: Binding(
+                get: { openFailure != nil },
+                set: { if !$0 { openFailure = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) { openFailure = nil }
+        } message: {
+            Text(openFailure ?? "")
         }
     }
 
@@ -154,23 +232,82 @@ struct AgentContextInspectorView: View {
 
     /// Opens a present context entry through the configured file opener.
     private func open(_ item: AgentContextItem) {
+        guard canOpen(item),
+              let repositoryURL = store.selectedRepositoryURL
+        else {
+            reportInvalidAction()
+            return
+        }
+
+        let scanner = AgentContextScanner(repositoryURL: repositoryURL)
         let preference = FeatureFlag.defaultEditorPreference.isEnabled
             ? DefaultTextEditorPreference.load()
             : .systemDefault
         Task { @MainActor in
-            let result = await fileOpener.open(item.url, preference: preference)
-            if result == .fellBackToSystemDefault {
-                openWarning = String(
-                    localized: "The configured default editor is unavailable. CodingBuddy opened the file with the system default instead."
+            guard let result = await scanner.performValidatedAction(for: item, { actionURL in
+                await fileOpener.open(actionURL, preference: preference)
+            }) else {
+                reportInvalidAction()
+                return
+            }
+            switch result {
+            case .failed, .unsupportedURL:
+                reportOpenFailure()
+            case .fellBackToSystemDefault:
+                reportOpenNotice(
+                    String(
+                        localized: "The configured editor is unavailable. CodingBuddy opened a read-only verified snapshot with the system default instead."
+                    )
                 )
-                openWarningID = UUID()
+            case .openedWithSelectedEditor, .openedWithSystemDefault:
+                reportOpenNotice(
+                    String(
+                        localized: "CodingBuddy opened a read-only verified snapshot. Edit the original file from its repository when changes are needed."
+                    )
+                )
             }
         }
     }
 
-    /// Reveals a present context entry in Finder.
-    private func reveal(_ item: AgentContextItem) {
-        NSWorkspace.shared.activateFileViewerSelecting([item.url])
+    /// Whether an item can be copied from a verified descriptor into a safe open snapshot.
+    private func canOpen(_ item: AgentContextItem) -> Bool {
+        item.entryType == .file && item.actionCapability.allowsExternalActions
+    }
+
+    /// Reports a stale or unsafe action target and refreshes the displayed identity snapshot.
+    private func reportInvalidAction() {
+        presentOpenFailure(String(localized: "The file could not be read safely. Refresh the inspector and try again."))
+        store.reload()
+    }
+
+    /// Reports a Launch Services failure without misclassifying or reloading the verified file.
+    private func reportOpenFailure() {
+        presentOpenFailure(
+            String(localized: "The read-only verified snapshot was created, but macOS could not open it.")
+        )
+    }
+
+    /// Shows and announces a short successful external-open result.
+    private func reportOpenNotice(_ message: String) {
+        openWarning = message
+        openWarningID = UUID()
+        AccessibilityNotification.Announcement(message).post()
+    }
+
+    /// Presents and announces a persistent external-open error.
+    private func presentOpenFailure(_ message: String) {
+        openFailure = message
+        AccessibilityNotification.Announcement(message).post()
+    }
+
+    /// Returns a non-diagnostic explanation that does not expose underlying file-system details.
+    private func refusalDescription(for reason: AgentContextScanRefusalReason) -> String {
+        switch reason {
+        case .repositoryPathUnavailableOrUnsafe:
+            String(
+                localized: "CodingBuddy refused to inspect this repository because its path is unavailable or contains a symbolic link."
+            )
+        }
     }
 
     /// Formats an optional byte count for dense table display.
@@ -183,6 +320,14 @@ struct AgentContextInspectorView: View {
     private func modifiedText(for item: AgentContextItem) -> String {
         item.modifiedAt?.formatted(date: .abbreviated, time: .shortened) ?? "-"
     }
+}
+
+/// VoiceOver focus targets for transient or unavailable inspector content.
+private enum AgentContextUnavailableFocus: Hashable {
+    /// Repository inspection is in progress.
+    case loading
+    /// Repository inspection was refused for safety.
+    case refused
 }
 
 /// Two-line context file summary for path and category.

@@ -9,6 +9,7 @@ import SwiftUI
 /// expiry per secret file and reversible resets (Trash). The encrypted
 /// credential store is described, never opened.
 struct CraftAgentView: View {
+    /// Read-mostly store providing safe Craft metadata and reversible reset actions.
     var store: CraftAgentStore
 
     @State private var pendingSecretReset: CraftAgentStore.SecretFile?

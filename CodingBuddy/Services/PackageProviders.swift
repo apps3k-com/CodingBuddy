@@ -7,13 +7,17 @@ import Foundation
 
 /// Internal provider contract for global package inventory and updates.
 nonisolated protocol PackageProvider: Sendable {
+    /// Package manager represented by this provider.
     var manager: PackageManagerKind { get }
+    /// Reads one concrete installation and returns its normalized global package inventory.
     func scan(installation: PackageManagerInstallation) async throws -> ProviderSnapshot
+    /// Builds the exact mutating command for the selected package target.
     func updateRequest(
         for package: InstalledPackage,
         mode: PackageUpdateMode,
         installation: PackageManagerInstallation
     ) throws -> CommandRequest
+    /// Builds a non-mutating preview command when the package manager supports one.
     func previewRequest(
         for package: InstalledPackage,
         mode: PackageUpdateMode,
@@ -22,6 +26,7 @@ nonisolated protocol PackageProvider: Sendable {
 }
 
 nonisolated extension PackageProvider {
+    /// Indicates by default that a provider has no native preview command.
     func previewRequest(
         for package: InstalledPackage,
         mode: PackageUpdateMode,
@@ -31,10 +36,14 @@ nonisolated extension PackageProvider {
 
 /// Provider failures safe to expose without raw environment or command data.
 nonisolated enum PackageProviderError: LocalizedError, Equatable, Sendable {
+    /// The package manager returned data that could not be normalized safely.
     case invalidResponse(PackageManagerKind)
+    /// A package was passed to a provider for a different manager.
     case unsupportedPackage(PackageManagerKind)
+    /// No exact version target is available for the requested update mode.
     case unavailableTarget
 
+    /// Localized, user-safe explanation that omits raw command output and environment data.
     var errorDescription: String? {
         switch self {
         case .invalidResponse(let manager):
@@ -49,13 +58,17 @@ nonisolated enum PackageProviderError: LocalizedError, Equatable, Sendable {
 
 /// Homebrew formula and cask provider using documented JSON commands.
 nonisolated struct HomebrewPackageProvider: PackageProvider {
+    /// Homebrew manager identity used in normalized package models.
     let manager = PackageManagerKind.homebrew
+    /// Command runner used for read-only inventory and generated update requests.
     let runner: any CommandRunning
 
+    /// Creates a Homebrew provider with an injectable command runner.
     init(runner: any CommandRunning = FoundationCommandRunner()) {
         self.runner = runner
     }
 
+    /// Reads installed and outdated formulae and casks without triggering Homebrew auto-update.
     func scan(installation: PackageManagerInstallation) async throws -> ProviderSnapshot {
         let environment = installation.environment.merging(["HOMEBREW_NO_AUTO_UPDATE": "1"]) { _, new in new }
         let info = try await runner.run(CommandRequest(
@@ -130,6 +143,7 @@ nonisolated struct HomebrewPackageProvider: PackageProvider {
         )
     }
 
+    /// Builds a Homebrew upgrade request for a formula or cask.
     func updateRequest(
         for package: InstalledPackage,
         mode: PackageUpdateMode,
@@ -147,6 +161,7 @@ nonisolated struct HomebrewPackageProvider: PackageProvider {
         )
     }
 
+    /// Builds Homebrew's dry-run upgrade request for the selected formula or cask.
     func previewRequest(
         for package: InstalledPackage,
         mode: PackageUpdateMode,
@@ -181,13 +196,17 @@ nonisolated struct HomebrewPackageProvider: PackageProvider {
 
 /// npm global package provider.
 nonisolated struct NPMPackageProvider: PackageProvider {
+    /// npm manager identity used in normalized package models.
     let manager = PackageManagerKind.npm
+    /// Command runner used to query npm's global inventory.
     let runner: any CommandRunning
 
+    /// Creates an npm provider with an injectable command runner.
     init(runner: any CommandRunning = FoundationCommandRunner()) {
         self.runner = runner
     }
 
+    /// Reads npm's globally installed and outdated packages, accepting its documented status codes.
     func scan(installation: PackageManagerInstallation) async throws -> ProviderSnapshot {
         let installedResult = try await runner.run(CommandRequest(
             executableURL: installation.executableURL,
@@ -220,6 +239,7 @@ nonisolated struct NPMPackageProvider: PackageProvider {
         )
     }
 
+    /// Builds an exact global npm install request for the selected target version.
     func updateRequest(
         for package: InstalledPackage,
         mode: PackageUpdateMode,
@@ -238,13 +258,17 @@ nonisolated struct NPMPackageProvider: PackageProvider {
 
 /// pnpm global package provider with an explicit PNPM_HOME environment.
 nonisolated struct PNPMPackageProvider: PackageProvider {
+    /// pnpm manager identity used in normalized package models.
     let manager = PackageManagerKind.pnpm
+    /// Command runner used to query pnpm's global inventory.
     let runner: any CommandRunning
 
+    /// Creates a pnpm provider with an injectable command runner.
     init(runner: any CommandRunning = FoundationCommandRunner()) {
         self.runner = runner
     }
 
+    /// Reads pnpm's global roots and outdated metadata using the installation environment.
     func scan(installation: PackageManagerInstallation) async throws -> ProviderSnapshot {
         let installedResult = try await runner.run(CommandRequest(
             executableURL: installation.executableURL,
@@ -281,6 +305,7 @@ nonisolated struct PNPMPackageProvider: PackageProvider {
         )
     }
 
+    /// Builds a global pnpm update request, adding `--latest` only for latest-mode plans.
     func updateRequest(
         for package: InstalledPackage,
         mode: PackageUpdateMode,
@@ -378,9 +403,12 @@ private nonisolated func githubRepositoryURL(from value: String?) -> URL? {
 }
 
 private nonisolated struct BrewInfoDocument: Decodable {
+    /// Installed Homebrew formula records.
     let formulae: [BrewFormula]
+    /// Installed Homebrew cask records.
     let casks: [BrewCask]
 
+    /// Decodes absent formula or cask collections as empty inventories.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         formulae = try container.decodeIfPresent([BrewFormula].self, forKey: .formulae) ?? []
@@ -391,11 +419,16 @@ private nonisolated struct BrewInfoDocument: Decodable {
 }
 
 private nonisolated struct BrewFormula: Decodable {
+    /// Canonical Homebrew formula name.
     let name: String
+    /// Upstream project homepage reported by Homebrew.
     let homepage: String?
+    /// Installed versions reported for the formula.
     let installed: [BrewInstalledVersion]
+    /// Whether Homebrew reports the formula as pinned.
     let pinned: Bool?
 
+    /// Decodes optional formula metadata without requiring installed-version entries.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decode(String.self, forKey: .name)
@@ -408,28 +441,43 @@ private nonisolated struct BrewFormula: Decodable {
 }
 
 private nonisolated struct BrewInstalledVersion: Decodable {
+    /// Installed formula version string.
     let version: String
+    /// Whether the user explicitly requested this installation.
     let installedOnRequest: Bool?
 
+    /// Maps Homebrew's snake-case installed-version keys.
     enum CodingKeys: String, CodingKey {
+        /// Installed version key.
         case version
+        /// Explicit-installation key exposed as `installedOnRequest`.
         case installedOnRequest = "installed_on_request"
     }
 }
 
 private nonisolated struct BrewCask: Decodable {
+    /// Canonical Homebrew cask token.
     let token: String
+    /// Current cask definition version.
     let version: String?
+    /// Upstream project homepage reported by Homebrew.
     let homepage: String?
+    /// Installed cask version strings.
     let installed: [String]
+    /// Whether the cask delegates updates to the installed application.
     let autoUpdates: Bool?
+    /// Whether Homebrew reports the cask as pinned.
     let pinned: Bool?
 
+    /// Maps Homebrew cask keys used by the inventory normalizer.
     enum CodingKeys: String, CodingKey {
+        /// Keys whose JSON and Swift names are identical.
         case token, version, homepage, installed, pinned
+        /// Auto-update key exposed as `autoUpdates`.
         case autoUpdates = "auto_updates"
     }
 
+    /// Decodes Homebrew's cask `installed` field in either array or scalar form.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         token = try container.decode(String.self, forKey: .token)
@@ -448,9 +496,12 @@ private nonisolated struct BrewCask: Decodable {
 }
 
 private nonisolated struct BrewOutdatedDocument: Decodable {
+    /// Formulae with updates reported by Homebrew.
     let formulae: [BrewOutdatedPackage]
+    /// Casks with updates reported by Homebrew.
     let casks: [BrewOutdatedPackage]
 
+    /// Decodes absent outdated collections as empty update sets.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         formulae = try container.decodeIfPresent([BrewOutdatedPackage].self, forKey: .formulae) ?? []
@@ -461,36 +512,51 @@ private nonisolated struct BrewOutdatedDocument: Decodable {
 }
 
 private nonisolated struct BrewOutdatedPackage: Decodable {
+    /// Formula name or cask token with an available update.
     let name: String
+    /// Target version currently offered by Homebrew.
     let currentVersion: String
 
+    /// Maps Homebrew's outdated-package response keys.
     enum CodingKeys: String, CodingKey {
+        /// Package identity key.
         case name
+        /// Available-version key exposed as `currentVersion`.
         case currentVersion = "current_version"
     }
 }
 
 private nonisolated struct NodeInstalledRoot: Decodable {
+    /// Runtime dependencies installed under the global root.
     let dependencies: [String: NodeInstalledPackage]?
+    /// Development dependencies installed under the global root.
     let devDependencies: [String: NodeInstalledPackage]?
+    /// Optional dependencies installed under the global root.
     let optionalDependencies: [String: NodeInstalledPackage]?
 }
 
 private nonisolated struct NodeInstalledPackage: Decodable {
+    /// Installed package version.
     let version: String?
+    /// Package homepage from registry metadata.
     let homepage: String?
+    /// Package repository in either string or object form.
     let repository: NodeRepository?
 
+    /// Parsed repository URL when registry metadata contains a valid URL string.
     var repositoryURL: URL? { repository?.url.flatMap(URL.init(string:)) }
 }
 
 private nonisolated enum NodeRepository: Decodable {
+    /// Normalized repository URL text from either supported registry representation.
     case value(String)
 
+    /// Underlying repository URL text.
     var url: String? {
         switch self { case .value(let value): value }
     }
 
+    /// Decodes repository metadata represented as a string or an object with a `url` field.
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let value = try? container.decode(String.self) {
@@ -503,14 +569,21 @@ private nonisolated enum NodeRepository: Decodable {
 }
 
 private nonisolated struct NodeOutdatedPackage: Decodable {
+    /// Version currently installed.
     let current: String
+    /// Highest version satisfying the current dependency range.
     let wanted: String
+    /// Latest version published by the registry.
     let latest: String
 }
 
 private nonisolated struct PNPMOutdatedPackage: Decodable {
+    /// Package name in pnpm's array-shaped outdated response.
     let name: String
+    /// Version currently installed.
     let current: String
+    /// Highest version satisfying the current dependency range.
     let wanted: String
+    /// Latest version published by the registry.
     let latest: String
 }

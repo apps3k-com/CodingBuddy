@@ -4,7 +4,7 @@ CodingBuddy ist eine native macOS-App zur Verwaltung der Environment Variables i
 
 ## Variablen durchsuchen
 
-- Die **Seitenleiste** ordnet Ziele nach Aufgaben: **Fokus**, **Umgebung**, **AI-Tools**, **Zustand & Sicherheit**, **Repositories** und **Wartung**. Unter Umgebung stehen *Alle Variablen* und je ein Eintrag pro Dotfile mit Zähler. Noch nicht existierende Dateien sind ausgegraut; legst du dort eine Variable an, wird die Datei erstellt.
+- Die **Seitenleiste** ordnet Ziele nach Aufgaben: **Fokus**, **Umgebung**, **AI-Tools**, **Zustand & Sicherheit**, **Repositories** und **Wartung**. Unter Umgebung stehen *Alle Variablen* und je ein Eintrag pro Dotfile. Ein Zahlen-Badge erscheint nur nach vollständig geladener Quelle; fehlende oder noch nicht geprüfte Quellen bleiben neutral, eine orange Warnung markiert verweigerte oder unvollständige Daten. Noch nicht existierende Dateien sind ausgegraut; legst du dort eine Variable an, wird die Datei erstellt.
 - Die obersten Seitenleisten-Gruppen lassen sich ein- und ausklappen. CodingBuddy merkt sich sowohl eingeklappte Gruppen als auch das zuletzt gewählte Ziel.
 - Die **Tabelle** zeigt Name, Wert und Quelldatei. Mit dem Suchfeld (⌘F) filterst du nach Name oder Wert.
 - Ein 🔒 **Schloss-Symbol** markiert komplexe Zeilen (Command Substitution wie `$(date)`, Mehrfach-Zuweisungen wie `export A=1 B=2`). CodingBuddy zeigt sie ehrlich an, schreibt sie aber nie um — solche Zeilen bearbeitest du besser im Texteditor.
@@ -32,6 +32,14 @@ CodingBuddy ist eine native macOS-App zur Verwaltung der Environment Variables i
 Vor jeder Änderung schreibt CodingBuddy ein Backup mit Zeitstempel nach
 `~/Library/Application Support/CodingBuddy/Backups/` (die letzten 20 pro Datei bleiben erhalten). Geschrieben wird atomar, symlink-sicher (Dotfile-Manager bleiben intakt) und unter Erhalt der Dateirechte. Wurde die Datei währenddessen extern geändert, wird der Schreibvorgang verweigert und die Ansicht neu geladen.
 
+CodingBuddy behandelt eine vorhandene unlesbare oder nicht als UTF-8 gültige
+Shell-Datei niemals als fehlend. Ein einzelner Datei-Scope zeigt eine
+Sicherheitsverweigerung; **Alle Variablen** behält Zeilen aus geprüften Dateien,
+kennzeichnet das Ergebnis aber als **Unvollständige Daten**. Neu anlegen,
+Bearbeiten, Löschen, Import und Export bleiben gesperrt, bis **Erneut versuchen**
+alle Quellen sicher laden kann. **Im Finder anzeigen** hilft bei der Prüfung,
+ohne den absoluten Pfad im Fehlertext der App offenzulegen.
+
 Der Eintrag **Wartung → Backups** (Alpha) listet diese Backups für
 zsh-Dotfiles und unterstützte Agent-Konfigurations-/Env-Dateien
 (`~/.codex/mcp.env`, Claude-Code-Settings, Cursor `mcp.json`). Wähle ein
@@ -39,7 +47,26 @@ Backup aus, um eine redigierte **Backup**-Vorschau mit dem aktuellen Ziel zu
 vergleichen. **Wiederherstellen …** schreibt das ausgewählte Backup über
 denselben sicheren Writer zurück; dadurch wird die aktuelle Datei vor dem
 Ersetzen erneut gesichert. Backups, die keinem bekannten von CodingBuddy
-verwalteten Ziel zugeordnet werden können, bleiben reine Vorschau.
+verwalteten Ziel zugeordnet werden können, bleiben reine Vorschau. CodingBuddy
+verweigert Vorschau und Wiederherstellung außerdem, wenn ein gefundenes Backup
+ersetzt wurde, zu einem Symlink geworden ist, keine sichere reguläre Datei mehr
+ist oder das Vorschau-Limit von 8 MiB überschreitet. Die Erkennung hält nur
+stabile No-Follow-Metadaten; die ausgewählte Datei wird erst für Vorschau oder
+Wiederherstellung geöffnet und geprüft. Dadurch benötigt eine normale Retention
+über viele verwaltete Dateien nicht einen Descriptor pro Zeile. Ein reguläres,
+anhand seines Namens erkanntes Backup, das die Eigentümer-, Berechtigungs- oder
+Größenprüfung nicht besteht, bleibt mit dem Status **Abgelehnt** und einer
+konkreten Erklärung sichtbar. Vorschau und Wiederherstellung bleiben gesperrt;
+**Im Finder anzeigen** steht für eine manuelle Wiederherstellung weiterhin zur
+Verfügung. Die
+Verzeichniserkennung bleibt auf 4.096 Einträge begrenzt. Wird diese Grenze
+überschritten, zeigt CodingBuddy eine Sicherheitsverweigerung mit **Erneut
+versuchen** und **Im Finder anzeigen**, statt eine irreführend unvollständige
+oder leere Liste anzuzeigen.
+Shell-Backup-Vorschauen erhalten Namen und harmlose Struktur, maskieren aber
+jeden Zuweisungswert und nicht nur bekannte Credential-Namen. JSON-Vorschauen
+erhalten Schlüssel und Container-Struktur, während jeder Skalarwert maskiert
+wird; fehlerhaftes JSON erscheint als eine einzige undurchsichtige Maske.
 
 ## Import & Export
 
@@ -87,16 +114,18 @@ Variablen, deren Namen nach Zugangsdaten aussehen (`GITHUB_TOKEN`, `AWS_SECRET_A
 - Klicke den **Schloss-Button** in der Toolbar (oder versuche einfach, einen maskierten Wert zu bearbeiten/kopieren) und authentifiziere dich mit **Touch ID oder deinem Account-Passwort**, um sie anzuzeigen.
 - Die Entsperrung läuft automatisch ab — die Dauer stellst du unter *Einstellungen → Sicherheit* ein (1/5/15 Minuten oder bis CodingBuddy beendet wird). Der Schloss-Button maskiert sofort wieder.
 - Wert/Zeile kopieren, Bearbeiten und der `.env`-Export maskierter Variablen verlangen zuerst eine Authentifizierung.
+- Die Authentifizierung ist an die exakte sichtbare Zeile und den Ansichts-Snapshot gebunden. Wird eine Datei neu geladen oder änderst du Scope, Suche oder den Filter für wirksame Variablen, während der macOS-Dialog offen ist, verwirft CodingBuddy die ausstehende Kopier-, Bearbeitungs- oder Exportaktion, statt sie auf geänderte Daten anzuwenden.
+- **Alle eingeblendeten Secrets sperren** leert nur Editoren, die einen sensiblen Wert aus einem Store eingeblendet haben. Normale Entwürfe wie `PATH` bleiben geöffnet. Bei einem geänderten Secret-Entwurf stehen **Sichern und sperren**, **Verwerfen und sperren** und **Abbrechen** bereit; dieselben Optionen erscheinen 30 Sekunden vor dem automatischen Ablauf. **Sichern und sperren** schließt erst nach erfolgreichem Schreiben. Ein verweigerter oder veralteter Write lässt den Editor mit seiner Recovery-Meldung geöffnet.
 
 ## MCP-Zugangsdaten (~/.mcp-auth)
 
 Der Sidebar-Bereich **Zustand & Sicherheit → MCP Auth** verwaltet den OAuth-Cache, den `mcp-remote` für entfernte MCP-Server anlegt — das Verzeichnis, das du bisher mit `rm -rf ~/.mcp-auth` löschen musstest.
 
 - Jeder Eintrag ist ein Server. CodingBuddy löst die kryptischen Datei-Hashes über deine Claude-Konfiguration (`~/.claude.json`, Claude-Desktop-Config) zu Server-URLs auf; nicht auflösbare Einträge zeigen den Hash plus den OAuth-Scope als Hinweis.
-- Die **Status-Spalte** zeigt, ob der Access-Token noch aktiv ist (mit geschätztem Ablauf), abgelaufen ist oder der Eintrag unvollständig ist (ein nie abgeschlossener Login).
-- **Eintrag zurücksetzen…** legt nur die Dateien dieses Servers nach einer Bestätigung in den **Papierkorb**, die den Server und die Folge klar benennt — chirurgisch, reversibel, und die nächste Verbindung startet einfach den OAuth-Flow neu. **Alles zurücksetzen…** nutzt eine eigene Bestätigung für alle Zugangsdaten (das GUI-Pendant zu `rm -rf ~/.mcp-auth`, aber rückgängig machbar).
-- **Dateien ansehen…** (oder Doppelklick) öffnet die Credential-Dateien mit maskierten Token-Werten. Nach Authentifizierung mit Touch ID oder Passwort kannst du das rohe JSON bearbeiten; ungültiges JSON wird beim Speichern abgelehnt.
-- Fehlt `~/.mcp-auth` oder ist das Verzeichnis leer, verweist der leere Zustand zuerst auf die Verbindung mit einem OAuth-fähigen MCP-Server. CodingBuddy listet zwischengespeicherte Zugangsdaten, nachdem `mcp-remote` sie erstellt hat.
+- Die **Status-Spalte** zeigt, ob der Access-Token noch aktiv ist (mit geschätztem Ablauf), abgelaufen, unvollständig (ein nie abgeschlossener Login) oder **Nur zurücksetzen** ist, weil Token-Artefakte vorhanden sind, aber nicht sicher gelesen werden können.
+- **Eintrag zurücksetzen…** legt nur die Dateien dieses Servers nach einer Bestätigung in den **Papierkorb**, die den Server und die Folge klar benennt — chirurgisch, reversibel, und die nächste Verbindung startet einfach den OAuth-Flow neu. **Alles zurücksetzen…** nutzt eine eigene Bestätigung für alle Zugangsdaten (das GUI-Pendant zu `rm -rf ~/.mcp-auth`, aber rückgängig machbar). CodingBuddy prüft jede Komponente der Cache-, privaten Staging- und Recovery-Pfade, ohne symbolischen Links zu folgen; nur die exakten unveränderlichen macOS-Kompatibilitätsaliase sind zulässig. Anschließend sammelt CodingBuddy die exakten Einträge in einer nur für den Eigentümer zugänglichen Transaktion, verschiebt diese exklusiv in ein privates CodingBuddy-Staging, prüft dort erneut ihre Identität und legt sie erst dann als Einheit in den Papierkorb. Die Wiederherstellung überschreibt nie einen währenddessen neu angelegten Pfad. Eine verbliebene Recovery blockiert weitere Resets, übersteht durch einen privaten identitätsgebundenen Datensatz einen App-Neustart und bleibt nach Schließen der Meldung über die Toolbar erreichbar; erst nach Auflösung des exakten Recovery-Verzeichnisses entfernt ein Reload die Aktion.
+- **Dateien ansehen…** (oder Doppelklick) öffnet die Credential-Dateien mit maskierten Token-Werten. Nach Authentifizierung mit Touch ID oder Passwort kannst du das rohe JSON bearbeiten; ungültiges JSON wird beim Speichern abgelehnt. Das Speichern legt zuerst ein Backup an, schreibt atomar und erhält Symlink sowie Dateirechte. Hat ein anderer Prozess die Datei nach dem Laden im Editor geändert, verweigert CodingBuddy den veralteten Write und bietet das Neuladen der aktuellen Festplattenversion an. Ein Editor mit ungesicherten Änderungen verhindert das Beenden der App. Editor und Liste bieten die appweite Aktion **Alle eingeblendeten Secrets sperren**; im Editor stehen bei ungesicherten Änderungen Speichern, Verwerfen und Abbrechen bereit. 30 Sekunden vor der automatischen Sperre bietet ein persistenter Countdown Sichern und Sperren, erneute Authentifizierung oder Verwerfen und Sperren; ein Abbruch der Authentifizierung lässt die Warnung sichtbar. Beim Ablauf löscht CodingBuddy den Klartext sofort, setzt Tastatur- und VoiceOver-Fokus auf Entsperren zurück und kündigt die Sperre an. Das macOS-Menü **Zugangsdaten** spiegelt Dateien ansehen, globale Sperre, verbliebene Wiederherstellung und Alles zurücksetzen, damit diese Aktionen auch bei ausgeblendeter Toolbar erreichbar bleiben.
+- Fehlt `~/.mcp-auth` oder ist das Verzeichnis leer, verweist der leere Zustand zuerst auf die Verbindung mit einem OAuth-fähigen MCP-Server. CodingBuddy listet zwischengespeicherte Zugangsdaten, nachdem `mcp-remote` sie erstellt hat. Sicher identifizierte Symlinks, Spezialdateien sowie extern beschreibbare, wechselnde oder übergroße Artefakte (über 1 MiB) bleiben als **Nur zurücksetzen** sichtbar; CodingBuddy zeigt oder bearbeitet niemals ihre Inhalte. Beim Reset verschiebt CodingBuddy den exakten, ohne Link-Verfolgung identifizierten Verzeichniseintrag in die reversible Transaktion. Dadurch werden weder das Ziel eines Symlinks noch der Inhalt einer Spezialdatei geöffnet oder verändert. Eine am Aktionszeitpunkt erkannte Ersetzung bricht ab, ohne den Ersatz zu löschen. Cache- und Recovery-Auflistungen sind begrenzt: Kann die Erkennung keine vollständige Credential-Inventur garantieren, zeigt die Ansicht statt „keine Zugangsdaten“ eine Sicherheitswarnung mit erneutem Versuch und Finder-Aktion. Resets bleiben deaktiviert, bis die vollständige Abdeckung wiederhergestellt ist.
 - Kein App-Neustart nötig: Die Ansicht lädt live nach, wenn `mcp-remote` die Dateien neu schreibt.
 
 ## AI-Tools
@@ -139,9 +168,17 @@ v1-Grenzen: Agent Doctor prüft keine Netzwerk-Erreichbarkeit, startet keine Age
 Der Seitenleisten-Eintrag **Repositories → Agent Context** (Alpha) ist ein Nur-Lese-Inspector für einen Repository-Ordner. Er zeigt, welche Instruktions- und Setup-Dateien ein Agent vor einer Coding-Session wahrscheinlich berücksichtigen würde.
 
 - Wähle einen Repository-Ordner; CodingBuddy merkt sich den zuletzt gewählten Ordner.
+- Eine abgeschlossene Prüfung ohne unterstützte Dateien zeigt **Keine Kontextdateien**. **Keine Ergebnisse** ist einer aktiven Suche vorbehalten, die alle geladenen Zeilen herausfiltert.
+- Beim Auswählen oder erneuten Prüfen eines Ordners entfernt CodingBuddy sofort
+  die Zeilen des vorherigen Repositories und zeigt den Prüfstatus. Ist die Wurzel
+  nicht verfügbar oder enthält eine benutzerkontrollierte Pfadkomponente einen
+  symbolischen Link, zeigt der Inspector eine ausdrückliche
+  Sicherheitsverweigerung mit **Erneut versuchen** und **Anderen Ordner
+  auswählen …** statt eines leeren Ergebnisses. Ein unsicherer Pfad wird nicht an
+  den Finder übergeben.
 - Die Tabelle prüft eine feste Allowlist: `AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, `.mcp.json`, `.codex`-Projektkonfiguration und offensichtliche Entwicklerdokumentation wie `README.md`, `CONTRIBUTING.md` und Development-Setup-Dokumente.
 - Signale markieren fehlende `AGENTS.md` oder `CLAUDE.md`, zwei gleichzeitig vorhandene Governance-Dateien, leere Dateien, ungewöhnlich große Dateien sowie projektlokale MCP-/Codex-Konfiguration.
-- Mit **Öffnen** oder **Im Finder anzeigen** springst du nativ zum Eintrag. **Öffnen** verwendet deinen konfigurierten Standard-Editor für textartige Dateien; der Inspector bearbeitet diese Dateien nie.
+- **Öffnen** ermöglicht eine native Nur-Lese-Nachverfolgung für reguläre Dateien. CodingBuddy prüft das Repository und jede Pfadkomponente erneut, lehnt ein über einen symbolischen Link ausgewähltes oder später durch einen solchen ersetztes Repository ab, kopiert begrenzte stabile Bytes aus dem geprüften Datei-Descriptor in einen privaten `0400`-Snapshot in einem nur für den Eigentümer zugänglichen Verzeichnis und öffnet ihn mit dem konfigurierten Texteditor. Die unveränderlichen macOS-Kompatibilitätsaliase `/var`, `/tmp` und `/etc` bleiben nach exakter Zielprüfung unterstützt. Auch eine Fallback-Meldung kennzeichnet die Datei ausdrücklich als schreibgeschützten, verifizierten Snapshot; ein Launch-Services-Fehler wird getrennt von einer fehlgeschlagenen Dateiprüfung gemeldet. Erfolg, Fallback und Fehler werden VoiceOver angekündigt. Repository-Verzeichnisse und Finder-Anzeigen sind bewusst keine externen Aktionsrouten, weil AppKit für einen normalen Pfad keine descriptorgebundene Identität bewahren kann. Wurde ein Eintrag ersetzt, umgeleitet, ist zu groß oder ändert sich beim Kopieren, verweigert CodingBuddy die Aktion und lädt den Inspector neu. CodingBuddy entfernt Snapshots nach zehn Minuten. Beim normalen Beenden und beim nächsten Start werden abgelaufene validierte Snapshots entfernt; ein frischer Snapshot bleibt lange genug verfügbar, damit ein kalt startender Editor die Launch-Services-Übergabe abschließen kann.
 
 v1-Grenzen: Agent Context ist ausschließlich deterministische Erkennung. Er durchsucht das Repository nicht rekursiv, vergleicht Policy-Text nicht semantisch, entscheidet nicht, welche Regel gewinnt, und führt keine Natural-Language-Analyse über Instruktionen aus.
 
@@ -196,11 +233,33 @@ Der Seitenleisten-Eintrag **Codex** (Alpha) verwaltet die Umgebungsdatei von Ope
 Der Eintrag **Claude Code** (Alpha) verwaltet die Claude-Code-Konfiguration:
 
 - **`env`-Blöcke** aus `~/.claude/settings.json` und `settings.local.json` — Variablen bearbeiten, anlegen, löschen. CodingBuddy patcht nur den betroffenen Wert (der Rest der Datei bleibt Byte für Byte unverändert, keine Umsortierung), schreibt vorher ein Backup und verweigert den Write, wenn Claude Code die Datei zwischenzeitlich geändert hat.
-- **MCP-Server** — Nur-Lese-Übersicht aus `~/.claude.json` (User-Scope und existierende Projekte) sowie den `.mcp.json`-Dateien der Projekte, mit den referenzierten env-/Header-Keys.
+- **MCP-Server** — Nur-Lese-Übersicht aus `~/.claude.json` (User-Scope und existierende Projekte) sowie den `.mcp.json`-Dateien der Projekte, mit den referenzierten env-/Header-Keys. CodingBuddy lädt diese Übersicht erst beim Öffnen von Claude Code und überspringt zu große Dateien, symbolische Links, Spezialdateien und unsichere Projektwurzeln.
+- Beim Öffnen zeigt der Eintrag einen ausdrücklichen Ladezustand. Das Verlassen bricht die Darstellungsanfrage ab; ein älterer oder verspäteter Scan kann kein neueres Ergebnis überschreiben.
+- Eine unsichere Quelle wird weder als fehlend gemeldet noch stillschweigend übersprungen. Eine vollständig verweigerte Ladung zeigt **Zugriff blockiert**, den quellspezifischen Grund, **Erneut versuchen** und **Im Finder zeigen**, ohne Konfigurationsinhalte offenzulegen. Bei einer teilweisen Ladung bleiben geprüfte Quellen sichtbar, jede abgelehnte Quelle wird benannt und Änderungen sind nur für betroffene Settings-Dateien gesperrt.
+- Lesevorgänge sind durch Limits pro Datei, für die Projektanzahl und für die Gesamtgröße der Projektdateien begrenzt. Ungültiges UTF-8, fehlerhaftes oder nicht unterstütztes JSON, symbolische Links, Spezialdateien, unsichere Pfadkomponenten und während der Prüfung veränderte Dateien werden sicher verweigert.
 
 ### Cursor
 
 Der Eintrag **Cursor** (Alpha) verwaltet `~/.cursor/mcp.json`: die `env`-Werte pro Server sind editierbar (maskiert, wertgenaues Patchen mit Backups und Schutz vor externen Änderungen); die Serverliste selbst ist nur lesend.
+
+Die Cursor-Konfiguration hat drei ausdrückliche Zustände: sicher fehlend,
+vollständig geladen oder verweigert. CodingBuddy liest höchstens 4 MiB über
+einen descriptorgebundenen No-Follow-Snapshot und verweigert unsichere Pfade,
+unlesbare oder nicht reguläre Dateien, zu große Dateien, ungültiges UTF-8,
+fehlerhaftes JSON und nicht unterstützte JSON-Strukturen. Eine Verweigerung
+erscheint nie als gültige leere Konfiguration oder als Ergebnis mit null
+Variablen. Stattdessen zeigt die Ansicht **Zugriff blockiert**, den konkreten
+Grund, **Erneut versuchen** und **Im Finder zeigen**. Bei einem unsicheren Pfad
+erhält der Finder nur den sicheren übergeordneten Ort.
+
+Anlegen, Bearbeiten und Löschen sind in Ansicht und Store gesperrt, bis die
+Konfiguration vollständig geladen ist. Ein verweigerter Reload entfernt zuvor
+geladene Zeilen und schließt Editoren oder Löschbestätigungen, deren Quelldaten
+nicht mehr aktuell sind. CodingBuddy schließt die Aktion auch dann, wenn Cursor
+währenddessen eine Serverdefinition ersetzt; selbst eine Ersetzung mit gleichem
+Servernamen wird abgewiesen, bevor ein Secret in ein geändertes Kommando oder
+eine geänderte URL, Umgebung, Header oder andere Servereinstellungen geschrieben
+werden kann.
 
 ### Craft Agents
 
@@ -224,7 +283,7 @@ Der Eintrag **Wartung → Software-Updates** (Alpha) inventarisiert globale Pake
 - Die Auswahl eines Pakets lädt Versionshinweise verzögert. CodingBuddy bevorzugt ein passendes GitHub Release und verlinkt sonst Repository, Homepage oder Changelog-Quelle. Fehlende Versionshinweise sind ein normaler Zustand.
 - Falls die automatische Erkennung die falsche Installation wählt, hinterlege unter **Einstellungen → Wartung** einen expliziten Homebrew-, npm- oder pnpm-Pfad.
 
-Alle Befehle verwenden `Foundation.Process` mit absolutem Programmpfad und getrennten Argumenten. CodingBuddy startet nie eine Login-Shell, `sudo` oder einen frei zusammengesetzten Befehlsstring. Der Fehler eines Providers blendet erfolgreiche Ergebnisse anderer Provider nicht aus; der Hinweis nennt den betroffenen Manager und erklärt, dass Ergebnisse anderer Manager sichtbar bleiben.
+Alle Befehle verwenden die native POSIX-Prozess-API mit absolutem Programmpfad und getrennten Argumenten. Jeder Aufruf erhält eine eigene Prozessgruppe; bei Timeout oder **Stoppen** fordert CodingBuddy zuerst die Beendigung an und stoppt resistente Kindprozesse nach einer kurzen Frist zwangsweise. CodingBuddy startet nie eine Login-Shell, `sudo` oder einen frei zusammengesetzten Befehlsstring. Der Fehler eines Providers blendet erfolgreiche Ergebnisse anderer Provider nicht aus; der Hinweis nennt den betroffenen Manager und erklärt, dass Ergebnisse anderer Manager sichtbar bleiben.
 
 v1-Grenzen: nur globale Pakete; eine aktive Installation pro Provider; keine Projekt-Abhängigkeiten, Installation, Deinstallation, Pin-Verwaltung, Rechteerhöhung oder automatischen Hintergrundupdates. Bun, Yarn, pipx, uv, Cargo und Editor-Erweiterungen werden noch nicht unterstützt.
 

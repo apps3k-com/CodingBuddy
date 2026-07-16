@@ -11,6 +11,7 @@ import Foundation
 /// exists — the selection would silently clear.
 nonisolated enum SelectionResolver {
 
+    /// Preserves a selected assignment across reloads by matching file, name, and duplicate occurrence.
     static func resolve(
         _ selection: EnvVariable.ID?,
         from oldVariables: [EnvVariable],

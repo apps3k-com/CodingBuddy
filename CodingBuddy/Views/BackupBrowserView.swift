@@ -3,6 +3,7 @@
 //  CodingBuddy
 //
 
+import AppKit
 import SwiftUI
 
 /// Table and preview UI for CodingBuddy-managed backup files.
@@ -115,7 +116,11 @@ struct BackupBrowserView: View {
             .width(min: 70, ideal: 85, max: 110)
 
             TableColumn("Status") { item in
-                if item.canRestore {
+                if item.rejectionReason != nil {
+                    Label(item.statusDisplayName, systemImage: "exclamationmark.shield")
+                        .foregroundStyle(.orange)
+                        .lineLimit(1)
+                } else if item.canRestore {
                     Text(item.statusDisplayName)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -138,7 +143,18 @@ struct BackupBrowserView: View {
             .width(min: 220, ideal: 330)
         }
         .overlay {
-            if filteredItems.isEmpty {
+            if let discoveryError = store.discoveryError {
+                ContentUnavailableView {
+                    Label("Backups Could Not Be Scanned Safely", systemImage: "exclamationmark.shield")
+                } description: {
+                    Text(discoveryError.localizedDescription)
+                } actions: {
+                    Button("Try Again", systemImage: "arrow.clockwise") { store.reload() }
+                    Button("Show in Finder", systemImage: "folder") {
+                        NSWorkspace.shared.activateFileViewerSelecting([store.backupDirectory])
+                    }
+                }
+            } else if filteredItems.isEmpty {
                 if searchText.isEmpty {
                     ContentUnavailableView(
                         "No backups",
@@ -186,31 +202,43 @@ private struct BackupPreviewPane: View {
     /// Detail pane body.
     var body: some View {
         if let item {
-            let preview = store.preview(for: item)
-            VStack(alignment: .leading, spacing: 10) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(verbatim: item.sourceDisplayName)
-                        .font(.headline)
-                    Text(verbatim: item.targetURL?.path ?? item.backupURL.lastPathComponent)
-                        .font(.caption)
-                        .monospaced()
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
+            if let rejection = item.rejectionReason {
+                ContentUnavailableView {
+                    Label("Backup Was Rejected for Safety", systemImage: "exclamationmark.shield")
+                } description: {
+                    Text(rejection.explanation)
+                } actions: {
+                    Button("Show in Finder", systemImage: "folder") {
+                        NSWorkspace.shared.activateFileViewerSelecting([item.backupURL])
+                    }
                 }
+            } else {
+                let preview = store.preview(for: item)
+                VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(verbatim: item.sourceDisplayName)
+                            .font(.headline)
+                        Text(verbatim: item.targetURL?.path ?? item.backupURL.lastPathComponent)
+                            .font(.caption)
+                            .monospaced()
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
 
-                LabeledContent("Saved") {
-                    Text(item.timestamp, format: .dateTime.year().month().day().hour().minute().second())
-                        .foregroundStyle(.secondary)
-                }
+                    LabeledContent("Saved") {
+                        Text(item.timestamp, format: .dateTime.year().month().day().hour().minute().second())
+                            .foregroundStyle(.secondary)
+                    }
 
-                VSplitView {
-                    PreviewTextSection(title: String(localized: "Backup"), text: preview.backupText)
-                    PreviewTextSection(title: String(localized: "Current"), text: preview.currentText)
+                    VSplitView {
+                        PreviewTextSection(title: String(localized: "Backup"), text: preview.backupText)
+                        PreviewTextSection(title: String(localized: "Current"), text: preview.currentText)
+                    }
                 }
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         } else {
             ContentUnavailableView(
                 "Select a backup",

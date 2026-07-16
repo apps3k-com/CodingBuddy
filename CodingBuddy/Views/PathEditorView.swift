@@ -8,15 +8,20 @@ import SwiftUI
 /// Edits a `:`-separated value (PATH and friends) as a reorderable list of
 /// segments. `$PATH`-style references stay verbatim as their own segment.
 struct PathEditorView: View {
+    /// Raw colon-separated value synchronized with the editable segment list.
     @Binding var rawValue: String
 
     private struct Segment: Identifiable, Equatable {
+        /// Session-local identity that keeps list edits and reordering stable.
         let id = UUID()
+        /// Verbatim path segment, including variable references or empty entries.
         var text: String
     }
 
+    /// Editable segments initialized from ``rawValue``.
     @State private var segments: [Segment]
 
+    /// Splits the initial bound value without expanding shell references.
     init(rawValue: Binding<String>) {
         _rawValue = rawValue
         _segments = State(initialValue: rawValue.wrappedValue

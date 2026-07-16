@@ -8,7 +8,9 @@ import SwiftUI
 
 /// Global package inventory, confirmation, and sequential update surface.
 struct PackageMaintenanceView: View {
+    /// Coordinator for inventory, plan confirmation, and sequential updates.
     @Bindable var store: PackageMaintenanceStore
+    /// Route to executable overrides when provider discovery needs correction.
     var openSettings: () -> Void
 
     @State private var inspectedPackageID: InstalledPackage.ID?
@@ -275,6 +277,7 @@ struct PackageMaintenanceView: View {
 /// Executes guidance through the existing store boundaries so behavior can be tested without SwiftUI inspection.
 @MainActor
 enum PackageMaintenanceViewActions {
+    /// Performs one currently valid guidance route through existing guarded workflows.
     @discardableResult
     static func perform(
         actionID: String,
@@ -299,6 +302,7 @@ enum PackageMaintenanceViewActions {
         }
 
         switch route {
+        /// Builds and previews a plan only for the currently inspected selection.
         case .prepareUpdatePlan:
             guard store.state == .loaded,
                   store.selection == Set([package.id]),
@@ -306,11 +310,14 @@ enum PackageMaintenanceViewActions {
                 return nil
             }
             store.prepareUpdatePlan()
+        /// Opens release notes only after their source has loaded successfully.
         case .openReleaseNotes:
             guard case .loaded(let notes) = store.releaseNotesState else { return nil }
             openURL(notes.sourceURL)
+        /// Opens package-manager executable settings.
         case .openSettings:
             openSettings()
+        /// Refreshes inventory only when no package operation is active.
         case .reload:
             guard !store.isUpdating, !store.isPreparing else { return nil }
             store.reload()
@@ -320,6 +327,7 @@ enum PackageMaintenanceViewActions {
 }
 
 private struct PackageStatusLabel: View {
+    /// Target-aware package status rendered by this compact label.
     var status: PackageStatus
 
     var body: some View {
@@ -350,8 +358,11 @@ private struct PackageStatusLabel: View {
 }
 
 private struct ProviderIssueStrip: View {
+    /// Provider failures reported during the latest inventory scan.
     var issues: [PackageProviderIssue]
+    /// Optional plain-language summary when explainable guidance is enabled.
     var guidanceSummary: String?
+    /// Route to executable settings for provider recovery.
     var openSettings: () -> Void
 
     var body: some View {
@@ -378,6 +389,7 @@ private struct ProviderIssueStrip: View {
 }
 
 private struct UpdateEventLog: View {
+    /// Ordered per-package execution events for the confirmed plan.
     var events: [PackageUpdateEvent]
 
     var body: some View {
@@ -397,6 +409,7 @@ private struct UpdateEventLog: View {
 }
 
 private extension PackageUpdateEventState {
+    /// SF Symbol representing this execution state.
     var systemImage: String {
         switch self {
         case .queued: "clock"
@@ -407,6 +420,7 @@ private extension PackageUpdateEventState {
         }
     }
 
+    /// Localized concise label for this execution state.
     var displayName: String {
         switch self {
         case .queued: String(localized: "Queued")
@@ -419,12 +433,18 @@ private extension PackageUpdateEventState {
 }
 
 private struct PackageInspector: View {
+    /// Installed package represented by the current inventory snapshot.
     var package: InstalledPackage
+    /// Lazily loaded release-note state for the resolved target version.
     var releaseNotesState: PackageReleaseNotesState
+    /// Feature-aware status shown to the user.
     var displayedStatus: PackageStatus
+    /// Optional deterministic explanation and available actions.
     var guidance: Guidance?
+    /// Typed guidance action delegated to the owning package view.
     var onPerformGuidanceAction: (String) -> Void
 
+    /// Creates an inspector, defaulting to the package's legacy status when needed.
     init(
         package: InstalledPackage,
         releaseNotesState: PackageReleaseNotesState,

@@ -20,8 +20,11 @@ struct MCPServerGuidanceTests {
         #expect(guidance.recommendedAction.id == MCPServerGuidance.openToolActionID)
         #expect(guidance.recommendedAction.availability == .available)
         #expect(guidance.alternatives.map(\.id) == [MCPServerGuidance.openSourceActionID])
-        #expect(guidance.consequence.localizedCaseInsensitiveContains("fail to start"))
-        #expect(guidance.consequence.localizedCaseInsensitiveContains("authentication may fail"))
+        #expect(guidance.consequence == String(
+            localized: "MCP guidance missing environment variables consequence",
+            defaultValue:
+                "The server may fail to start, or authentication may fail, until the missing variables are defined."
+        ))
         #expect(guidance.glossaryTerms == [.mcp, .scope])
     }
 
@@ -56,8 +59,11 @@ struct MCPServerGuidanceTests {
             return
         }
         #expect(!reason.isEmpty)
-        #expect(guidance.relevance.localizedCaseInsensitiveContains("not tested network reachability"))
-        #expect(guidance.relevance.localizedCaseInsensitiveContains("authentication"))
+        #expect(guidance.relevance == String(
+            localized: "MCP guidance configured relevance",
+            defaultValue:
+                "This is a configuration-only result. CodingBuddy has not tested network reachability or authentication."
+        ))
         #expect(guidance.alternatives.isEmpty)
         #expect(guidance.glossaryTerms == [.mcp, .scope])
     }

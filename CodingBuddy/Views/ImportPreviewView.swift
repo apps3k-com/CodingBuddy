@@ -8,13 +8,16 @@ import SwiftUI
 /// Shows the entries found in a .env file and lets the user pick which ones
 /// to append to the managed block of a target file.
 struct ImportPreviewView: View {
+    /// Destination store that performs backup-first shell-file writes.
     let store: EnvStore
+    /// Parsed source entries available for selective import.
     let entries: [EnvFileEntry]
 
     @Environment(\.dismiss) private var dismiss
     @State private var selectedIDs: Set<EnvFileEntry.ID>
     @State private var targetFile: ShellConfigFile = .zshrc
 
+    /// Creates a preview with every parsed entry selected initially.
     init(store: EnvStore, entries: [EnvFileEntry]) {
         self.store = store
         self.entries = entries

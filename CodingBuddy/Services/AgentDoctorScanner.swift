@@ -149,6 +149,8 @@ nonisolated struct AgentDoctorScanner: Sendable {
                 diagnostics.append(.expiredCredential(tool: .mcpAuth, name: name, source: entry.id))
             case .incomplete:
                 diagnostics.append(.incompleteCredential(tool: .mcpAuth, name: name, source: entry.id))
+            case .resetOnly:
+                diagnostics.append(.incompleteCredential(tool: .mcpAuth, name: name, source: entry.id))
             }
             return diagnostics
         }

@@ -8,6 +8,7 @@ import Foundation
 /// Maps the parsed `~/.codex/config.toml` onto the MCP servers it defines.
 nonisolated enum CodexConfigReader {
 
+    /// Extracts direct MCP server tables, ignoring unrelated and nested tool tables.
     static func servers(in tomlText: String) -> [CodexMCPServer] {
         let table = TOMLReader.parse(tomlText)
         guard let mcpServers = table.table(at: ["mcp_servers"]) else { return [] }

@@ -155,6 +155,8 @@ struct WriterTests {
         \(ShellConfigWriter.managedBlockEnd)
 
         """)
+        let permissions = try FileManager.default.attributesOfItem(atPath: file.path)[.posixPermissions] as? Int
+        #expect(permissions == 0o600)
     }
 
     @Test func addAppendsToExistingManagedBlock() throws {
@@ -171,6 +173,72 @@ struct WriterTests {
         #expect(result.contains("export FIRST=\"1\"\nexport SECOND=\"2\"\n"))
         // Original content stays untouched in front of the block.
         #expect(result.hasPrefix(Self.fixture))
+    }
+
+    @Test func addFailsClosedWhenExistingFileIsNotUTF8() throws {
+        let dir = try makeTempDir()
+        let file = dir.appendingPathComponent(".zshrc")
+        let original = Data([0xFF, 0xFE, 0x00, 0x41])
+        try original.write(to: file)
+
+        var errorCode: CocoaError.Code?
+        do {
+            try makeWriter(in: dir).addVariables([(name: "API_KEY", rawValue: "secret")], to: file)
+        } catch let error as CocoaError {
+            errorCode = error.code
+        } catch {
+            throw error
+        }
+
+        #expect(
+            errorCode == .fileReadCorruptFile
+                || errorCode == .fileReadInapplicableStringEncoding
+        )
+        #expect(try Data(contentsOf: file) == original)
+        #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("Backups").path))
+    }
+
+    @Test func addFailsClosedWhenExistingFileIsUnreadable() throws {
+        let dir = try makeTempDir()
+        let file = dir.appendingPathComponent(".zshrc")
+        let original = Data("export EXISTING=\"preserve me\"\n".utf8)
+        try original.write(to: file)
+        try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: file.path)
+        defer {
+            try? FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: file.path)
+        }
+
+        var errorCode: CocoaError.Code?
+        do {
+            try makeWriter(in: dir).addVariables([(name: "API_KEY", rawValue: "secret")], to: file)
+        } catch let error as CocoaError {
+            errorCode = error.code
+        } catch {
+            throw error
+        }
+
+        #expect(errorCode == .fileReadNoPermission)
+        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: file.path)
+        #expect(try Data(contentsOf: file) == original)
+        #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("Backups").path))
+    }
+
+    @Test func addRejectsDanglingDotfileSymlinkWithoutReplacingIt() throws {
+        let dir = try makeTempDir()
+        let file = dir.appendingPathComponent(".zshrc")
+        let missing = dir.appendingPathComponent("missing-zshrc")
+        try FileManager.default.createSymbolicLink(at: file, withDestinationURL: missing)
+
+        #expect(throws: SafeFileWriter.WriteError.danglingSymlink) {
+            try makeWriter(in: dir).addVariables(
+                [(name: "API_KEY", rawValue: "secret")],
+                to: file
+            )
+        }
+
+        let attrs = try FileManager.default.attributesOfItem(atPath: file.path)
+        #expect(attrs[.type] as? FileAttributeType == .typeSymbolicLink)
+        #expect(!FileManager.default.fileExists(atPath: missing.path))
     }
 
     // MARK: - Backups
@@ -205,6 +273,7 @@ struct WriterTests {
             at: dir.appendingPathComponent("Backups"), includingPropertiesForKeys: nil
         )
         #expect(backups.count == 2)
+        #expect(backups.allSatisfy { !$0.lastPathComponent.contains("codingbuddy-recovery-") })
     }
 
     @Test func unchangedContentWritesNothing() throws {
@@ -237,6 +306,38 @@ struct WriterTests {
         let linkType = try FileManager.default.attributesOfItem(atPath: link.path)[.type] as? FileAttributeType
         #expect(linkType == .typeSymbolicLink)
         #expect(try content(of: realFile).contains("export EDITOR=\"nano\""))
+    }
+
+    @Test func equalContentSymlinkRetargetBetweenReadAndWriteIsRejected() throws {
+        let dir = try makeTempDir()
+        let original = dir.appendingPathComponent("original-zshrc")
+        let other = dir.appendingPathComponent("other-zshrc")
+        let link = dir.appendingPathComponent(".zshrc")
+        try Self.fixture.write(to: original, atomically: true, encoding: .utf8)
+        try Self.fixture.write(to: other, atomically: true, encoding: .utf8)
+        try FileManager.default.createSymbolicLink(at: link, withDestinationURL: original)
+        let editor = try variable(named: "EDITOR", in: link)
+        let writer = ShellConfigWriter(
+            backupDirectory: dir.appendingPathComponent("Backups"),
+            transactionHook: { point in
+                guard case .beforeSnapshotValidation = point else { return }
+                try FileManager.default.removeItem(at: link)
+                try FileManager.default.createSymbolicLink(at: link, withDestinationURL: other)
+            }
+        )
+
+        #expect(throws: SafeFileWriter.WriteError.staleOriginal) {
+            try writer.updateVariable(
+                editor,
+                newName: "EDITOR",
+                newRawValue: "nano",
+                exported: true,
+                at: link
+            )
+        }
+        #expect(try content(of: original) == Self.fixture)
+        #expect(try content(of: other) == Self.fixture)
+        #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("Backups").path))
     }
 
     @Test func writePreservesPosixPermissions() throws {

@@ -1,6 +1,936 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld additional sources were refused." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld weitere Quellen wurden abgelehnt."
+          }
+        }
+      }
+    },
+    "Access blocked" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugriff blockiert"
+          }
+        }
+      }
+    },
+    "Choose Another Folder..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anderen Ordner auswählen ..."
+          }
+        }
+      }
+    },
+    "Claude Code configuration access blocked" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugriff auf Claude-Code-Konfiguration blockiert"
+          }
+        }
+      }
+    },
+    "CodingBuddy did not load this file because it could not be read safely." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat diese Datei nicht geladen, weil sie nicht sicher gelesen werden konnte."
+          }
+        }
+      }
+    },
+    "CodingBuddy did not load this file because it is not valid UTF-8." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat diese Datei nicht geladen, weil sie kein gültiges UTF-8 enthält."
+          }
+        }
+      }
+    },
+    "CodingBuddy refused to read one or more Claude Code sources safely. No configuration contents were exposed." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat das sichere Lesen einer oder mehrerer Claude-Code-Quellen verweigert. Es wurden keine Konfigurationsinhalte offengelegt."
+          }
+        }
+      }
+    },
+    "CodingBuddy refused to inspect this repository because its path is unavailable or contains a symbolic link." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat die Prüfung dieses Repositories verweigert, weil sein Pfad nicht verfügbar ist oder einen symbolischen Link enthält."
+          }
+        }
+      }
+    },
+    "Context entries will appear after the safety check finishes." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontexteinträge werden nach Abschluss der Sicherheitsprüfung angezeigt."
+          }
+        }
+      }
+    },
+    "Incomplete data" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unvollständige Daten"
+          }
+        }
+      }
+    },
+    "Inspecting repository..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository wird geprüft ..."
+          }
+        }
+      }
+    },
+    "Loading Claude Code configuration..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude-Code-Konfiguration wird geladen ..."
+          }
+        }
+      }
+    },
+    "Project inventory" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projektübersicht"
+          }
+        }
+      }
+    },
+    "Repository inspection blocked" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Prüfung blockiert"
+          }
+        }
+      }
+    },
+    "Shell file access blocked" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugriff auf Shell-Datei blockiert"
+          }
+        }
+      }
+    },
+    "Some Claude Code sources are unavailable. Changes are disabled for affected files." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einige Claude-Code-Quellen sind nicht verfügbar. Änderungen sind für betroffene Dateien deaktiviert."
+          }
+        }
+      }
+    },
+    "The path is unavailable or contains a symbolic link." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pfad ist nicht verfügbar oder enthält einen symbolischen Link."
+          }
+        }
+      }
+    },
+    "The project inventory exceeds CodingBuddy’s safety limit." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Projektübersicht überschreitet das Sicherheitslimit von CodingBuddy."
+          }
+        }
+      }
+    },
+    "The project MCP files exceed CodingBuddy’s aggregate safety limit." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Projekt-MCP-Dateien überschreiten das aggregierte Sicherheitslimit von CodingBuddy."
+          }
+        }
+      }
+    },
+    "The source could not be read safely." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Quelle konnte nicht sicher gelesen werden."
+          }
+        }
+      }
+    },
+    "The source does not contain valid JSON." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Quelle enthält kein gültiges JSON."
+          }
+        }
+      }
+    },
+    "The source exceeds CodingBuddy’s safety size limit." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Quelle überschreitet das Sicherheitslimit von CodingBuddy."
+          }
+        }
+      }
+    },
+    "The source has an unsupported JSON structure." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Quelle hat eine nicht unterstützte JSON-Struktur."
+          }
+        }
+      }
+    },
+    "The source is not a supported regular file or directory." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Quelle ist keine unterstützte reguläre Datei oder kein unterstütztes Verzeichnis."
+          }
+        }
+      }
+    },
+    "The source is not valid UTF-8." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Quelle enthält kein gültiges UTF-8."
+          }
+        }
+      }
+    },
+    "This Claude Code source is unavailable. Retry before making changes." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Claude-Code-Quelle ist nicht verfügbar. Versuche es vor Änderungen erneut."
+          }
+        }
+      }
+    },
+    "Shell file unavailable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell-Datei nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Some shell files are unavailable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einige Shell-Dateien sind nicht verfügbar"
+          }
+        }
+      }
+    },
+    "This shell file is unavailable. Retry before making changes." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Shell-Datei ist nicht verfügbar. Versuche es erneut, bevor du Änderungen vornimmst."
+          }
+        }
+      }
+    },
+    "This view is incomplete. Changes, import, and export are disabled." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Ansicht ist unvollständig. Änderungen sowie Import und Export sind deaktiviert."
+          }
+        }
+      }
+    },
+    "Backups Could Not Be Scanned Safely" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backups konnten nicht sicher gescannt werden"
+          }
+        }
+      }
+    },
+    "Backup Was Rejected for Safety" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup wurde aus Sicherheitsgründen abgelehnt"
+          }
+        }
+      }
+    },
+    "Rejected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abgelehnt"
+          }
+        }
+      }
+    },
+    "This backup did not pass CodingBuddy's ownership and permission checks. It was not read and cannot be restored." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Backup hat die Eigentümer- und Berechtigungsprüfungen von CodingBuddy nicht bestanden. Es wurde nicht gelesen und kann nicht wiederhergestellt werden."
+          }
+        }
+      }
+    },
+    "This backup exceeds CodingBuddy's %@ safety limit. It was not read and cannot be restored." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Backup überschreitet das Sicherheitslimit von CodingBuddy von %1$@. Es wurde nicht gelesen und kann nicht wiederhergestellt werden."
+          }
+        }
+      }
+    },
+    "CodingBuddy could not inspect the backup folder safely." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte den Backup-Ordner nicht sicher prüfen."
+          }
+        }
+      }
+    },
+    "CodingBuddy found more backup data than it can inspect safely in one pass (maximum %lld files or %@)." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat mehr Backup-Daten gefunden, als sicher in einem Durchlauf geprüft werden können (maximal %1$lld Dateien oder %2$@)."
+          }
+        }
+      }
+    },
+    "CodingBuddy opened a read-only verified snapshot. Edit the original file from its repository when changes are needed." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat eine geprüfte, schreibgeschützte Momentaufnahme geöffnet. Nötige Änderungen müssen an der Originaldatei im Repository vorgenommen werden."
+          }
+        }
+      }
+    },
+    "CodingBuddy found token artifacts but refused to read them safely." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat Token-Artefakte gefunden, deren Inhalt aus Sicherheitsgründen nicht gelesen wurde."
+          }
+        }
+      }
+    },
+    "The backup folder contains more than %lld entries, so CodingBuddy refused to show a partial inventory." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Backup-Ordner enthält mehr als %lld Einträge. CodingBuddy zeigt deshalb bewusst keine unvollständige Übersicht."
+          }
+        }
+      }
+    },
+    "CodingBuddy cannot safely read this file because it is unexpectedly large." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy kann diese Datei nicht sicher lesen, weil sie unerwartet groß ist."
+          }
+        }
+      }
+    },
+    "CodingBuddy did not open this credential artifact because it could not be read safely. You can still reveal it in Finder or reset it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat dieses Zugangsdaten-Artefakt nicht geöffnet, weil es nicht sicher gelesen werden konnte. Du kannst es weiterhin im Finder anzeigen oder zurücksetzen."
+          }
+        }
+      }
+    },
+    "CodingBuddy did not reset credentials because the cache or recovery area could not be enumerated safely. Review it in Finder and try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat die Zugangsdaten nicht zurückgesetzt, weil der Cache- oder Wiederherstellungsbereich nicht sicher aufgelistet werden konnte. Prüfe ihn im Finder und versuche es erneut."
+          }
+        }
+      }
+    },
+    "CodingBuddy found an unsafe or unexpectedly large credential cache and deliberately did not read it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat einen unsicheren oder unerwartet großen Zugangsdaten-Cache gefunden und ihn daher bewusst nicht gelesen."
+          }
+        }
+      }
+    },
+    "Credential Scan Limited for Safety" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugangsdaten-Scan aus Sicherheitsgründen eingeschränkt"
+          }
+        }
+      }
+    },
+    "MCP Credentials Could Not Be Scanned Safely" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP-Zugangsdaten konnten nicht sicher gescannt werden"
+          }
+        }
+      }
+    },
+    "Some credential files were not read because their type, ownership, permissions, size, or directory count was unsafe." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einige Zugangsdaten-Dateien wurden nicht gelesen, weil Dateityp, Eigentümer, Berechtigungen, Größe oder Verzeichnisanzahl unsicher waren."
+          }
+        }
+      }
+    },
+    "Some credential or recovery files were not read because their type, ownership, permissions, size, or directory count was unsafe." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einige Zugangsdaten- oder Wiederherstellungsdateien wurden nicht gelesen, weil Dateityp, Eigentümer, Berechtigungen, Größe oder Verzeichnisanzahl unsicher waren."
+          }
+        }
+      }
+    },
+    "This artifact is reset-only because CodingBuddy cannot read it safely." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Artefakt kann nur zurückgesetzt werden, weil CodingBuddy es nicht sicher lesen kann."
+          }
+        }
+      }
+    },
+    "The unlock period ended. CodingBuddy discarded the unsaved cleartext draft." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Entsperrzeitraum ist abgelaufen. CodingBuddy hat den ungespeicherten Klartextentwurf verworfen."
+          }
+        }
+      }
+    },
+    "This editor contains unsaved cleartext. Save or discard it before locking all revealed secrets." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Editor enthält ungespeicherten Klartext. Speichere oder verwirf ihn, bevor alle eingeblendeten Secrets gesperrt werden."
+          }
+        }
+      }
+    },
+    "Try Again" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut versuchen"
+          }
+        }
+      }
+    },
+    "Authentication could not be completed. Check your Mac authentication settings and try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Authentifizierung konnte nicht abgeschlossen werden. Prüfe die Authentifizierungseinstellungen deines Macs und versuche es erneut."
+          }
+        }
+      }
+    },
+    "Authentication Failed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Authentifizierung fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Automatic lock in" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatische Sperre in"
+          }
+        }
+      }
+    },
+    "Check Recovery Status" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederherstellungsstatus prüfen"
+          }
+        }
+      }
+    },
+    "CodingBuddy will lock all revealed secrets soon." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy sperrt in Kürze alle eingeblendeten Secrets."
+          }
+        }
+      }
+    },
+    "CodingBuddy will lock all revealed secrets in %lld seconds." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy sperrt alle eingeblendeten Secrets in %lld Sekunden."
+          }
+        }
+      }
+    },
+    "Credential contents were locked and cleared." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Inhalte der Anmeldedaten wurden gesperrt und aus dem Speicher entfernt."
+          }
+        }
+      }
+    },
+    "Discard and Lock" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwerfen und sperren"
+          }
+        }
+      }
+    },
+    "Immediately hide all revealed secrets throughout CodingBuddy" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle in CodingBuddy eingeblendeten Secrets sofort ausblenden"
+          }
+        }
+      }
+    },
+    "Lock All Revealed Secrets" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle eingeblendeten Secrets sperren"
+          }
+        }
+      }
+    },
+    "Lock All Revealed Secrets?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle eingeblendeten Secrets sperren?"
+          }
+        }
+      }
+    },
+    "Locking…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird gesperrt…"
+          }
+        }
+      }
+    },
+    "Reauthenticate" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut authentifizieren"
+          }
+        }
+      }
+    },
+    "Resolve the existing credential recovery files before starting another reset." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löse die vorhandenen Wiederherstellungsdateien der Anmeldedaten auf, bevor du ein weiteres Zurücksetzen startest."
+          }
+        }
+      }
+    },
+    "Resolve the retained recovery files before resetting more credentials" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löse die beibehaltenen Wiederherstellungsdateien auf, bevor du weitere Anmeldedaten zurücksetzt"
+          }
+        }
+      }
+    },
+    "Reset All MCP Credentials…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle MCP-Anmeldedaten zurücksetzen…"
+          }
+        }
+      }
+    },
+    "Save and Lock" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sichern und sperren"
+          }
+        }
+      }
+    },
+    "The command produced more output than can be safely displayed." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Befehl hat mehr Ausgabe erzeugt, als sicher angezeigt werden kann."
+          }
+        }
+      }
+    },
+    "Show Credential Recovery in Finder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anmeldedaten-Wiederherstellung im Finder zeigen"
+          }
+        }
+      }
+    },
+    "This credential file contains unsaved changes. Save or discard them before locking all revealed secrets." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Anmeldedatendatei enthält ungesicherte Änderungen. Sichere oder verwirf sie, bevor alle eingeblendeten Secrets gesperrt werden."
+          }
+        }
+      }
+    },
+    "CodingBuddy could not read this credential file. Verify that it still exists and try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte diese Anmeldedatendatei nicht lesen. Prüfe, ob sie noch vorhanden ist, und versuche es erneut."
+          }
+        }
+      }
+    },
+    "CodingBuddy could not complete the credential operation. No unconfirmed changes were written." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte den Anmeldedatenvorgang nicht abschließen. Es wurden keine unbestätigten Änderungen geschrieben."
+          }
+        }
+      }
+    },
+    "CodingBuddy could not finish the credential reset. Protected recovery files remain available for manual recovery." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte das Zurücksetzen der Anmeldedaten nicht abschließen. Geschützte Wiederherstellungsdateien bleiben für eine manuelle Wiederherstellung verfügbar."
+          }
+        }
+      }
+    },
+    "CodingBuddy could not save this credential file. No changes were written." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte diese Anmeldedatendatei nicht sichern. Es wurden keine Änderungen geschrieben."
+          }
+        }
+      }
+    },
+    "Credential Editor Locked" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anmeldedaten-Editor gesperrt"
+          }
+        }
+      }
+    },
+    "Credential File Changed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anmeldedatendatei wurde geändert"
+          }
+        }
+      }
+    },
+    "Credential File Could Not Be Loaded" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anmeldedatendatei konnte nicht geladen werden"
+          }
+        }
+      }
+    },
+    "Credential File Could Not Be Saved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anmeldedatendatei konnte nicht gesichert werden"
+          }
+        }
+      }
+    },
+    "Credential Operation Failed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anmeldedatenvorgang fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Credential Recovery Required" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederherstellung der Anmeldedaten erforderlich"
+          }
+        }
+      }
+    },
+    "CodingBuddy stopped credential recovery because one or more original paths changed. Protected recovery files remain available for manual recovery." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat die Wiederherstellung der Anmeldedaten angehalten, weil sich mindestens ein ursprünglicher Pfad geändert hat. Geschützte Wiederherstellungsdateien bleiben für eine manuelle Wiederherstellung verfügbar."
+          }
+        }
+      }
+    },
+    "Copy Recovery Path" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederherstellungspfad kopieren"
+          }
+        }
+      }
+    },
+    "Discard Changes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Änderungen verwerfen"
+          }
+        }
+      }
+    },
+    "Reload from Disk" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neu von der Festplatte laden"
+          }
+        }
+      }
+    },
+    "Save and Continue" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sichern und fortfahren"
+          }
+        }
+      }
+    },
+    "Save changes before continuing?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Änderungen vor dem Fortfahren sichern?"
+          }
+        }
+      }
+    },
+    "Show Recovery Files in Finder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederherstellungsdateien im Finder zeigen"
+          }
+        }
+      }
+    },
+    "The credential content is visible and editable until CodingBuddy locks it again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Inhalt der Anmeldedaten ist sichtbar und bearbeitbar, bis CodingBuddy ihn wieder sperrt."
+          }
+        }
+      }
+    },
+    "The unlock period ended. CodingBuddy discarded the unsaved cleartext changes to protect your credentials." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Entsperrzeitraum ist abgelaufen. CodingBuddy hat die ungesicherten Klartextänderungen zum Schutz deiner Anmeldedaten verworfen."
+          }
+        }
+      }
+    },
+    "This credential file contains unsaved changes." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Anmeldedatendatei enthält ungesicherte Änderungen."
+          }
+        }
+      }
+    },
+    "Unmasked credential contents for “%@”" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unmaskierter Inhalt der Anmeldedaten für „%@“"
+          }
+        }
+      }
+    },
     "“%@” is already defined in %@ — the last assignment in load order wins." : {
       "localizations" : {
         "de" : {
@@ -1592,6 +2522,46 @@
         }
       }
     },
+    "CodingBuddy cannot confirm the final save state. Review the retained recovery file at %@ before editing again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy kann den endgültigen Speicherzustand nicht bestätigen. Prüfe die beibehaltene Wiederherstellungsdatei unter %@, bevor du erneut bearbeitest."
+          }
+        }
+      }
+    },
+    "CodingBuddy did not save the requested change. Review the retained recovery file at %@ before retrying." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat die angeforderte Änderung nicht gespeichert. Prüfe die beibehaltene Wiederherstellungsdatei unter %@, bevor du es erneut versuchst."
+          }
+        }
+      }
+    },
+    "CodingBuddy saved the requested change, but cleanup stopped. Review the retained recovery file at %@ before editing again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat die angeforderte Änderung gespeichert, aber die Bereinigung wurde angehalten. Prüfe die beibehaltene Wiederherstellungsdatei unter %@, bevor du erneut bearbeitest."
+          }
+        }
+      }
+    },
+    "CodingBuddy saved the requested change, but macOS could not confirm that cleanup was durable. Verify the current file before editing again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat die angeforderte Änderung gespeichert, aber macOS konnte die dauerhafte Bereinigung nicht bestätigen. Prüfe die aktuelle Datei, bevor du sie erneut bearbeitest."
+          }
+        }
+      }
+    },
     "CodingBuddy could not access the saved GitHub token in Keychain." : {
       "localizations" : {
         "de" : {
@@ -1849,6 +2819,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wert kopieren"
+          }
+        }
+      }
+    },
+    "Could Not Open Snapshot" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snapshot konnte nicht geöffnet werden"
           }
         }
       }
@@ -3586,6 +4566,16 @@
         }
       }
     },
+    "No context files" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Kontextdateien"
+          }
+        }
+      }
+    },
     "No pull requests" : {
       "localizations" : {
         "de" : {
@@ -3642,6 +4632,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keine Signale"
+          }
+        }
+      }
+    },
+    "No supported agent context files were found in this repository." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In diesem Repository wurden keine unterstützten Agent-Kontextdateien gefunden."
           }
         }
       }
@@ -4205,7 +5205,7 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Warnung"
           }
         },
@@ -4304,6 +5304,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eintrag zurücksetzen…"
+          }
+        }
+      }
+    },
+    "Reset only" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur zurücksetzen"
           }
         }
       }
@@ -4979,12 +5989,12 @@
         }
       }
     },
-    "The configured default editor is unavailable. CodingBuddy opened the file with the system default instead." : {
+    "The configured editor is unavailable. CodingBuddy opened a read-only verified snapshot with the system default instead." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der konfigurierte Standard-Editor ist nicht verfügbar. CodingBuddy hat die Datei stattdessen mit dem Systemstandard geöffnet."
+            "value" : "Der konfigurierte Editor ist nicht verfügbar. CodingBuddy hat stattdessen einen schreibgeschützten, verifizierten Snapshot mit dem Systemstandard geöffnet."
           }
         }
       }
@@ -5015,6 +6025,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Die Datei konnte nicht gelesen werden."
+          }
+        }
+      }
+    },
+    "The file could not be read safely. Refresh the inspector and try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei konnte nicht sicher gelesen werden. Aktualisiere den Inspector und versuche es erneut."
+          }
+        }
+      }
+    },
+    "The read-only verified snapshot was created, but macOS could not open it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der schreibgeschützte, verifizierte Snapshot wurde erstellt, aber macOS konnte ihn nicht öffnen."
           }
         }
       }
@@ -5397,6 +6427,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bis CodingBuddy beendet wird"
+          }
+        }
+      }
+    },
+    "View Credential Files…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anmeldedatendateien anzeigen…"
+          }
+        }
+      }
+    },
+    "View the selected credential files" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die ausgewählten Anmeldedatendateien anzeigen"
           }
         }
       }

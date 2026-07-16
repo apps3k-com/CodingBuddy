@@ -46,7 +46,7 @@ struct BackupBrowserTests {
         try write("cursor backup\n", to: backups.appendingPathComponent("mcp.json-2026-06-28-001126-333"))
         try write("unknown backup\n", to: backups.appendingPathComponent("random-2026-06-28-001127-333"))
 
-        let items = BackupBrowserScanner(homeDirectory: home, backupDirectory: backups).items()
+        let items = try BackupBrowserScanner(homeDirectory: home, backupDirectory: backups).items()
 
         #expect(items.map(\.backupURL.lastPathComponent) == [
             "random-2026-06-28-001127-333",
@@ -62,6 +62,104 @@ struct BackupBrowserTests {
         #expect(try item("settings.local.json-2026-06-28-001125-333", in: items).targetURL == home.appendingPathComponent(".claude/settings.local.json"))
         #expect(try item("mcp.json-2026-06-28-001126-333", in: items).targetURL == home.appendingPathComponent(".cursor/mcp.json"))
         #expect(try item("random-2026-06-28-001127-333", in: items).targetURL == nil)
+    }
+
+    /// Verifies discovery counts unrelated entries and refuses an incomplete inventory.
+    @Test func scannerRefusesDirectoryEntryOverflowWithoutReturningPartialItems() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        try write("backup\n", to: backups.appendingPathComponent("zshrc-2026-06-28-001122-333"))
+        try write("noise\n", to: backups.appendingPathComponent("unrelated-a"))
+        try write("noise\n", to: backups.appendingPathComponent("unrelated-b"))
+        let scanner = BackupBrowserScanner(
+            homeDirectory: home,
+            backupDirectory: backups,
+            maximumDirectoryEntryCount: 2
+        )
+
+        #expect(throws: BackupBrowserScanner.ScanError.tooManyEntries(maximum: 2)) {
+            _ = try scanner.items()
+        }
+    }
+
+    /// Verifies a reload clears stale rows and exposes the exact fail-closed discovery state.
+    @Test func storeClearsInventoryWhenDirectoryEntryLimitIsExceeded() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        try write("backup\n", to: backups.appendingPathComponent("zshrc-2026-06-28-001122-333"))
+        let store = BackupBrowserStore(
+            homeDirectory: home,
+            backupDirectory: backups,
+            maximumDirectoryEntryCount: 2
+        )
+        store.reload()
+        #expect(store.items.count == 1)
+        #expect(store.discoveryError == nil)
+
+        try write("noise\n", to: backups.appendingPathComponent("unrelated-a"))
+        try write("noise\n", to: backups.appendingPathComponent("unrelated-b"))
+        store.reload()
+
+        #expect(store.items.isEmpty)
+        #expect(store.discoveryError == .tooManyEntries(maximum: 2))
+    }
+
+    /// Verifies normal per-source retention can exceed 64 rows without disabling restore.
+    @Test func storeInventoriesNormalRetentionWithoutEagerSnapshotLimit() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let baseNames = [
+            "zshenv", "zprofile", "zshrc", "mcp.env", "settings.json",
+            "settings.local.json", "mcp.json",
+        ]
+        for baseName in baseNames {
+            for counter in 1...10 {
+                try write(
+                    "\(baseName)-\(counter)\n",
+                    to: backups.appendingPathComponent(
+                        "\(baseName)-2026-06-28-001122-333-\(counter)"
+                    )
+                )
+            }
+        }
+        let store = BackupBrowserStore(homeDirectory: home, backupDirectory: backups)
+
+        store.reload()
+
+        #expect(store.items.count == 70)
+        #expect(store.discoveryError == nil)
+        let selected = try #require(store.items.first)
+        #expect(store.preview(for: selected).backupText != String(localized: "Could not read file."))
+    }
+
+    /// Verifies implausibly large backups remain visible as explicit safety rejections.
+    @Test func storeShowsOversizedBackupsAsRejectedWithoutReadingContents() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let backup = backups.appendingPathComponent("zshrc-2026-06-28-001122-333")
+        try write("", to: backup)
+        let handle = try FileHandle(forWritingTo: backup)
+        try handle.truncate(atOffset: UInt64(BackupBrowserStore.maximumBackupFileSize + 1))
+        try handle.close()
+        let store = BackupBrowserStore(homeDirectory: home, backupDirectory: backups)
+
+        store.reload()
+
+        let item = try #require(store.items.first)
+        #expect(store.items.count == 1)
+        #expect(store.discoveryError == nil)
+        #expect(item.byteCount == BackupBrowserStore.maximumBackupFileSize + 1)
+        #expect(item.rejectionReason == .exceedsSizeLimit(
+            maximumByteCount: BackupBrowserStore.maximumBackupFileSize
+        ))
+        #expect(item.statusDisplayName == String(localized: "Rejected"))
+        #expect(!item.canPreview)
+        #expect(!item.canRestore)
+        #expect(store.preview(for: item).backupText == item.rejectionReason?.explanation)
     }
 
     /// Verifies restore writes through SafeFileWriter and backs up the current target first.
@@ -105,6 +203,53 @@ struct BackupBrowserTests {
         #expect(permissions & 0o777 == 0o600)
     }
 
+    /// Verifies every supported secret-bearing restore target opts into private creation.
+    @Test func allSupportedRestoreSourcesUseRestrictiveCreationMode() {
+        let sources: [BackupBrowserSource] = [
+            .shell(.zshenv),
+            .shell(.zprofile),
+            .shell(.zshrc),
+            .codexMCPEnv,
+            .claudeSettings,
+            .claudeLocalSettings,
+            .cursorMCPJSON,
+        ]
+
+        for source in sources {
+            #expect(source.createMode == 0o600)
+        }
+        #expect(BackupBrowserSource.unsupported(baseName: "unknown").createMode == nil)
+    }
+
+    /// Verifies a target created after a missing snapshot is treated as stale.
+    @Test func storeRestoreRejectsConcurrentlyCreatedMissingTarget() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let target = home.appendingPathComponent(".zshrc")
+        try write("restored\n", to: backups.appendingPathComponent("zshrc-2026-06-28-001122-333"))
+        var createdTarget = false
+        let store = BackupBrowserStore(
+            homeDirectory: home,
+            backupDirectory: backups,
+            restoreTransactionHook: { point in
+                guard case .beforeSnapshotValidation = point, !createdTarget else { return }
+                createdTarget = true
+                try "outside\n".write(to: target, atomically: true, encoding: .utf8)
+            }
+        )
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        #expect(throws: SafeFileWriter.WriteError.staleOriginal) {
+            try store.restore(backup)
+        }
+        #expect(createdTarget)
+        #expect(try String(contentsOf: target, encoding: .utf8) == "outside\n")
+        let entries = try FileManager.default.contentsOfDirectory(at: backups, includingPropertiesForKeys: nil)
+        #expect(entries.map(\.lastPathComponent) == [backup.backupURL.lastPathComponent])
+    }
+
     /// Verifies restoring through a dotfile symlink updates the target without replacing the link.
     @Test func storeRestorePreservesDotfileSymlink() throws {
         let root = try makeTempDir()
@@ -127,16 +272,19 @@ struct BackupBrowserTests {
         #expect(linkType == .typeSymbolicLink)
     }
 
-    /// Verifies previews hide obvious secret values without changing restore data.
-    @Test func storePreviewRedactsSensitiveValues() throws {
+    /// Verifies shell previews hide every assignment regardless of its variable name.
+    @Test func storePreviewRedactsAllShellValues() throws {
         let root = try makeTempDir()
         let home = root.appendingPathComponent("Home", isDirectory: true)
         let backups = root.appendingPathComponent("Backups", isDirectory: true)
         try write(
             """
             export GITHUB_TOKEN=secret
-              "api_key": "secret",
+            DATABASE_URL=postgres://user:password@host/database
+            REDIS_URL=redis://user:password@host
+            CONNECTION_STRING=Server=host;Password=secret
             NORMAL=value
+            # Harmless section comment
             """,
             to: backups.appendingPathComponent("mcp.env-2026-06-28-001122-333")
         )
@@ -147,8 +295,244 @@ struct BackupBrowserTests {
         let preview = store.preview(for: backup)
 
         #expect(preview.backupText.contains("export GITHUB_TOKEN=••••••••"))
-        #expect(preview.backupText.contains("  \"api_key\": \"••••••••\","))
-        #expect(preview.backupText.contains("NORMAL=value"))
+        #expect(preview.backupText.contains("DATABASE_URL=••••••••"))
+        #expect(preview.backupText.contains("REDIS_URL=••••••••"))
+        #expect(preview.backupText.contains("CONNECTION_STRING=••••••••"))
+        #expect(preview.backupText.contains("NORMAL=••••••••"))
+        #expect(preview.backupText.contains("# Harmless section comment"))
+        for secret in ["postgres://", "redis://", "Password=secret", "NORMAL=value"] {
+            #expect(!preview.backupText.contains(secret))
+        }
+    }
+
+    /// Verifies zsh declaration builtins preserve only an unambiguous prefix before masking.
+    @Test func shellPreviewRedactsSupportedDeclarationVariants() {
+        #expect(BackupShellPreviewRedactor.redact("GITHUB_TOKEN=secret") ==
+            "GITHUB_TOKEN=••••••••")
+        #expect(BackupShellPreviewRedactor.redact("  export   GITHUB_TOKEN='secret'") ==
+            "  export   GITHUB_TOKEN=••••••••")
+        #expect(BackupShellPreviewRedactor.redact("typeset -x GITHUB_TOKEN=secret") ==
+            "typeset -x GITHUB_TOKEN=••••••••")
+        #expect(BackupShellPreviewRedactor.redact("typeset -gx -- API_KEY=secret") ==
+            "typeset -gx -- API_KEY=••••••••")
+        #expect(BackupShellPreviewRedactor.redact("readonly AWS_SECRET_ACCESS_KEY=secret") ==
+            "readonly AWS_SECRET_ACCESS_KEY=••••••••")
+        #expect(BackupShellPreviewRedactor.redact("export -n NPM_AUTH=secret") ==
+            "export -n NPM_AUTH=••••••••")
+        #expect(BackupShellPreviewRedactor.redact("typeset PATH=/opt/bin") ==
+            "typeset PATH=••••••••")
+        #expect(BackupShellPreviewRedactor.redact("readonly NORMAL=value # harmless") ==
+            "readonly NORMAL=•••••••• # harmless")
+    }
+
+    /// Verifies ambiguous secret-bearing shell text fails closed instead of leaking a suffix.
+    @Test func shellPreviewFailsClosedForMalformedAndCompoundSecretLines() {
+        let malformed = BackupShellPreviewRedactor.redact(
+            "typeset -x GITHUB_TOKEN='unterminated-secret"
+        )
+        let compound = BackupShellPreviewRedactor.redact(
+            "typeset NORMAL=visible GITHUB_TOKEN=compound-secret"
+        )
+        let embedded = BackupShellPreviewRedactor.redact(
+            #"NORMAL="GITHUB_TOKEN=embedded-secret""#
+        )
+        let comment = BackupShellPreviewRedactor.redact(
+            "# stale GITHUB_TOKEN=comment-secret"
+        )
+        let appended = BackupShellPreviewRedactor.redact(
+            "typeset -x GITHUB_TOKEN+=append-secret"
+        )
+        let indexed = BackupShellPreviewRedactor.redact(
+            "GITHUB_TOKEN[work] = indexed-secret"
+        )
+
+        #expect(malformed == "typeset -x GITHUB_TOKEN=••••••••")
+        #expect(compound == "typeset NORMAL=••••••••")
+        #expect(embedded == "NORMAL=••••••••")
+        #expect(comment == "••••••••")
+        #expect(appended == "••••••••")
+        #expect(indexed == "GITHUB_TOKEN[work] =••••••••")
+        let redactedLines = [malformed, compound, embedded, comment, appended, indexed]
+        for secret in [
+            "unterminated-secret", "compound-secret", "embedded-secret",
+            "comment-secret", "append-secret", "indexed-secret",
+        ] {
+            #expect(!redactedLines.contains(where: { $0.contains(secret) }))
+        }
+    }
+
+    /// Verifies the store applies declaration redaction to real backup preview content.
+    @Test func storePreviewDoesNotExposeDeclarationSecrets() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        try write(
+            """
+            typeset -x GITHUB_TOKEN=typeset-secret
+            readonly AWS_SECRET_ACCESS_KEY=readonly-secret
+            export -n NPM_AUTH=export-option-secret
+            NORMAL=value
+            """,
+            to: backups.appendingPathComponent("zshrc-2026-06-28-001122-333")
+        )
+        let store = BackupBrowserStore(homeDirectory: home, backupDirectory: backups)
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        let preview = store.preview(for: backup).backupText
+
+        #expect(preview.contains("typeset -x GITHUB_TOKEN=••••••••"))
+        #expect(preview.contains("readonly AWS_SECRET_ACCESS_KEY=••••••••"))
+        #expect(preview.contains("export -n NPM_AUTH=••••••••"))
+        #expect(preview.contains("NORMAL=••••••••"))
+        for secret in ["typeset-secret", "readonly-secret", "export-option-secret"] {
+            #expect(!preview.contains(secret))
+        }
+    }
+
+    /// Verifies JSON backup previews retain shape while masking all scalar values.
+    @Test func storePreviewStructurallyRedactsEveryJSONValue() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let secret = "SECRET\\\"}, \\\"suffix\\\": \\\"LEAK"
+        let json = try JSONSerialization.data(withJSONObject: [
+            "access_token": secret,
+            "scope": "read",
+            "env": [
+                "DATABASE_URL": "postgres://user:password@host/database",
+                "ARBITRARY_NAME": "must-not-be-visible",
+            ],
+            "enabled": true,
+            "retries": 3,
+        ], options: [.sortedKeys])
+        let backupURL = backups.appendingPathComponent("settings.json-2026-06-28-001122-333")
+        try FileManager.default.createDirectory(at: backups, withIntermediateDirectories: true)
+        try json.write(to: backupURL)
+        let store = BackupBrowserStore(homeDirectory: home, backupDirectory: backups)
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        let preview = store.preview(for: backup)
+
+        #expect(!preview.backupText.contains("SECRET"))
+        #expect(!preview.backupText.contains("LEAK"))
+        #expect(!preview.backupText.contains("read"))
+        #expect(!preview.backupText.contains("postgres://"))
+        #expect(!preview.backupText.contains("must-not-be-visible"))
+        #expect(preview.backupText.contains("\"env\""))
+        #expect(preview.backupText.contains("\"ARBITRARY_NAME\""))
+        #expect(preview.backupText.contains("\"enabled\""))
+        #expect(preview.backupText.contains("\"retries\""))
+    }
+
+    /// Verifies malformed JSON fails closed instead of falling back to textual display.
+    @Test func storePreviewMasksMalformedJSONAsOneOpaqueValue() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        try write(
+            #"{"env":{"CONNECTION_STRING":"Server=host;Password=LEAK"}"#,
+            to: backups.appendingPathComponent("settings.json-2026-06-28-001122-333")
+        )
+        let store = BackupBrowserStore(homeDirectory: home, backupDirectory: backups)
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        let preview = store.preview(for: backup).backupText
+
+        #expect(preview == "••••••••")
+        #expect(!preview.contains("LEAK"))
+        #expect(!preview.contains("CONNECTION_STRING"))
+    }
+
+    /// Verifies harmless shell structure survives while uncertain assignment text is opaque.
+    @Test func shellPreviewPreservesHarmlessStructureAndMasksUncertainty() {
+        #expect(BackupShellPreviewRedactor.redact("") == "")
+        #expect(BackupShellPreviewRedactor.redact("# Development tools") == "# Development tools")
+        #expect(BackupShellPreviewRedactor.redact("autoload -Uz compinit") == "autoload -Uz compinit")
+        #expect(BackupShellPreviewRedactor.redact("PLAIN=value # safe note") ==
+            "PLAIN=•••••••• # safe note")
+        #expect(BackupShellPreviewRedactor.redact("PLAIN=value # fallback=secret") ==
+            "PLAIN=••••••••")
+        #expect(BackupShellPreviewRedactor.redact("PLAIN+=appended") ==
+            "PLAIN+=••••••••")
+        #expect(BackupShellPreviewRedactor.redact("PLAIN[index]=indexed") ==
+            "PLAIN[index]=••••••••")
+        #expect(BackupShellPreviewRedactor.redact("PLAIN=one SECOND=two") ==
+            "PLAIN=••••••••")
+    }
+
+    /// Verifies an atomic backup replacement after discovery cannot be previewed or restored.
+    @Test func storeRejectsBackupReplacementAfterDiscovery() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let target = home.appendingPathComponent(".zshrc")
+        let backupURL = backups.appendingPathComponent("zshrc-2026-06-28-001122-333")
+        try write("current\n", to: target)
+        try write("captured\n", to: backupURL)
+        let store = BackupBrowserStore(homeDirectory: home, backupDirectory: backups)
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        try FileManager.default.removeItem(at: backupURL)
+        try write("replacement\n", to: backupURL)
+
+        #expect(store.preview(for: backup).backupText == String(localized: "Could not read file."))
+        #expect(throws: BackupBrowserError.backupChanged) {
+            try store.restore(backup)
+        }
+        #expect(try String(contentsOf: target, encoding: .utf8) == "current\n")
+    }
+
+    /// Verifies in-place byte changes are rejected even when the backup inode is unchanged.
+    @Test func storeRejectsBackupContentMutationAfterDiscovery() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let target = home.appendingPathComponent(".zshrc")
+        let backupURL = backups.appendingPathComponent("zshrc-2026-06-28-001122-333")
+        try write("current\n", to: target)
+        try write("captured\n", to: backupURL)
+        let store = BackupBrowserStore(homeDirectory: home, backupDirectory: backups)
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        let handle = try FileHandle(forWritingTo: backupURL)
+        try handle.truncate(atOffset: 0)
+        try handle.write(contentsOf: Data("mutation\n".utf8))
+        try handle.close()
+
+        #expect(throws: BackupBrowserError.backupChanged) {
+            try store.restore(backup)
+        }
+        #expect(try String(contentsOf: target, encoding: .utf8) == "current\n")
+    }
+
+    /// Verifies replacing a discovered backup with a symlink fails closed.
+    @Test func storeRejectsBackupSymlinkAfterDiscovery() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let target = home.appendingPathComponent(".zshrc")
+        let backupURL = backups.appendingPathComponent("zshrc-2026-06-28-001122-333")
+        let external = root.appendingPathComponent("external")
+        try write("current\n", to: target)
+        try write("captured\n", to: backupURL)
+        try write("external\n", to: external)
+        let store = BackupBrowserStore(homeDirectory: home, backupDirectory: backups)
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        try FileManager.default.removeItem(at: backupURL)
+        try FileManager.default.createSymbolicLink(at: backupURL, withDestinationURL: external)
+
+        #expect(store.preview(for: backup).backupText == String(localized: "Could not read file."))
+        #expect(throws: BackupBrowserError.backupChanged) {
+            try store.restore(backup)
+        }
+        #expect(try String(contentsOf: target, encoding: .utf8) == "current\n")
     }
 
     /// Verifies unsupported backup names are preview-only and cannot be restored.

@@ -31,19 +31,29 @@ nonisolated enum AgentPRGuidanceRoute: String, CaseIterable, Sendable {
 
 /// Stable identifiers for the sanitized evidence emitted by Agent PR guidance.
 nonisolated enum AgentPRGuidanceEvidenceID: String, CaseIterable, Sendable {
+    /// Identifies the sanitized owner/name pair without exposing a remote URL.
     case repository = "agent-pr-monitor.evidence.repository"
+    /// Identifies the provider-assigned pull request number.
     case pullRequestNumber = "agent-pr-monitor.evidence.pr-number"
+    /// Identifies the app's conservative merge-readiness classification.
     case readiness = "agent-pr-monitor.evidence.readiness"
+    /// Identifies the aggregate state of required checks and status contexts.
     case continuousIntegration = "agent-pr-monitor.evidence.ci-state"
+    /// Identifies the current review decision without retaining reviewer content.
     case review = "agent-pr-monitor.evidence.review-state"
+    /// Identifies the count of unresolved review findings.
     case unresolvedFindings = "agent-pr-monitor.evidence.unresolved-findings"
+    /// Identifies the abbreviated commit revision used to qualify the evidence.
     case headSHA = "agent-pr-monitor.evidence.head-sha"
 }
 
 /// Availability of the existing feature routes at the time guidance is built.
 nonisolated struct AgentPRGuidanceActionAvailability: Equatable, Sendable {
+    /// Whether the row has a valid browser destination for the pull request.
     let canOpenPullRequest: Bool
+    /// Whether a repository refresh can currently be started.
     let canRefresh: Bool
+    /// Whether the GitHub authorization settings route can be opened.
     let canOpenSettings: Bool
 
     /// Common production state when all routes are ready to execute.
@@ -56,17 +66,29 @@ nonisolated struct AgentPRGuidanceActionAvailability: Equatable, Sendable {
 
 /// Shared deterministic PR classification used by guidance and attention ranking.
 nonisolated enum AgentPRGuidanceState: String, Equatable, Sendable {
+    /// The visible snapshot is stale because GitHub authorization needs repair.
     case staleAuthorization = "stale-authorization"
+    /// The visible snapshot is stale because GitHub is rate limiting refreshes.
     case staleRateLimit = "stale-rate-limit"
+    /// The visible snapshot is stale after a non-authorization refresh failure.
     case staleRefreshFailure = "stale-refresh-failure"
+    /// A refresh is in flight while the previous snapshot remains visible.
     case refreshing
+    /// All observed merge gates are satisfied, subject to GitHub's live state.
     case ready
+    /// Required checks are present but have not reached a terminal result.
     case waitingForContinuousIntegration = "waiting-for-ci"
+    /// Automated signals are green but a required review decision is still absent.
     case waitingForReview = "waiting-for-review"
+    /// GitHub has not exposed enough check or review evidence for a safe classification.
     case waitingForSignals = "waiting-for-signals"
+    /// At least one required check or status context has failed.
     case failedContinuousIntegration = "failed-ci"
+    /// The current review decision requires author changes.
     case changesRequested = "changes-requested"
+    /// Review threads still contain findings that must be resolved or answered.
     case unresolvedFindings = "unresolved-findings"
+    /// The pull request intentionally remains outside the ready-for-review workflow.
     case draft
 }
 
@@ -115,10 +137,15 @@ nonisolated enum AgentPRGuidanceCatalog {
 
     /// Localized copy associated with one deterministic state.
     private struct Copy {
+        /// Plain-language description of the observed state.
         let explanation: String
+        /// Reason the state matters to the current workflow.
         let relevance: String
+        /// Likely outcome if the state is left unchanged.
         let consequence: String
+        /// Result the recommended action is expected to produce.
         let expectedResult: String
+        /// Explicit justification when the state intentionally offers no action.
         let noActionReason: String?
     }
 

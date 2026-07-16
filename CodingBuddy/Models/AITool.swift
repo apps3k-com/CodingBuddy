@@ -8,11 +8,16 @@ import Foundation
 /// AI coding tools with their own sidebar section. Cases are added as the
 /// corresponding sections ship (Claude Code, Cursor, Craft Agents follow).
 nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable, Sendable {
+    /// OpenAI Codex configuration and diagnostics.
     case codex
+    /// Anthropic Claude Code configuration and diagnostics.
     case claudeCode
+    /// Cursor editor configuration and diagnostics.
     case cursor
+    /// Craft Agents configuration and diagnostics.
     case craftAgents
 
+    /// Stable persistence and selection identity.
     var id: String { rawValue }
 
     /// Product names are proper nouns — displayed verbatim, not localized.
@@ -25,6 +30,7 @@ nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable, Sendable 
         }
     }
 
+    /// SF Symbol used to distinguish the tool in navigation.
     var systemImage: String {
         switch self {
         case .codex: "terminal"
@@ -34,6 +40,7 @@ nonisolated enum AITool: String, CaseIterable, Identifiable, Hashable, Sendable 
         }
     }
 
+    /// Feature flag that controls whether the tool's section is available.
     var featureFlag: FeatureFlag {
         switch self {
         case .codex: .aiToolsCodex

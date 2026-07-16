@@ -3,7 +3,89 @@
 //  CodingBuddy
 //
 
+import Foundation
 import SwiftUI
+
+/// Lifecycle of a sidebar data source whose first scan is triggered by navigation.
+nonisolated enum SidebarLoadPhase: Equatable, Sendable {
+    /// Discovery has not started and no result may be inferred.
+    case neutral
+    /// Discovery is currently running.
+    case loading
+    /// Discovery finished and the store result can be classified.
+    case loaded
+}
+
+/// Conservative sidebar semantics for counts backed by local discovery.
+nonisolated enum SidebarCountState: Equatable, Sendable {
+    /// No reliable presence or count evidence is available.
+    case neutral
+    /// The source is actively being discovered.
+    case loading
+    /// Discovery completed without refusal and produced an exact count.
+    case available(count: Int)
+    /// Discovery refused all or part of the source data.
+    case refused
+
+    /// Numeric badge content is exposed only for a complete available snapshot.
+    var badgeCount: Int? {
+        guard case .available(let count) = self else { return nil }
+        return count
+    }
+
+    /// Maps one shell file's explicit access result to truthful count semantics.
+    static func shell(count: Int, accessState: EnvFileAccessState) -> Self {
+        switch accessState {
+        case .missing: .neutral
+        case .loaded: .available(count: count)
+        case .refused: .refused
+        }
+    }
+
+    /// Treats every credential scan refusal as incomplete, including visible reset-only artifacts.
+    static func mcpCredentials(
+        count: Int,
+        rootExists: Bool,
+        hasScanRefusals: Bool
+    ) -> Self {
+        guard rootExists else { return .neutral }
+        return hasScanRefusals ? .refused : .available(count: count)
+    }
+
+    /// Keeps backup inventory neutral or loading until its first bounded discovery finishes.
+    static func backups(
+        count: Int,
+        phase: SidebarLoadPhase,
+        hasDiscoveryError: Bool
+    ) -> Self {
+        switch phase {
+        case .neutral: .neutral
+        case .loading: .loading
+        case .loaded: hasDiscoveryError ? .refused : .available(count: count)
+        }
+    }
+
+    /// Uses Cursor's authoritative load result, including complete empty documents.
+    static func cursor(
+        count: Int,
+        loadState: CursorStore.LoadState
+    ) -> Self {
+        switch loadState {
+        case .missing: .neutral
+        case .loaded: .available(count: count)
+        case .refused: .refused
+        }
+    }
+
+    /// Maps Claude Code discovery without collapsing a refused scan into neutral state.
+    static func claudeCode(_ state: ClaudeCodeStore.SidebarState) -> Self {
+        switch state {
+        case .neutral, .missing: .neutral
+        case .available(let count): .available(count: count)
+        case .refused: .refused
+        }
+    }
+}
 
 /// Root split-view container for CodingBuddy.
 struct ContentView: View {
@@ -15,8 +97,8 @@ struct ContentView: View {
     @State private var mcpAuthStore = MCPAuthStore()
     /// Codex configuration store.
     @State private var codexStore = CodexStore()
-    /// Claude Code configuration store.
-    @State private var claudeCodeStore = ClaudeCodeStore()
+    /// Claude Code configuration store, created only when its destination opens.
+    @State private var claudeCodeStore: ClaudeCodeStore?
     /// Cursor configuration store.
     @State private var cursorStore = CursorStore()
     /// Craft Agents configuration store.
@@ -39,6 +121,8 @@ struct ContentView: View {
     /// Backup Browser store when the feature flag is enabled.
     @State private var backupBrowserStore: BackupBrowserStore? =
         FeatureFlag.backupBrowser.isEnabled ? BackupBrowserStore() : nil
+    /// First-load phase for the lazily scanned backup inventory.
+    @State private var backupSidebarLoadPhase = SidebarLoadPhase.neutral
     /// Software Updates store when package maintenance is enabled.
     @State private var packageMaintenanceStore: PackageMaintenanceStore? =
         FeatureFlag.packageMaintenance.isEnabled ? PackageMaintenanceStore() : nil
@@ -54,9 +138,17 @@ struct ContentView: View {
     @State private var showSettings = false
     /// Settings pane requested by the action that opened Settings.
     @State private var requestedSettingsPane = SettingsInitialPane.general
+    /// Injectable lazy constructor that keeps app and test-host startup free of Claude HOME reads.
+    private let makeClaudeCodeStore: @MainActor () -> ClaudeCodeStore
 
     /// Creates root-owned stores and shares GitHub token persistence.
-    init(githubTokenStore: any GitHubTokenStore = KeychainGitHubTokenStore()) {
+    init(
+        githubTokenStore: any GitHubTokenStore = KeychainGitHubTokenStore(),
+        makeClaudeCodeStore: @escaping @MainActor () -> ClaudeCodeStore = {
+            ClaudeCodeStore(homeDirectory: FileManager.default.homeDirectoryForCurrentUser)
+        }
+    ) {
+        self.makeClaudeCodeStore = makeClaudeCodeStore
         _githubAuthorizationStore = State(initialValue: GitHubAuthorizationStore(tokenStore: githubTokenStore))
         _agentPRMonitorStore = State(initialValue: FeatureFlag.agentPRMonitor.isEnabled
             ? AgentPRMonitorStore(tokenStore: githubTokenStore)
@@ -88,9 +180,14 @@ struct ContentView: View {
                     Label("All Variables", systemImage: "list.bullet")
                         .tag(SidebarScope.all)
                     ForEach(ShellConfigFile.allCases) { file in
-                        Label(file.rawValue, systemImage: "doc.text")
-                            .foregroundStyle(store.existingFiles.contains(file) ? .primary : .secondary)
-                            .badge(store.variables(in: file).count)
+                        sidebarCountLabel(
+                            Label(file.rawValue, systemImage: "doc.text")
+                                .foregroundStyle(store.existingFiles.contains(file) ? .primary : .secondary),
+                            state: .shell(
+                                count: store.variables(in: file).count,
+                                accessState: store.accessState(for: file)
+                            )
+                        )
                             .tag(SidebarScope.file(file))
                     }
                 }
@@ -99,13 +196,7 @@ struct ContentView: View {
                         Text("AI Tools")
                     } content: {
                         ForEach(AITool.allCases.filter { $0.featureFlag.isEnabled }) { tool in
-                            Label {
-                                Text(verbatim: tool.displayName)
-                            } icon: {
-                                Image(systemName: tool.systemImage)
-                            }
-                            .foregroundStyle(toolExists(tool) ? .primary : .secondary)
-                            .badge(toolBadgeCount(tool))
+                            aiToolSidebarLabel(tool)
                             .tag(SidebarScope.aiTool(tool))
                         }
                     }
@@ -115,13 +206,19 @@ struct ContentView: View {
                         Text("Health & Security")
                     } content: {
                         if FeatureFlag.mcpAuthManager.isEnabled {
-                            Label {
-                                Text(verbatim: "MCP Auth")
-                            } icon: {
-                                Image(systemName: "key.radiowaves.forward")
-                            }
-                            .foregroundStyle(mcpAuthStore.rootExists ? .primary : .secondary)
-                            .badge(mcpAuthStore.entries.count)
+                            sidebarCountLabel(
+                                Label {
+                                    Text(verbatim: "MCP Auth")
+                                } icon: {
+                                    Image(systemName: "key.radiowaves.forward")
+                                }
+                                .foregroundStyle(mcpAuthStore.rootExists ? .primary : .secondary),
+                                state: .mcpCredentials(
+                                    count: mcpAuthStore.entries.count,
+                                    rootExists: mcpAuthStore.rootExists,
+                                    hasScanRefusals: !mcpAuthStore.scanRefusals.isEmpty
+                                )
+                            )
                             .tag(SidebarScope.mcpAuth)
                         }
                         if let agentDoctorStore {
@@ -179,13 +276,19 @@ struct ContentView: View {
                                 .tag(SidebarScope.packageMaintenance)
                         }
                         if let backupBrowserStore {
-                            Label("Backups", systemImage: "clock.arrow.circlepath")
-                                .badge(backupBrowserStore.count)
+                            sidebarCountLabel(
+                                Label("Backups", systemImage: "clock.arrow.circlepath"),
+                                state: .backups(
+                                    count: backupBrowserStore.count,
+                                    phase: backupSidebarLoadPhase,
+                                    hasDiscoveryError: backupBrowserStore.discoveryError != nil
+                                )
+                            )
                                 .tag(SidebarScope.backupBrowser)
                         }
                     }
                     .onAppear {
-                        backupBrowserStore?.reload()
+                        reloadBackupBrowser()
                         if packageMaintenanceStore?.state == .idle {
                             packageMaintenanceStore?.reload()
                         }
@@ -267,7 +370,14 @@ struct ContentView: View {
             case .aiTool(.codex):
                 CodexView(store: codexStore, secrets: secrets)
             case .aiTool(.claudeCode):
-                ClaudeCodeView(store: claudeCodeStore, secrets: secrets)
+                if let claudeCodeStore {
+                    ClaudeCodeView(store: claudeCodeStore, secrets: secrets)
+                } else {
+                    ProgressView("Loading Claude Code configuration...")
+                        .controlSize(.small)
+                        .accessibilityLabel("Loading Claude Code configuration...")
+                        .onAppear(perform: loadClaudeCodeStoreIfNeeded)
+                }
             case .aiTool(.cursor):
                 CursorView(store: cursorStore, secrets: secrets)
             case .aiTool(.craftAgents):
@@ -291,12 +401,18 @@ struct ContentView: View {
                 menuActions.settingsRequested = false
             }
         }
+        .onChange(of: menuActions.lockSecretsRequest) {
+            secrets.lock()
+        }
         .onAppear {
             scope = SidebarSelectionState.restoredScope(storageValue: storedSidebarScope)
         }
         .onChange(of: scope) {
             if let scope, scope.isEnabled {
                 storedSidebarScope = scope.storageID
+            }
+            if scope == .aiTool(.claudeCode) {
+                loadClaudeCodeStoreIfNeeded()
             }
         }
         .alert(
@@ -309,6 +425,17 @@ struct ContentView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(store.lastError ?? "")
+        }
+        .alert(
+            "Authentication Failed",
+            isPresented: Binding(
+                get: { secrets.lastError != nil },
+                set: { if !$0 { secrets.clearError() } }
+            )
+        ) {
+            Button("OK", role: .cancel) { secrets.clearError() }
+        } message: {
+            Text(secrets.lastError ?? "")
         }
     }
 
@@ -356,21 +483,103 @@ struct ContentView: View {
     /// Returns whether a tool has local configuration available.
     private func toolExists(_ tool: AITool) -> Bool {
         switch tool {
-        case .codex: codexStore.directoryExists
-        case .claudeCode: claudeCodeStore.directoryExists
-        case .cursor: cursorStore.directoryExists
-        case .craftAgents: craftStore.directoryExists
+        case .codex: return codexStore.directoryExists
+        case .claudeCode:
+            if case .available = claudeCodeStore?.sidebarState { return true }
+            return false
+        case .cursor: return cursorStore.directoryExists
+        case .craftAgents: return craftStore.directoryExists
         }
     }
 
     /// Count shown in the sidebar badge for one AI tool.
     private func toolBadgeCount(_ tool: AITool) -> Int {
         switch tool {
-        case .codex: codexStore.variables.count
-        case .claudeCode: claudeCodeStore.envEntries.count
-        case .cursor: cursorStore.envEntries.count
-        case .craftAgents: craftStore.secretFiles.count + (craftStore.encryptedStore != nil ? 1 : 0)
+        case .codex: return codexStore.variables.count
+        case .claudeCode:
+            if case .available(let count) = claudeCodeStore?.sidebarState { return count }
+            return 0
+        case .cursor: return cursorStore.envEntries.count
+        case .craftAgents: return craftStore.secretFiles.count + (craftStore.encryptedStore != nil ? 1 : 0)
         }
+    }
+
+    /// Keeps Claude neutral before discovery instead of implying a missing configuration or zero count.
+    @ViewBuilder
+    private func aiToolSidebarLabel(_ tool: AITool) -> some View {
+        if tool == .claudeCode {
+            let sourceState = claudeCodeStore?.sidebarState ?? .neutral
+            sidebarCountLabel(
+                toolLabel(tool)
+                    .foregroundStyle(sourceState == .missing ? .secondary : .primary),
+                state: .claudeCode(sourceState)
+            )
+        } else if tool == .cursor {
+            sidebarCountLabel(
+                toolLabel(tool)
+                    .foregroundStyle(cursorStore.loadState == .missing ? .secondary : .primary),
+                state: .cursor(
+                    count: cursorStore.envEntries.count,
+                    loadState: cursorStore.loadState
+                )
+            )
+        } else {
+            toolLabel(tool)
+                .foregroundStyle(toolExists(tool) ? .primary : .secondary)
+                .badge(toolBadgeCount(tool))
+        }
+    }
+
+    /// Shared icon-and-title label for one AI tool destination.
+    private func toolLabel(_ tool: AITool) -> some View {
+        Label {
+            Text(verbatim: tool.displayName)
+        } icon: {
+            Image(systemName: tool.systemImage)
+        }
+    }
+
+    /// Applies a native progress indicator or exact numeric badge without inventing count data.
+    @ViewBuilder
+    private func sidebarCountLabel<LabelContent: View>(
+        _ label: LabelContent,
+        state: SidebarCountState
+    ) -> some View {
+        switch state {
+        case .neutral:
+            label
+        case .loading:
+            HStack(spacing: 8) {
+                label
+                Spacer()
+                ProgressView()
+                    .controlSize(.small)
+            }
+        case .available(let count):
+            label.badge(Text(count, format: .number))
+        case .refused:
+            HStack(spacing: 8) {
+                label
+                Spacer()
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                    .accessibilityLabel("Access blocked")
+            }
+        }
+    }
+
+    /// Runs the synchronous bounded backup scan with explicit sidebar lifecycle state.
+    private func reloadBackupBrowser() {
+        guard let backupBrowserStore else { return }
+        backupSidebarLoadPhase = .loading
+        backupBrowserStore.reload()
+        backupSidebarLoadPhase = .loaded
+    }
+
+    /// Materializes Claude configuration state only after the user navigates there.
+    private func loadClaudeCodeStoreIfNeeded() {
+        guard claudeCodeStore == nil else { return }
+        claudeCodeStore = makeClaudeCodeStore()
     }
 }
 

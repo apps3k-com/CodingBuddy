@@ -14,6 +14,7 @@ final class FileChangeMonitor {
     private let debounce: TimeInterval
     private let onChange: @MainActor () -> Void
 
+    /// Creates a monitor that coalesces file-system bursts before notifying the main actor.
     init(debounce: TimeInterval = 0.2, onChange: @escaping @MainActor () -> Void) {
         self.debounce = debounce
         self.onChange = onChange

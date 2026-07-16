@@ -454,8 +454,11 @@ nonisolated struct RepoReadinessScanner: Sendable {
 
     /// Local resolution state for the selected repository's Git metadata directory.
     private enum GitDirectoryResolution: Sendable {
+        /// No `.git` entry exists at the repository root.
         case missing
+        /// A `.git` file exists but does not resolve to a safe metadata directory.
         case unresolvedFile
+        /// Git metadata resolved to the associated directory.
         case directory(URL)
     }
 
@@ -787,8 +790,11 @@ nonisolated struct RepoReadinessScanner: Sendable {
 
     /// Bounded text file states.
     private enum TextState: Sendable {
+        /// The expected text file does not exist.
         case missing
+        /// The file exists but contains no non-whitespace text.
         case empty
+        /// The file exists and contains non-whitespace text within the read bound.
         case nonEmpty
     }
 }

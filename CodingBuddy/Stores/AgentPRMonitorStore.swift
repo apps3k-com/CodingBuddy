@@ -129,6 +129,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         if let saved = defaults.string(forKey: Self.watchedRepositoriesKey) {
             watchedRepositories = Self.repositoryList(from: saved)
         } else if let saved = defaults.string(forKey: Self.repositoryKey),
+                  /// Repository restored from the legacy single-watch preference.
                   let repository = GitHubRepositoryRef(displayName: saved) {
             watchedRepositories = [repository]
             persistWatchedRepositories()

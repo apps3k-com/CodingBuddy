@@ -3,38 +3,100 @@
 //  CodingBuddy
 //
 
+import Darwin
 import Foundation
 
 /// Read-only scanner for CodingBuddy's managed backup directory.
 nonisolated struct BackupBrowserScanner: Sendable {
+    /// Discovery failures that prevent the browser from presenting a complete inventory.
+    enum ScanError: LocalizedError, Equatable, Sendable {
+        /// The managed backup directory could not be opened as a directory without following its leaf.
+        case directoryUnavailable
+        /// Discovery stopped before reading an attacker-controlled number of directory entries.
+        case tooManyEntries(maximum: Int)
+
+        /// Localized refusal explanation shown instead of a partial or empty inventory.
+        var errorDescription: String? {
+            switch self {
+            case .directoryUnavailable:
+                return String(localized: "CodingBuddy could not inspect the backup folder safely.")
+            case .tooManyEntries(let maximum):
+                return String(localized: "The backup folder contains more than \(maximum) entries, so CodingBuddy refused to show a partial inventory.")
+            }
+        }
+    }
+
+    /// Default ceiling for every entry in the managed backup directory, including unrelated files.
+    static let defaultMaximumDirectoryEntryCount = 4_096
+
     /// Home directory used to resolve known backup basenames back to targets.
     var homeDirectory: URL
     /// Directory where `SafeFileWriter` stores timestamped backups.
     var backupDirectory: URL
+    /// Maximum number of directory entries discovery will inspect in one pass.
+    var maximumDirectoryEntryCount: Int
 
     /// Creates a scanner for one home directory and backup directory.
     init(
         homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser,
         backupDirectory: URL = FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("CodingBuddy/Backups", isDirectory: true)
+            .appendingPathComponent("CodingBuddy/Backups", isDirectory: true),
+        maximumDirectoryEntryCount: Int = Self.defaultMaximumDirectoryEntryCount
     ) {
         self.homeDirectory = homeDirectory
         self.backupDirectory = backupDirectory
+        self.maximumDirectoryEntryCount = max(0, maximumDirectoryEntryCount)
     }
 
     /// Loads parseable backup files, newest first.
-    func items() -> [BackupBrowserItem] {
-        guard let entries = try? FileManager.default.contentsOfDirectory(
-            at: backupDirectory,
-            includingPropertiesForKeys: [.fileSizeKey, .contentModificationDateKey, .isRegularFileKey],
-            options: [.skipsHiddenFiles]
-        ) else {
-            return []
+    func items() throws -> [BackupBrowserItem] {
+        let descriptor = backupDirectory.path.withCString {
+            open($0, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+        }
+        guard descriptor >= 0 else {
+            if errno == ENOENT { return [] }
+            throw ScanError.directoryUnavailable
+        }
+        defer { Darwin.close(descriptor) }
+
+        let duplicate = dup(descriptor)
+        guard duplicate >= 0, let directory = fdopendir(duplicate) else {
+            if duplicate >= 0 { Darwin.close(duplicate) }
+            throw ScanError.directoryUnavailable
+        }
+        defer { closedir(directory) }
+
+        var result: [BackupBrowserItem] = []
+        var inspectedEntryCount = 0
+        while true {
+            errno = 0
+            guard let entry = readdir(directory) else {
+                guard errno == 0 else { throw ScanError.directoryUnavailable }
+                break
+            }
+            let name = withUnsafePointer(to: &entry.pointee.d_name) {
+                $0.withMemoryRebound(to: CChar.self, capacity: Int(MAXNAMLEN) + 1) {
+                    String(cString: $0)
+                }
+            }
+            guard name != ".", name != ".." else { continue }
+
+            inspectedEntryCount += 1
+            guard inspectedEntryCount <= maximumDirectoryEntryCount else {
+                throw ScanError.tooManyEntries(maximum: maximumDirectoryEntryCount)
+            }
+
+            var info = Darwin.stat()
+            let isRegularFile = name.withCString {
+                fstatat(descriptor, $0, &info, AT_SYMLINK_NOFOLLOW) == 0
+                    && (info.st_mode & S_IFMT) == S_IFREG
+            }
+            guard isRegularFile, let item = item(for: name, info: info) else { continue }
+            result.append(item)
         }
 
-        return entries.compactMap(item(for:))
-            .sorted { lhs, rhs in
+        return result.sorted { lhs, rhs in
                 if lhs.timestamp != rhs.timestamp {
                     return lhs.timestamp > rhs.timestamp
                 }
@@ -42,11 +104,30 @@ nonisolated struct BackupBrowserScanner: Sendable {
             }
     }
 
-    /// Creates a backup row for one parseable regular file.
-    private func item(for backupURL: URL) -> BackupBrowserItem? {
-        guard let parsed = Self.parse(fileName: backupURL.lastPathComponent) else { return nil }
-        let values = try? backupURL.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey, .isRegularFileKey])
-        guard values?.isRegularFile != false else { return nil }
+    /// Creates a backup row for one parseable regular file, including explicit rejections.
+    private func item(for fileName: String, info: Darwin.stat) -> BackupBrowserItem? {
+        guard let parsed = Self.parse(fileName: fileName) else { return nil }
+        let accessState: BackupBrowserAccessState
+        do {
+            accessState = .available(
+                try SecureInputReader.metadata(
+                    from: info,
+                    maximumByteCount: BackupBrowserStore.maximumBackupFileSize,
+                    policy: .backup
+                )
+            )
+        } catch SecureInputReadError.fileTooLarge {
+            accessState = .rejected(
+                .exceedsSizeLimit(maximumByteCount: BackupBrowserStore.maximumBackupFileSize)
+            )
+        } catch {
+            accessState = .rejected(.unsafeMetadata)
+        }
+        let backupURL = backupDirectory.appendingPathComponent(fileName, isDirectory: false)
+        let modifiedAt = Date(
+            timeIntervalSince1970: TimeInterval(info.st_mtimespec.tv_sec)
+                + TimeInterval(info.st_mtimespec.tv_nsec) / 1_000_000_000
+        )
 
         let source = source(for: parsed.baseName)
         let targetURL = source.targetURL(in: homeDirectory)
@@ -60,9 +141,10 @@ nonisolated struct BackupBrowserScanner: Sendable {
             collisionCounter: parsed.collisionCounter,
             source: source,
             targetURL: targetURL,
-            byteCount: values?.fileSize,
-            modifiedAt: values?.contentModificationDate,
-            targetExists: targetExists
+            byteCount: Int(exactly: info.st_size),
+            modifiedAt: modifiedAt,
+            targetExists: targetExists,
+            accessState: accessState
         )
     }
 

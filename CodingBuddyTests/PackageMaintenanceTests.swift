@@ -205,7 +205,7 @@ struct PackageMaintenanceTests {
         #expect(item.command.arguments == ["upgrade", "--cask", "tool"])
     }
 
-    @Test func storeExecutesConfirmedPlanSequentiallyAndKeepsPartialResults() async throws {
+    @Test @MainActor func storeExecutesConfirmedPlanSequentiallyAndKeepsPartialResults() async throws {
         let first = nodePackage(name: "first", status: .updateAvailable)
         let second = nodePackage(name: "second", status: .updateAvailable)
         let provider = FixturePackageProvider(
@@ -214,7 +214,7 @@ struct PackageMaintenanceTests {
         )
         let updateRunner = StubCommandRunner(outputs: [
             .success(CommandResult(exitCode: 0, standardOutput: Data("done".utf8), standardError: Data())),
-            .failure(CommandRunnerError.unacceptableExit(code: 1, message: "failed")),
+            .failure(CommandRunnerError.unacceptableExit(code: 1)),
         ])
         let store = PackageMaintenanceStore(
             service: PackageMaintenanceService(
@@ -324,7 +324,7 @@ struct PackageMaintenanceTests {
         #expect((await runner.requests).map { $0.arguments.last } == ["guided@2.0.0"])
     }
 
-    @Test func cancellingUpdatesStopsQueuedPackagesWithoutRollback() async throws {
+    @Test @MainActor func cancellingUpdatesStopsQueuedPackagesWithoutRollback() async throws {
         let first = nodePackage(name: "first", status: .updateAvailable)
         let second = nodePackage(name: "second", status: .updateAvailable)
         let provider = FixturePackageProvider(

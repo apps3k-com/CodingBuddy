@@ -629,11 +629,17 @@ private nonisolated struct RESTRepositoryNode: Decodable {
     }
 
     private enum CodingKeys: String, CodingKey {
+        /// Maps the repository name without transformation.
         case name
+        /// Maps the optional repository description without transformation.
         case description
+        /// Maps GitHub's reserved `private` field to the Swift privacy property.
         case isPrivate = "private"
+        /// Maps the repository archive flag without transformation.
         case archived
+        /// Maps GitHub's snake-case push timestamp.
         case pushedAt = "pushed_at"
+        /// Maps the nested owner payload without transformation.
         case owner
     }
 }
@@ -926,13 +932,21 @@ private nonisolated struct StatusContextNode: Decodable {
     let targetUrl: URL?
 
     private enum CodingKeys: String, CodingKey {
+        /// Maps GraphQL's concrete-type discriminator.
         case typename = "__typename"
+        /// Maps a check run's display name.
         case name
+        /// Maps a check run's execution status.
         case status
+        /// Maps a check run's terminal conclusion.
         case conclusion
+        /// Maps a check run's provider details URL.
         case detailsUrl
+        /// Maps a legacy status context's name.
         case context
+        /// Maps a legacy status context's state.
         case state
+        /// Maps a legacy status context's provider URL.
         case targetUrl
     }
 
@@ -969,6 +983,7 @@ private nonisolated struct RESTCheckRunsResponse: Decodable {
     let checkRuns: [RESTCheckRun]
 
     private enum CodingKeys: String, CodingKey {
+        /// Maps GitHub's snake-case check-run collection.
         case checkRuns = "check_runs"
     }
 }
@@ -985,9 +1000,13 @@ private nonisolated struct RESTCheckRun: Decodable {
     let detailsURL: URL?
 
     private enum CodingKeys: String, CodingKey {
+        /// Maps the check-run name without transformation.
         case name
+        /// Maps the check-run execution status without transformation.
         case status
+        /// Maps the check-run terminal conclusion without transformation.
         case conclusion
+        /// Maps GitHub's snake-case provider details URL.
         case detailsURL = "details_url"
     }
 
@@ -1017,8 +1036,11 @@ private nonisolated struct RESTCommitStatus: Decodable {
     let targetURL: URL?
 
     private enum CodingKeys: String, CodingKey {
+        /// Maps the legacy status context name without transformation.
         case context
+        /// Maps the legacy status state without transformation.
         case state
+        /// Maps GitHub's snake-case provider target URL.
         case targetURL = "target_url"
     }
 
