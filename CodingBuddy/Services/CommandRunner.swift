@@ -8,6 +8,12 @@ import Foundation
 
 /// Fully separated native process request. No shell command string is accepted.
 nonisolated struct CommandRequest: Equatable, Sendable {
+    /// Longest command runtime accepted from any internal caller.
+    static let maximumTimeout: TimeInterval = 3_600
+    /// Largest combined output budget accepted from any internal caller.
+    static let maximumOutputByteCount = 64 * 1_024 * 1_024
+    /// Small positive runtime used for invalid or non-positive timeout input.
+    private static let minimumTimeout: TimeInterval = 0.01
     /// Absolute executable path passed directly to `posix_spawn`.
     let executableURL: URL
     /// Argument vector excluding the executable name.
@@ -33,8 +39,17 @@ nonisolated struct CommandRequest: Equatable, Sendable {
         self.executableURL = executableURL
         self.arguments = arguments
         self.environment = environment
-        self.timeout = timeout
-        self.maximumOutputBytes = max(1, maximumOutputBytes)
+        self.timeout = if timeout == .infinity {
+            Self.maximumTimeout
+        } else if timeout.isFinite {
+            min(max(Self.minimumTimeout, timeout), Self.maximumTimeout)
+        } else {
+            Self.minimumTimeout
+        }
+        self.maximumOutputBytes = min(
+            max(1, maximumOutputBytes),
+            Self.maximumOutputByteCount
+        )
         self.acceptedExitCodes = acceptedExitCodes
     }
 

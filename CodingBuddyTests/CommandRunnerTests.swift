@@ -9,6 +9,27 @@ import Testing
 @testable import CodingBuddy
 
 struct CommandRunnerTests {
+    /// Verifies caller-controlled limits cannot disable process resource bounds.
+    @Test func requestNormalizesInvalidAndExcessiveResourceLimits() {
+        let nonFinite = CommandRequest(
+            executableURL: URL(fileURLWithPath: "/usr/bin/true"),
+            arguments: [],
+            timeout: .infinity,
+            maximumOutputBytes: .max
+        )
+        #expect(nonFinite.timeout == CommandRequest.maximumTimeout)
+        #expect(nonFinite.maximumOutputBytes == CommandRequest.maximumOutputByteCount)
+
+        let nonPositive = CommandRequest(
+            executableURL: URL(fileURLWithPath: "/usr/bin/true"),
+            arguments: [],
+            timeout: -.infinity,
+            maximumOutputBytes: .min
+        )
+        #expect(nonPositive.timeout > 0)
+        #expect(nonPositive.maximumOutputBytes == 1)
+    }
+
     @Test func relativeFileURLIsRejectedBeforeItsResolvedPathCanBeUsed() async {
         let relativeURL = URL(fileURLWithPath: "bin/sh")
         #expect(relativeURL.baseURL != nil)

@@ -57,6 +57,16 @@ nonisolated enum SecretAuthenticationPresentation: Equatable {
 
 /// Pure policy separating secret ownership from SwiftUI presentation behavior.
 nonisolated enum SecretDraftProtectionPolicy {
+    /// Determines whether the current draft owns cleartext that must be cleared on lock.
+    static func protectsDraft(
+        protectsRevealedSecret: Bool,
+        currentName: String,
+        protectionEnabled: Bool
+    ) -> Bool {
+        protectsRevealedSecret
+            || (protectionEnabled && SecretDetector.isSensitive(name: currentName))
+    }
+
     /// Decides how an editor responds to an automatic unlocked-to-locked transition.
     static func automaticRelock(
         protectsRevealedSecret: Bool,
@@ -313,6 +323,7 @@ extension View {
     func protectsSecretDraft(
         secrets: SecretsGuard,
         protectsRevealedSecret: Bool,
+        currentName: String,
         hasUnsavedChanges: Bool,
         canSave: Bool,
         saveAndDismiss: @escaping () -> Bool,
@@ -322,7 +333,11 @@ extension View {
         modifier(
             SecretDraftProtectionModifier(
                 secrets: secrets,
-                protectsRevealedSecret: protectsRevealedSecret,
+                protectsRevealedSecret: SecretDraftProtectionPolicy.protectsDraft(
+                    protectsRevealedSecret: protectsRevealedSecret,
+                    currentName: currentName,
+                    protectionEnabled: FeatureFlag.secretsProtection.isEnabled
+                ),
                 hasUnsavedChanges: hasUnsavedChanges,
                 canSave: canSave,
                 saveAndDismiss: saveAndDismiss,

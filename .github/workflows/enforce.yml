@@ -71,7 +71,7 @@ jobs:
         run: |
           CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
           echo "$CHANGED"
-          if echo "$CHANGED" | grep -qE '^CodingBuddy/.*\.(swift|xcstrings)$'; then
+          if echo "$CHANGED" | grep -qE '^CodingBuddy/.*\.(swift|xcstrings|storyboard|xib)$'; then
             if printf '%s\n' "$PR_BODY" | grep -qiE '(^|[[:space:]])Docs:[[:space:]]*none([[:space:]]|$)'; then
               echo "PR declares 'Docs: none' — OK."
             else

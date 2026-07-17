@@ -137,10 +137,12 @@ query AgentPRMonitor($owner: String!, $repo: String!, $first: Int!, $after: Stri
           nodes { number title url state }
         }
         reviewDecision
-        latestReviews(first: 10) {
-          nodes { author { login } state submittedAt url bodyText }
+        latestReviews(first: 100) {
+          pageInfo { hasNextPage }
+          nodes { author { login } state submittedAt url }
         }
         reviewThreads(first: 50) {
+          pageInfo { hasNextPage }
           nodes {
             isResolved
             isOutdated
@@ -284,7 +286,12 @@ Recommended behavior:
 - Coalesce manual refresh taps while a request is running.
 - Pause automatic refresh when remaining budget is low.
 - Use pagination caps for v1: first 50 open PRs per repository, first 50 review
-  threads per PR, first 50 status contexts per head commit.
+  threads per PR, and first 100 latest reviews per PR. `pageInfo.hasNextPage`
+  keeps review state unknown when either review collection is incomplete.
+- GraphQL check-rollup truncation and REST fallback truncation are fail-closed.
+  REST fallback reads up to 100 check runs and up to ten 100-entry combined-status
+  pages; `Link`, `total_count`, duplicate case-insensitive contexts, a changing
+  combined `state`, or a page-cap mismatch keeps CI state unknown.
 - Prefer one GraphQL request per repository refresh; use REST fallback only
   when needed.
 

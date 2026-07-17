@@ -83,11 +83,9 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
                 }
             }
 
-            let namesFromClaudeJSON = Set(projectServers.map(\.name))
             let localMCPJSON = URL(fileURLWithPath: path).appendingPathComponent(".mcp.json")
             if let localText = try? String(contentsOf: localMCPJSON, encoding: .utf8) {
                 rows += MCPServersJSONReader.servers(inDocument: localText, scope: path)
-                    .filter { !namesFromClaudeJSON.contains($0.name) }
                     .map { item(from: $0, tool: .claudeCode, sourcePath: localMCPJSON.path) }
             }
         }
@@ -244,10 +242,39 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
     private func redactedArgs(_ args: [String]) -> [String] {
         var result: [String] = []
         var redactNext = false
+        var redactHeaderNext = false
         for arg in args {
             if redactNext {
                 result.append("••••••••")
                 redactNext = false
+                continue
+            }
+
+            if redactHeaderNext {
+                result.append(redactedHeader(arg))
+                redactHeaderNext = false
+                continue
+            }
+
+            if arg == "-H" || arg == "--header" {
+                result.append(arg)
+                redactHeaderNext = true
+                continue
+            }
+
+            if arg.hasPrefix("--header=") {
+                let value = String(arg.dropFirst("--header=".count))
+                result.append("--header=" + redactedHeader(value))
+                continue
+            }
+
+            if arg.hasPrefix("-H"), arg.count > 2 {
+                let attached = String(arg.dropFirst(2))
+                if attached.hasPrefix("=") {
+                    result.append("-H=" + redactedHeader(String(attached.dropFirst())))
+                } else {
+                    result.append("-H" + redactedHeader(attached))
+                }
                 continue
             }
 
@@ -273,6 +300,43 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
             }
         }
         return result
+    }
+
+    /// Masks credential-bearing header values while retaining safe header names and values.
+    private func redactedHeader(_ value: String) -> String {
+        guard let colon = value.firstIndex(of: ":") else { return "••••••••" }
+        let name = String(value[..<colon]).trimmingCharacters(in: .whitespaces)
+        guard !name.isEmpty else { return "••••••••" }
+        guard !isSensitiveHeaderName(name) else {
+            return "\(name): ••••••••"
+        }
+        let headerValue = String(value[value.index(after: colon)...])
+            .trimmingCharacters(in: .whitespaces)
+        let sanitizedValue = sanitizedArgument(headerValue)
+        if headerValue.contains("://"), sanitizedValue == headerValue {
+            return "\(name): ••••••••"
+        }
+        guard !sanitizedValue.isEmpty else { return "\(name):" }
+        return "\(name): \(sanitizedValue)"
+    }
+
+    /// Classifies standard authentication headers and token-like custom header names.
+    private func isSensitiveHeaderName(_ name: String) -> Bool {
+        let normalized = name.lowercased()
+        let knownSensitiveNames: Set<String> = [
+            "authorization",
+            "proxy-authorization",
+            "cookie",
+            "set-cookie",
+            "x-api-key",
+        ]
+        guard !knownSensitiveNames.contains(normalized) else { return true }
+
+        let detectorName = name
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: "_")
+        return SecretDetector.isSensitive(name: detectorName)
     }
 
     /// Sanitizes standalone URL arguments or `--flag=<url>` values.

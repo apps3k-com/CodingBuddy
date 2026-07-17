@@ -62,10 +62,32 @@ nonisolated enum AttentionPriority: Int, CaseIterable, Comparable, Sendable {
     }
 }
 
-/// One ranked pull request and the guidance that explains its current state.
+/// Source represented by one attention item without inventing pull request data.
+nonisolated enum PRAttentionSource: Equatable, Sendable {
+    /// A concrete pull request returned by GitHub.
+    case pullRequest(AgentPullRequest)
+    /// A watched repository whose pull request snapshot is currently unavailable or stale.
+    case repository(GitHubRepositoryRef)
+
+    /// Repository whose state the item represents.
+    var repository: GitHubRepositoryRef {
+        switch self {
+        case .pullRequest(let row): row.repository
+        case .repository(let repository): repository
+        }
+    }
+
+    /// Concrete pull request when GitHub returned one for this item.
+    var pullRequest: AgentPullRequest? {
+        guard case .pullRequest(let row) = self else { return nil }
+        return row
+    }
+}
+
+/// One ranked pull request or repository snapshot and the guidance that explains its current state.
 nonisolated struct PRAttentionItem: Identifiable, Equatable, Sendable {
-    /// Current pull request snapshot represented by the queue row.
-    let row: AgentPullRequest
+    /// Concrete pull request or repository-scoped snapshot state represented by the queue row.
+    let source: PRAttentionSource
     /// Freshness used when classifying and explaining the snapshot.
     let freshness: AgentPRGuidanceFreshness
     /// Shared deterministic state used by both ranking and source guidance.
@@ -75,8 +97,25 @@ nonisolated struct PRAttentionItem: Identifiable, Equatable, Sendable {
     /// Existing source guidance and safe recommended action.
     let guidance: Guidance
 
-    /// Stable identity matching the source pull request row.
-    var id: AgentPullRequest.ID { row.id }
+    /// Stable identity that cannot collide between repository and pull request entries.
+    var id: String {
+        switch source {
+        case .pullRequest(let row): row.id
+        case .repository(let repository): "repository:\(repository.id)"
+        }
+    }
+
+    /// Repository whose current state is explained by this item.
+    var repository: GitHubRepositoryRef { source.repository }
+
+    /// Concrete pull request when the item is backed by a GitHub PR row.
+    var pullRequest: AgentPullRequest? { source.pullRequest }
+
+    /// Provider update timestamp when GitHub returned a concrete pull request.
+    var updatedAt: Date? { pullRequest?.updatedAt }
+
+    /// Pull request title, or the localized repository-level reason when no row was returned.
+    var titleDisplayName: String { pullRequest?.title ?? reasonDisplayName }
 
     /// Localized reason that distinguishes states inside one urgency band.
     var reasonDisplayName: String {

@@ -11,6 +11,66 @@
         }
       }
     },
+    "Attention inspector repository header accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ Repository-Status: %2$@. Priorität: %3$@."
+          }
+        }
+      }
+    },
+    "Attention inspector recommended repository header accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empfohlen. %1$@ Repository-Status: %2$@. Priorität: %3$@."
+          }
+        }
+      }
+    },
+    "Choose an item to understand its priority and recommended next action." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Eintrag aus, um seine Priorität und die empfohlene nächste Aktion zu verstehen."
+          }
+        }
+      }
+    },
+    "Item" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintrag"
+          }
+        }
+      }
+    },
+    "Repository status" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Status"
+          }
+        }
+      }
+    },
+    "Select an item" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintrag auswählen"
+          }
+        }
+      }
+    },
     "Access blocked" : {
       "localizations" : {
         "de" : {
@@ -7828,6 +7888,16 @@
         }
       }
     },
+    "Attention inspector recommended header accessibility label" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empfohlen. %1$@, Pull Request %2$lld: %3$@. Priorität: %4$@."
+          }
+        }
+      }
+    },
     "Attention priority act now" : {
       "localizations" : {
         "de" : {
@@ -7928,12 +7998,12 @@
         }
       }
     },
-    "Some repository snapshots are not current. Other results remain available." : {
+    "Some repository snapshots are not current. Available repository status remains visible." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Einige Repository-Momentaufnahmen sind nicht aktuell. Die übrigen Ergebnisse bleiben verfügbar."
+            "value" : "Einige Repository-Momentaufnahmen sind nicht aktuell. Der verfügbare Repository-Status bleibt sichtbar."
           }
         }
       }
@@ -8543,7 +8613,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Pull Request bleibt unverändert, während CodingBuddy GitHub auf neuere Signale prüft."
+            "value" : "Kein Pull Request wird verändert, während CodingBuddy GitHub auf neuere Signale prüft."
           }
         }
       }
@@ -8553,7 +8623,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CodingBuddy aktualisiert dieses Repository. Der Pull Request zeigt deshalb noch den vorherigen Snapshot."
+            "value" : "CodingBuddy aktualisiert dieses Repository und hat seine aktuellen Pull-Request-Daten noch nicht bestätigt."
           }
         }
       }
@@ -8563,7 +8633,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der sichtbare Status kann sich ändern, sobald die laufende schreibgeschützte Aktualisierung abgeschlossen ist."
+            "value" : "Die Fokusliste kann sich ändern, sobald die laufende schreibgeschützte Aktualisierung abgeschlossen ist."
           }
         }
       }
@@ -8593,7 +8663,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die sichtbaren Bereitschafts- und Review-Signale können veraltet sein."
+            "value" : "Pull-Request-Arbeit aus diesem Repository kann fehlen oder veraltet sein."
           }
         }
       }
@@ -8603,7 +8673,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dieser Pull Request zeigt den letzten erfolgreichen Snapshot, weil die GitHub-Autorisierung geprüft werden muss."
+            "value" : "CodingBuddy kann die aktuellen Pull-Request-Daten dieses Repositorys nicht bestätigen, weil die GitHub-Autorisierung geprüft werden muss."
           }
         }
       }
@@ -8613,7 +8683,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CodingBuddy kann Änderungen am Pull Request erst bestätigen, wenn die Autorisierung wieder funktioniert."
+            "value" : "Bis die Autorisierung wieder funktioniert, kann die Fokusliste nicht bestätigen, welche Pull Requests geändert wurden oder Aufmerksamkeit brauchen."
           }
         }
       }
@@ -8623,7 +8693,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der sichtbare Pull-Request-Status bleibt veraltet, bis eine spätere Aktualisierung erfolgreich ist."
+            "value" : "Pull-Request-Arbeit aus diesem Repository bleibt unbestätigt, bis eine spätere Aktualisierung erfolgreich ist."
           }
         }
       }
@@ -8633,7 +8703,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dieser Pull Request zeigt einen älteren Snapshot, weil GitHub Anfragen vorübergehend begrenzt."
+            "value" : "CodingBuddy kann die aktuellen Pull-Request-Daten nicht bestätigen, weil GitHub Anfragen vorübergehend begrenzt."
           }
         }
       }
@@ -8653,7 +8723,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bereitschafts- und Review-Informationen können weiterhin veraltet sein."
+            "value" : "Pull-Request-Arbeit aus diesem Repository kann fehlen oder veraltet sein."
           }
         }
       }
@@ -8663,7 +8733,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die letzte Aktualisierung ist fehlgeschlagen. Dieser Pull Request zeigt deshalb weiterhin den letzten erfolgreichen Snapshot."
+            "value" : "Die letzte Aktualisierung ist fehlgeschlagen, bevor CodingBuddy die aktuellen Pull-Request-Daten dieses Repositorys bestätigen konnte."
           }
         }
       }
@@ -8673,7 +8743,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erst nach einer erfolgreichen Aktualisierung kann CodingBuddy den aktuellen Pull-Request-Status bestätigen."
+            "value" : "Erst nach einer erfolgreichen Aktualisierung kann die Fokusliste bestätigen, welche Pull Requests Aufmerksamkeit brauchen."
           }
         }
       }

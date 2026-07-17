@@ -404,6 +404,7 @@ private struct ClaudeEnvEditor: View {
         .protectsSecretDraft(
             secrets: secrets,
             protectsRevealedSecret: protectsRevealedSecret,
+            currentName: key,
             hasUnsavedChanges: hasUnsavedChanges,
             canSave: !key.isEmpty && canSelectSource(source),
             saveAndDismiss: { onSave(key, value, source) },

@@ -45,17 +45,19 @@ struct PRAttentionLocalizationTests {
             "Open the full pull request monitor",
             "Refresh watched repositories",
             "Priority",
+            "Item",
+            "Repository status",
             "Why now",
             "Add a fine-grained read-only token before CodingBuddy can rank pull request work.",
             "No watched repositories",
             "Choose repositories in Agent PR Monitor to build your attention queue.",
             "Loading attention queue...",
             "Attention queue unavailable",
-            "Some repository snapshots are not current. Other results remain available.",
+            "Some repository snapshots are not current. Available repository status remains visible.",
             "No pull requests need sorting",
             "CodingBuddy did not find open pull requests in the current repository snapshots.",
-            "Select a pull request",
-            "Choose a queue row to understand its priority and recommended next action.",
+            "Select an item",
+            "Choose an item to understand its priority and recommended next action.",
             "Signal",
             "Recommended",
         ]
@@ -66,13 +68,32 @@ struct PRAttentionLocalizationTests {
     }
 
     @Test func inspectorAccessibilityFormatKeepsPositionalPlaceholders() throws {
-        let key = "Attention inspector header accessibility label"
-        let english = try #require(sourceDefaultValues()[key])
-        let german = try germanValue(for: key, strings: catalogStrings())
+        let strings = try catalogStrings()
+        let defaults = try sourceDefaultValues()
+        let pullRequestKeys = [
+            "Attention inspector header accessibility label",
+            "Attention inspector recommended header accessibility label",
+        ]
+        for key in pullRequestKeys {
+            let english = try #require(defaults[key])
+            let german = try germanValue(for: key, strings: strings)
+            for placeholder in ["%1$@", "%2$lld", "%3$@", "%4$@"] {
+                #expect(english.contains(placeholder))
+                #expect(german.contains(placeholder))
+            }
+        }
 
-        for placeholder in ["%1$@", "%2$lld", "%3$@", "%4$@"] {
-            #expect(english.contains(placeholder))
-            #expect(german.contains(placeholder))
+        let repositoryKeys = [
+            "Attention inspector repository header accessibility label",
+            "Attention inspector recommended repository header accessibility label",
+        ]
+        for key in repositoryKeys {
+            let english = try #require(defaults[key])
+            let german = try germanValue(for: key, strings: strings)
+            for placeholder in ["%1$@", "%2$@", "%3$@"] {
+                #expect(english.contains(placeholder))
+                #expect(german.contains(placeholder))
+            }
         }
     }
 
@@ -83,6 +104,10 @@ struct PRAttentionLocalizationTests {
         #expect(source.contains(".accessibilityLabel(Text(headerAccessibilityLabel(for: item)))"))
         #expect(source.contains(".accessibilityAddTraits(.isHeader)"))
         #expect(source.contains("Attention inspector header accessibility label"))
+        #expect(source.contains("Attention inspector recommended header accessibility label"))
+        #expect(source.contains("Attention inspector repository header accessibility label"))
+        #expect(source.contains("Attention inspector recommended repository header accessibility label"))
+        #expect(source.contains(".inspector(isPresented: inspectorBinding)"))
     }
 
     private func sourceDefaultValues() throws -> [String: String] {

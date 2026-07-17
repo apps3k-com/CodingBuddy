@@ -449,6 +449,7 @@ struct ContentView: View {
         )
         return PRAttentionQueueBuilder.snapshot(
             rows: store.rows,
+            repositories: store.watchedRepositories,
             freshnessByRepository: freshnessByRepository,
             defaultFreshness: AgentPRMonitorView.guidanceFreshness(for: store.state)
         ).actNowCount

@@ -22,11 +22,11 @@ struct PRAttentionQueueTests {
 
         let snapshot = PRAttentionQueueBuilder.snapshot(rows: rows, freshnessByRepository: [:])
 
-        #expect(snapshot.items.map(\.row.number) == [6, 5, 4, 3, 2, 1])
+        #expect(snapshot.items.compactMap(\.pullRequest?.number) == [6, 5, 4, 3, 2, 1])
         #expect(snapshot.items.map(\.priority) == [
             .actNow, .actNow, .actNow, .next, .waiting, .ready,
         ])
-        #expect(snapshot.recommendedItem?.row.number == 6)
+        #expect(snapshot.recommendedItem?.pullRequest?.number == 6)
         #expect(snapshot.actNowCount == 3)
     }
 
@@ -54,10 +54,10 @@ struct PRAttentionQueueTests {
         )
 
         #expect(snapshot.items.count == 2)
-        #expect(snapshot.items.first?.row.number == 11)
+        #expect(snapshot.items.first?.pullRequest?.number == 11)
         #expect(snapshot.items.first?.state == .staleAuthorization)
         #expect(snapshot.items.first?.priority == .actNow)
-        #expect(snapshot.items.last?.row.repository == healthyRepository)
+        #expect(snapshot.items.last?.repository == healthyRepository)
     }
 
     @Test func oneRepositoryFailureDoesNotHideOtherRepositoryResults() {
@@ -71,7 +71,7 @@ struct PRAttentionQueueTests {
             freshnessByRepository: [failingRepository: .refreshFailed]
         )
 
-        #expect(snapshot.items.map(\.row.number) == [21, 20])
+        #expect(snapshot.items.compactMap(\.pullRequest?.number) == [21, 20])
         #expect(snapshot.items.map(\.state) == [.failedContinuousIntegration, .staleRefreshFailure])
         #expect(snapshot.items.map(\.priority) == [.actNow, .next])
     }
@@ -110,7 +110,47 @@ struct PRAttentionQueueTests {
             freshnessByRepository: [:]
         )
 
-        #expect(snapshot.items.map(\.row.number) == [6, 7, 9, 8])
+        #expect(snapshot.items.compactMap(\.pullRequest?.number) == [6, 7, 9, 8])
+    }
+
+    @Test func repositoryFailureWithoutPullRequestRowsRemainsActionable() {
+        let healthyRepository = GitHubRepositoryRef(owner: "apps3k-com", name: "healthy")
+        let failingRepository = GitHubRepositoryRef(owner: "apps3k-com", name: "missing-snapshot")
+        let snapshot = PRAttentionQueueBuilder.snapshot(
+            rows: [makeRow(repository: healthyRepository, number: 50)],
+            repositories: [healthyRepository, failingRepository],
+            freshnessByRepository: [failingRepository: .authorizationRequired]
+        )
+
+        #expect(snapshot.items.count == 2)
+        #expect(snapshot.recommendedItem?.repository == failingRepository)
+        #expect(snapshot.recommendedItem?.pullRequest == nil)
+        #expect(snapshot.recommendedItem?.state == .staleAuthorization)
+        #expect(snapshot.recommendedItem?.priority == .actNow)
+        #expect(snapshot.recommendedItem?.guidance.technicalEvidence.map(\.sanitizedValue) == [
+            failingRepository.displayName,
+        ])
+        #expect(snapshot.actNowCount == 1)
+    }
+
+    /// Verifies GitHub case variants cannot duplicate a repository failure or weaken its state.
+    @Test func caseVariantRepositoriesCollapseToOneConservativeEntry() throws {
+        let canonical = GitHubRepositoryRef(owner: "apps3k-com", name: "CodingBuddy")
+        let caseVariant = GitHubRepositoryRef(owner: "Apps3K-Com", name: "codingbuddy")
+        let snapshot = PRAttentionQueueBuilder.snapshot(
+            rows: [],
+            repositories: [canonical, caseVariant],
+            freshnessByRepository: [
+                canonical: .refreshFailed,
+                caseVariant: .authorizationRequired,
+            ]
+        )
+
+        let item = try #require(snapshot.items.first)
+        #expect(snapshot.items.count == 1)
+        #expect(item.repository.canonicalID == canonical.canonicalID)
+        #expect(item.state == .staleAuthorization)
+        #expect(item.priority == .actNow)
     }
 
     @Test func unavailableRecoveryRouteIsExplainedWithoutChangingPriority() {

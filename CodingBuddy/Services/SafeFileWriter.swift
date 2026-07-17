@@ -1045,7 +1045,14 @@ nonisolated struct SafeFileWriter {
             maximumEntryCount: maximumBackupDirectoryEntryCount
         )
         let staleCandidates = candidates
-            .sorted { $0.name < $1.name }
+            .sorted {
+                guard let lhs = Self.backupOrderIfValid(for: $0.name, baseName: baseName),
+                      let rhs = Self.backupOrderIfValid(for: $1.name, baseName: baseName) else {
+                    return $0.name < $1.name
+                }
+                guard lhs.stamp == rhs.stamp else { return lhs.stamp < rhs.stamp }
+                return lhs.counter < rhs.counter
+            }
             .dropLast(backupRetention)
         var recoveryArtifacts: [RecoveryArtifact] = []
         for stale in staleCandidates {
@@ -1095,7 +1102,8 @@ nonisolated struct SafeFileWriter {
             guard inspectedEntryCount <= maximumEntryCount else {
                 throw WriteError.backupDirectoryTooLarge(maximum: maximumBackupDirectoryEntryCount)
             }
-            guard let baseName, name.hasPrefix("\(baseName)-") else { continue }
+            guard let baseName,
+                  Self.backupOrderIfValid(for: name, baseName: baseName) != nil else { continue }
             var info = Darwin.stat()
             let metadataResult = name.withCString {
                 fstatat(directoryFD, $0, &info, AT_SYMLINK_NOFOLLOW)
@@ -1109,6 +1117,33 @@ nonisolated struct SafeFileWriter {
             }
         }
         return candidates
+    }
+
+    /// Parses writer-generated timestamps and numeric collision suffixes for retention ordering.
+    private static func backupOrderIfValid(
+        for name: String,
+        baseName: String
+    ) -> (stamp: String, counter: Int)? {
+        let prefix = "\(baseName)-"
+        guard name.hasPrefix(prefix) else { return nil }
+        let suffix = name.dropFirst(prefix.count)
+        guard suffix.count >= 21 else { return nil }
+        let stamp = String(suffix.prefix(21))
+        let stampCharacters = Array(stamp)
+        let separatorOffsets: Set<Int> = [4, 7, 10, 17]
+        guard stampCharacters.indices.allSatisfy({ index in
+            separatorOffsets.contains(index)
+                ? stampCharacters[index] == "-"
+                : stampCharacters[index].isNumber
+        }) else { return nil }
+
+        let remainder = suffix.dropFirst(21)
+        guard !remainder.isEmpty else { return (stamp, 0) }
+        guard remainder.first == "-",
+              let counter = Int(remainder.dropFirst()),
+              counter > 0,
+              String(counter) == remainder.dropFirst() else { return nil }
+        return (stamp, counter)
     }
 
     // MARK: - Descriptor utilities

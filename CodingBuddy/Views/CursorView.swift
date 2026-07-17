@@ -372,6 +372,7 @@ private struct CursorEnvEditor: View {
         .protectsSecretDraft(
             secrets: secrets,
             protectsRevealedSecret: protectsRevealedSecret,
+            currentName: key,
             hasUnsavedChanges: hasUnsavedChanges,
             canSave: !key.isEmpty,
             saveAndDismiss: { onSave(key, value, server) },

@@ -225,6 +225,32 @@ struct SafeFileWriterTests {
         }
     }
 
+    /// Verifies collision suffixes are ordered numerically once they reach two digits.
+    @Test func backupRetentionOrdersCollisionSuffixesNumerically() throws {
+        let dir = try makeTempDir()
+        let backups = dir.appendingPathComponent("Backups", isDirectory: true)
+        let target = dir.appendingPathComponent("file")
+        try FileManager.default.createDirectory(at: backups, withIntermediateDirectories: true)
+        try "current".write(to: target, atomically: true, encoding: .utf8)
+        for counter in 1...11 {
+            let name = "file-2020-01-01-000000-000-\(counter)"
+            try "backup-\(counter)".write(
+                to: backups.appendingPathComponent(name),
+                atomically: true,
+                encoding: .utf8
+            )
+        }
+
+        try SafeFileWriter(backupDirectory: backups, backupRetention: 3)
+            .write("changed", to: target, expectedOriginal: "current")
+
+        let names = Set(try FileManager.default.contentsOfDirectory(atPath: backups.path))
+        #expect(names.count == 3)
+        #expect(names.contains("file-2020-01-01-000000-000-10"))
+        #expect(names.contains("file-2020-01-01-000000-000-11"))
+        #expect(!names.contains("file-2020-01-01-000000-000-9"))
+    }
+
     @Test func unchangedContentDoesNotBackUp() throws {
         let dir = try makeTempDir()
         let backups = dir.appendingPathComponent("Backups")

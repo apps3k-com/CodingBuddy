@@ -232,6 +232,36 @@ user's authority to mutate or delete the managed files. CodingBuddy's checks
 target ordinary concurrent writers, symlink/path replacement and deterministic
 race boundaries without overstating the guarantees macOS exposes.
 
+### GitHub monitoring evidence boundary
+
+`GitHubClient` treats provider pagination as part of the trust boundary, not as
+a display concern. GraphQL requests fetch up to 100 latest reviews and retain
+`pageInfo.hasNextPage`; a missing review decision with additional unseen
+reviews stays unknown. The REST combined-status fallback requests 100 legacy
+statuses per page and follows `Link` or `total_count` evidence for at most ten
+pages. A changing count, an empty page before declared completion, or a
+remaining next page marks the check collection as truncated. Duplicate
+case-insensitive status contexts and disagreement with GitHub's global combined
+state also fail closed because page ordering can shift during pagination. Truncated review
+or check collections cannot produce approved or green readiness.
+
+`PRAttentionQueueBuilder` merges concrete `AgentPullRequest` sources with typed
+repository sources. A stale watched repository that returned no PR row becomes
+one repository-level queue item with only refresh or Settings routes; it never
+receives a placeholder PR number or an Open PR action. Healthy repositories and
+their last trustworthy snapshots remain independently visible.
+
+### MCP inventory disclosure boundary
+
+`MCPServerInventoryScanner` preserves every source occurrence, including a
+same-named Claude Code server defined in both `.claude.json` and a project
+`.mcp.json`. Keeping these rows separate enables later duplicate and shadowing
+analysis. Human-readable command summaries remove URL credentials and query
+data, token-like arguments, and values of authentication, cookie, API-key, or
+token-like custom headers. Non-sensitive header values remain visible for
+diagnostics; the inventory never claims that a locally recognized definition
+is reachable or authenticated.
+
 ## Sandbox
 
 The app is deliberately **not sandboxed**: its purpose is reading and writing dotfiles in `$HOME`, which the App Sandbox forbids. Hardened runtime stays enabled. See [ADRs](ADRs).

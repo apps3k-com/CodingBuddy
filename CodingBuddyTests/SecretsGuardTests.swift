@@ -236,6 +236,30 @@ struct SecretsGuardTests {
         )
     }
 
+    /// Verifies a sensitive name entered after sheet creation activates draft protection.
+    @Test func liveSensitiveNameProtectsNewDraftWhenFeatureIsEnabled() {
+        #expect(SecretDraftProtectionPolicy.protectsDraft(
+            protectsRevealedSecret: false,
+            currentName: "GITHUB_TOKEN",
+            protectionEnabled: true
+        ))
+        #expect(!SecretDraftProtectionPolicy.protectsDraft(
+            protectsRevealedSecret: false,
+            currentName: "PATH",
+            protectionEnabled: true
+        ))
+        #expect(!SecretDraftProtectionPolicy.protectsDraft(
+            protectsRevealedSecret: false,
+            currentName: "GITHUB_TOKEN",
+            protectionEnabled: false
+        ))
+        #expect(SecretDraftProtectionPolicy.protectsDraft(
+            protectsRevealedSecret: true,
+            currentName: "PATH",
+            protectionEnabled: false
+        ))
+    }
+
     /// Verifies expiry clears a revealed secret and reports only meaningful lost edits.
     @Test func automaticRelockClearsRevealedSecretAndTracksDirtyState() {
         #expect(

@@ -94,11 +94,16 @@ not create another repository list or fetch GitHub independently.
 - **Ready** stays visible for completion or merge follow-up but never outranks
   actionable work.
 
-The first row is the recommendation. Select any row to see **Why now**, the
-plain explanation, the consequence, and the existing safe next action. A
+The first row is the recommendation. Each compact item cell keeps repository,
+title, and PR number together so the table remains usable beside its native
+inspector in narrow windows. Select any row to see **Why now**, the plain
+explanation, the consequence, and the existing safe next action. A
 repository-wide refresh problem appears once instead of being repeated for
-every stale PR. Valid snapshots from other watched repositories remain in the
-queue.
+every stale PR. If a watched repository fails before returning any PR rows, a
+repository-level entry keeps that missing visibility actionable without
+inventing a pull request. The partial-state banner remains neutral when only
+repository status is available; valid PR snapshots from other watched
+repositories remain in the queue when present.
 
 v1 limits: the queue does not snooze work, send notifications, run in the
 background, mutate GitHub, or rank Health, Security, and package signals yet.
@@ -197,7 +202,8 @@ The **MCP Inventory** entry (alpha) is a read-only table of MCP servers discover
 - Search filters by server name, tool, repository or workspace name, scope, command or URL summary, and environment variable name.
 - Codex servers that reference variables missing from `~/.codex/mcp.env` are highlighted. Use **Open Tool** to jump from a selected Codex, Claude Code or Cursor row to the existing tool editor.
 - The inspector explains one server state at a time. Missing variables recommend opening the owning tool, an unknown transport is called out as a configuration warning, and a configured row clearly states that no action is needed based on the local file evidence.
-- Secret values are never shown: URL user info, query strings, fragments and token-like command arguments are redacted.
+- Secret values are never shown: URL user info, query strings, fragments, token-like command arguments and credential-bearing header arguments are redacted. Safe header values remain visible so the summary stays useful.
+- Same-named Claude Code definitions in `.claude.json` and a project `.mcp.json` remain separate occurrences. This preserves the evidence needed to detect shadowing and conflicting definitions instead of silently hiding one source.
 
 v1 limits: MCP Inventory does not edit, install, network-test, or authenticate with servers. **Configured** means that the scan recognized the local definition and did not prove a missing variable; it does not prove that the definition is complete, the server is reachable, or authentication will succeed. Claude Code and Cursor rows show configured `env` and header keys only; they do not infer missing variables from command text.
 
@@ -210,8 +216,9 @@ The **Repositories → Agent PR Monitor** entry (alpha) is a read-only table for
 - The compact table shows PR title, repository, advisory readiness and last update time. Select a row to inspect author/source classification, branches, linked closing issues, CI status, review status and unresolved findings.
 - With explainable guidance enabled, the selected PR first states what its current readiness means, why it matters, and what to do next. Green and genuinely waiting states say that no action is needed now; failed checks, requested changes, unresolved findings and drafts recommend opening the PR.
 - A snapshot refresh in progress or a stale repository snapshot takes priority over the old readiness result. Authorization problems lead to Settings, ordinary refresh failures recommend a refresh, and active refreshes or rate limits explain that waiting is the useful next step instead of creating false urgency.
+- GitHub review and legacy-status collections are read with bounded pagination. If GitHub reports more entries than CodingBuddy can safely fetch, review and CI stay **unknown/pending** rather than being presented as approved or green.
 - Use **Refresh** to reload manually and **Open PR** to continue in the browser. The monitor never comments, approves, resolves threads or merges PRs.
-- Rate limits, missing permissions, denied repositories and offline errors are shown as UI-safe states while the last successful snapshot stays visible where possible. Repository-specific failures are scoped, so successful repositories remain visible when another watched repository fails.
+- Rate limits, missing permissions, denied repositories and offline errors are shown as UI-safe states while the last successful snapshot stays visible where possible. Repository-specific failures are scoped, so successful repositories remain visible when another watched repository fails. A failure with no cached PR rows remains visible as one repository-level entry in the Attention Queue.
 
 v1 limits: Agent PR Monitor reads GitHub.com only, does not update GitHub Projects and does not run in the background after CodingBuddy quits.
 

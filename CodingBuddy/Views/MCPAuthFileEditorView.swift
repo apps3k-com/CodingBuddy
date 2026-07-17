@@ -463,8 +463,7 @@ struct MCPAuthFileEditorView: View {
     private func save() -> Bool {
         guard let file = selectedFile, let loadedContents else { return false }
         if store.save(text, to: file, loaded: loadedContents) {
-            loadSelectedFile()
-            return true
+            return loadSelectedFile()
         }
         let isStale = store.lastFailureKind == .fileChangedExternally
         let recoveryArtifact: URL? = if case let .writeRecovery(url) = store.lastFailureKind {

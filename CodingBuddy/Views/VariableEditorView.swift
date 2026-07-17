@@ -176,6 +176,7 @@ struct VariableEditorView: View {
         .protectsSecretDraft(
             secrets: secrets,
             protectsRevealedSecret: protectsRevealedSecret,
+            currentName: name,
             hasUnsavedChanges: hasUnsavedChanges,
             canSave: canSave,
             saveAndDismiss: save,

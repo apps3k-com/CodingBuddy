@@ -279,6 +279,7 @@ private struct EnvEntryEditor: View {
         .protectsSecretDraft(
             secrets: secrets,
             protectsRevealedSecret: protectsRevealedSecret,
+            currentName: name,
             hasUnsavedChanges: hasUnsavedChanges,
             canSave: !name.isEmpty,
             saveAndDismiss: { onSave(name, value) },

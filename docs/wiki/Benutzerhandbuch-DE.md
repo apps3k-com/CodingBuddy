@@ -104,11 +104,17 @@ GitHub nicht eigenständig ab.
 - **Bereit** bleibt für Abschluss oder Merge-Nachverfolgung sichtbar, steht aber
   nie vor tatsächlich bearbeitbarer Arbeit.
 
-Die erste Zeile ist die Empfehlung. Wähle einen Eintrag aus, um **Warum jetzt**,
-die einfache Erklärung, mögliche Folgen und die vorhandene sichere nächste
-Aktion zu sehen. Ein Repository-weites Aktualisierungsproblem erscheint nur
-einmal statt für jeden veralteten PR. Gültige Snapshots anderer beobachteter
-Repositories bleiben in der Liste.
+Die erste Zeile ist die Empfehlung. Jede kompakte Eintragszelle hält
+Repository, Titel und PR-Nummer zusammen, damit die Tabelle auch neben dem
+nativen Inspector in schmalen Fenstern nutzbar bleibt. Wähle einen Eintrag aus,
+um **Warum jetzt**, die einfache Erklärung, mögliche Folgen und die vorhandene
+sichere nächste Aktion zu sehen. Ein Repository-weites Aktualisierungsproblem erscheint nur
+einmal statt für jeden veralteten PR. Schlägt ein beobachtetes Repository fehl,
+bevor es PR-Zeilen liefert, hält ein Repository-Eintrag diese fehlende
+Sichtbarkeit bearbeitbar, ohne einen Pull Request zu erfinden. Der Hinweis auf
+einen unvollständigen Stand bleibt neutral, wenn nur Repository-Status
+verfügbar ist; gültige PR-Snapshots anderer beobachteter Repositories bleiben
+in der Liste, wenn sie vorhanden sind.
 
 v1-Grenzen: Die Liste stellt Arbeit nicht zurück, sendet keine
 Benachrichtigungen, läuft nicht im Hintergrund, verändert GitHub nicht und
@@ -213,7 +219,8 @@ Der Seitenleisten-Eintrag **MCP Inventory** (Alpha) ist eine Nur-Lese-Tabelle de
 - Die Suche filtert nach Servername, Tool, Repository- oder Workspace-Name, Scope, Command- oder URL-Zusammenfassung und Environment-Variable-Name.
 - Codex-Server, die Variablen referenzieren, die in `~/.codex/mcp.env` fehlen, werden hervorgehoben. Mit **Tool öffnen** springst du aus einer ausgewählten Codex-, Claude-Code- oder Cursor-Zeile zum bestehenden Tool-Editor.
 - Der Inspector erklärt jeweils den Zustand eines Servers. Fehlende Variablen empfehlen das zuständige Tool zu öffnen, ein unbekannter Transport wird als Konfigurationswarnung erklärt und eine konfigurierte Zeile sagt anhand der lokalen Dateinachweise klar, dass keine Aktion nötig ist.
-- Secret-Werte werden nie angezeigt: URL-Userinfo, Query-Strings, Fragmente und tokenartige Command-Argumente werden redigiert.
+- Secret-Werte werden nie angezeigt: URL-Userinfo, Query-Strings, Fragmente, tokenartige Command-Argumente und Zugangsdaten enthaltende Header-Argumente werden redigiert. Sichere Header-Werte bleiben sichtbar, damit die Zusammenfassung nützlich bleibt.
+- Gleichnamige Claude-Code-Definitionen in `.claude.json` und einer projektbezogenen `.mcp.json` bleiben getrennte Vorkommen. Dadurch bleiben Nachweise für Shadowing und widersprüchliche Definitionen erhalten, statt eine Quelle still auszublenden.
 
 v1-Grenzen: MCP Inventory bearbeitet, installiert, prüft und authentifiziert keine Server. **Konfiguriert** bedeutet, dass der Scan die lokale Definition erkannt und keine sicher fehlende Variable festgestellt hat; es beweist weder die Vollständigkeit der Definition noch Erreichbarkeit oder erfolgreiche Authentifizierung. Claude-Code- und Cursor-Zeilen zeigen nur konfigurierte `env`- und Header-Keys; sie leiten keine fehlenden Variablen aus Command-Text ab.
 
@@ -226,8 +233,9 @@ Der Seitenleisten-Eintrag **Repositories → Agent PR Monitor** (Alpha) ist eine
 - Die kompakte Tabelle zeigt PR-Titel, Repository, beratende Merge-Bereitschaft und letzte Aktualisierung. Wähle eine Zeile, um Autor-/Quellklassifizierung, Branches, verknüpfte Closing-Issues, CI-Status, Review-Status und ungelöste Befunde im Inspector zu prüfen.
 - Mit aktivierten verständlichen Empfehlungen erklärt der ausgewählte PR zuerst, was seine aktuelle Bereitschaft bedeutet, warum sie wichtig ist und was als Nächstes sinnvoll ist. Grüne und tatsächlich wartende Zustände sagen ausdrücklich, dass jetzt keine Aktion nötig ist; fehlgeschlagene Checks, angeforderte Änderungen, ungelöste Befunde und Drafts empfehlen, den PR zu öffnen.
 - Eine laufende Snapshot-Aktualisierung oder ein veralteter Repository-Snapshot hat Vorrang vor der alten Bereitschaftsaussage. Authentifizierungsprobleme führen zu den Einstellungen, gewöhnliche Ladefehler empfehlen eine Aktualisierung und laufende Aktualisierungen oder Rate-Limits erklären, dass Abwarten der sinnvolle nächste Schritt ist, statt falsche Dringlichkeit zu erzeugen.
+- GitHub-Review- und Legacy-Status-Sammlungen werden mit begrenzter Pagination gelesen. Meldet GitHub mehr Einträge, als CodingBuddy sicher laden kann, bleiben Review und CI **unbekannt/ausstehend**, statt als genehmigt oder grün zu erscheinen.
 - Mit **Aktualisieren** lädst du manuell neu, mit **PR öffnen** arbeitest du im Browser weiter. Der Monitor kommentiert nie, genehmigt nie, löst keine Threads auf und führt keine Merges aus.
-- Rate-Limits, fehlende Rechte, verweigerte Repositories und Offline-Fehler erscheinen als UI-sichere Zustände; der letzte erfolgreiche Snapshot bleibt möglichst sichtbar. Repository-spezifische Fehler sind abgegrenzt, sodass erfolgreiche Repositories sichtbar bleiben, wenn ein anderes überwachtes Repository fehlschlägt.
+- Rate-Limits, fehlende Rechte, verweigerte Repositories und Offline-Fehler erscheinen als UI-sichere Zustände; der letzte erfolgreiche Snapshot bleibt möglichst sichtbar. Repository-spezifische Fehler sind abgegrenzt, sodass erfolgreiche Repositories sichtbar bleiben, wenn ein anderes überwachtes Repository fehlschlägt. Ein Fehler ohne zwischengespeicherte PR-Zeilen bleibt als einzelner Repository-Eintrag in der Fokusliste sichtbar.
 
 v1-Grenzen: Agent PR Monitor liest nur GitHub.com, aktualisiert keine GitHub Projects und läuft nach dem Beenden von CodingBuddy nicht im Hintergrund weiter.
 
