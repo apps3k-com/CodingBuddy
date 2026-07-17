@@ -1,7 +1,7 @@
 ---
 title: "Fail closed when security configuration is unavailable"
 scope: "file"
-path: ["**/*"]
+path: ["CodingBuddy/{Services,Stores}/**/*.swift"]
 severity_min: "critical"
 buckets: ["security"]
 enabled: true
@@ -10,14 +10,14 @@ enabled: true
 @kody-sync
 
 ## Instructions
-Missing, malformed, or unreadable security configuration must disable the operation with an actionable error, never permissive defaults.
-
-Only report violations demonstrated by the diff and repository context; do not speculate.
+- Treat missing, malformed, unreadable, or ambiguous security configuration as unavailable and block the affected mutation.
+- Return actionable typed guidance without exposing raw secret material.
+- Cancel stale scans and clear private state when repository or credential context changes.
 
 ## Examples
 
 ### Bad example
-The change bypasses the required boundary without an equivalent safeguard.
+A parser error falls back to an empty allow-list that the caller interprets as unrestricted.
 
 ### Good example
-The change uses the canonical boundary and adds focused evidence for its failure behavior.
+The feature reports an unavailable state and refuses the write until configuration is valid.

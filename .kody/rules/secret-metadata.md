@@ -1,7 +1,7 @@
 ---
 title: "Store secret references and metadata, never secret values"
 scope: "file"
-path: ["**/*"]
+path: ["CodingBuddy/{Models,Services,Stores,Views}/**/*.swift"]
 severity_min: "critical"
 buckets: ["security"]
 enabled: true
@@ -10,14 +10,14 @@ enabled: true
 @kody-sync
 
 ## Instructions
-Persistence, logs, analytics, fixtures, and UI state may contain secret identifiers and metadata only, never resolved credentials.
-
-Only report violations demonstrated by the diff and repository context; do not speculate.
+- Keep resolved tokens, passwords, private keys, and secret values out of persistence, logs, analytics, fixtures, and UI state.
+- Represent secrets through references plus the minimum redacted metadata required for UX.
+- Apply redaction before errors or snapshots cross a service boundary.
 
 ## Examples
 
 ### Bad example
-The change bypasses the required boundary without an equivalent safeguard.
+A diagnostic model stores the resolved GitHub token to make retry easier.
 
 ### Good example
-The change uses the canonical boundary and adds focused evidence for its failure behavior.
+The model stores provider, reference, and redacted status while retrieval remains inside the credential boundary.

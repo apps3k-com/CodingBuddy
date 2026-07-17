@@ -1,7 +1,7 @@
 ---
 title: "Use native capabilities and complete localization"
-scope: "file"
-path: ["**/*"]
+scope: "pull-request"
+path: ["CodingBuddy/**/*.swift","CodingBuddy/Localizable.xcstrings","docs/FEATURE_FLAGS.md"]
 severity_min: "high"
 buckets: ["compatibility"]
 enabled: true
@@ -10,14 +10,19 @@ enabled: true
 @kody-sync
 
 ## Instructions
-Prefer supported Apple APIs and repository abstractions. User-visible strings, labels, errors, and feature states must use the canonical localization catalog.
+- Prefer supported Apple APIs and repository abstractions over custom platform emulation.
+- Keep user-visible phrases, accessibility labels, domain errors, and feature states in the String Catalog with English and German coverage.
+- Document new feature flags and keep default behavior explicit.
 
-Only report violations demonstrated by the diff and repository context; do not speculate.
+## False-positive exceptions
+- SwiftUI Text string literals use LocalizedStringKey and are catalog-backed; do not demand manual String(localized:) wrapping.
+- Foundation and filesystem localizedDescription is acceptable. Domain errors must conform to LocalizedError with catalog-backed messages instead of per-store string guards.
+- The standalone product name CodingBuddy intentionally uses the String overload and is not localized; phrases containing the name remain localized.
 
 ## Examples
 
 ### Bad example
-The change bypasses the required boundary without an equivalent safeguard.
+A domain error exposes an internal raw string and a new feature flag has no documentation.
 
 ### Good example
-The change uses the canonical boundary and adds focused evidence for its failure behavior.
+The domain error implements LocalizedError through catalog keys and the default-off flag is documented and tested.
