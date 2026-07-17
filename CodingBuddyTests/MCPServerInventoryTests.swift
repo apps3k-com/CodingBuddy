@@ -300,6 +300,11 @@ struct MCPServerInventoryTests {
                 "-HAuthorization: Bearer ghp_abcd1234",
                 "-H=X-API-Key: opaque-5678",
                 "--header=Accept: application/json",
+                "--header=Accept: application/json, text/event-stream",
+                "--header=Accept: application/ghp_abcd1234",
+                "--header=Accept: application/*ghp_abcd1234",
+                "--header=Content-Type: application/json",
+                "--header=X-Debug: Bearer custom-header-secret",
                 "--header=Referer: https://user:password@example.com/path?token=referer-secret",
                 "--header",
                 "Link: <https://user:password@example.org/callback?token=link-secret>; rel=next",
@@ -327,17 +332,24 @@ struct MCPServerInventoryTests {
         #expect(summary.contains("-HAuthorization: ••••••••"))
         #expect(summary.contains("-H=X-API-Key: ••••••••"))
         #expect(summary.contains("--header=Accept: application/json"))
-        #expect(summary.contains("--header=Referer: https://example.com/path"))
+        #expect(summary.contains("--header=Accept: application/json, text/event-stream"))
+        #expect(!summary.contains("--header=Accept: application/ghp_abcd1234"))
+        #expect(!summary.contains("--header=Accept: application/*ghp_abcd1234"))
+        #expect(summary.components(separatedBy: "--header=Accept: ••••••••").count == 3)
+        #expect(summary.contains("--header=Content-Type: application/json"))
+        #expect(summary.contains("--header=X-Debug: ••••••••"))
+        #expect(summary.contains("--header=Referer: ••••••••"))
         #expect(summary.contains("--header Link: ••••••••"))
-        #expect(summary.contains("-HX-Request-ID: request-attached-123"))
-        #expect(summary.contains("-H X-Request-ID: request-123"))
-        #expect(summary.contains("-HOrigin: https://example.net/path"))
+        #expect(summary.contains("-HX-Request-ID: ••••••••"))
+        #expect(summary.contains("-H X-Request-ID: ••••••••"))
+        #expect(summary.contains("-HOrigin: ••••••••"))
         #expect(summary.contains("-H ••••••••"))
         #expect(!summary.contains("auth-secret"))
         #expect(!summary.contains("proxy-secret"))
         #expect(!summary.contains("cookie-secret"))
         #expect(!summary.contains("set-cookie-secret"))
         #expect(!summary.contains("api-key-secret"))
+        #expect(!summary.contains("custom-header-secret"))
         #expect(!summary.contains("token-secret"))
         #expect(!summary.contains("client-secret"))
         #expect(!summary.contains("ghp_abcd1234"))
@@ -379,7 +391,7 @@ struct MCPServerInventoryTests {
             home.appendingPathComponent(".claude.json").path,
             project.appendingPathComponent(".mcp.json").path,
         ]))
-        #expect(Set(occurrences.map(\.summary)) == ["claude-runner claude.js", "local-runner local.js"])
+        #expect(Set(occurrences.map(\.summary)) == Set(["claude-runner claude.js", "local-runner local.js"]))
         #expect(Set(occurrences.map(\.id)).count == 2)
     }
 

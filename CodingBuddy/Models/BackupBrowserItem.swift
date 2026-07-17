@@ -188,10 +188,35 @@ nonisolated struct BackupBrowserItem: Identifiable, Equatable, Hashable, Sendabl
     }
 }
 
-/// Redacted text preview for a backup and its current target.
+/// Display-safe content for one side of a backup comparison.
+nonisolated enum BackupBrowserPreviewContent: Equatable, Sendable {
+    /// Content whose sensitive values were structurally redacted.
+    case redacted(String)
+    /// A non-sensitive explanation, such as an unavailable-file message.
+    case message(String)
+    /// The complete document was withheld because safe redaction was ambiguous.
+    case suppressedForSafety
+
+    /// Opaque text retained for non-visual consumers and regression assertions.
+    var text: String {
+        switch self {
+        case let .redacted(text), let .message(text):
+            text
+        case .suppressedForSafety:
+            "••••••••"
+        }
+    }
+}
+
+/// Redacted content preview for a backup and its current target.
 nonisolated struct BackupBrowserPreview: Equatable, Sendable {
-    /// Redacted backup file contents.
-    var backupText: String
-    /// Redacted current target contents, or an explanatory placeholder.
-    var currentText: String
+    /// Display-safe backup file contents.
+    var backup: BackupBrowserPreviewContent
+    /// Display-safe current target contents, or an explanatory placeholder.
+    var current: BackupBrowserPreviewContent
+
+    /// Opaque backup text retained for non-visual consumers and tests.
+    var backupText: String { backup.text }
+    /// Opaque current-target text retained for non-visual consumers and tests.
+    var currentText: String { current.text }
 }

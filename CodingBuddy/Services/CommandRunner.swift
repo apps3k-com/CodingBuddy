@@ -72,6 +72,11 @@ nonisolated struct CommandRequest: Equatable, Sendable {
                 key.utf8.contains(0) || value.utf8.contains(0)
             }
     }
+
+    /// Whether an environment key would be reinterpreted at the POSIX `name=value` boundary.
+    var containsInvalidEnvironmentName: Bool {
+        environment.keys.contains { $0.isEmpty || $0.contains("=") }
+    }
 }
 
 /// Captured process output after a successful native invocation.
@@ -196,7 +201,8 @@ nonisolated struct FoundationCommandRunner: CommandRunning {
         guard let executablePath = request.absoluteExecutablePath else {
             throw CommandRunnerError.executableMustBeAbsolute
         }
-        guard !request.containsEmbeddedNUL else {
+        guard !request.containsEmbeddedNUL,
+              !request.containsInvalidEnvironmentName else {
             throw CommandRunnerError.launchFailed
         }
         guard FileManager.default.isExecutableFile(atPath: executablePath) else {

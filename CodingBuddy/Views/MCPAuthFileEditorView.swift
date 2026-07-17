@@ -273,6 +273,7 @@ struct MCPAuthFileEditorView: View {
         .onChange(of: secrets.unlockedUntil) {
             isRelockWarningVisible = false
             relockScheduleID = UUID()
+            if secrets.isUnlocked { authenticationFailure = nil }
         }
         .onDisappear {
             invalidatePresentation()

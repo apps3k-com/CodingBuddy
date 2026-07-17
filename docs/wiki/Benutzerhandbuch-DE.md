@@ -75,7 +75,12 @@ bei unbekanntem Zielzustand kein blindes Wiederholen nahegelegt wird.
 Shell-Backup-Vorschauen erhalten Namen und harmlose Struktur, maskieren aber
 jeden Zuweisungswert und nicht nur bekannte Credential-Namen. JSON-Vorschauen
 erhalten Schlüssel und Container-Struktur, während jeder Skalarwert maskiert
-wird; fehlerhaftes JSON erscheint als eine einzige undurchsichtige Maske.
+wird; fehlerhaftes JSON erscheint als eine einzige undurchsichtige Maske. Kann
+CodingBuddy das Ende eines mehrzeiligen Shell-Werts nicht sicher bestimmen,
+blendet es die vollständige Vorschau aus und kennzeichnet diese
+Sicherheitsentscheidung ausdrücklich statt nur eine mehrdeutige Maske zu zeigen.
+Das gilt auch für aktive zsh-ANSI-C-Quotes (`$'…'`) und alte
+`$[…]`-Arithmetik-Ausdrücke.
 
 ## Import & Export
 
@@ -130,7 +135,7 @@ Variablen, deren Namen nach Zugangsdaten aussehen (`GITHUB_TOKEN`, `AWS_SECRET_A
 - Die Entsperrung läuft automatisch ab — die Dauer stellst du unter *Einstellungen → Sicherheit* ein (1/5/15 Minuten oder bis CodingBuddy beendet wird). Der Schloss-Button maskiert sofort wieder.
 - Wert/Zeile kopieren, Bearbeiten und der `.env`-Export maskierter Variablen verlangen zuerst eine Authentifizierung.
 - Die Authentifizierung ist an die exakte sichtbare Zeile und den Ansichts-Snapshot gebunden. Wird eine Datei neu geladen oder änderst du Scope, Suche oder den Filter für wirksame Variablen, während der macOS-Dialog offen ist, verwirft CodingBuddy die ausstehende Kopier-, Bearbeitungs- oder Exportaktion, statt sie auf geänderte Daten anzuwenden.
-- **Alle eingeblendeten Secrets sperren** leert nur Editoren, die einen sensiblen Wert aus einem Store eingeblendet haben. Normale Entwürfe wie `PATH` bleiben geöffnet. Bei einem geänderten Secret-Entwurf stehen **Sichern und sperren**, **Verwerfen und sperren** und **Abbrechen** bereit; dieselben Optionen erscheinen 30 Sekunden vor dem automatischen Ablauf. **Sichern und sperren** schließt erst nach erfolgreichem Schreiben. Ein verweigerter oder veralteter Write lässt den Editor mit seiner Recovery-Meldung geöffnet.
+- **Alle eingeblendeten Secrets sperren** leert nur Editoren, die aktuell sensiblen Klartext enthalten, unabhängig davon, ob er aus einem Store eingeblendet oder unter einem sensitiven Variablennamen eingegeben wurde. Sobald ein Entwurf sensitiv ist, entfernt eine Umbenennung in einen normalen Namen wie `PATH` diesen Schutz nicht. Normale Entwürfe bleiben geöffnet. Bei einem geänderten Secret-Entwurf stehen **Sichern und sperren**, **Verwerfen und sperren** und **Abbrechen** bereit; dieselben Optionen erscheinen 30 Sekunden vor dem automatischen Ablauf. **Sichern und sperren** schließt erst nach erfolgreichem Schreiben. Ein verweigerter oder veralteter Write lässt den Editor mit seiner Recovery-Meldung geöffnet.
 
 ## MCP-Zugangsdaten (~/.mcp-auth)
 
@@ -219,7 +224,7 @@ Der Seitenleisten-Eintrag **MCP Inventory** (Alpha) ist eine Nur-Lese-Tabelle de
 - Die Suche filtert nach Servername, Tool, Repository- oder Workspace-Name, Scope, Command- oder URL-Zusammenfassung und Environment-Variable-Name.
 - Codex-Server, die Variablen referenzieren, die in `~/.codex/mcp.env` fehlen, werden hervorgehoben. Mit **Tool öffnen** springst du aus einer ausgewählten Codex-, Claude-Code- oder Cursor-Zeile zum bestehenden Tool-Editor.
 - Der Inspector erklärt jeweils den Zustand eines Servers. Fehlende Variablen empfehlen das zuständige Tool zu öffnen, ein unbekannter Transport wird als Konfigurationswarnung erklärt und eine konfigurierte Zeile sagt anhand der lokalen Dateinachweise klar, dass keine Aktion nötig ist.
-- Secret-Werte werden nie angezeigt: URL-Userinfo, Query-Strings, Fragmente, tokenartige Command-Argumente und Zugangsdaten enthaltende Header-Argumente werden redigiert. Sichere Header-Werte bleiben sichtbar, damit die Zusammenfassung nützlich bleibt.
+- Secret-Werte werden nie angezeigt: URL-Userinfo, Query-Strings, Fragmente, tokenartige Command-Argumente und Header-Argumente werden redigiert. Header-Namen bleiben sichtbar. `Accept` behält nur `application/json`, `text/event-stream` oder `*/*`; `Content-Type` nur `application/json`. Alle anderen Header-Werte werden maskiert.
 - Gleichnamige Claude-Code-Definitionen in `.claude.json` und einer projektbezogenen `.mcp.json` bleiben getrennte Vorkommen. Dadurch bleiben Nachweise für Shadowing und widersprüchliche Definitionen erhalten, statt eine Quelle still auszublenden.
 
 v1-Grenzen: MCP Inventory bearbeitet, installiert, prüft und authentifiziert keine Server. **Konfiguriert** bedeutet, dass der Scan die lokale Definition erkannt und keine sicher fehlende Variable festgestellt hat; es beweist weder die Vollständigkeit der Definition noch Erreichbarkeit oder erfolgreiche Authentifizierung. Claude-Code- und Cursor-Zeilen zeigen nur konfigurierte `env`- und Header-Keys; sie leiten keine fehlenden Variablen aus Command-Text ab.

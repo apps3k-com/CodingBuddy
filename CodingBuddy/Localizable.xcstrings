@@ -5039,12 +5039,32 @@
         }
       }
     },
+    "Preview Hidden for Safety" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschau aus Sicherheitsgründen ausgeblendet"
+          }
+        }
+      }
+    },
     "Preview only" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nur Vorschau"
+          }
+        }
+      }
+    },
+    "CodingBuddy could not safely determine where a shell value ends, so the entire preview is hidden." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte nicht sicher bestimmen, wo ein Shell-Wert endet. Deshalb wird die gesamte Vorschau ausgeblendet."
           }
         }
       }

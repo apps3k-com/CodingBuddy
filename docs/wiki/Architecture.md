@@ -157,7 +157,10 @@ symlinks; only immutable macOS root aliases such as `/var` are accepted and
 revalidated.
 
 Shared secret locking distinguishes an editor that owns authenticated store
-cleartext from an ordinary draft. Automatic expiry clears only the former.
+cleartext or has accepted cleartext under a sensitive name from an ordinary
+draft. Protection is latched for the editor lifetime: renaming a tainted draft
+to a non-sensitive name cannot downgrade it. Automatic expiry clears only
+protected drafts.
 Manual locking preserves ordinary drafts; dirty revealed-secret drafts must be
 saved, discarded, or cancelled explicitly. Every protected editor receives a
 final 30-second warning, and save callbacks return explicit success so a refused
@@ -186,6 +189,12 @@ value, including unknown names, declaration forms, append/index syntax, and
 ambiguous assignment-bearing lines. JSON backup previews preserve keys and
 container shape while replacing every scalar value, including values under
 innocent-looking keys. Malformed credential-bearing JSON is masked as a whole.
+When multiline shell syntax prevents the redactor from proving a safe document
+boundary, `BackupBrowserPreviewContent.suppressedForSafety` carries that typed
+decision to the view. The UI renders a localized explanation instead of
+conflating full suppression with ordinary per-value masks. Active zsh ANSI-C
+quotes (`$'…'`) and legacy arithmetic expansions (`$[…]`) are deliberately
+treated as unsupported boundaries and suppress the complete preview.
 
 ### Agent Context action boundary
 
@@ -257,10 +266,13 @@ their last trustworthy snapshots remain independently visible.
 same-named Claude Code server defined in both `.claude.json` and a project
 `.mcp.json`. Keeping these rows separate enables later duplicate and shadowing
 analysis. Human-readable command summaries remove URL credentials and query
-data, token-like arguments, and values of authentication, cookie, API-key, or
-token-like custom headers. Non-sensitive header values remain visible for
-diagnostics; the inventory never claims that a locally recognized definition
-is reachable or authenticated.
+data, token-like arguments, and all unrecognized header values. Header values
+use a finite allowlist instead of relying on names or MIME grammar: `Accept`
+may expose only `application/json`, `text/event-stream`, and `*/*`, while
+`Content-Type` may expose only `application/json`. Comma-separated `Accept`
+values are visible only when every item is in that set; all custom and otherwise
+unrecognized values are masked. The inventory never claims that a locally
+recognized definition is reachable or authenticated.
 
 ## Sandbox
 

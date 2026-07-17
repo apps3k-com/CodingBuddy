@@ -260,6 +260,47 @@ struct SecretsGuardTests {
         ))
     }
 
+    /// Verifies renaming a draft cannot remove protection after sensitive cleartext was owned.
+    @Test func sensitiveDraftProtectionRemainsLatchedAfterRename() {
+        let protected = SecretDraftProtectionPolicy.latchedProtection(
+            wasProtected: false,
+            protectsRevealedSecret: false,
+            currentName: "GITHUB_TOKEN",
+            protectionEnabled: true
+        )
+
+        #expect(protected)
+        #expect(SecretDraftProtectionPolicy.latchedProtection(
+            wasProtected: protected,
+            protectsRevealedSecret: false,
+            currentName: "PATH",
+            protectionEnabled: true
+        ))
+        #expect(SecretDraftProtectionPolicy.protectionBecameActive(
+            wasProtected: false,
+            isProtected: protected
+        ))
+        #expect(!SecretDraftProtectionPolicy.protectionBecameActive(
+            wasProtected: protected,
+            isProtected: true
+        ))
+    }
+
+    /// Verifies a same-update sensitive rename cannot race ahead of the sticky state callback.
+    @Test func sensitiveRenameUsesCurrentEvidenceDuringAutomaticRelock() {
+        let effectiveProtection = SecretDraftProtectionPolicy.latchedProtection(
+            wasProtected: false,
+            protectsRevealedSecret: false,
+            currentName: "GITHUB_TOKEN",
+            protectionEnabled: true
+        )
+
+        #expect(SecretDraftProtectionPolicy.automaticRelock(
+            protectsRevealedSecret: effectiveProtection,
+            hasUnsavedChanges: true
+        ) == .clearAndDismiss(reportDiscard: true))
+    }
+
     /// Verifies expiry clears a revealed secret and reports only meaningful lost edits.
     @Test func automaticRelockClearsRevealedSecretAndTracksDirtyState() {
         #expect(

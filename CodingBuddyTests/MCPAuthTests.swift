@@ -35,6 +35,30 @@ struct MCPAuthTests {
         return info.st_mode & S_IFMT
     }
 
+    private func fileInventory(at root: URL) throws -> [String: Data] {
+        var inventory: [String: Data] = [:]
+        func collect(_ directory: URL, prefix: String) throws {
+            let children = try FileManager.default.contentsOfDirectory(
+                at: directory,
+                includingPropertiesForKeys: [.isDirectoryKey, .isRegularFileKey],
+                options: []
+            )
+            for child in children {
+                let relativePath = prefix.isEmpty
+                    ? child.lastPathComponent
+                    : "\(prefix)/\(child.lastPathComponent)"
+                let values = try child.resourceValues(forKeys: [.isDirectoryKey, .isRegularFileKey])
+                if values.isDirectory == true {
+                    try collect(child, prefix: relativePath)
+                } else if values.isRegularFile == true {
+                    inventory[relativePath] = try Data(contentsOf: child)
+                }
+            }
+        }
+        try collect(root, prefix: "")
+        return inventory
+    }
+
     private func makeStore(
         root: URL,
         home: URL,
@@ -263,6 +287,7 @@ struct MCPAuthTests {
 
         #expect(trashCalls == 0)
         #expect(store.lastFailureKind == .fileChangedExternally)
+        #expect(!FileManager.default.fileExists(atPath: removed.url.path))
         for file in entry.files where file.id != removed.id {
             #expect(FileManager.default.fileExists(atPath: file.url.path))
         }
@@ -343,6 +368,7 @@ struct MCPAuthTests {
             .appendingPathComponent(entry.versionDirectory, isDirectory: true)
             .appendingPathComponent("untracked-state")
         try "new state".write(to: addedArtifact, atomically: true, encoding: .utf8)
+        let expectedInventory = try fileInventory(at: root)
 
         store.resetAll()
 
@@ -350,6 +376,7 @@ struct MCPAuthTests {
         #expect(store.lastFailureKind == .fileChangedExternally)
         #expect(FileManager.default.fileExists(atPath: addedArtifact.path))
         #expect(!store.entries.isEmpty)
+        #expect(try fileInventory(at: root) == expectedInventory)
     }
 
     /// A child added after the final preflight cannot hitch a ride inside a reset-all directory.
@@ -359,6 +386,7 @@ struct MCPAuthTests {
         let version = root.appendingPathComponent("mcp-remote-9.9.9", isDirectory: true)
         let racedArtifact = version.appendingPathComponent("late-unconfirmed-state")
         let originalNames = Set(try FileManager.default.contentsOfDirectory(atPath: version.path))
+        var expectedInventory: [String: Data]?
         var injected = false
         var trashCalls = 0
         let store = makeStore(
@@ -376,6 +404,7 @@ struct MCPAuthTests {
                     atomically: true,
                     encoding: .utf8
                 )
+                expectedInventory = try fileInventory(at: root)
             }
         )
 
@@ -389,6 +418,8 @@ struct MCPAuthTests {
             Set(try FileManager.default.contentsOfDirectory(atPath: version.path))
                 == originalNames.union([racedArtifact.lastPathComponent])
         )
+        let completeExpectedInventory = try #require(expectedInventory)
+        #expect(try fileInventory(at: root) == completeExpectedInventory)
     }
 
     /// A process retaining a directory descriptor cannot add an unconfirmed child after rename.
@@ -484,13 +515,14 @@ struct MCPAuthTests {
         let originalName = String(stagedName.dropFirst(5))
         let liveArtifact = root.appendingPathComponent(originalName)
         let retainedReplacement = recoveryDirectory.appendingPathComponent(stagedName)
+        let recoveryInventory = try fileInventory(at: recoveryDirectory)
+        let recoveredOriginalNames = Set(recoveryInventory.keys.map { String($0.dropFirst(5)) })
 
         #expect(!FileManager.default.fileExists(atPath: liveArtifact.path))
         #expect(FileManager.default.fileExists(atPath: retainedReplacement.path))
         #expect(try String(contentsOf: retainedReplacement, encoding: .utf8) == "replacement")
-        #expect(
-            try !FileManager.default.contentsOfDirectory(atPath: recoveryDirectory.path).isEmpty
-        )
+        #expect(recoveryInventory.count == entry.files.count)
+        #expect(recoveredOriginalNames == Set(entry.files.map { $0.url.lastPathComponent }))
         guard case .recoveryRequired = store.lastFailureKind else {
             Issue.record("Expected retained recovery after a staged leaf replacement")
             return
@@ -1123,10 +1155,14 @@ struct MCPAuthTests {
         let originalURL = try #require(replacedOriginalURL)
         let stagedName = try #require(replacedStagedName)
         let retainedReplacement = recovery.appendingPathComponent(stagedName)
+        let recoveryInventory = try fileInventory(at: recovery)
+        let recoveredOriginalNames = Set(recoveryInventory.keys.map { String($0.dropFirst(5)) })
         #expect(store.lastFailureKind == .recoveryRequired(recovery))
         #expect(!FileManager.default.fileExists(atPath: originalURL.path))
         #expect(FileManager.default.fileExists(atPath: retainedReplacement.path))
         #expect(try String(contentsOf: retainedReplacement, encoding: .utf8) == "source replacement")
+        #expect(recoveryInventory.count == entry.files.count)
+        #expect(recoveredOriginalNames == Set(entry.files.map { $0.url.lastPathComponent }))
     }
 
     @Test func transactionStagingRaceDoesNotOverwriteOrTrashCollision() throws {

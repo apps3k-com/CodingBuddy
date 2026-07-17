@@ -111,40 +111,40 @@ final class BackupBrowserStore {
               selectedItem == item
         else {
             return BackupBrowserPreview(
-                backupText: String(localized: "Could not read file."),
-                currentText: String(localized: "Could not read file.")
+                backup: .message(String(localized: "Could not read file.")),
+                current: .message(String(localized: "Could not read file."))
             )
         }
 
         guard let secureMetadata = selectedItem.secureMetadata else {
             let explanation = selectedItem.rejectionReason?.explanation
                 ?? String(localized: "Could not read file.")
-            return BackupBrowserPreview(backupText: explanation, currentText: explanation)
+            return BackupBrowserPreview(backup: .message(explanation), current: .message(explanation))
         }
 
-        let backupText: String
+        let backup: BackupBrowserPreviewContent
         if let snapshot = try? SecureInputReader.capture(
                 at: selectedItem.backupURL,
                 matching: secureMetadata,
                 maximumByteCount: Self.maximumBackupFileSize,
                 policy: .backup
            ), let text = String(data: snapshot.data, encoding: .utf8) {
-            backupText = redactedPreviewText(text, source: selectedItem.source)
+            backup = redactedPreviewContent(text, source: selectedItem.source)
         } else {
-            backupText = String(localized: "Could not read file.")
+            backup = .message(String(localized: "Could not read file."))
         }
 
-        let currentText: String
+        let current: BackupBrowserPreviewContent
         if let targetURL = selectedItem.targetURL {
             if FileManager.default.fileExists(atPath: targetURL.resolvingSymlinksInPath().path) {
-                currentText = currentPreviewText(from: targetURL, source: selectedItem.source)
+                current = currentPreviewContent(from: targetURL, source: selectedItem.source)
             } else {
-                currentText = String(localized: "The target file does not exist yet.")
+                current = .message(String(localized: "The target file does not exist yet."))
             }
         } else {
-            currentText = String(localized: "No supported restore target.")
+            current = .message(String(localized: "No supported restore target."))
         }
-        return BackupBrowserPreview(backupText: backupText, currentText: currentText)
+        return BackupBrowserPreview(backup: backup, current: current)
     }
 
     /// Restores a selected backup through `SafeFileWriter`, backing up the current target first.
@@ -207,24 +207,32 @@ final class BackupBrowserStore {
     }
 
     /// Reads a current target with the same bounded regular-file policy used for backups.
-    private func currentPreviewText(from url: URL, source: BackupBrowserSource) -> String {
+    private func currentPreviewContent(
+        from url: URL,
+        source: BackupBrowserSource
+    ) -> BackupBrowserPreviewContent {
         guard let snapshot = try? SecureInputReader.capture(
             at: url.resolvingSymlinksInPath(),
             maximumByteCount: Self.maximumBackupFileSize,
             policy: .backup
         ), let text = String(data: snapshot.data, encoding: .utf8) else {
-            return String(localized: "Could not read file.")
+            return .message(String(localized: "Could not read file."))
         }
-        return redactedPreviewText(text, source: source)
+        return redactedPreviewContent(text, source: source)
     }
 
     /// Redacts structured JSON as a whole document and shell assignments fail closed.
-    private func redactedPreviewText(_ text: String, source: BackupBrowserSource) -> String {
+    private func redactedPreviewContent(
+        _ text: String,
+        source: BackupBrowserSource
+    ) -> BackupBrowserPreviewContent {
         if source.containsJSON {
-            return MCPAuthRedactor.maskedPreview(
-                text: text,
-                isJSON: true,
-                policy: .backupPreview
+            return .redacted(
+                MCPAuthRedactor.maskedPreview(
+                    text: text,
+                    isJSON: true,
+                    policy: .backupPreview
+                )
             )
         }
         return BackupShellPreviewRedactor.redactDocument(text)
@@ -246,10 +254,12 @@ nonisolated enum BackupShellPreviewRedactor {
 
     /// Redacts a complete shell document, refusing all structure when an assignment
     /// has syntax that can consume subsequent lines.
-    static func redactDocument(_ text: String) -> String {
+    static func redactDocument(_ text: String) -> BackupBrowserPreviewContent {
         let lines = text.components(separatedBy: "\n")
-        guard !lines.contains(where: assignmentContinuesBeyondLine(_:)) else { return mask }
-        return lines.map(redact(_:)).joined(separator: "\n")
+        guard !lines.contains(where: assignmentContinuesBeyondLine(_:)) else {
+            return .suppressedForSafety
+        }
+        return .redacted(lines.map(redact(_:)).joined(separator: "\n"))
     }
 
     /// Redacts an assignment while preserving syntax only when its prefix is unambiguous.
@@ -329,32 +339,56 @@ nonisolated enum BackupShellPreviewRedactor {
     /// Lexes only enough shell syntax to determine whether later lines can belong
     /// to the current assignment. Uncertainty deliberately produces `true`.
     private static func containsOpenShellSyntax(_ value: Substring) -> Bool {
-        enum Quote {
-            case single
-            case double
+        enum Context {
+            case singleQuote
+            case doubleQuote
             case backtick
+            case parentheses
+            case braces
         }
 
-        var quote: Quote?
+        var contexts: [Context] = []
         var escaped = false
-        var parenthesisDepth = 0
-        var braceDepth = 0
         var index = value.startIndex
         while index < value.endIndex {
             let character = value[index]
             let nextIndex = value.index(after: index)
             let next = nextIndex < value.endIndex ? value[nextIndex] : nil
+            let previous = index > value.startIndex ? value[value.index(before: index)] : nil
+            let startsPossibleComment = character == "#" && previous.map {
+                $0.isWhitespace || ";|&({".contains($0)
+            } ?? true
 
-            switch quote {
-            case .single:
-                if character == "'" { quote = nil }
-            case .double:
+            if character == "$", next == "'" || next == "[" {
+                if case .singleQuote? = contexts.last {
+                    // Expansion markers are literal inside ordinary single quotes.
+                } else {
+                    // ANSI-C quotes and legacy zsh arithmetic have distinct escape
+                    // rules. Refuse the document instead of approximating either.
+                    return true
+                }
+            }
+
+            switch contexts.last {
+            case .singleQuote:
+                if character == "'" { contexts.removeLast() }
+            case .doubleQuote:
                 if escaped {
                     escaped = false
                 } else if character == "\\" {
                     escaped = true
                 } else if character == "\"" {
-                    quote = nil
+                    contexts.removeLast()
+                } else if character == "`" {
+                    contexts.append(.backtick)
+                } else if character == "$", next == "(" {
+                    contexts.append(.parentheses)
+                    index = value.index(after: nextIndex)
+                    continue
+                } else if character == "$", next == "{" {
+                    contexts.append(.braces)
+                    index = value.index(after: nextIndex)
+                    continue
                 }
             case .backtick:
                 if escaped {
@@ -362,34 +396,79 @@ nonisolated enum BackupShellPreviewRedactor {
                 } else if character == "\\" {
                     escaped = true
                 } else if character == "`" {
-                    quote = nil
+                    contexts.removeLast()
+                } else if startsPossibleComment {
+                    return true
+                } else if character == "$", next == "(" {
+                    contexts.append(.parentheses)
+                    index = value.index(after: nextIndex)
+                    continue
+                }
+            case .parentheses:
+                if escaped {
+                    escaped = false
+                } else if character == "\\" {
+                    escaped = true
+                } else if character == "'" {
+                    contexts.append(.singleQuote)
+                } else if character == "\"" {
+                    contexts.append(.doubleQuote)
+                } else if character == "`" {
+                    contexts.append(.backtick)
+                } else if startsPossibleComment {
+                    return true
+                } else if character == "(" {
+                    contexts.append(.parentheses)
+                } else if character == ")" {
+                    contexts.removeLast()
+                } else if character == "$", next == "{" {
+                    contexts.append(.braces)
+                    index = value.index(after: nextIndex)
+                    continue
+                } else if character == "<", next == "<" {
+                    return true
+                }
+            case .braces:
+                if escaped {
+                    escaped = false
+                } else if character == "\\" {
+                    escaped = true
+                } else if character == "'" {
+                    contexts.append(.singleQuote)
+                } else if character == "\"" {
+                    contexts.append(.doubleQuote)
+                } else if character == "`" {
+                    contexts.append(.backtick)
+                } else if character == "}" {
+                    contexts.removeLast()
+                } else if character == "$", next == "(" {
+                    contexts.append(.parentheses)
+                    index = value.index(after: nextIndex)
+                    continue
+                } else if character == "$", next == "{" {
+                    contexts.append(.braces)
+                    index = value.index(after: nextIndex)
+                    continue
                 }
             case nil:
                 if escaped {
                     escaped = false
-                } else {
-                    switch character {
-                    case "\\":
-                        escaped = true
-                    case "'":
-                        quote = .single
-                    case "\"":
-                        quote = .double
-                    case "`":
-                        quote = .backtick
-                    case "<" where next == "<":
-                        return true
-                    case "(":
-                        parenthesisDepth += 1
-                    case ")" where parenthesisDepth > 0:
-                        parenthesisDepth -= 1
-                    case "{" where value[..<index].last == "$":
-                        braceDepth += 1
-                    case "}" where braceDepth > 0:
-                        braceDepth -= 1
-                    default:
-                        break
-                    }
+                } else if character == "\\" {
+                    escaped = true
+                } else if character == "'" {
+                    contexts.append(.singleQuote)
+                } else if character == "\"" {
+                    contexts.append(.doubleQuote)
+                } else if character == "`" {
+                    contexts.append(.backtick)
+                } else if character == "(" {
+                    contexts.append(.parentheses)
+                } else if character == "$", next == "{" {
+                    contexts.append(.braces)
+                    index = value.index(after: nextIndex)
+                    continue
+                } else if character == "<", next == "<" {
+                    return true
                 }
             }
             index = nextIndex
@@ -399,10 +478,8 @@ nonisolated enum BackupShellPreviewRedactor {
         let endsWithContinuationOperator = trimmed.hasSuffix("|")
             || trimmed.hasSuffix("||")
             || trimmed.hasSuffix("&&")
-        return quote != nil
+        return !contexts.isEmpty
             || escaped
-            || parenthesisDepth > 0
-            || braceDepth > 0
             || endsWithContinuationOperator
     }
 }

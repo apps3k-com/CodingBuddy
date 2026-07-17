@@ -302,41 +302,39 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
         return result
     }
 
-    /// Masks credential-bearing header values while retaining safe header names and values.
+    /// Retains header names while exposing only narrowly validated non-secret values.
     private func redactedHeader(_ value: String) -> String {
         guard let colon = value.firstIndex(of: ":") else { return "••••••••" }
         let name = String(value[..<colon]).trimmingCharacters(in: .whitespaces)
         guard !name.isEmpty else { return "••••••••" }
-        guard !isSensitiveHeaderName(name) else {
-            return "\(name): ••••••••"
-        }
         let headerValue = String(value[value.index(after: colon)...])
             .trimmingCharacters(in: .whitespaces)
-        let sanitizedValue = sanitizedArgument(headerValue)
-        if headerValue.contains("://"), sanitizedValue == headerValue {
+        guard let safeValue = safeHeaderValue(name: name, value: headerValue) else {
             return "\(name): ••••••••"
         }
-        guard !sanitizedValue.isEmpty else { return "\(name):" }
-        return "\(name): \(sanitizedValue)"
+        return "\(name): \(safeValue)"
     }
 
-    /// Classifies standard authentication headers and token-like custom header names.
-    private func isSensitiveHeaderName(_ name: String) -> Bool {
-        let normalized = name.lowercased()
-        let knownSensitiveNames: Set<String> = [
-            "authorization",
-            "proxy-authorization",
-            "cookie",
-            "set-cookie",
-            "x-api-key",
-        ]
-        guard !knownSensitiveNames.contains(normalized) else { return true }
+    /// Allows only complete media values that CodingBuddy knows cannot carry credentials.
+    private func safeHeaderValue(name: String, value: String) -> String? {
+        guard !value.isEmpty,
+              value.utf8.count <= 256
+        else { return nil }
 
-        let detectorName = name
-            .components(separatedBy: CharacterSet.alphanumerics.inverted)
-            .filter { !$0.isEmpty }
-            .joined(separator: "_")
-        return SecretDetector.isSensitive(name: detectorName)
+        let mediaRanges = value.split(separator: ",", omittingEmptySubsequences: false)
+        let allowedValues: Set<String>
+        if name.caseInsensitiveCompare("Accept") == .orderedSame {
+            allowedValues = ["application/json", "text/event-stream", "*/*"]
+        } else if name.caseInsensitiveCompare("Content-Type") == .orderedSame {
+            allowedValues = ["application/json"]
+        } else {
+            return nil
+        }
+
+        guard !mediaRanges.isEmpty,
+              mediaRanges.allSatisfy({ allowedValues.contains($0.trimmingCharacters(in: .whitespaces).lowercased()) })
+        else { return nil }
+        return value
     }
 
     /// Sanitizes standalone URL arguments or `--flag=<url>` values.

@@ -67,7 +67,10 @@ suggested against an unknown target state.
 Shell backup previews preserve names and harmless structure but mask every
 assignment value, not only familiar credential names. JSON backup previews
 preserve keys and container shape while masking every scalar value; malformed
-JSON is shown as one opaque mask.
+JSON is shown as one opaque mask. If CodingBuddy cannot safely determine where
+a multiline shell value ends, it hides the complete preview and labels that
+safety decision explicitly instead of presenting an ambiguous mask. This
+includes active zsh ANSI-C quotes (`$'…'`) and legacy `$[…]` arithmetic.
 
 ## Import & export
 
@@ -118,7 +121,7 @@ Variables whose names look like credentials (`GITHUB_TOKEN`, `AWS_SECRET_ACCESS_
 - The unlock expires automatically — configure the duration in *Settings → Security* (1/5/15 minutes or until CodingBuddy quits). The lock button re-masks immediately.
 - Copying a value or line, editing, and `.env` export of masked variables all require authentication first.
 - Authentication is bound to the exact visible row and view snapshot. If a file reloads or you change the scope, search, or effective-variable filter while the macOS prompt is open, CodingBuddy cancels the pending copy, edit, or export instead of applying it to changed data.
-- **Lock All Revealed Secrets** clears only editors that currently own a sensitive value revealed from a backing store. Ordinary drafts such as `PATH` remain open. A changed revealed-secret draft offers **Save and Lock**, **Discard and Lock**, or **Cancel**. Dirty revealed-secret editors show the same choices 30 seconds before automatic expiry. **Save and Lock** closes only after persistence succeeds; a refused or stale write leaves the editor open with its recovery message.
+- **Lock All Revealed Secrets** clears only editors that currently own sensitive cleartext, whether it came from a backing store or was entered under a sensitive variable name. Once a draft becomes sensitive, renaming it to an ordinary name such as `PATH` does not remove that protection. Ordinary drafts remain open. A changed revealed-secret draft offers **Save and Lock**, **Discard and Lock**, or **Cancel**. Dirty revealed-secret editors show the same choices 30 seconds before automatic expiry. **Save and Lock** closes only after persistence succeeds; a refused or stale write leaves the editor open with its recovery message.
 
 ## MCP credentials (~/.mcp-auth)
 
@@ -202,7 +205,7 @@ The **MCP Inventory** entry (alpha) is a read-only table of MCP servers discover
 - Search filters by server name, tool, repository or workspace name, scope, command or URL summary, and environment variable name.
 - Codex servers that reference variables missing from `~/.codex/mcp.env` are highlighted. Use **Open Tool** to jump from a selected Codex, Claude Code or Cursor row to the existing tool editor.
 - The inspector explains one server state at a time. Missing variables recommend opening the owning tool, an unknown transport is called out as a configuration warning, and a configured row clearly states that no action is needed based on the local file evidence.
-- Secret values are never shown: URL user info, query strings, fragments, token-like command arguments and credential-bearing header arguments are redacted. Safe header values remain visible so the summary stays useful.
+- Secret values are never shown: URL user info, query strings, fragments, token-like command arguments and header arguments are redacted. Header names remain visible. `Accept` retains only `application/json`, `text/event-stream`, or `*/*`; `Content-Type` retains only `application/json`. Every other header value is masked.
 - Same-named Claude Code definitions in `.claude.json` and a project `.mcp.json` remain separate occurrences. This preserves the evidence needed to detect shadowing and conflicting definitions instead of silently hiding one source.
 
 v1 limits: MCP Inventory does not edit, install, network-test, or authenticate with servers. **Configured** means that the scan recognized the local definition and did not prove a missing variable; it does not prove that the definition is complete, the server is reachable, or authentication will succeed. Claude Code and Cursor rows show configured `env` and header keys only; they do not infer missing variables from command text.

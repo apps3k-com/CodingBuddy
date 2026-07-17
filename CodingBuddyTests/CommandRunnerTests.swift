@@ -94,6 +94,24 @@ struct CommandRunnerTests {
         }
     }
 
+    /// Environment names must remain unambiguous when encoded as POSIX `name=value` entries.
+    @Test func emptyOrEqualsBearingEnvironmentNamesFailBeforeLaunch() async {
+        for environment in [["": "value"], ["SAFE=INJECTED": "value"]] {
+            do {
+                _ = try await FoundationCommandRunner().run(CommandRequest(
+                    executableURL: URL(fileURLWithPath: "/usr/bin/true"),
+                    arguments: [],
+                    environment: environment
+                ))
+                Issue.record("Expected the malformed environment name to be rejected")
+            } catch let error as CommandRunnerError {
+                #expect(error == .launchFailed)
+            } catch {
+                Issue.record("Expected CommandRunnerError, got \(error)")
+            }
+        }
+    }
+
     @Test func cStringAllocationFailureFailsBeforeSpawn() async throws {
         let marker = FileManager.default.temporaryDirectory
             .appending(path: "CommandRunnerAllocationMarker-" + UUID().uuidString)

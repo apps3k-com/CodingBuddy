@@ -350,8 +350,8 @@ private struct BackupPreviewPane: View {
                     }
 
                     VSplitView {
-                        PreviewTextSection(title: String(localized: "Backup"), text: preview.backupText)
-                        PreviewTextSection(title: String(localized: "Current"), text: preview.currentText)
+                        PreviewTextSection(title: String(localized: "Backup"), content: preview.backup)
+                        PreviewTextSection(title: String(localized: "Current"), content: preview.current)
                     }
                 }
                 .padding()
@@ -371,8 +371,8 @@ private struct BackupPreviewPane: View {
 private struct PreviewTextSection: View {
     /// Section title.
     var title: String
-    /// Redacted text to display.
-    var text: String
+    /// Display-safe content and its explicit safety state.
+    var content: BackupBrowserPreviewContent
 
     /// Section body.
     var body: some View {
@@ -381,13 +381,25 @@ private struct PreviewTextSection: View {
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
-            ScrollView {
-                Text(verbatim: text.isEmpty ? " " : text)
-                    .font(.system(.caption, design: .monospaced))
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(8)
+            Group {
+                if case .suppressedForSafety = content {
+                    ContentUnavailableView {
+                        Label("Preview Hidden for Safety", systemImage: "eye.slash")
+                    } description: {
+                        Text("CodingBuddy could not safely determine where a shell value ends, so the entire preview is hidden.")
+                    }
+                    .accessibilityElement(children: .combine)
+                } else {
+                    ScrollView {
+                        Text(verbatim: content.text.isEmpty ? " " : content.text)
+                            .font(.system(.caption, design: .monospaced))
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(8)
+                    }
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(.quaternary.opacity(0.35))
             .clipShape(RoundedRectangle(cornerRadius: 6))
         }

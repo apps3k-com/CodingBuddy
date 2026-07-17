@@ -870,10 +870,20 @@ private actor ClaudeCancellationProbe {
     /// Suspends one request until cancellation is visible outside the main actor.
     func load(_ request: ClaudeCodeStore.LoadRequest) async -> ClaudeCodeStore.Snapshot {
         requestCount += 1
-        while !request.cancellation.isCancelled {
-            await Task.yield()
+        let deadline = ContinuousClock.now + .seconds(5)
+        while ContinuousClock.now < deadline {
+            if request.cancellation.isCancelled {
+                cancellationCount += 1
+                return ClaudeCodeStore.Snapshot(
+                    sourceStatuses: [],
+                    envEntries: [],
+                    servers: [],
+                    watchURLs: []
+                )
+            }
+            try? await Task.sleep(for: .milliseconds(1))
         }
-        cancellationCount += 1
+        Issue.record("Expected Claude loader request to observe cancellation")
         return ClaudeCodeStore.Snapshot(
             sourceStatuses: [],
             envEntries: [],

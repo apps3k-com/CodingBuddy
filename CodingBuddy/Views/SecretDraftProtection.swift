@@ -67,6 +67,25 @@ nonisolated enum SecretDraftProtectionPolicy {
             || (protectionEnabled && SecretDetector.isSensitive(name: currentName))
     }
 
+    /// Keeps protection sticky after a draft has ever owned sensitive cleartext.
+    static func latchedProtection(
+        wasProtected: Bool,
+        protectsRevealedSecret: Bool,
+        currentName: String,
+        protectionEnabled: Bool
+    ) -> Bool {
+        wasProtected || protectsDraft(
+            protectsRevealedSecret: protectsRevealedSecret,
+            currentName: currentName,
+            protectionEnabled: protectionEnabled
+        )
+    }
+
+    /// Whether a lifecycle change must restart the automatic relock warning task.
+    static func protectionBecameActive(wasProtected: Bool, isProtected: Bool) -> Bool {
+        !wasProtected && isProtected
+    }
+
     /// Decides how an editor responds to an automatic unlocked-to-locked transition.
     static func automaticRelock(
         protectsRevealedSecret: Bool,
@@ -91,8 +110,12 @@ nonisolated enum SecretDraftProtectionPolicy {
 private struct SecretDraftProtectionModifier: ViewModifier {
     /// Shared authentication state whose expiry must clear this draft.
     let secrets: SecretsGuard
-    /// Whether this editor received sensitive cleartext from a protected backing store.
-    let protectsRevealedSecret: Bool
+    /// Whether this editor initially received cleartext from a protected backing store.
+    let initiallyProtectsRevealedSecret: Bool
+    /// Current draft name, which may become sensitive after the editor appears.
+    let currentName: String
+    /// Whether name-based draft protection is enabled for this editor lifecycle.
+    let protectionEnabled: Bool
     /// Whether dismissing the draft would lose user changes.
     let hasUnsavedChanges: Bool
     /// Whether the current draft passes the editor's normal save validation.
@@ -108,8 +131,48 @@ private struct SecretDraftProtectionModifier: ViewModifier {
     @State private var isRelockWarningVisible = false
     @State private var relockScheduleID = UUID()
     @State private var authenticationFailure: String?
+    @State private var protectsCleartext: Bool
     @FocusState private var reauthenticateFocused: Bool
     @AccessibilityFocusState private var reauthenticateAccessibilityFocused: Bool
+
+    /// Creates a modifier whose initial protection state cannot be lost by later renaming.
+    init(
+        secrets: SecretsGuard,
+        protectsRevealedSecret: Bool,
+        currentName: String,
+        protectionEnabled: Bool,
+        hasUnsavedChanges: Bool,
+        canSave: Bool,
+        saveAndDismiss: @escaping () -> Bool,
+        clearAndDismiss: @escaping () -> Void,
+        reportAutomaticDiscard: @escaping () -> Void
+    ) {
+        self.secrets = secrets
+        self.initiallyProtectsRevealedSecret = protectsRevealedSecret
+        self.currentName = currentName
+        self.protectionEnabled = protectionEnabled
+        self.hasUnsavedChanges = hasUnsavedChanges
+        self.canSave = canSave
+        self.saveAndDismiss = saveAndDismiss
+        self.clearAndDismiss = clearAndDismiss
+        self.reportAutomaticDiscard = reportAutomaticDiscard
+        _protectsCleartext = State(initialValue: SecretDraftProtectionPolicy.latchedProtection(
+            wasProtected: false,
+            protectsRevealedSecret: protectsRevealedSecret,
+            currentName: currentName,
+            protectionEnabled: protectionEnabled
+        ))
+    }
+
+    /// Effective ownership combines sticky history with the current draft evidence.
+    private var protectsRevealedSecret: Bool {
+        SecretDraftProtectionPolicy.latchedProtection(
+            wasProtected: protectsCleartext,
+            protectsRevealedSecret: initiallyProtectsRevealedSecret,
+            currentName: currentName,
+            protectionEnabled: protectionEnabled
+        )
+    }
 
     /// Adds focused-command handling, automatic expiry, and dirty-state choice.
     func body(content: Content) -> some View {
@@ -136,6 +199,13 @@ private struct SecretDraftProtectionModifier: ViewModifier {
             .onChange(of: secrets.unlockedUntil) {
                 isRelockWarningVisible = false
                 relockScheduleID = UUID()
+                if secrets.isUnlocked { authenticationFailure = nil }
+            }
+            .onChange(of: currentName) {
+                latchCurrentProtection()
+            }
+            .onChange(of: initiallyProtectsRevealedSecret) {
+                latchCurrentProtection()
             }
             .onChange(of: hasUnsavedChanges) {
                 relockScheduleID = UUID()
@@ -166,6 +236,25 @@ private struct SecretDraftProtectionModifier: ViewModifier {
             } message: {
                 Text(String(localized: "This editor contains unsaved cleartext. Save or discard it before locking all revealed secrets."))
             }
+    }
+
+    /// Promotes the draft to protected state without ever downgrading it in place.
+    private func latchCurrentProtection() {
+        let wasProtected = protectsCleartext
+        let isProtected = SecretDraftProtectionPolicy.latchedProtection(
+            wasProtected: protectsCleartext,
+            protectsRevealedSecret: initiallyProtectsRevealedSecret,
+            currentName: currentName,
+            protectionEnabled: protectionEnabled
+        )
+        protectsCleartext = isProtected
+        if SecretDraftProtectionPolicy.protectionBecameActive(
+            wasProtected: wasProtected,
+            isProtected: isProtected
+        ) {
+            isRelockWarningVisible = false
+            relockScheduleID = UUID()
+        }
     }
 
     /// Locks immediately for a clean draft and asks before discarding a dirty one.
@@ -333,11 +422,9 @@ extension View {
         modifier(
             SecretDraftProtectionModifier(
                 secrets: secrets,
-                protectsRevealedSecret: SecretDraftProtectionPolicy.protectsDraft(
-                    protectsRevealedSecret: protectsRevealedSecret,
-                    currentName: currentName,
-                    protectionEnabled: FeatureFlag.secretsProtection.isEnabled
-                ),
+                protectsRevealedSecret: protectsRevealedSecret,
+                currentName: currentName,
+                protectionEnabled: FeatureFlag.secretsProtection.isEnabled,
                 hasUnsavedChanges: hasUnsavedChanges,
                 canSave: canSave,
                 saveAndDismiss: saveAndDismiss,

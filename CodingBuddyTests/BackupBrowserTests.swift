@@ -560,16 +560,24 @@ struct BackupBrowserTests {
             "GITHUB_TOKEN='first-line\nquoted-secret'\nNORMAL=value",
             "GITHUB_TOKEN=first-line\\\ncontinued-secret\nNORMAL=value",
             "GITHUB_TOKEN=$(cat <<'EOF'\nheredoc-secret\nEOF\n)\nNORMAL=value",
+            "GITHUB_TOKEN=\"$(printf %s \"first-line\nnested-substitution-secret\")\"\nNORMAL=value",
+            "GITHUB_TOKEN=\"`printf %s \"first-line\nnested-backtick-secret\"`\"\nNORMAL=value",
+            "GITHUB_TOKEN=$(printf first # )\ncommented-delimiter-secret\n)\nNORMAL=value",
+            "GITHUB_TOKEN=$'first\\'\nansi-c-quote-secret\n'\nNORMAL=value",
+            "PIN=$[\nlegacy-arithmetic-secret\n]\nNORMAL=value",
             "env GITHUB_TOKEN='wrapper-line\nwrapper-secret'\nNORMAL=value",
         ]
 
         for document in documents {
             let preview = BackupShellPreviewRedactor.redactDocument(document)
-            #expect(preview == "••••••••")
+            #expect(preview == .suppressedForSafety)
             for secret in [
-                "quoted-secret", "continued-secret", "heredoc-secret", "wrapper-secret",
+                "quoted-secret", "continued-secret", "heredoc-secret",
+                "nested-substitution-secret", "nested-backtick-secret",
+                "commented-delimiter-secret", "ansi-c-quote-secret",
+                "legacy-arithmetic-secret", "wrapper-secret",
             ] {
-                #expect(!preview.contains(secret))
+                #expect(!preview.text.contains(secret))
             }
         }
     }
@@ -587,10 +595,11 @@ struct BackupBrowserTests {
         store.reload()
         let backup = try #require(store.items.first)
 
-        let preview = store.preview(for: backup).backupText
+        let preview = store.preview(for: backup)
 
-        #expect(preview == "••••••••")
-        #expect(!preview.contains("store-secret"))
+        #expect(preview.backup == .suppressedForSafety)
+        #expect(preview.backupText == "••••••••")
+        #expect(!preview.backupText.contains("store-secret"))
     }
 
     /// Verifies JSON backup previews retain shape while masking all scalar values.
