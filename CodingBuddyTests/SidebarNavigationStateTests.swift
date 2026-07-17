@@ -19,6 +19,7 @@ struct SidebarNavigationStateTests {
             .agentContextInspector,
             .repoReadinessChecklist,
             .mcpServerInventory,
+            .capabilityHygiene,
             .agentPRMonitor,
             .backupBrowser,
             .packageMaintenance,

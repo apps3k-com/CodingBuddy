@@ -7,6 +7,7 @@
 **🔧 Technical (EN)**
 - [Architecture](Architecture)
 - [Agent PR Monitor Design](Agent-PR-Monitor)
+- [Capability Hygiene](Capability-Hygiene)
 - [Data Model & Safety](Data-Model)
 - [Development Setup](Development-Setup)
 - [Conventions](Conventions)

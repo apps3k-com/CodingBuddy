@@ -21,6 +21,8 @@ nonisolated struct CodexMCPServer: Identifiable, Equatable, Hashable {
     var inlineEnvKeys: [String] = []
     /// `env_vars` allowlist passed through from the Codex process env.
     var envVarAllowlist: [String] = []
+    /// Effective state from the server table; Codex defaults an omitted value to enabled.
+    var isEnabled: Bool = true
 
     /// Stable identity within the Codex MCP configuration.
     var id: String { name }

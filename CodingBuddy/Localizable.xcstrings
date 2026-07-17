@@ -1,6 +1,916 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "No capabilities in verified sources" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Capabilities in geprüften Quellen"
+          }
+        }
+      }
+    },
+    "No capability was found in verified evidence. Coverage details list sources that were not fully scanned." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In den geprüften Nachweisen wurde keine Capability gefunden. Die Abdeckungsdetails führen Quellen auf, die nicht vollständig gescannt wurden."
+          }
+        }
+      }
+    },
+    "View" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ansicht"
+          }
+        }
+      }
+    },
+    "Coverage is incomplete" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Abdeckung ist unvollständig"
+          }
+        }
+      }
+    },
+    "Show coverage details" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abdeckungsdetails anzeigen"
+          }
+        }
+      }
+    },
+    "Incomplete sources" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unvollständige Quellen"
+          }
+        }
+      }
+    },
+    "Scan notices" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan-Hinweise"
+          }
+        }
+      }
+    },
+    "Advisory overlap analysis reached its safety limit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die beratende Überschneidungsanalyse hat ihr Sicherheitslimit erreicht"
+          }
+        }
+      }
+    },
+    "Coverage details" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abdeckungsdetails"
+          }
+        }
+      }
+    },
+    "Possible-overlap analysis stopped at its safety limit. Duplicate and proven-shadowing evidence remains available." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Analyse möglicher Überschneidungen wurde am Sicherheitslimit beendet. Nachweise zu Duplikaten und belegtem Shadowing bleiben verfügbar."
+          }
+        }
+      }
+    },
+    "Notice" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hinweis"
+          }
+        }
+      }
+    },
+    "No findings in verified sources" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Befunde in geprüften Quellen"
+          }
+        }
+      }
+    },
+    "No finding exists in the verified evidence. Open the coverage details before treating this as an all-clear result." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In den geprüften Nachweisen gibt es keinen Befund. Öffne die Abdeckungsdetails, bevor du dies als vollständige Entwarnung wertest."
+          }
+        }
+      }
+    },
+    "Canonical behavior" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanonisches Verhalten"
+          }
+        }
+      }
+    },
+    "Matches" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmt überein"
+          }
+        }
+      }
+    },
+    "Similarity" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ähnlichkeit"
+          }
+        }
+      }
+    },
+    "Provider precedence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provider-Priorität"
+          }
+        }
+      }
+    },
+    "Provider" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provider"
+          }
+        }
+      }
+    },
+    "Provider rule" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provider-Regel"
+          }
+        }
+      }
+    },
+    "Evaluation scope" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auswertungskontext"
+          }
+        }
+      }
+    },
+    "Winner" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gewinner"
+          }
+        }
+      }
+    },
+    "Shadowed occurrence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überschattetes Vorkommen"
+          }
+        }
+      }
+    },
+    "Provider evidence is unavailable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Provider-Nachweis ist nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Registration" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrierung"
+          }
+        }
+      }
+    },
+    "Enabled" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiviert"
+          }
+        }
+      }
+    },
+    "Yes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ja"
+          }
+        }
+      }
+    },
+    "No" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nein"
+          }
+        }
+      }
+    },
+    "Header names" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Header-Namen"
+          }
+        }
+      }
+    },
+    "Repository usage" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository-Nutzung"
+          }
+        }
+      }
+    },
+    "The source is not valid UTF-8" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Quelle ist nicht gültiges UTF-8"
+          }
+        }
+      }
+    },
+    "The source does not contain unambiguous valid JSON" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Quelle enthält kein eindeutiges gültiges JSON"
+          }
+        }
+      }
+    },
+    "The source does not contain unambiguous valid TOML" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Quelle enthält kein eindeutiges gültiges TOML"
+          }
+        }
+      }
+    },
+    "A symbolic link was refused" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein symbolischer Link wurde verweigert"
+          }
+        }
+      }
+    },
+    "The configured path escapes its provider-owned root" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der konfigurierte Pfad verlässt das Root-Verzeichnis des Providers"
+          }
+        }
+      }
+    },
+    "The path is not a supported regular file or directory" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pfad ist keine unterstützte reguläre Datei oder kein unterstütztes Verzeichnis"
+          }
+        }
+      }
+    },
+    "The file exceeds the per-file safety limit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei überschreitet das Sicherheitslimit pro Datei"
+          }
+        }
+      }
+    },
+    "The scan reached its aggregate byte limit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Scan hat sein aggregiertes Byte-Limit erreicht"
+          }
+        }
+      }
+    },
+    "The scan reached its entry limit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Scan hat sein Eintragslimit erreicht"
+          }
+        }
+      }
+    },
+    "The scan reached its directory-depth limit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Scan hat sein Verzeichnistiefenlimit erreicht"
+          }
+        }
+      }
+    },
+    "The scan reached its project or provider-root limit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Scan hat sein Projekt- oder Provider-Root-Limit erreicht"
+          }
+        }
+      }
+    },
+    "Behavior-bearing fields are unavailable for exact matching" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verhaltensbestimmende Felder sind für den exakten Abgleich nicht verfügbar"
+          }
+        }
+      }
+    },
+    "The provider format is not supported by this scanner" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Provider-Format wird von diesem Scanner nicht unterstützt"
+          }
+        }
+      }
+    },
+    "The source was unavailable or changed during inspection" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Quelle war nicht verfügbar oder hat sich während der Prüfung geändert"
+          }
+        }
+      }
+    },
+    "Capabilities" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capabilities"
+          }
+        }
+      }
+    },
+    "Search capabilities" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capabilities durchsuchen"
+          }
+        }
+      }
+    },
+    "Capability" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capability"
+          }
+        }
+      }
+    },
+    "Consumer" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consumer"
+          }
+        }
+      }
+    },
+    "Identity" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identität"
+          }
+        }
+      }
+    },
+    "Occurrence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorkommen"
+          }
+        }
+      }
+    },
+    "Source path" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quellpfad"
+          }
+        }
+      }
+    },
+    "Occurrences" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorkommen"
+          }
+        }
+      }
+    },
+    "Kind" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Art"
+          }
+        }
+      }
+    },
+    "Copy Source Paths" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quellpfade kopieren"
+          }
+        }
+      }
+    },
+    "Copy the selected source paths" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewählte Quellpfade kopieren"
+          }
+        }
+      }
+    },
+    "Inspector" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inspector"
+          }
+        }
+      }
+    },
+    "Show or hide details" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details ein- oder ausblenden"
+          }
+        }
+      }
+    },
+    "Scanning capabilities" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capabilities werden geprüft"
+          }
+        }
+      }
+    },
+    "Rescan local capability sources" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lokale Capability-Quellen erneut prüfen"
+          }
+        }
+      }
+    },
+    "Scanning capabilities…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capabilities werden geprüft …"
+          }
+        }
+      }
+    },
+    "No hygiene findings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Hygiene-Befunde"
+          }
+        }
+      }
+    },
+    "No duplicate, proven shadowing, or possible-overlap finding exists in the completed local evidence." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In den vollständigen lokalen Nachweisen gibt es keinen Befund zu Duplikaten, belegtem Shadowing oder möglichen Überschneidungen."
+          }
+        }
+      }
+    },
+    "No capabilities found" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Capabilities gefunden"
+          }
+        }
+      }
+    },
+    "CodingBuddy did not find a supported configured MCP server, standalone skill, or installed plugin." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat keinen unterstützten konfigurierten MCP-Server, eigenständigen Skill oder installiertes Plugin gefunden."
+          }
+        }
+      }
+    },
+    "Recommendation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empfehlung"
+          }
+        }
+      }
+    },
+    "Related analysis" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwandte Analyse"
+          }
+        }
+      }
+    },
+    "Permission names and secret references are evidence for the planned MCP Risk Auditor and Token/Scope Map. This view does not assign a risk score." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechtigungsnamen und Secret-Referenzen dienen als Nachweise für den geplanten MCP Risk Auditor und die Token/Scope Map. Diese Ansicht vergibt keinen Risiko-Score."
+          }
+        }
+      }
+    },
+    "No selection" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Auswahl"
+          }
+        }
+      }
+    },
+    "Select a finding or capability to inspect its local evidence." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Befund oder eine Capability aus, um die lokalen Nachweise zu prüfen."
+          }
+        }
+      }
+    },
+    "Safe summary" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sichere Zusammenfassung"
+          }
+        }
+      }
+    },
+    "Permissions" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechtigungen"
+          }
+        }
+      }
+    },
+    "Secret references" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secret-Referenzen"
+          }
+        }
+      }
+    },
+    "Static local evidence only. Runtime availability, trust, approval, effective OAuth grants, and actual use may be unknown." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur statische lokale Nachweise. Laufzeit-Verfügbarkeit, Vertrauen, Freigabe, wirksame OAuth-Berechtigungen und tatsächliche Nutzung können unbekannt sein."
+          }
+        }
+      }
+    },
+    "MCP server" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MCP-Server"
+          }
+        }
+      }
+    },
+    "Skill" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skill"
+          }
+        }
+      }
+    },
+    "Plugin" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plugin"
+          }
+        }
+      }
+    },
+    "Shared Agents" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemeinsame Agents"
+          }
+        }
+      }
+    },
+    "Exact duplicate" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exaktes Duplikat"
+          }
+        }
+      }
+    },
+    "Shadowed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überschrieben"
+          }
+        }
+      }
+    },
+    "Possible overlap" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mögliche Überschneidung"
+          }
+        }
+      }
+    },
+    "These occurrences have the same kind, exact runtime identity, and complete canonical behavior." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Vorkommen haben dieselbe Art, exakt dieselbe Laufzeit-Identität und ein vollständig übereinstimmendes kanonisches Verhalten."
+          }
+        }
+      }
+    },
+    "A documented provider precedence rule selects one occurrence and hides another in this evaluated scope." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine dokumentierte Präzedenzregel des Providers wählt in diesem geprüften Scope ein Vorkommen aus und verdeckt ein anderes."
+          }
+        }
+      }
+    },
+    "Distinct names share conservative search signals. Their responsibilities may overlap, but CodingBuddy cannot prove a conflict." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unterschiedliche Namen teilen konservative Suchsignale. Ihre Aufgaben können sich überschneiden, CodingBuddy kann jedoch keinen Konflikt belegen."
+          }
+        }
+      }
+    },
+    "Compare the source scopes and keep the occurrences that are intentionally required." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergleiche die Quell-Scopes und behalte die bewusst benötigten Vorkommen."
+          }
+        }
+      }
+    },
+    "Review the winning and shadowed definitions before changing either source manually." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfe die wirksame und die überschriebene Definition, bevor du eine Quelle manuell änderst."
+          }
+        }
+      }
+    },
+    "Compare the documented purpose, permissions, and scope. Keeping both may be correct." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergleiche dokumentierten Zweck, Berechtigungen und Scope. Beide beizubehalten kann korrekt sein."
+          }
+        }
+      }
+    },
+    "Not present" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht vorhanden"
+          }
+        }
+      }
+    },
+    "Complete" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vollständig"
+          }
+        }
+      }
+    },
+    "Partial" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilweise"
+          }
+        }
+      }
+    },
+    "Refused" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verweigert"
+          }
+        }
+      }
+    },
+    "Unsupported" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht unterstützt"
+          }
+        }
+      }
+    },
+    "Capability coverage warning format" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld Quellen sind unvollständig; %2$lld Scan-Hinweise. Geprüfte Zeilen bleiben sichtbar."
+          }
+        }
+      }
+    },
     "%lld additional sources were refused." : {
       "localizations" : {
         "de" : {

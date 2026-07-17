@@ -71,6 +71,8 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
     case repoReadinessChecklist
     /// Enables cross-tool MCP server inventory.
     case mcpServerInventory
+    /// Enables unified capability inventory and hygiene recommendations.
+    case capabilityHygiene
     /// Enables the read-only GitHub Agent PR Monitor.
     case agentPRMonitor
     /// Enables local backup discovery and restore.
@@ -104,6 +106,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
         case .agentContextInspector: .alpha
         case .repoReadinessChecklist: .alpha
         case .mcpServerInventory: .alpha
+        case .capabilityHygiene: .alpha
         case .agentPRMonitor: .alpha
         case .backupBrowser: .alpha
         case .defaultEditorPreference: .alpha

@@ -89,4 +89,32 @@ struct TOMLReaderTests {
         #expect(table.string(at: ["key"]) == "value")
         #expect(table.int(at: ["other"]) == 1)
     }
+
+    /// Rejects trailing tokens after strings instead of accepting a misleading partial value.
+    @Test func diagnosticsRejectTrailingStringTokens() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [mcp_servers.review]
+        command = "review"
+        enabled = "false" trailing
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "review")
+        #expect(result.table.value(at: ["mcp_servers", "review", "enabled"]) == nil)
+    }
+
+    /// Keeps bounded adversarial multiline arrays linear enough for an interactive scan.
+    @Test func largeMultilineArrayParsesWithinInteractiveBudget() {
+        let values = Array(repeating: "  \"argument\",", count: 12_000).joined(separator: "\n")
+        let input = "args = [\n\(values)\n]\n"
+        let clock = ContinuousClock()
+        let start = clock.now
+
+        let result = TOMLReader.parseWithDiagnostics(input)
+        let elapsed = clock.now - start
+
+        #expect(result.isComplete)
+        #expect(result.table.stringArray(at: ["args"])?.count == 12_000)
+        #expect(elapsed < .seconds(5))
+    }
 }
