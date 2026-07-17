@@ -323,7 +323,7 @@ struct AgentContextInspectorView: View {
 }
 
 /// VoiceOver focus targets for transient or unavailable inspector content.
-private enum AgentContextUnavailableFocus: Hashable {
+private nonisolated enum AgentContextUnavailableFocus: Hashable {
     /// Repository inspection is in progress.
     case loading
     /// Repository inspection was refused for safety.

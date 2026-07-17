@@ -85,8 +85,10 @@ has_generated_header() {
                 if (in_block_comment) {
                     close_at = index(line, "*/")
                     if (close_at > 0) {
-                        if (has_marker(substr(line, 1, close_at - 1))) found = 1
-                        line = substr(line, close_at + 2)
+                        comment_text = substr(line, 1, close_at - 1)
+                        remainder = substr(line, close_at + 2)
+                        if (has_marker(comment_text) && trim(remainder) == "") found = 1
+                        line = remainder
                         in_block_comment = 0
                         continue
                     }
@@ -316,6 +318,11 @@ while IFS= read -r file; do
             }
             return delta
         }
+        function property_declaration_continues(value, tail) {
+            tail = value
+            sub(/[[:space:]]+$/, "", tail)
+            return paren_delta(value) > 0 || tail ~ /(:|=|,|\(|\[|<|->)$/
+        }
         function update_contexts(value, callable_open, enum_open, character, i) {
             # Pending declarations can still contain closure literals in their
             # signatures. Only an explicitly confirmed body start may open a
@@ -358,6 +365,7 @@ while IFS= read -r file; do
             callable_count = 0
             enum_count = 0
             pending_callable = 0
+            pending_callable_kind = ""
             pending_callable_parens = 0
             pending_callable_waiting = 0
             pending_enum = 0
@@ -387,6 +395,13 @@ while IFS= read -r file; do
             enter_callable = 0
             enter_enum = 0
 
+            if (pending_callable && pending_callable_kind == "property" &&
+                declaration_kind(normalized_declaration(code)) != "") {
+                pending_callable = 0
+                pending_callable_kind = ""
+                pending_callable_parens = 0
+                pending_callable_waiting = 0
+            }
             if (pending_callable) {
                 if (!pending_callable_waiting) {
                     pending_callable_parens += paren_delta(code)
@@ -407,11 +422,13 @@ while IFS= read -r file; do
                     pending_callable = 0
                     pending_callable_parens = 0
                     pending_callable_waiting = 0
+                    pending_callable_kind = ""
                     pending_doc = 0
                     update_contexts(code)
                     next
                 }
                 pending_callable = 0
+                pending_callable_kind = ""
                 pending_callable_parens = 0
                 pending_callable_waiting = 0
             }
@@ -438,6 +455,7 @@ while IFS= read -r file; do
             # A new declaration proves that a previously pending declaration
             # was bodyless (for example a protocol requirement).
             pending_callable = 0
+            pending_callable_kind = ""
             pending_enum = 0
 
             if (kind == "case" && (enum_count == 0 || callable_count > 0)) {
@@ -448,8 +466,10 @@ while IFS= read -r file; do
 
             if ((kind == "func" || kind == "init" || kind == "subscript" || kind == "property") && code ~ /\{/) {
                 enter_callable = 1
-            } else if (kind == "func" || kind == "init" || kind == "subscript" || kind == "property") {
+            } else if (kind == "func" || kind == "init" || kind == "subscript" ||
+                       (kind == "property" && property_declaration_continues(code))) {
                 pending_callable = 1
+                pending_callable_kind = kind
                 pending_callable_parens = paren_delta(code)
                 pending_callable_waiting = pending_callable_parens <= 0
             }

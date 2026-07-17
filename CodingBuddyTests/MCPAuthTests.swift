@@ -43,6 +43,7 @@ struct MCPAuthTests {
         trashItem: ((URL) throws -> URL)? = nil,
         beforeResetStage: @escaping (Int, URL) throws -> Void = { _, _ in },
         beforeResetRename: @escaping (Int, URL) throws -> Void = { _, _ in },
+        afterResetRename: @escaping (Int, URL) throws -> Void = { _, _ in },
         beforeRecoveryRename: @escaping (Int, URL) throws -> Void = { _, _ in },
         beforeTrashStage: @escaping (URL) throws -> Void = { _ in }
     ) -> MCPAuthStore {
@@ -62,6 +63,7 @@ struct MCPAuthTests {
             trashItem: resolvedTrashItem,
             beforeResetStage: beforeResetStage,
             beforeResetRename: beforeResetRename,
+            afterResetRename: afterResetRename,
             beforeRecoveryRename: beforeRecoveryRename,
             beforeTrashStage: beforeTrashStage
         )
@@ -131,6 +133,16 @@ struct MCPAuthTests {
         #expect(urls.contains(serverURL))
     }
 
+    /// VoiceOver must not claim that no cache input was read when safe rows remain visible.
+    @Test func scanSafetyAnnouncementDistinguishesPartialAndFullyRefusedScans() {
+        let partial = MCPAuthScanSafetyPresentation.announcement(hasVisibleEntries: true)
+        let refused = MCPAuthScanSafetyPresentation.announcement(hasVisibleEntries: false)
+
+        #expect(partial == String(localized: "Some credential or recovery files were not read because their type, ownership, permissions, size, or directory count was unsafe."))
+        #expect(refused == String(localized: "CodingBuddy found an unsafe or unexpectedly large credential cache and deliberately did not read it."))
+        #expect(partial != refused)
+    }
+
     // MARK: - Store
 
     @Test func resetMovesAllEntryFilesAway() throws {
@@ -195,6 +207,294 @@ struct MCPAuthTests {
         #expect(trashCalls == 1)
         #expect(store.entries.isEmpty)
         #expect(try FileManager.default.contentsOfDirectory(atPath: root.path).isEmpty)
+    }
+
+    /// A newly added artifact for the confirmed server invalidates the reset inventory.
+    @Test func resetRejectsArtifactAddedAfterConfirmationSnapshot() throws {
+        let dir = try makeTempDir()
+        let (root, hash) = try makeFixtureRoot(in: dir)
+        var trashCalls = 0
+        let store = makeStore(
+            root: root,
+            home: dir,
+            trashItem: { url in
+                trashCalls += 1
+                return url
+            }
+        )
+        let entry = try #require(store.entries.first { $0.hash == hash })
+        let added = root
+            .appendingPathComponent(entry.versionDirectory, isDirectory: true)
+            .appendingPathComponent("\(hash)_additional.json")
+        try #"{"new":"credential"}"#.write(
+            to: added,
+            atomically: true,
+            encoding: .utf8
+        )
+
+        #expect(!store.reset(entry))
+
+        #expect(trashCalls == 0)
+        #expect(store.lastFailureKind == .fileChangedExternally)
+        #expect(FileManager.default.fileExists(atPath: added.path))
+        for file in entry.files {
+            #expect(FileManager.default.fileExists(atPath: file.url.path))
+        }
+    }
+
+    /// Removing one confirmed artifact invalidates the reset before transaction creation.
+    @Test func resetRejectsArtifactRemovedAfterConfirmationSnapshot() throws {
+        let dir = try makeTempDir()
+        let (root, hash) = try makeFixtureRoot(in: dir)
+        var trashCalls = 0
+        let store = makeStore(
+            root: root,
+            home: dir,
+            trashItem: { url in
+                trashCalls += 1
+                return url
+            }
+        )
+        let entry = try #require(store.entries.first { $0.hash == hash })
+        let removed = try #require(entry.files.first { $0.kind == .codeVerifier })
+        try FileManager.default.removeItem(at: removed.url)
+
+        #expect(!store.reset(entry))
+
+        #expect(trashCalls == 0)
+        #expect(store.lastFailureKind == .fileChangedExternally)
+        for file in entry.files where file.id != removed.id {
+            #expect(FileManager.default.fileExists(atPath: file.url.path))
+        }
+    }
+
+    /// Replacing a confirmed path with equal bytes still changes its filesystem identity.
+    @Test func resetRejectsEqualContentArtifactReplacementAfterConfirmationSnapshot() throws {
+        let dir = try makeTempDir()
+        let (root, hash) = try makeFixtureRoot(in: dir)
+        var trashCalls = 0
+        let store = makeStore(
+            root: root,
+            home: dir,
+            trashItem: { url in
+                trashCalls += 1
+                return url
+            }
+        )
+        let entry = try #require(store.entries.first { $0.hash == hash })
+        let replaced = try #require(entry.files.first { $0.kind == .tokens })
+        let content = try Data(contentsOf: replaced.url)
+        try FileManager.default.removeItem(at: replaced.url)
+        try content.write(to: replaced.url, options: .withoutOverwriting)
+
+        #expect(!store.reset(entry))
+
+        #expect(trashCalls == 0)
+        #expect(store.lastFailureKind == .fileChangedExternally)
+        #expect(try Data(contentsOf: replaced.url) == content)
+    }
+
+    /// A represented artifact changed into a reset-only form and invalidates its bound identity.
+    @Test func resetRejectsFreshScanRefusalBeforeStaging() throws {
+        let dir = try makeTempDir()
+        let (root, hash) = try makeFixtureRoot(in: dir)
+        var trashCalls = 0
+        let store = makeStore(
+            root: root,
+            home: dir,
+            trashItem: { url in
+                trashCalls += 1
+                return url
+            }
+        )
+        let entry = try #require(store.entries.first { $0.hash == hash })
+        let tokens = try #require(entry.files.first { $0.kind == .tokens })
+        let oversized = Data(
+            repeating: 0x20,
+            count: MCPAuthScanner.maximumCredentialFileSize + 1
+        )
+        try oversized.write(to: tokens.url)
+
+        #expect(!store.reset(entry))
+
+        #expect(trashCalls == 0)
+        #expect(store.lastFailureKind == .fileChangedExternally)
+        #expect(try Data(contentsOf: tokens.url) == oversized)
+        for file in entry.files where file.id != tokens.id {
+            #expect(FileManager.default.fileExists(atPath: file.url.path))
+        }
+    }
+
+    /// Reset-all binds every artifact moved with an already confirmed version directory.
+    @Test func resetAllRejectsNestedArtifactAdditionAfterConfirmationSnapshot() throws {
+        let dir = try makeTempDir()
+        let (root, hash) = try makeFixtureRoot(in: dir)
+        var trashCalls = 0
+        let store = makeStore(
+            root: root,
+            home: dir,
+            trashItem: { url in
+                trashCalls += 1
+                return url
+            }
+        )
+        let entry = try #require(store.entries.first { $0.hash == hash })
+        let addedArtifact = root
+            .appendingPathComponent(entry.versionDirectory, isDirectory: true)
+            .appendingPathComponent("untracked-state")
+        try "new state".write(to: addedArtifact, atomically: true, encoding: .utf8)
+
+        store.resetAll()
+
+        #expect(trashCalls == 0)
+        #expect(store.lastFailureKind == .fileChangedExternally)
+        #expect(FileManager.default.fileExists(atPath: addedArtifact.path))
+        #expect(!store.entries.isEmpty)
+    }
+
+    /// A child added after the final preflight cannot hitch a ride inside a reset-all directory.
+    @Test func resetAllRejectsNestedArtifactAddedAtRenameBoundary() throws {
+        let dir = try makeTempDir()
+        let (root, _) = try makeFixtureRoot(in: dir)
+        let version = root.appendingPathComponent("mcp-remote-9.9.9", isDirectory: true)
+        let racedArtifact = version.appendingPathComponent("late-unconfirmed-state")
+        let originalNames = Set(try FileManager.default.contentsOfDirectory(atPath: version.path))
+        var injected = false
+        var trashCalls = 0
+        let store = makeStore(
+            root: root,
+            home: dir,
+            trashItem: { url in
+                trashCalls += 1
+                return url
+            },
+            beforeResetRename: { index, _ in
+                guard index == 0, !injected else { return }
+                injected = true
+                try "unconfirmed".write(
+                    to: racedArtifact,
+                    atomically: true,
+                    encoding: .utf8
+                )
+            }
+        )
+
+        store.resetAll()
+
+        #expect(injected)
+        #expect(trashCalls == 0)
+        #expect(store.lastFailureKind == .fileChangedExternally)
+        #expect(try String(contentsOf: racedArtifact, encoding: .utf8) == "unconfirmed")
+        #expect(
+            Set(try FileManager.default.contentsOfDirectory(atPath: version.path))
+                == originalNames.union([racedArtifact.lastPathComponent])
+        )
+    }
+
+    /// A process retaining a directory descriptor cannot add an unconfirmed child after rename.
+    @Test func resetAllRollsBackNestedArtifactAddedAfterRename() throws {
+        let dir = try makeTempDir()
+        let (root, _) = try makeFixtureRoot(in: dir)
+        let version = root.appendingPathComponent("mcp-remote-9.9.9", isDirectory: true)
+        let versionDescriptor = Darwin.open(version.path, O_RDONLY | O_DIRECTORY | O_CLOEXEC)
+        #expect(versionDescriptor >= 0)
+        guard versionDescriptor >= 0 else { return }
+        defer { Darwin.close(versionDescriptor) }
+
+        let racedName = "post-rename-unconfirmed-state"
+        var injected = false
+        var trashCalls = 0
+        let store = makeStore(
+            root: root,
+            home: dir,
+            trashItem: { url in
+                trashCalls += 1
+                return url
+            },
+            afterResetRename: { index, _ in
+                guard index == 0, !injected else { return }
+                let descriptor = Darwin.openat(
+                    versionDescriptor,
+                    racedName,
+                    O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC,
+                    0o600
+                )
+                guard descriptor >= 0 else {
+                    throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
+                }
+                defer { Darwin.close(descriptor) }
+                let bytes = Array("unconfirmed".utf8)
+                let written = bytes.withUnsafeBytes { buffer in
+                    Darwin.write(descriptor, buffer.baseAddress, buffer.count)
+                }
+                guard written == bytes.count else {
+                    throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
+                }
+                injected = true
+            }
+        )
+
+        store.resetAll()
+
+        let racedArtifact = version.appendingPathComponent(racedName)
+        #expect(injected)
+        #expect(trashCalls == 0)
+        #expect(store.lastFailureKind == .fileChangedExternally)
+        #expect(try String(contentsOf: racedArtifact, encoding: .utf8) == "unconfirmed")
+        #expect(!store.entries.isEmpty)
+    }
+
+    /// A replaced non-directory leaf is rejected before the transaction reaches Trash.
+    @Test func resetRetainsRecoveryForLeafReplacedBeforeTrash() throws {
+        let dir = try makeTempDir()
+        let (root, hash) = try makeFixtureRoot(in: dir)
+        var replaced = false
+        var replacedStagedName: String?
+        var trashCalls = 0
+        let store = makeStore(
+            root: root,
+            home: dir,
+            trashItem: { url in
+                trashCalls += 1
+                return url
+            },
+            beforeTrashStage: { stagedURL in
+                let transaction = root.appendingPathComponent(
+                    stagedURL.lastPathComponent,
+                    isDirectory: true
+                )
+                let names = try FileManager.default.contentsOfDirectory(atPath: transaction.path)
+                let stagedLeaf = try #require(names.sorted().first)
+                let leafURL = transaction.appendingPathComponent(stagedLeaf)
+                try FileManager.default.removeItem(at: leafURL)
+                try "replacement".write(to: leafURL, atomically: false, encoding: .utf8)
+                replacedStagedName = stagedLeaf
+                replaced = true
+            }
+        )
+        let entry = try #require(store.entries.first { $0.hash == hash })
+
+        #expect(!store.reset(entry))
+
+        #expect(replaced)
+        #expect(trashCalls == 0)
+        let recoveryDirectory = try #require(store.lastRecoveryDirectory)
+        let stagedName = try #require(replacedStagedName)
+        #expect(stagedName.count > 5)
+        let originalName = String(stagedName.dropFirst(5))
+        let liveArtifact = root.appendingPathComponent(originalName)
+        let retainedReplacement = recoveryDirectory.appendingPathComponent(stagedName)
+
+        #expect(!FileManager.default.fileExists(atPath: liveArtifact.path))
+        #expect(FileManager.default.fileExists(atPath: retainedReplacement.path))
+        #expect(try String(contentsOf: retainedReplacement, encoding: .utf8) == "replacement")
+        #expect(
+            try !FileManager.default.contentsOfDirectory(atPath: recoveryDirectory.path).isEmpty
+        )
+        guard case .recoveryRequired = store.lastFailureKind else {
+            Issue.record("Expected retained recovery after a staged leaf replacement")
+            return
+        }
     }
 
     /// Verifies reset-all cannot traverse an intermediate link into an external cache root.
@@ -458,6 +758,7 @@ struct MCPAuthTests {
         let entry = try #require(store.entries.first { $0.hash == hash })
 
         #expect(entry.status == .resetOnly)
+        #expect(!store.hasIncompleteCredentialInventory)
         #expect(store.reset(entry))
 
         #expect(access(tokenURL.path, F_OK) != 0)
@@ -784,6 +1085,50 @@ struct MCPAuthTests {
         #expect(stagedItems.count == entry.files.count)
     }
 
+    /// Verifies recovery refuses a staged source replaced after the global preflight.
+    @Test func recoveryRenameRejectsStagedSourceReplacedAfterPreflight() throws {
+        struct TrashFailure: Error {}
+        let dir = try makeTempDir()
+        let (root, hash) = try makeFixtureRoot(in: dir)
+        var replacedOriginalURL: URL?
+        var replacedStagedName: String?
+        let store = makeStore(
+            root: root,
+            home: dir,
+            trashItem: { _ in throw TrashFailure() },
+            beforeRecoveryRename: { index, originalURL in
+                guard index == 0 else { return }
+                let stagingRoot = dir.appendingPathComponent("ResetStaging", isDirectory: true)
+                let transactionName = try #require(
+                    FileManager.default.contentsOfDirectory(atPath: stagingRoot.path)
+                        .first { $0.hasPrefix(".codingbuddy-reset-") }
+                )
+                let transaction = stagingRoot.appendingPathComponent(transactionName, isDirectory: true)
+                let stagedName = try #require(
+                    FileManager.default.contentsOfDirectory(atPath: transaction.path)
+                        .first { $0.hasSuffix("-\(originalURL.lastPathComponent)") }
+                )
+                let stagedURL = transaction.appendingPathComponent(stagedName)
+                try FileManager.default.removeItem(at: stagedURL)
+                try "source replacement".write(to: stagedURL, atomically: false, encoding: .utf8)
+                replacedOriginalURL = originalURL
+                replacedStagedName = stagedName
+            }
+        )
+        let entry = try #require(store.entries.first { $0.hash == hash })
+
+        store.reset(entry)
+
+        let recovery = try #require(store.lastRecoveryDirectory)
+        let originalURL = try #require(replacedOriginalURL)
+        let stagedName = try #require(replacedStagedName)
+        let retainedReplacement = recovery.appendingPathComponent(stagedName)
+        #expect(store.lastFailureKind == .recoveryRequired(recovery))
+        #expect(!FileManager.default.fileExists(atPath: originalURL.path))
+        #expect(FileManager.default.fileExists(atPath: retainedReplacement.path))
+        #expect(try String(contentsOf: retainedReplacement, encoding: .utf8) == "source replacement")
+    }
+
     @Test func transactionStagingRaceDoesNotOverwriteOrTrashCollision() throws {
         let dir = try makeTempDir()
         let (root, hash) = try makeFixtureRoot(in: dir)
@@ -976,6 +1321,18 @@ struct MCPAuthTests {
         #expect(!message.contains("No unconfirmed changes were written"))
     }
 
+    /// Verifies post-commit cleanup failures never regress to an uncommitted-write message.
+    @Test func cleanupDurabilityMessagePreservesCommittedState() throws {
+        let dir = try makeTempDir()
+        let store = makeStore(root: dir.appendingPathComponent("root"), home: dir)
+        let error = SafeFileWriter.CleanupDurabilityError()
+
+        let message = store.userFacingMessage(for: error)
+
+        #expect(message == error.localizedDescription)
+        #expect(!message.contains("No unconfirmed changes were written"))
+    }
+
     @Test func safeWriterRecoveryMapsToDirectArtifactAction() throws {
         let dir = try makeTempDir()
         let store = makeStore(root: dir.appendingPathComponent("root"), home: dir)
@@ -1006,6 +1363,46 @@ struct MCPAuthTests {
         let currentRequest = lifecycle.appear()
         #expect(!lifecycle.accepts(dismissedRequest))
         #expect(lifecycle.accepts(currentRequest))
+    }
+
+    /// Verifies reset blockers retain the most actionable recovery location.
+    @Test func resetSafetyBlockerPreservesRecoveryPrecedenceAndLocation() {
+        let root = URL(fileURLWithPath: "/tmp/mcp-auth")
+        let refused = URL(fileURLWithPath: "/tmp/recovery-scan")
+        let recovery = URL(fileURLWithPath: "/tmp/recovery-transaction")
+
+        #expect(
+            MCPAuthResetSafetyBlocker.resolve(
+                recoveryDirectory: recovery,
+                recoveryDiscoveryRefusedAt: refused,
+                hasIncompleteInventory: true,
+                rootDirectory: root
+            ) == .recoveryRequired(recovery)
+        )
+        #expect(
+            MCPAuthResetSafetyBlocker.resolve(
+                recoveryDirectory: nil,
+                recoveryDiscoveryRefusedAt: refused,
+                hasIncompleteInventory: true,
+                rootDirectory: root
+            ) == .recoveryDiscoveryUnavailable(refused)
+        )
+        #expect(
+            MCPAuthResetSafetyBlocker.resolve(
+                recoveryDirectory: nil,
+                recoveryDiscoveryRefusedAt: nil,
+                hasIncompleteInventory: true,
+                rootDirectory: root
+            ) == .incompleteInventory(root)
+        )
+        #expect(
+            MCPAuthResetSafetyBlocker.resolve(
+                recoveryDirectory: nil,
+                recoveryDiscoveryRefusedAt: nil,
+                hasIncompleteInventory: false,
+                rootDirectory: root
+            ) == nil
+        )
     }
 
     /// Verifies safety refusals retain their specific user-facing explanation.

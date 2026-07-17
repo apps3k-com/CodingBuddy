@@ -33,7 +33,9 @@ struct ClaudeCodeView: View {
 
     /// Stable focus destinations for asynchronous loading and refusal feedback.
     private enum UnavailableFocus: Hashable {
+        /// Filesystem inspection is still running.
         case loading
+        /// Filesystem inspection refused one or more unsafe sources.
         case refused
     }
 

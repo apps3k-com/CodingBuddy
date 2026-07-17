@@ -37,7 +37,9 @@ jobs:
     name: Feature flags are documented
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
       - name: Check FeatureFlags.swift against docs/FEATURE_FLAGS.md
         run: ./scripts/check-feature-flags.sh
 
@@ -45,7 +47,9 @@ jobs:
     name: Swift docstring coverage is at least 90%
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
       - name: Verify docstring checker fixtures
         run: ./scripts/test-docstring-coverage.sh
       - name: Measure repository docstring coverage
@@ -55,9 +59,10 @@ jobs:
     name: Wiki sources updated for user-visible changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Require docs/wiki changes alongside app changes
         env:
           PR_BODY: ${{ github.event.pull_request.body }}

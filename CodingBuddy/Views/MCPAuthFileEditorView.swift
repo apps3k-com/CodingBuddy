@@ -56,6 +56,31 @@ nonisolated struct MCPAuthEditorLifecycle {
     }
 }
 
+/// Safety state that prevents reset-only credential artifacts from being reset blindly.
+nonisolated enum MCPAuthResetSafetyBlocker: Equatable {
+    /// A retained transaction must be recovered before another reset can begin.
+    case recoveryRequired(URL)
+    /// CodingBuddy could not enumerate the recovery area within its safety bounds.
+    case recoveryDiscoveryUnavailable(URL)
+    /// The current credential scan cannot prove that the reset inventory is complete.
+    case incompleteInventory(URL)
+
+    /// Resolves the most specific recovery state and its actionable filesystem location.
+    static func resolve(
+        recoveryDirectory: URL?,
+        recoveryDiscoveryRefusedAt: URL?,
+        hasIncompleteInventory: Bool,
+        rootDirectory: URL
+    ) -> Self? {
+        if let recoveryDirectory { return .recoveryRequired(recoveryDirectory) }
+        if let recoveryDiscoveryRefusedAt {
+            return .recoveryDiscoveryUnavailable(recoveryDiscoveryRefusedAt)
+        }
+        if hasIncompleteInventory { return .incompleteInventory(rootDirectory) }
+        return nil
+    }
+}
+
 /// Shows the credential files of one MCP server. Token values are masked;
 /// after Touch ID / password authentication the raw content becomes editable
 /// (JSON files are validated before saving).
@@ -105,10 +130,15 @@ struct MCPAuthFileEditorView: View {
     @State private var lifecycle = MCPAuthEditorLifecycle()
     @State private var authenticationTask: Task<Void, Never>?
     @State private var showsResetConfirmation = false
+    @State private var authenticationFailure: String?
     @FocusState private var unlockButtonFocused: Bool
     @AccessibilityFocusState private var unlockAccessibilityFocused: Bool
     @FocusState private var editorFocused: Bool
     @AccessibilityFocusState private var editorAccessibilityFocused: Bool
+    @FocusState private var reauthenticateButtonFocused: Bool
+    @AccessibilityFocusState private var reauthenticateAccessibilityFocused: Bool
+    @FocusState private var showInFinderButtonFocused: Bool
+    @AccessibilityFocusState private var showInFinderAccessibilityFocused: Bool
 
     /// File represented by the current picker selection.
     private var selectedFile: MCPAuthFile? {
@@ -175,6 +205,18 @@ struct MCPAuthFileEditorView: View {
                 relockWarning(deadline: warningDeadline)
             }
 
+            if let authenticationFailure {
+                Divider()
+                authenticationFailureView(authenticationFailure)
+            }
+
+            if !isEditing,
+               selectedFile?.isSafelyReadable != true,
+               let resetSafetyBlocker {
+                Divider()
+                resetSafetyBlockerView(resetSafetyBlocker)
+            }
+
             Divider()
 
             HStack {
@@ -195,10 +237,13 @@ struct MCPAuthFileEditorView: View {
                         Button("Show in Finder", systemImage: "folder") {
                             showSelectedFileInFinder()
                         }
-                        Button("Reset Entry…", systemImage: "trash", role: .destructive) {
-                            showsResetConfirmation = true
+                        .focused($showInFinderButtonFocused)
+                        .accessibilityFocused($showInFinderAccessibilityFocused)
+                        if resetSafetyBlocker == nil {
+                            Button("Reset Entry…", systemImage: "trash", role: .destructive) {
+                                showsResetConfirmation = true
+                            }
                         }
-                        .disabled(hasResetSafetyBlocker)
                     }
                 }
                 Spacer()
@@ -220,10 +265,14 @@ struct MCPAuthFileEditorView: View {
         .onAppear {
             lifecycle.appear()
             selectedFileID = entry.files.first?.id
-            focusUnlockControl()
+            focusLockedStateControl()
         }
         .onChange(of: secrets.isUnlocked) {
             if !secrets.isUnlocked { handleRelock() }
+        }
+        .onChange(of: secrets.unlockedUntil) {
+            isRelockWarningVisible = false
+            relockScheduleID = UUID()
         }
         .onDisappear {
             invalidatePresentation()
@@ -357,9 +406,20 @@ struct MCPAuthFileEditorView: View {
         authenticationTask?.cancel()
         let requestGeneration = lifecycle.generation
         authenticationTask = Task { @MainActor in
-            guard await secrets.requestUnlock(),
-                  !Task.isCancelled,
+            let didUnlock = await secrets.requestUnlock()
+            guard !Task.isCancelled,
                   lifecycle.accepts(requestGeneration) else { return }
+            let presentation = SecretAuthenticationPresentation.resolve(
+                didUnlock: didUnlock,
+                errorMessage: secrets.lastError
+            )
+            secrets.clearError()
+            guard presentation == .succeeded else {
+                authenticationTask = nil
+                handleAuthenticationFailure(presentation, focus: .unlock)
+                return
+            }
+            authenticationFailure = nil
             isRelockWarningVisible = false
             guard loadSelectedFile() else {
                 authenticationTask = nil
@@ -456,7 +516,11 @@ struct MCPAuthFileEditorView: View {
     /// Selects and, while unlocked, loads a credential file.
     private func selectFile(_ fileID: MCPAuthFile.ID) {
         selectedFileID = fileID
-        if isEditing { loadSelectedFile() }
+        if isEditing {
+            loadSelectedFile()
+        } else {
+            focusLockedStateControl()
+        }
     }
 
     /// Removes cleartext immediately when the shared authentication window ends.
@@ -465,6 +529,7 @@ struct MCPAuthFileEditorView: View {
         let discardedChanges = hasUnsavedChanges
         showsImmediateLockPrompt = false
         isRelockWarningVisible = false
+        authenticationFailure = nil
         clearSensitiveBuffer()
         focusUnlockControl()
         AccessibilityNotification.Announcement(
@@ -519,9 +584,20 @@ struct MCPAuthFileEditorView: View {
         authenticationTask?.cancel()
         let requestGeneration = lifecycle.generation
         authenticationTask = Task { @MainActor in
-            guard await secrets.requestUnlock(),
-                  !Task.isCancelled,
+            let didUnlock = await secrets.requestUnlock()
+            guard !Task.isCancelled,
                   lifecycle.accepts(requestGeneration) else { return }
+            let presentation = SecretAuthenticationPresentation.resolve(
+                didUnlock: didUnlock,
+                errorMessage: secrets.lastError
+            )
+            secrets.clearError()
+            guard presentation == .succeeded else {
+                authenticationTask = nil
+                handleAuthenticationFailure(presentation, focus: .reauthenticate)
+                return
+            }
+            authenticationFailure = nil
             isRelockWarningVisible = false
             relockScheduleID = UUID()
             authenticationTask = nil
@@ -555,11 +631,14 @@ struct MCPAuthFileEditorView: View {
         store.clearError()
     }
 
-    /// Whether reset is blocked by an unresolved or unbounded recovery area.
-    private var hasResetSafetyBlocker: Bool {
-        store.lastRecoveryDirectory != nil
-            || store.recoveryDiscoveryRefusedAt != nil
-            || store.hasIncompleteCredentialInventory
+    /// Most specific reason reset is blocked, including a safe recovery location.
+    private var resetSafetyBlocker: MCPAuthResetSafetyBlocker? {
+        MCPAuthResetSafetyBlocker.resolve(
+            recoveryDirectory: store.lastRecoveryDirectory,
+            recoveryDiscoveryRefusedAt: store.recoveryDiscoveryRefusedAt,
+            hasIncompleteInventory: store.hasIncompleteCredentialInventory,
+            rootDirectory: store.rootDirectory
+        )
     }
 
     /// Invalidates asynchronous results before cleartext is removed or dismissal begins.
@@ -656,8 +735,109 @@ struct MCPAuthFileEditorView: View {
     private var relockActionButtons: some View {
         Button(String(localized: "Save and Lock")) { saveAndLock() }
         Button(String(localized: "Reauthenticate")) { reauthenticate() }
+            .focused($reauthenticateButtonFocused)
+            .accessibilityFocused($reauthenticateAccessibilityFocused)
         Button(String(localized: "Discard and Lock"), role: .destructive) {
             discardAndLock()
+        }
+    }
+
+    /// Persistent sanitized authentication feedback with a single focusable recovery action.
+    private func authenticationFailureView(_ message: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Label(message, systemImage: "exclamationmark.triangle.fill")
+                .font(.caption)
+                .foregroundStyle(.red)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(12)
+        .background(.red.opacity(0.08))
+        .accessibilityElement(children: .contain)
+    }
+
+    /// Explains why reset is unavailable and exposes safe recovery actions.
+    private func resetSafetyBlockerView(_ blocker: MCPAuthResetSafetyBlocker) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(resetSafetyTitle(for: blocker), systemImage: "exclamationmark.shield.fill")
+                .font(.headline)
+            Text(resetSafetyMessage(for: blocker))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) { resetSafetyActions(for: blocker) }
+                VStack(alignment: .leading, spacing: 8) { resetSafetyActions(for: blocker) }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(.orange.opacity(0.10))
+        .accessibilityElement(children: .contain)
+    }
+
+    /// Localized heading for a blocked reset state.
+    private func resetSafetyTitle(for blocker: MCPAuthResetSafetyBlocker) -> String {
+        switch blocker {
+        case .recoveryRequired:
+            String(localized: "Credential Recovery Required")
+        case .recoveryDiscoveryUnavailable, .incompleteInventory:
+            String(localized: "Credential Scan Limited for Safety")
+        }
+    }
+
+    /// Localized explanation for a blocked reset state.
+    private func resetSafetyMessage(for blocker: MCPAuthResetSafetyBlocker) -> String {
+        switch blocker {
+        case .recoveryRequired:
+            String(localized: "Resolve the retained recovery files before resetting more credentials")
+        case .recoveryDiscoveryUnavailable, .incompleteInventory:
+            String(localized: "CodingBuddy did not reset credentials because the cache or recovery area could not be enumerated safely. Review it in Finder and try again.")
+        }
+    }
+
+    /// Retry plus the filesystem action relevant to the current blocker.
+    @ViewBuilder
+    private func resetSafetyActions(for blocker: MCPAuthResetSafetyBlocker) -> some View {
+        Button(String(localized: "Retry"), systemImage: "arrow.clockwise") {
+            store.reload()
+        }
+        switch blocker {
+        case .recoveryRequired(let directory):
+            Button(String(localized: "Show Recovery Files in Finder"), systemImage: "folder") {
+                NSWorkspace.shared.activateFileViewerSelecting([directory])
+            }
+            Button(String(localized: "Copy Recovery Path"), systemImage: "doc.on.doc") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(directory.path, forType: .string)
+            }
+        case .recoveryDiscoveryUnavailable(let directory), .incompleteInventory(let directory):
+            Button(String(localized: "Show in Finder"), systemImage: "folder") {
+                NSWorkspace.shared.activateFileViewerSelecting([directory])
+            }
+        }
+    }
+
+    /// Focus target selected after a genuine authentication failure.
+    private enum AuthenticationFailureFocus {
+        /// Return focus to the initial secret-unlock action.
+        case unlock
+        /// Return focus to the pre-expiry reauthentication action.
+        case reauthenticate
+    }
+
+    /// Keeps genuine failures visible and announces only the sanitized app message.
+    private func handleAuthenticationFailure(
+        _ presentation: SecretAuthenticationPresentation,
+        focus: AuthenticationFailureFocus
+    ) {
+        guard case .visibleFailure(let message) = presentation else { return }
+        authenticationFailure = message
+        AccessibilityNotification.Announcement(message).post()
+        switch focus {
+        case .unlock:
+            focusUnlockControl()
+        case .reauthenticate:
+            focusReauthenticateControl()
         }
     }
 
@@ -665,9 +845,34 @@ struct MCPAuthFileEditorView: View {
     private func focusUnlockControl() {
         Task { @MainActor in
             await Task.yield()
-            guard !isEditing else { return }
+            guard !isEditing, selectedFile?.isSafelyReadable == true else { return }
             unlockButtonFocused = true
             unlockAccessibilityFocused = true
+        }
+    }
+
+    /// Moves focus to the locked-state action that is actually rendered for the selected file.
+    private func focusLockedStateControl() {
+        Task { @MainActor in
+            await Task.yield()
+            guard !isEditing else { return }
+            if selectedFile?.isSafelyReadable == true {
+                unlockButtonFocused = true
+                unlockAccessibilityFocused = true
+            } else {
+                showInFinderButtonFocused = true
+                showInFinderAccessibilityFocused = true
+            }
+        }
+    }
+
+    /// Returns keyboard and VoiceOver focus to reauthentication after a failed attempt.
+    private func focusReauthenticateControl() {
+        Task { @MainActor in
+            await Task.yield()
+            guard isEditing, warningDeadline != nil, authenticationFailure != nil else { return }
+            reauthenticateButtonFocused = true
+            reauthenticateAccessibilityFocused = true
         }
     }
 

@@ -441,6 +441,36 @@
         }
       }
     },
+    "CodingBuddy deliberately omitted credential cache input that could not be inspected safely." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy hat Eingaben aus dem Zugangsdaten-Cache bewusst ausgelassen, weil sie nicht sicher geprüft werden konnten."
+          }
+        }
+      }
+    },
+    "Credential scan was incomplete" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugangsdaten-Scan war unvollständig"
+          }
+        }
+      }
+    },
+    "Open MCP Auth, review the safety warning, and retry the scan." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne MCP Auth, prüfe den Sicherheitshinweis und starte den Scan erneut."
+          }
+        }
+      }
+    },
     "Credential Scan Limited for Safety" : {
       "localizations" : {
         "de" : {
@@ -1699,6 +1729,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Der MCP-Client benötigt einen vollständigen OAuth-Cache-Eintrag, bevor er diese Anmeldung wiederverwenden kann."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance incomplete credential scan consequence" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Außerhalb der gemeldeten Ergebnisse können weitere abgelaufene, unvollständige oder unsichere Zugangsdaten-Artefakte vorhanden sein."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance incomplete credential scan explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agent Doctor hat einen Teil des MCP-Auth-Caches bewusst ausgelassen, weil diese Eingabe nicht innerhalb der Sicherheitsgrenzen geprüft werden konnte."
+          }
+        }
+      }
+    },
+    "Agent Doctor guidance incomplete credential scan relevance" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur nach einem vollständigen Scan des Zugangsdaten-Caches ist ein leeres oder unauffälliges Ergebnis belastbar."
           }
         }
       }
@@ -5358,6 +5418,26 @@
         }
       }
     },
+    "Mark Reviewed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als geprüft markieren"
+          }
+        }
+      }
+    },
+    "Restore Applied; Verification Required" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederherstellung angewendet; Überprüfung erforderlich"
+          }
+        }
+      }
+    },
     "Restore Backup" : {
       "localizations" : {
         "de" : {
@@ -5378,12 +5458,52 @@
         }
       }
     },
+    "Restore Completed with Recovery Required" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederherstellung abgeschlossen – Nachbereitung erforderlich"
+          }
+        }
+      }
+    },
     "Restore Failed" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wiederherstellung fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Restore State Could Not Be Confirmed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status der Wiederherstellung konnte nicht bestätigt werden"
+          }
+        }
+      }
+    },
+    "Restore Was Not Applied" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederherstellung wurde nicht angewendet"
+          }
+        }
+      }
+    },
+    "Review the previous restore recovery state before restoring another backup." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfe zuerst den Recovery-Status der vorherigen Wiederherstellung, bevor du ein weiteres Backup wiederherstellst."
           }
         }
       }

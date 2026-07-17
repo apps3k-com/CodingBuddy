@@ -35,6 +35,8 @@ nonisolated struct BackupBrowserScanner: Sendable {
     var backupDirectory: URL
     /// Maximum number of directory entries discovery will inspect in one pass.
     var maximumDirectoryEntryCount: Int
+    /// Internal hook for deterministic metadata-race tests; production callers leave it nil.
+    private let entryMetadataHook: (@Sendable (String) throws -> Void)?
 
     /// Creates a scanner for one home directory and backup directory.
     init(
@@ -42,11 +44,13 @@ nonisolated struct BackupBrowserScanner: Sendable {
         backupDirectory: URL = FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("CodingBuddy/Backups", isDirectory: true),
-        maximumDirectoryEntryCount: Int = Self.defaultMaximumDirectoryEntryCount
+        maximumDirectoryEntryCount: Int = Self.defaultMaximumDirectoryEntryCount,
+        entryMetadataHook: (@Sendable (String) throws -> Void)? = nil
     ) {
         self.homeDirectory = homeDirectory
         self.backupDirectory = backupDirectory
         self.maximumDirectoryEntryCount = max(0, maximumDirectoryEntryCount)
+        self.entryMetadataHook = entryMetadataHook
     }
 
     /// Loads parseable backup files, newest first.
@@ -87,12 +91,15 @@ nonisolated struct BackupBrowserScanner: Sendable {
                 throw ScanError.tooManyEntries(maximum: maximumDirectoryEntryCount)
             }
 
+            try entryMetadataHook?(name)
             var info = Darwin.stat()
-            let isRegularFile = name.withCString {
-                fstatat(descriptor, $0, &info, AT_SYMLINK_NOFOLLOW) == 0
-                    && (info.st_mode & S_IFMT) == S_IFREG
+            let metadataResult = name.withCString {
+                fstatat(descriptor, $0, &info, AT_SYMLINK_NOFOLLOW)
             }
-            guard isRegularFile, let item = item(for: name, info: info) else { continue }
+            guard metadataResult == 0 else { throw ScanError.directoryUnavailable }
+            guard (info.st_mode & S_IFMT) == S_IFREG,
+                  let item = item(for: name, info: info)
+            else { continue }
             result.append(item)
         }
 

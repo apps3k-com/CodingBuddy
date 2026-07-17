@@ -102,8 +102,57 @@ struct EnvStoreTests {
         )
         let store = makeStore(home: home)
 
-        #expect(store.accessState(for: .zshrc) == .refused(.unreadable))
+        #expect(store.accessState(for: .zshrc) == .refused(.unsafePath))
         #expect(!store.accessState(in: .zshrc).allowsActions)
+        #expect(store.existingFiles.contains(.zshrc))
+    }
+
+    /// Verifies a stable final dotfile symlink loads and remains intact after an edit.
+    @Test func symlinkedShellFileLoadsAndUpdatesItsTargetWithoutReplacingTheLink() throws {
+        let home = try makeTempDir()
+        let managedTarget = home.appendingPathComponent("managed-zshrc")
+        try "export MANAGED_VALUE=before\n".write(
+            to: managedTarget,
+            atomically: true,
+            encoding: .utf8
+        )
+        let link = ShellConfigFile.zshrc.url(in: home)
+        try FileManager.default.createSymbolicLink(
+            at: link,
+            withDestinationURL: managedTarget
+        )
+
+        let store = makeStore(home: home)
+        let variable = try #require(store.variables(in: .zshrc).first)
+        let originalDestination = try FileManager.default.destinationOfSymbolicLink(
+            atPath: link.path
+        )
+
+        #expect(store.accessState(for: .zshrc) == .loaded)
+        #expect(variable.name == "MANAGED_VALUE")
+        #expect(store.update(
+            variable,
+            name: "MANAGED_VALUE",
+            rawValue: "after",
+            exported: true
+        ))
+        #expect(try String(contentsOf: managedTarget, encoding: .utf8) == "export MANAGED_VALUE=after\n")
+        #expect(try FileManager.default.destinationOfSymbolicLink(atPath: link.path) == originalDestination)
+        #expect(store.existingFiles.contains(.zshrc))
+    }
+
+    /// Verifies an oversized startup file is refused before its bytes are parsed.
+    @Test func oversizedShellFileIsRefusedBeforeParsing() throws {
+        let home = try makeTempDir()
+        try Data(
+            repeating: 0x41,
+            count: EnvStore.maximumShellFileSize + 1
+        ).write(to: ShellConfigFile.zshrc.url(in: home))
+
+        let store = makeStore(home: home)
+
+        #expect(store.accessState(for: .zshrc) == .refused(.tooLarge))
+        #expect(store.variables(in: .zshrc).isEmpty)
         #expect(store.existingFiles.contains(.zshrc))
     }
 

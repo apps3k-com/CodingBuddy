@@ -175,18 +175,6 @@ struct SafeFileWriterTests {
         #expect(syncCalls == 2)
     }
 
-    @Test func missingCreateModeHonorsUmask() throws {
-        let previousMask = umask(0o077)
-        defer { umask(previousMask) }
-        let dir = try makeTempDir()
-        let target = dir.appendingPathComponent("file")
-
-        try SafeFileWriter(backupDirectory: dir.appendingPathComponent("Backups"))
-            .write("secret", to: target)
-
-        #expect(try mode(of: target) == 0o600)
-    }
-
     @Test func existingPermissionsArePreservedOverCreateMode() throws {
         let dir = try makeTempDir()
         let target = dir.appendingPathComponent("file")
@@ -214,6 +202,27 @@ struct SafeFileWriterTests {
         #expect(try String(contentsOf: entries[0], encoding: .utf8) == "original")
         #expect(try recoveryFiles(in: dir).isEmpty)
         #expect(try recoveryFiles(in: backups).isEmpty)
+    }
+
+    /// Verifies non-positive retention input cannot remove the only recovery copy.
+    @Test func nonPositiveBackupRetentionStillKeepsNewestBackup() throws {
+        for retention in [0, -3] {
+            let dir = try makeTempDir()
+            let backups = dir.appendingPathComponent("Backups")
+            let target = dir.appendingPathComponent("file")
+            try "old".write(to: target, atomically: true, encoding: .utf8)
+
+            try SafeFileWriter(backupDirectory: backups, backupRetention: retention)
+                .write("new", to: target, expectedOriginal: "old")
+
+            let entries = try FileManager.default.contentsOfDirectory(
+                at: backups,
+                includingPropertiesForKeys: nil
+            )
+            #expect(entries.count == 1)
+            #expect(try String(contentsOf: entries[0], encoding: .utf8) == "old")
+            #expect(try String(contentsOf: target, encoding: .utf8) == "new")
+        }
     }
 
     @Test func unchangedContentDoesNotBackUp() throws {

@@ -10,6 +10,10 @@ import Observation
 nonisolated enum EnvFileRefusalReason: Equatable, Sendable {
     /// The file exists, but its bytes could not be read safely.
     case unreadable
+    /// The file path, type, ownership, or permissions fail the no-follow safety policy.
+    case unsafePath
+    /// The file exceeds the explicit shell-source byte ceiling.
+    case tooLarge
     /// The file's bytes are not valid UTF-8 and therefore cannot be parsed safely.
     case invalidUTF8
 
@@ -18,6 +22,10 @@ nonisolated enum EnvFileRefusalReason: Equatable, Sendable {
         switch self {
         case .unreadable:
             String(localized: "CodingBuddy did not load this file because it could not be read safely.")
+        case .unsafePath:
+            String(localized: "The path is unavailable or contains a symbolic link.")
+        case .tooLarge:
+            String(localized: "CodingBuddy cannot safely read this file because it is unexpectedly large.")
         case .invalidUTF8:
             String(localized: "CodingBuddy did not load this file because it is not valid UTF-8.")
         }
@@ -77,6 +85,9 @@ nonisolated enum EnvScopeAccessState: Equatable, Sendable {
 /// files change on disk.
 @Observable
 final class EnvStore {
+    /// Maximum bytes accepted from one zsh startup file during a reload.
+    nonisolated static let maximumShellFileSize = 4 * 1_024 * 1_024
+
     /// Home directory whose supported zsh startup files form the managed scope.
     let homeDirectory: URL
 
@@ -89,6 +100,8 @@ final class EnvStore {
     var lastError: String?
 
     private let writer: ShellConfigWriter
+    /// Descriptor-bound reader configured with the same isolated support directory as the writer.
+    private let reader: SafeFileWriter
     @ObservationIgnored private lazy var monitor = FileChangeMonitor { [weak self] in
         self?.reload()
         self?.startWatching()
@@ -104,6 +117,7 @@ final class EnvStore {
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("CodingBuddy/Backups", isDirectory: true)
         self.writer = ShellConfigWriter(backupDirectory: backups)
+        self.reader = SafeFileWriter(backupDirectory: backups)
         reload()
         startWatching()
     }
@@ -119,14 +133,28 @@ final class EnvStore {
         for file in ShellConfigFile.allCases {
             let url = file.url(in: homeDirectory)
             do {
-                let data = try Data(contentsOf: url)
-                existing.insert(file)
-                guard let content = String(data: data, encoding: .utf8) else {
-                    accessStates[file] = .refused(.invalidUTF8)
+                let snapshot = try reader.snapshot(
+                    at: url,
+                    maximumByteCount: Self.maximumShellFileSize,
+                    createMissingParentDirectories: false
+                )
+                guard let content = try snapshot.utf8Content() else {
+                    accessStates[file] = .missing
                     continue
                 }
+                existing.insert(file)
                 accessStates[file] = .loaded
                 loaded += ShellConfigParser.variables(in: content, file: file)
+            } catch SafeFileWriter.WriteError.targetTooLarge {
+                existing.insert(file)
+                accessStates[file] = .refused(.tooLarge)
+            } catch SafeFileWriter.WriteError.unsafeTarget,
+                    SafeFileWriter.WriteError.danglingSymlink {
+                existing.insert(file)
+                accessStates[file] = .refused(.unsafePath)
+            } catch let error as CocoaError where error.code == .fileReadInapplicableStringEncoding {
+                existing.insert(file)
+                accessStates[file] = .refused(.invalidUTF8)
             } catch {
                 if Self.isSafelyMissing(url) {
                     accessStates[file] = .missing

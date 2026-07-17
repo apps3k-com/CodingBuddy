@@ -614,6 +614,8 @@ nonisolated enum MCPAuthScanRefusal: Hashable, Sendable {
     case credentialArtifact
     /// One safely identified artifact remained visible but its contents were deliberately not read.
     case credentialArtifactUnreadable
+    /// The scan-wide artifact or byte ceiling was reached before all cache input could be inspected.
+    case aggregateScanBudget
 
     /// Whether this refusal means a reset cannot prove that it covers the complete inventory.
     var preventsCredentialReset: Bool {
@@ -643,6 +645,10 @@ nonisolated enum MCPAuthScanner {
     static let maximumVersionDirectoryCount = 32
     /// Four artifacts per server are typical; 512 still permits a large local inventory.
     static let maximumCredentialArtifactsPerVersion = 512
+    /// Scan-wide entry ceiling that prevents many individually valid versions from multiplying work.
+    static let maximumCredentialArtifactCount = 768
+    /// Scan-wide byte ceiling for credential contents retained only long enough to parse metadata.
+    static let maximumCredentialScanByteCount = 4 * maximumCredentialFileSize
 
     /// `mcp-remote` names files `<md5(serverURL)>_<kind>`; the URL itself is
     /// not stored. We recover it by hashing the server URLs found in the
@@ -707,7 +713,9 @@ nonisolated enum MCPAuthScanner {
 
         var entries: [MCPAuthEntry] = []
         var refusals: Set<MCPAuthScanRefusal> = []
-        for versionName in versionNames {
+        var scannedArtifactCount = 0
+        var consumedByteCount = 0
+        versionLoop: for versionName in versionNames {
             let directory: SecureInputDirectory
             do {
                 directory = try rootDirectory.openChildDirectory(named: versionName)
@@ -730,10 +738,24 @@ nonisolated enum MCPAuthScanner {
             }
 
             var acceptedFiles: [ScannedAuthFile] = []
+            var reachedAggregateBudget = false
             for fileName in fileNames {
-                switch authFile(named: fileName, in: directory) {
+                guard credentialHash(from: fileName) != nil else { continue }
+                guard scannedArtifactCount < maximumCredentialArtifactCount else {
+                    refusals.insert(.aggregateScanBudget)
+                    reachedAggregateBudget = true
+                    break
+                }
+                scannedArtifactCount += 1
+
+                switch authFile(
+                    named: fileName,
+                    in: directory,
+                    remainingByteBudget: maximumCredentialScanByteCount - consumedByteCount
+                ) {
                 case .accepted(let file):
                     acceptedFiles.append(file)
+                    consumedByteCount += file.consumedByteCount
                 case .ignored:
                     break
                 case .refused(let file):
@@ -743,7 +765,12 @@ nonisolated enum MCPAuthScanner {
                     } else {
                         refusals.insert(.credentialArtifact)
                     }
+                case .budgetExceeded(let file):
+                    if let file { acceptedFiles.append(file) }
+                    refusals.insert(.aggregateScanBudget)
+                    reachedAggregateBudget = true
                 }
+                if reachedAggregateBudget { break }
             }
             let grouped = Dictionary(
                 grouping: acceptedFiles,
@@ -759,10 +786,12 @@ nonisolated enum MCPAuthScanner {
                     accessTokenExpiry: nil
                 )
                 if let tokens = scannedFiles.first(where: { $0.file.kind == .tokens }) {
-                    applyTokenMetadata(from: tokens, to: &entry)
+                    entry.scope = tokens.scope
+                    entry.accessTokenExpiry = tokens.accessTokenExpiry
                 }
                 entries.append(entry)
             }
+            if reachedAggregateBudget { break versionLoop }
         }
 
         // Resolved servers first, then by name -- stable, scannable order.
@@ -783,8 +812,12 @@ nonisolated enum MCPAuthScanner {
         let hash: String
         /// Display and mutation model retained without secret metadata.
         let file: MCPAuthFile
-        /// Stable bytes only when the artifact was an accepted regular file.
-        let snapshot: SecureInputSnapshot?
+        /// Bytes charged against the scan-wide budget after one bounded capture.
+        let consumedByteCount: Int
+        /// Non-secret OAuth scope parsed before the descriptor-backed snapshot is released.
+        let scope: String?
+        /// Best-effort token expiry parsed before the descriptor-backed snapshot is released.
+        let accessTokenExpiry: Date?
     }
 
     /// Result of classifying one child without conflating irrelevant names with refused input.
@@ -796,15 +829,16 @@ nonisolated enum MCPAuthScanner {
         /// Credential-shaped child rejected by the secure input policy, with
         /// reset-only metadata when its path was still identified safely.
         case refused(ScannedAuthFile?)
+        /// A safely identified artifact would exceed the remaining scan-wide byte budget.
+        case budgetExceeded(ScannedAuthFile?)
     }
 
     private static func authFile(
         named name: String,
-        in directory: SecureInputDirectory
+        in directory: SecureInputDirectory,
+        remainingByteBudget: Int
     ) -> AuthFileScanResult {
-        guard let underscore = name.firstIndex(of: "_") else { return .ignored }
-        let hash = String(name[..<underscore])
-        guard hash.count == 32, hash.allSatisfy(\.isHexDigit) else { return .ignored }
+        guard let hash = credentialHash(from: name) else { return .ignored }
         guard let entryType = try? directory.entryType(named: name) else { return .refused(nil) }
 
         let url = directory.url.appendingPathComponent(name)
@@ -817,52 +851,86 @@ nonisolated enum MCPAuthScanner {
                     modified: nil,
                     isSafelyReadable: false
                 ),
-                snapshot: nil
+                consumedByteCount: 0,
+                scope: nil,
+                accessTokenExpiry: nil
             )
         }
 
-        let snapshot: SecureInputSnapshot?
         switch entryType {
         case mode_t(S_IFREG):
-            guard let regularFileSnapshot = try? SecureInputReader.capture(
-                name: name,
-                in: directory,
-                maximumByteCount: maximumCredentialFileSize,
-                policy: .credential
-            ) else {
+            let metadata: SecureInputMetadata
+            do {
+                metadata = try directory.entryMetadata(
+                    named: name,
+                    maximumByteCount: maximumCredentialFileSize,
+                    policy: .credential
+                )
+            } catch {
                 return .refused(resetOnlyFile())
             }
-            snapshot = regularFileSnapshot
+            guard metadata.byteCount <= remainingByteBudget else {
+                return .budgetExceeded(resetOnlyFile())
+            }
+
+            let snapshot: SecureInputSnapshot
+            do {
+                snapshot = try SecureInputReader.capture(
+                    name: name,
+                    in: directory,
+                    maximumByteCount: min(maximumCredentialFileSize, remainingByteBudget),
+                    policy: .credential
+                )
+            } catch let error as SecureInputReadError
+                where error == .fileTooLarge && remainingByteBudget < maximumCredentialFileSize {
+                return .budgetExceeded(resetOnlyFile())
+            } catch {
+                return .refused(resetOnlyFile())
+            }
+
+            let file = MCPAuthFile(
+                url: url,
+                kind: .init(fileName: name),
+                modified: snapshot.modifiedAt,
+                isSafelyReadable: true
+            )
+            let metadataValues = tokenMetadata(from: snapshot.data, file: file)
+            return .accepted(ScannedAuthFile(
+                hash: hash,
+                file: file,
+                consumedByteCount: snapshot.data.count,
+                scope: metadataValues.scope,
+                accessTokenExpiry: metadataValues.accessTokenExpiry
+            ))
         case mode_t(S_IFLNK):
             // Keep the artifact visible for guarded reset/edit workflows, but
             // never follow it while deriving scanner metadata.
-            snapshot = nil
+            return .accepted(resetOnlyFile())
         default:
             return .refused(resetOnlyFile())
         }
-
-        return .accepted(ScannedAuthFile(
-            hash: hash,
-                file: MCPAuthFile(
-                    url: url,
-                    kind: .init(fileName: name),
-                    modified: snapshot?.modifiedAt,
-                    isSafelyReadable: snapshot != nil
-                ),
-            snapshot: snapshot
-        ))
     }
 
-    /// Extracts only non-secret metadata (scope, expiry estimate) from tokens.json.
-    private static func applyTokenMetadata(from scanned: ScannedAuthFile, to entry: inout MCPAuthEntry) {
-        guard let snapshot = scanned.snapshot,
-              let json = try? JSONSerialization.jsonObject(with: snapshot.data) as? [String: Any] else {
-            return
+    /// Parses only non-secret token metadata while the bounded snapshot remains local.
+    private static func tokenMetadata(
+        from data: Data,
+        file: MCPAuthFile
+    ) -> (scope: String?, accessTokenExpiry: Date?) {
+        guard file.kind == .tokens,
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return (nil, nil)
         }
-        entry.scope = json["scope"] as? String
-        if let expiresIn = json["expires_in"] as? Double, let modified = scanned.file.modified {
-            entry.accessTokenExpiry = modified.addingTimeInterval(expiresIn)
+        let expiry = (json["expires_in"] as? Double).flatMap { expiresIn in
+            file.modified?.addingTimeInterval(expiresIn)
         }
+        return (json["scope"] as? String, expiry)
+    }
+
+    /// Returns the credential hash prefix only for a structurally valid cache artifact name.
+    private static func credentialHash(from name: String) -> String? {
+        guard let underscore = name.firstIndex(of: "_") else { return nil }
+        let hash = String(name[..<underscore])
+        return hash.count == 32 && hash.allSatisfy(\.isHexDigit) ? hash : nil
     }
 
     private static func collectHTTPStrings(in value: Any, into urls: inout Set<String>) {
@@ -1048,6 +1116,27 @@ nonisolated fileprivate final class SecureInputDirectory {
         }
         guard result == 0 else { throw SecureInputReadError.ioFailure }
         return info.st_mode & mode_t(S_IFMT)
+    }
+
+    /// Returns validated no-follow metadata before a caller spends aggregate read budget.
+    func entryMetadata(
+        named name: String,
+        maximumByteCount: Int,
+        policy: SecureInputReadPolicy
+    ) throws -> SecureInputMetadata {
+        guard SecureInputReader.isSinglePathComponent(name) else {
+            throw SecureInputReadError.unsafeFile
+        }
+        var info = Darwin.stat()
+        let result = name.withCString {
+            fstatat(descriptor.raw, $0, &info, AT_SYMLINK_NOFOLLOW)
+        }
+        guard result == 0 else { throw SecureInputReadError.ioFailure }
+        return try SecureInputReader.metadata(
+            from: info,
+            maximumByteCount: maximumByteCount,
+            policy: policy
+        )
     }
 
     private static func validatedDirectoryIdentity(_ info: Darwin.stat) throws -> SecureInputIdentity {

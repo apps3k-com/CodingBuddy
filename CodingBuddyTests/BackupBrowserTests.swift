@@ -11,6 +11,44 @@ import Testing
 @MainActor
 @Suite(.serialized)
 struct BackupBrowserTests {
+    /// Verifies restore recovery UI preserves commit state and every retained artifact.
+    @Test func restoreFailurePresentationPreservesStructuredRecoveryState() {
+        let paths = ["/tmp/recovery-a", "/tmp/recovery-b"]
+        let contexts: [SafeFileWriter.RecoveryArtifact.Context] = [.stagedWrite, .uncertainTarget]
+        let artifacts = zip(paths, contexts).map {
+            SafeFileWriter.RecoveryArtifact(lastKnownPath: $0.0, context: $0.1)
+        }
+
+        let notApplied = BackupRestoreFailurePresentation(error: SafeFileWriter.RecoveryError(
+            commitState: .notCommitted,
+            artifacts: artifacts
+        ))
+        let applied = BackupRestoreFailurePresentation(error: SafeFileWriter.RecoveryError(
+            commitState: .committed,
+            artifacts: artifacts
+        ))
+        let uncertain = BackupRestoreFailurePresentation(error: SafeFileWriter.RecoveryError(
+            commitState: .unknown,
+            artifacts: artifacts
+        ))
+        let needsVerification = BackupRestoreFailurePresentation(
+            error: SafeFileWriter.CleanupDurabilityError()
+        )
+        let ordinary = BackupRestoreFailurePresentation(
+            error: CocoaError(.fileWriteUnknown)
+        )
+
+        #expect(notApplied.outcome == .notApplied)
+        #expect(applied.outcome == .appliedWithRecovery)
+        #expect(uncertain.outcome == .uncertain)
+        #expect(needsVerification.outcome == .appliedNeedsVerification)
+        #expect(needsVerification.title == String(localized: "Restore Applied; Verification Required"))
+        #expect(needsVerification.recoveryURLs.isEmpty)
+        #expect(needsVerification.requiresPersistentAttention)
+        #expect(ordinary.outcome == .ordinaryFailure)
+        #expect(!ordinary.requiresPersistentAttention)
+        #expect(notApplied.recoveryURLs.map(\.path) == paths)
+    }
 
     /// Creates an isolated fixture root for backup browser tests.
     private func makeTempDir() throws -> URL {
@@ -79,6 +117,27 @@ struct BackupBrowserTests {
         )
 
         #expect(throws: BackupBrowserScanner.ScanError.tooManyEntries(maximum: 2)) {
+            _ = try scanner.items()
+        }
+    }
+
+    /// Verifies a disappearing entry cannot turn a failed metadata lookup into a complete inventory.
+    @Test func scannerRefusesMetadataLookupRaceWithoutReturningPartialItems() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let racedBackup = backups.appendingPathComponent("zshrc-2026-06-28-001122-333")
+        try write("backup\n", to: racedBackup)
+        let scanner = BackupBrowserScanner(
+            homeDirectory: home,
+            backupDirectory: backups,
+            entryMetadataHook: { name in
+                guard name == racedBackup.lastPathComponent else { return }
+                try FileManager.default.removeItem(at: racedBackup)
+            }
+        )
+
+        #expect(throws: BackupBrowserScanner.ScanError.directoryUnavailable) {
             _ = try scanner.items()
         }
     }
@@ -183,6 +242,50 @@ struct BackupBrowserTests {
         #expect(try String(contentsOf: currentBackup, encoding: .utf8) == "current\n")
     }
 
+    /// Verifies unresolved restore recovery survives view recreation and blocks another restore.
+    @Test func restoreRecoveryAttentionPersistsUntilExplicitlyReviewed() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let target = home.appendingPathComponent(".zshrc")
+        let recoveryPath = root.appendingPathComponent("retained-recovery")
+        try write("current\n", to: target)
+        try write("restored\n", to: backups.appendingPathComponent("zshrc-2026-06-28-001122-333"))
+        let injectedError = SafeFileWriter.RecoveryError(
+            commitState: .notCommitted,
+            artifacts: [
+                SafeFileWriter.RecoveryArtifact(
+                    lastKnownPath: recoveryPath.path,
+                    context: .stagedWrite
+                )
+            ]
+        )
+        let store = BackupBrowserStore(
+            homeDirectory: home,
+            backupDirectory: backups,
+            restoreTransactionHook: { point in
+                if case .beforeCommit = point { throw injectedError }
+            }
+        )
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        #expect(throws: SafeFileWriter.RecoveryError.self) {
+            try store.restore(backup)
+        }
+
+        let attention = try #require(store.restoreRecoveryAttention)
+        #expect(attention.outcome == .notApplied)
+        #expect(attention.recoveryURLs == [recoveryPath])
+        #expect(try String(contentsOf: target, encoding: .utf8) == "current\n")
+        #expect(throws: BackupBrowserError.recoveryRequiresReview) {
+            try store.restore(backup)
+        }
+
+        store.markRestoreRecoveryReviewed()
+        #expect(store.restoreRecoveryAttention == nil)
+    }
+
     /// Verifies restoring Codex credentials recreates missing files with restrictive permissions.
     @Test func storeRestoreCreatesCodexEnvWithRestrictivePermissions() throws {
         let root = try makeTempDir()
@@ -201,6 +304,67 @@ struct BackupBrowserTests {
             FileManager.default.attributesOfItem(atPath: target.path)[.posixPermissions] as? Int
         )
         #expect(permissions & 0o777 == 0o600)
+    }
+
+    /// Verifies restore refuses to snapshot an unexpectedly large current target.
+    @Test func storeRestoreRefusesOversizedCurrentTargetBeforeBackupOrMutation() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let target = home.appendingPathComponent(".zshrc")
+        let backupURL = backups.appendingPathComponent("zshrc-2026-06-28-001122-333")
+        try write("", to: target)
+        let handle = try FileHandle(forWritingTo: target)
+        try handle.truncate(atOffset: UInt64(BackupBrowserStore.maximumBackupFileSize + 1))
+        try handle.close()
+        try write("restored\n", to: backupURL)
+        let store = BackupBrowserStore(homeDirectory: home, backupDirectory: backups)
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        #expect(throws: SafeFileWriter.WriteError.targetTooLarge) {
+            try store.restore(backup)
+        }
+        let attributes = try FileManager.default.attributesOfItem(atPath: target.path)
+        #expect(attributes[.size] as? Int == BackupBrowserStore.maximumBackupFileSize + 1)
+        let entries = try FileManager.default.contentsOfDirectory(at: backups, includingPropertiesForKeys: nil)
+        #expect(entries.map(\.lastPathComponent) == [backupURL.lastPathComponent])
+    }
+
+    /// Verifies descriptor-created parents are rebound before a restored file can be committed.
+    @Test func storeRestoreRejectsCreatedParentReplacementBeforeCommit() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let parent = home.appendingPathComponent(".codex", isDirectory: true)
+        let movedParent = home.appendingPathComponent(".codex-moved", isDirectory: true)
+        let outside = root.appendingPathComponent("Outside", isDirectory: true)
+        try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: outside, withIntermediateDirectories: true)
+        try write(
+            "OPENAI_API_KEY=restored\n",
+            to: backups.appendingPathComponent("mcp.env-2026-06-28-001122-333")
+        )
+        var replacedParent = false
+        let store = BackupBrowserStore(
+            homeDirectory: home,
+            backupDirectory: backups,
+            restoreTransactionHook: { point in
+                guard case .beforeSnapshotValidation = point, !replacedParent else { return }
+                replacedParent = true
+                try FileManager.default.moveItem(at: parent, to: movedParent)
+                try FileManager.default.createSymbolicLink(at: parent, withDestinationURL: outside)
+            }
+        )
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        #expect(throws: SafeFileWriter.WriteError.staleOriginal) {
+            try store.restore(backup)
+        }
+        #expect(replacedParent)
+        #expect(!FileManager.default.fileExists(atPath: movedParent.appendingPathComponent("mcp.env").path))
+        #expect(!FileManager.default.fileExists(atPath: outside.appendingPathComponent("mcp.env").path))
     }
 
     /// Verifies every supported secret-bearing restore target opts into private creation.
@@ -390,6 +554,45 @@ struct BackupBrowserTests {
         }
     }
 
+    /// Verifies multiline shell assignments make the whole preview opaque.
+    @Test func shellPreviewFailsClosedForMultilineAssignmentForms() {
+        let documents = [
+            "GITHUB_TOKEN='first-line\nquoted-secret'\nNORMAL=value",
+            "GITHUB_TOKEN=first-line\\\ncontinued-secret\nNORMAL=value",
+            "GITHUB_TOKEN=$(cat <<'EOF'\nheredoc-secret\nEOF\n)\nNORMAL=value",
+            "env GITHUB_TOKEN='wrapper-line\nwrapper-secret'\nNORMAL=value",
+        ]
+
+        for document in documents {
+            let preview = BackupShellPreviewRedactor.redactDocument(document)
+            #expect(preview == "••••••••")
+            for secret in [
+                "quoted-secret", "continued-secret", "heredoc-secret", "wrapper-secret",
+            ] {
+                #expect(!preview.contains(secret))
+            }
+        }
+    }
+
+    /// Verifies the store routes shell backups through whole-document multiline refusal.
+    @Test func storePreviewFailsClosedForMultilineShellAssignment() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        try write(
+            "GITHUB_TOKEN='first-line\nstore-secret'\nNORMAL=value",
+            to: backups.appendingPathComponent("zshrc-2026-06-28-001122-333")
+        )
+        let store = BackupBrowserStore(homeDirectory: home, backupDirectory: backups)
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        let preview = store.preview(for: backup).backupText
+
+        #expect(preview == "••••••••")
+        #expect(!preview.contains("store-secret"))
+    }
+
     /// Verifies JSON backup previews retain shape while masking all scalar values.
     @Test func storePreviewStructurallyRedactsEveryJSONValue() throws {
         let root = try makeTempDir()
@@ -504,6 +707,7 @@ struct BackupBrowserTests {
         try handle.write(contentsOf: Data("mutation\n".utf8))
         try handle.close()
 
+        #expect(store.preview(for: backup).backupText == String(localized: "Could not read file."))
         #expect(throws: BackupBrowserError.backupChanged) {
             try store.restore(backup)
         }

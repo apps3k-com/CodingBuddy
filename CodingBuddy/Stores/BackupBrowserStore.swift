@@ -14,6 +14,8 @@ nonisolated enum BackupBrowserError: LocalizedError, Equatable, Sendable {
     case backupChanged
     /// The mapped target exists but is not a regular writable file.
     case targetNotWritable
+    /// A previous restore has unresolved recovery state that must be reviewed first.
+    case recoveryRequiresReview
 
     /// Localized explanation suitable for alerts.
     var errorDescription: String? {
@@ -24,6 +26,8 @@ nonisolated enum BackupBrowserError: LocalizedError, Equatable, Sendable {
             String(localized: "The file was changed externally. Please try again.")
         case .targetNotWritable:
             String(localized: "CodingBuddy cannot safely write to the selected target file.")
+        case .recoveryRequiresReview:
+            String(localized: "Review the previous restore recovery state before restoring another backup.")
         }
     }
 }
@@ -42,6 +46,8 @@ final class BackupBrowserStore {
     private(set) var discoveryError: BackupBrowserScanner.ScanError?
     /// Last restore error, surfaced by the UI.
     var lastError: String?
+    /// Unresolved transactional outcome retained across navigation until explicit review.
+    private(set) var restoreRecoveryAttention: BackupRestoreFailurePresentation?
 
     /// Read-only scanner used for deterministic backup discovery.
     @ObservationIgnored private let scanner: BackupBrowserScanner
@@ -73,6 +79,11 @@ final class BackupBrowserStore {
     /// Number of discovered backup files.
     var count: Int {
         items.count
+    }
+
+    /// Clears the navigation-stable safety block only after the user explicitly reviews it.
+    func markRestoreRecoveryReviewed() {
+        restoreRecoveryAttention = nil
     }
 
     /// Re-runs backup discovery synchronously.
@@ -138,6 +149,9 @@ final class BackupBrowserStore {
 
     /// Restores a selected backup through `SafeFileWriter`, backing up the current target first.
     func restore(_ item: BackupBrowserItem) throws {
+        guard restoreRecoveryAttention == nil else {
+            throw BackupBrowserError.recoveryRequiresReview
+        }
         guard let selectedItem = items.first(where: { $0.id == item.id }),
               selectedItem == item
         else {
@@ -158,35 +172,38 @@ final class BackupBrowserStore {
         } catch {
             throw BackupBrowserError.backupChanged
         }
-        try validateTarget(targetURL)
-        try FileManager.default.createDirectory(
-            at: targetURL.deletingLastPathComponent(),
-            withIntermediateDirectories: true
-        )
-
+        guard let backupContent = String(data: backupSnapshot.data, encoding: .utf8) else {
+            throw BackupBrowserError.backupChanged
+        }
         let writer = SafeFileWriter(
             backupDirectory: backupDirectory,
             createMode: selectedItem.source.createMode,
             transactionHook: restoreTransactionHook
         )
-        let targetSnapshot = try writer.snapshot(at: targetURL)
-        guard let backupContent = String(data: backupSnapshot.data, encoding: .utf8) else {
-            throw BackupBrowserError.backupChanged
+        let targetSnapshot: SafeFileWriter.Snapshot
+        do {
+            targetSnapshot = try writer.snapshot(
+                at: targetURL,
+                maximumByteCount: Self.maximumBackupFileSize,
+                createMissingParentDirectories: true
+            )
+        } catch SafeFileWriter.WriteError.unsafeTarget {
+            throw BackupBrowserError.targetNotWritable
+        } catch SafeFileWriter.WriteError.danglingSymlink {
+            throw BackupBrowserError.targetNotWritable
         }
-        try writer.write(backupContent, using: targetSnapshot)
+        do {
+            try writer.write(backupContent, using: targetSnapshot)
+        } catch {
+            let presentation = BackupRestoreFailurePresentation(error: error)
+            if presentation.requiresPersistentAttention {
+                restoreRecoveryAttention = presentation
+            }
+            throw error
+        }
 
         lastError = nil
         reload()
-    }
-
-    /// Ensures an existing target is a regular file or symlink to a regular file.
-    private func validateTarget(_ targetURL: URL) throws {
-        let resolved = targetURL.resolvingSymlinksInPath()
-        guard FileManager.default.fileExists(atPath: resolved.path) else { return }
-        let attributes = try FileManager.default.attributesOfItem(atPath: resolved.path)
-        guard attributes[.type] as? FileAttributeType == .typeRegular else {
-            throw BackupBrowserError.targetNotWritable
-        }
     }
 
     /// Reads a current target with the same bounded regular-file policy used for backups.
@@ -201,7 +218,7 @@ final class BackupBrowserStore {
         return redactedPreviewText(text, source: source)
     }
 
-    /// Redacts structured JSON as a whole document and shell assignments line by line.
+    /// Redacts structured JSON as a whole document and shell assignments fail closed.
     private func redactedPreviewText(_ text: String, source: BackupBrowserSource) -> String {
         if source.containsJSON {
             return MCPAuthRedactor.maskedPreview(
@@ -210,15 +227,7 @@ final class BackupBrowserStore {
                 policy: .backupPreview
             )
         }
-        return text
-            .components(separatedBy: "\n")
-            .map(redactedShellPreviewLine(_:))
-            .joined(separator: "\n")
-    }
-
-    /// Redacts one ordinary shell assignment without reconstructing JSON-like input.
-    private func redactedShellPreviewLine(_ line: String) -> String {
-        BackupShellPreviewRedactor.redact(line)
+        return BackupShellPreviewRedactor.redactDocument(text)
     }
 }
 
@@ -234,6 +243,14 @@ nonisolated enum BackupShellPreviewRedactor {
     private static let declarationPattern = #/^(?<prefix>[ \t]*(?:(?:builtin|command)[ \t]+)?(?:typeset|readonly|export)[ \t]+(?:(?:[+-][A-Za-z]+|--)[ \t]+)*(?<name>[A-Za-z_][A-Za-z0-9_]*)[ \t]*=)(?<rest>.*)$/#
     /// Simple indexed or append assignment whose name/operator structure is unambiguous.
     private static let extendedAssignmentPattern = #/^(?<prefix>[ \t]*(?<name>[A-Za-z_][A-Za-z0-9_]*)(?:\[[A-Za-z0-9_.-]+\])?[ \t]*(?:\+=|=))(?<rest>.*)$/#
+
+    /// Redacts a complete shell document, refusing all structure when an assignment
+    /// has syntax that can consume subsequent lines.
+    static func redactDocument(_ text: String) -> String {
+        let lines = text.components(separatedBy: "\n")
+        guard !lines.contains(where: assignmentContinuesBeyondLine(_:)) else { return mask }
+        return lines.map(redact(_:)).joined(separator: "\n")
+    }
 
     /// Redacts an assignment while preserving syntax only when its prefix is unambiguous.
     static func redact(_ line: String) -> String {
@@ -287,6 +304,106 @@ nonisolated enum BackupShellPreviewRedactor {
             return prefix + mask
         }
         return redactParsedAssignment(prefix: prefix, assignment: assignment)
+    }
+
+    /// Detects quotes, substitutions, arrays, heredocs, and explicit operators
+    /// whose value or command body may continue on a later physical line.
+    private static func assignmentContinuesBeyondLine(_ line: String) -> Bool {
+        let value: Substring
+        if ShellConfigParser.parseLine(line) != nil,
+           let equals = line.firstIndex(of: "=") {
+            value = line[line.index(after: equals)...]
+        } else if let match = line.wholeMatch(of: declarationPattern) {
+            value = match.output.rest
+        } else if let match = line.wholeMatch(of: extendedAssignmentPattern) {
+            value = match.output.rest
+        } else if let equals = line.firstIndex(of: "=") {
+            value = line[line.index(after: equals)...]
+        } else {
+            return false
+        }
+
+        return containsOpenShellSyntax(value)
+    }
+
+    /// Lexes only enough shell syntax to determine whether later lines can belong
+    /// to the current assignment. Uncertainty deliberately produces `true`.
+    private static func containsOpenShellSyntax(_ value: Substring) -> Bool {
+        enum Quote {
+            case single
+            case double
+            case backtick
+        }
+
+        var quote: Quote?
+        var escaped = false
+        var parenthesisDepth = 0
+        var braceDepth = 0
+        var index = value.startIndex
+        while index < value.endIndex {
+            let character = value[index]
+            let nextIndex = value.index(after: index)
+            let next = nextIndex < value.endIndex ? value[nextIndex] : nil
+
+            switch quote {
+            case .single:
+                if character == "'" { quote = nil }
+            case .double:
+                if escaped {
+                    escaped = false
+                } else if character == "\\" {
+                    escaped = true
+                } else if character == "\"" {
+                    quote = nil
+                }
+            case .backtick:
+                if escaped {
+                    escaped = false
+                } else if character == "\\" {
+                    escaped = true
+                } else if character == "`" {
+                    quote = nil
+                }
+            case nil:
+                if escaped {
+                    escaped = false
+                } else {
+                    switch character {
+                    case "\\":
+                        escaped = true
+                    case "'":
+                        quote = .single
+                    case "\"":
+                        quote = .double
+                    case "`":
+                        quote = .backtick
+                    case "<" where next == "<":
+                        return true
+                    case "(":
+                        parenthesisDepth += 1
+                    case ")" where parenthesisDepth > 0:
+                        parenthesisDepth -= 1
+                    case "{" where value[..<index].last == "$":
+                        braceDepth += 1
+                    case "}" where braceDepth > 0:
+                        braceDepth -= 1
+                    default:
+                        break
+                    }
+                }
+            }
+            index = nextIndex
+        }
+
+        let trimmed = value.trimmingCharacters(in: .whitespaces)
+        let endsWithContinuationOperator = trimmed.hasSuffix("|")
+            || trimmed.hasSuffix("||")
+            || trimmed.hasSuffix("&&")
+        return quote != nil
+            || escaped
+            || parenthesisDepth > 0
+            || braceDepth > 0
+            || endsWithContinuationOperator
     }
 }
 

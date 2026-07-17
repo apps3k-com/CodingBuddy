@@ -36,6 +36,39 @@ private actor ControlledAuthenticator {
     }
 }
 
+/// Deterministic failing boundary used to complete an authentication error after revocation.
+private actor ControlledFailingAuthenticator {
+    private var completionContinuation: CheckedContinuation<Void, Never>?
+    private var startContinuations: [CheckedContinuation<Void, Never>] = []
+    private var started = false
+
+    /// Suspends until the test releases the simulated system prompt, then fails.
+    func authenticate() async throws -> Bool {
+        started = true
+        startContinuations.forEach { $0.resume() }
+        startContinuations.removeAll()
+        await withCheckedContinuation { completionContinuation = $0 }
+        throw AuthenticationFailure.failed
+    }
+
+    /// Waits until ``authenticate()`` has entered its suspended state.
+    func waitUntilStarted() async {
+        guard !started else { return }
+        await withCheckedContinuation { startContinuations.append($0) }
+    }
+
+    /// Releases the simulated prompt so it can publish its failure.
+    func fail() {
+        completionContinuation?.resume()
+        completionContinuation = nil
+    }
+}
+
+/// Pure synthetic failure distinct from a user or task cancellation.
+nonisolated private enum AuthenticationFailure: Error {
+    case failed
+}
+
 @MainActor
 struct SecretsGuardTests {
     @Test func successfulAuthenticationUnlocksWithoutError() async {
@@ -69,6 +102,32 @@ struct SecretsGuardTests {
         #expect(guardStore.lastError == nil)
     }
 
+    /// Verifies views distinguish genuine failures from cancellation without exposing raw errors.
+    @Test func authenticationPresentationSurfacesOnlySanitizedFailures() {
+        let sanitizedMessage = String(
+            localized: "Authentication could not be completed. Check your Mac authentication settings and try again."
+        )
+
+        #expect(
+            SecretAuthenticationPresentation.resolve(
+                didUnlock: true,
+                errorMessage: sanitizedMessage
+            ) == .succeeded
+        )
+        #expect(
+            SecretAuthenticationPresentation.resolve(
+                didUnlock: false,
+                errorMessage: nil
+            ) == .silentFailure
+        )
+        #expect(
+            SecretAuthenticationPresentation.resolve(
+                didUnlock: false,
+                errorMessage: sanitizedMessage
+            ) == .visibleFailure(sanitizedMessage)
+        )
+    }
+
     @Test func lateAuthenticationCannotReopenAfterLock() async {
         let authenticator = ControlledAuthenticator()
         let guardStore = SecretsGuard { _ in await authenticator.authenticate() }
@@ -94,6 +153,37 @@ struct SecretsGuardTests {
 
         #expect(!(await request.value))
         #expect(!guardStore.isUnlocked)
+    }
+
+    /// Verifies a failure completed after an explicit lock cannot publish a stale alert.
+    @Test func lateAuthenticationFailureAfterLockStaysSilent() async {
+        let authenticator = ControlledFailingAuthenticator()
+        let guardStore = SecretsGuard { _ in try await authenticator.authenticate() }
+        let request = Task { await guardStore.requestUnlock() }
+
+        await authenticator.waitUntilStarted()
+        guardStore.lock()
+        await authenticator.fail()
+
+        #expect(!(await request.value))
+        #expect(guardStore.lastError == nil)
+    }
+
+    /// Verifies task cancellation suppresses both CancellationError and later unrelated failures.
+    @Test func taskCancelledAuthenticationFailuresStaySilent() async {
+        let directCancellation = SecretsGuard { _ in throw CancellationError() }
+        #expect(!(await directCancellation.requestUnlock()))
+        #expect(directCancellation.lastError == nil)
+
+        let authenticator = ControlledFailingAuthenticator()
+        let delayedFailure = SecretsGuard { _ in try await authenticator.authenticate() }
+        let request = Task { await delayedFailure.requestUnlock() }
+        await authenticator.waitUntilStarted()
+        request.cancel()
+        await authenticator.fail()
+
+        #expect(!(await request.value))
+        #expect(delayedFailure.lastError == nil)
     }
 
     @Test func relockWarningTimingIsDeterministic() {

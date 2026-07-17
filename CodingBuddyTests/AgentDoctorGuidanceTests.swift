@@ -102,19 +102,28 @@ struct AgentDoctorGuidanceTests {
     }
 
     @Test func credentialFindingsOpenMCPAuthBeforeTheirSourceAlternative() throws {
-        for code in [AgentDiagnosticCode.expiredCredential, .incompleteCredential] {
+        for code in [
+            AgentDiagnosticCode.expiredCredential,
+            .incompleteCredential,
+            .credentialScanIncomplete,
+        ] {
             let diagnostic = makeDiagnostic(code: code)
             let withSource = AgentDoctorGuidance.guidance(for: diagnostic, canOpenSource: true)
             let withoutSource = AgentDoctorGuidance.guidance(for: diagnostic, canOpenSource: false)
 
             #expect(withSource.recommendedAction.id == AgentDoctorGuidance.openDestinationActionID)
             #expect(withSource.recommendedAction.availability == .available)
-            #expect(withSource.alternatives.map(\.id) == [AgentDoctorGuidance.openSourceActionID])
-            #expect(withSource.alternatives.first?.availability == .available)
+            if code == .credentialScanIncomplete {
+                #expect(withSource.alternatives.isEmpty)
+                #expect(withoutSource.alternatives.isEmpty)
+            } else {
+                #expect(withSource.alternatives.map(\.id) == [AgentDoctorGuidance.openSourceActionID])
+                #expect(withSource.alternatives.first?.availability == .available)
 
-            let sourceFallback = try #require(withoutSource.alternatives.first)
-            #expect(sourceFallback.id == AgentDoctorGuidance.openSourceActionID)
-            try expectUnavailable(sourceFallback)
+                let sourceFallback = try #require(withoutSource.alternatives.first)
+                #expect(sourceFallback.id == AgentDoctorGuidance.openSourceActionID)
+                try expectUnavailable(sourceFallback)
+            }
         }
     }
 
@@ -163,7 +172,7 @@ struct AgentDoctorGuidanceTests {
             switch code {
             case .missingReferencedEnvVar:
                 expected = [.mcp]
-            case .expiredCredential, .incompleteCredential:
+            case .expiredCredential, .incompleteCredential, .credentialScanIncomplete:
                 expected = [.mcp, .oauth]
             case .missingDirectory, .missingZshStartupFiles, .invalidConfigFile, .unsafePermissions:
                 expected = []
@@ -240,7 +249,9 @@ struct AgentDoctorGuidanceTests {
             let diagnostic = AgentDiagnostic(
                 code: code,
                 severity: .warning,
-                tool: code == .expiredCredential || code == .incompleteCredential ? .mcpAuth : .codex,
+                tool: code == .expiredCredential
+                    || code == .incompleteCredential
+                    || code == .credentialScanIncomplete ? .mcpAuth : .codex,
                 title: secrets[0],
                 detail: secrets[2],
                 source: secrets[1],
@@ -287,6 +298,10 @@ struct AgentDoctorGuidanceTests {
             tool = .mcpAuth
             source = "mcp-remote-1.0.0/abcdef1234567890abcdef1234567890"
             subject = "abcdef123456"
+        case .credentialScanIncomplete:
+            tool = .mcpAuth
+            source = "mcp-auth-scan"
+            subject = nil
         }
 
         return AgentDiagnostic(

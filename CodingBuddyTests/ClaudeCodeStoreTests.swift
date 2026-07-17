@@ -223,6 +223,27 @@ struct ClaudeCodeStoreTests {
         #expect(store.sourceStatuses.isEmpty)
     }
 
+    /// Verifies replacement and navigation cancellation reach work beyond the main-actor task.
+    @Test func supersededReloadSignalsCancellationToBackgroundLoader() async throws {
+        let probe = ClaudeCancellationProbe()
+        let store = ClaudeCodeStore(
+            homeDirectory: try makeTempDir(),
+            loadSnapshot: { request in await probe.load(request) }
+        )
+
+        store.reload()
+        await probe.waitForRequestCount(1)
+        store.reload()
+        await probe.waitForRequestCount(2)
+        await probe.waitForCancellationCount(1)
+
+        store.cancelLoading()
+        await probe.waitForCancellationCount(2)
+
+        #expect(store.loadState == .notLoaded)
+        #expect(await probe.cancellationCount == 2)
+    }
+
     @Test func unsafeClaudeDirectoryIsRefusedInsteadOfReportedMissing() async throws {
         let home = try makeTempDir()
         let external = try makeTempDir()
@@ -694,6 +715,51 @@ struct ClaudeCodeStoreTests {
         })
     }
 
+    /// Verifies invalid UTF-8 consumes its bounded reservation before another project read.
+    @Test func invalidUTF8ProjectFileConsumesAggregateByteBudget() async throws {
+        let home = try makeHome(settings: settingsFixture)
+        let first = home.appendingPathComponent("project-a", isDirectory: true)
+        let second = home.appendingPathComponent("project-b", isDirectory: true)
+        try FileManager.default.createDirectory(at: first, withIntermediateDirectories: false)
+        try FileManager.default.createDirectory(at: second, withIntermediateDirectories: false)
+        try Data([0xff]).write(to: first.appendingPathComponent(".mcp.json"))
+        try #"{ "mcpServers": { "file-b": { "command": "two" } } }"#.write(
+            to: second.appendingPathComponent(".mcp.json"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let state = """
+        {
+          "projects": {
+            "\(first.path)": { "mcpServers": { "embedded-a": { "command": "one" } } },
+            "\(second.path)": { "mcpServers": { "embedded-b": { "command": "two" } } }
+          }
+        }
+        """
+        try state.write(
+            to: home.appendingPathComponent(".claude.json"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let limits = ClaudeCodeStore.ReadLimits(
+            configurationFileBytes: 16 * 1_024,
+            projectMCPFileBytes: 1_024,
+            projectCount: 2,
+            projectMCPBytes: 1
+        )
+
+        let store = makeStore(home: home, readLimits: limits)
+        await load(store)
+
+        #expect(Set(store.servers.map(\.name)) == ["embedded-a", "embedded-b"])
+        #expect(store.sourceStatuses.contains {
+            $0.id == "project-mcp-0" && $0.availability == .refused(.invalidUTF8)
+        })
+        #expect(store.sourceStatuses.contains {
+            $0.id == "project-mcp-1" && $0.availability == .refused(.projectByteLimit)
+        })
+    }
+
     @Test func missingFilesYieldEmptyState() async throws {
         let home = try makeTempDir()
         let store = makeStore(home: home)
@@ -791,5 +857,46 @@ private actor ClaudeSnapshotGate {
     /// Completes one selected generation with a test-owned immutable snapshot.
     func resume(request: Int, with snapshot: ClaudeCodeStore.Snapshot) {
         continuations.removeValue(forKey: request)?.resume(returning: snapshot)
+    }
+}
+
+/// Loader probe that completes only after the store propagates generation cancellation.
+private actor ClaudeCancellationProbe {
+    /// Number of requests that reached the injected loader.
+    private var requestCount = 0
+    /// Number of requests that observed their shared cancellation signal.
+    private(set) var cancellationCount = 0
+
+    /// Suspends one request until cancellation is visible outside the main actor.
+    func load(_ request: ClaudeCodeStore.LoadRequest) async -> ClaudeCodeStore.Snapshot {
+        requestCount += 1
+        while !request.cancellation.isCancelled {
+            await Task.yield()
+        }
+        cancellationCount += 1
+        return ClaudeCodeStore.Snapshot(
+            sourceStatuses: [],
+            envEntries: [],
+            servers: [],
+            watchURLs: []
+        )
+    }
+
+    /// Waits for an expected number of loader invocations.
+    func waitForRequestCount(_ expected: Int) async {
+        for _ in 0..<5_000 {
+            if requestCount >= expected { return }
+            try? await Task.sleep(for: .milliseconds(1))
+        }
+        Issue.record("Expected Claude cancellation probe request did not start")
+    }
+
+    /// Waits for an expected number of requests to observe cancellation.
+    func waitForCancellationCount(_ expected: Int) async {
+        for _ in 0..<5_000 {
+            if cancellationCount >= expected { return }
+            try? await Task.sleep(for: .milliseconds(1))
+        }
+        Issue.record("Expected Claude loader did not observe cancellation")
     }
 }

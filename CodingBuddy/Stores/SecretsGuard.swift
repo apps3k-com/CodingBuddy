@@ -61,7 +61,9 @@ final class SecretsGuard {
             unlock()
             return true
         } catch {
-            guard !Self.isSilentCancellation(error) else { return false }
+            guard requestedGeneration == lockGeneration,
+                  !Task.isCancelled,
+                  !Self.isSilentCancellation(error) else { return false }
             lastError = String(
                 localized: "Authentication could not be completed. Check your Mac authentication settings and try again."
             )
@@ -104,6 +106,7 @@ final class SecretsGuard {
 
     /// User- and lifecycle-initiated cancellations need no duplicate app alert.
     private static func isSilentCancellation(_ error: Error) -> Bool {
+        if error is CancellationError { return true }
         let cocoaError = error as NSError
         guard cocoaError.domain == LAError.errorDomain,
               let code = LAError.Code(rawValue: cocoaError.code) else {

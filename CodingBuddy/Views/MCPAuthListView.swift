@@ -3,8 +3,20 @@
 //  CodingBuddy
 //
 
+import Accessibility
 import AppKit
 import SwiftUI
+
+/// Localized accessibility copy that distinguishes partial from fully refused scans.
+nonisolated enum MCPAuthScanSafetyPresentation {
+    /// Announces whether safe entries remain visible or the whole cache was refused.
+    static func announcement(hasVisibleEntries: Bool) -> String {
+        if hasVisibleEntries {
+            return String(localized: "Some credential or recovery files were not read because their type, ownership, permissions, size, or directory count was unsafe.")
+        }
+        return String(localized: "CodingBuddy found an unsafe or unexpectedly large credential cache and deliberately did not read it.")
+    }
+}
 
 /// Lists the MCP servers found in ~/.mcp-auth with status, allows surgical
 /// resets (to the Trash) and opens the credential file editor.
@@ -18,6 +30,8 @@ struct MCPAuthListView: View {
     @State private var inspectedEntry: MCPAuthEntry?
     @State private var pendingReset: MCPAuthEntry?
     @State private var confirmResetAll = false
+    /// VoiceOver target used when credential discovery becomes safety-limited.
+    @AccessibilityFocusState private var scanRefusalFocused: Bool
 
     var body: some View {
         Table(store.entries, selection: $selection) {
@@ -120,6 +134,11 @@ struct MCPAuthListView: View {
         .sheet(item: $inspectedEntry) { entry in
             MCPAuthFileEditorView(store: store, secrets: secrets, entry: entry)
         }
+        .task(id: scanSafetyAnnouncement) {
+            if let scanSafetyAnnouncement {
+                await focusAndAnnounceScanRefusal(scanSafetyAnnouncement)
+            }
+        }
         .confirmationDialog(
             "Move credentials for “\(pendingReset?.displayName ?? "")” to the Trash?",
             isPresented: Binding(
@@ -174,6 +193,7 @@ struct MCPAuthListView: View {
             if hasScanSafetyWarning, store.entries.isEmpty {
                 ContentUnavailableView {
                     Label("MCP Credentials Could Not Be Scanned Safely", systemImage: "exclamationmark.shield")
+                        .accessibilityFocused($scanRefusalFocused)
                 } description: {
                     Text("CodingBuddy found an unsafe or unexpectedly large credential cache and deliberately did not read it.")
                 } actions: {
@@ -219,6 +239,8 @@ struct MCPAuthListView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(.orange.opacity(0.08))
+        .accessibilityElement(children: .contain)
+        .accessibilityFocused($scanRefusalFocused)
     }
 
     private func entry(for id: MCPAuthEntry.ID?) -> MCPAuthEntry? {
@@ -266,6 +288,14 @@ struct MCPAuthListView: View {
             || store.recoveryDiscoveryRefusedAt != nil
     }
 
+    /// Concrete VoiceOver copy doubles as task identity so partial and fully refused scans differ.
+    private var scanSafetyAnnouncement: String? {
+        guard hasScanSafetyWarning else { return nil }
+        return MCPAuthScanSafetyPresentation.announcement(
+            hasVisibleEntries: !store.entries.isEmpty
+        )
+    }
+
     /// Whether reset must remain unavailable until recovery discovery is safe
     /// or a retained transaction has been resolved.
     private var hasResetSafetyBlocker: Bool {
@@ -278,5 +308,13 @@ struct MCPAuthListView: View {
     private func showCredentialCache() {
         let location = store.recoveryDiscoveryRefusedAt ?? store.rootDirectory
         NSWorkspace.shared.activateFileViewerSelecting([location])
+    }
+
+    /// Focuses and announces a sanitized warning whenever the scan becomes incomplete.
+    private func focusAndAnnounceScanRefusal(_ announcement: String) async {
+        await Task.yield()
+        guard scanSafetyAnnouncement == announcement else { return }
+        scanRefusalFocused = true
+        AccessibilityNotification.Announcement(announcement).post()
     }
 }

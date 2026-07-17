@@ -200,7 +200,7 @@ nonisolated struct SafeFileWriter {
         }
     ) {
         self.backupDirectory = backupDirectory
-        self.backupRetention = backupRetention
+        self.backupRetention = max(1, backupRetention)
         self.maximumBackupDirectoryEntryCount = max(1, maximumBackupDirectoryEntryCount)
         self.createMode = createMode
         self.transactionHook = transactionHook
@@ -213,6 +213,30 @@ nonisolated struct SafeFileWriter {
         return Snapshot(
             target: target,
             original: try snapshotTarget(target),
+            requestedPath: fileURL.path,
+            requestedName: fileURL.lastPathComponent
+        )
+    }
+
+    /// Captures a bounded target while optionally creating missing parent directories
+    /// through the same descriptor-relative walk retained by the later write.
+    ///
+    /// Final symbolic links remain supported for existing regular-file targets. A
+    /// dangling final link is never populated implicitly, and every followed parent
+    /// link and created directory is revalidated before commit.
+    func snapshot(
+        at fileURL: URL,
+        maximumByteCount: Int,
+        createMissingParentDirectories: Bool
+    ) throws -> Snapshot {
+        guard maximumByteCount >= 0 else { throw WriteError.unsafeTarget }
+        let target = try resolveTarget(
+            fileURL,
+            createMissingParentDirectories: createMissingParentDirectories
+        )
+        return Snapshot(
+            target: target,
+            original: try snapshotTarget(target, maximumByteCount: maximumByteCount),
             requestedPath: fileURL.path,
             requestedName: fileURL.lastPathComponent
         )
@@ -435,6 +459,7 @@ nonisolated struct SafeFileWriter {
         /// Open descriptor anchoring the exact file captured by this snapshot.
         let descriptor: Descriptor
 
+        /// Compares the write-relevant identity, bytes, and permission mode.
         static func == (lhs: TargetSnapshot, rhs: TargetSnapshot) -> Bool {
             lhs.identity == rhs.identity && lhs.data == rhs.data && lhs.mode == rhs.mode
         }
@@ -450,6 +475,7 @@ nonisolated struct SafeFileWriter {
 
     private func resolveTarget(
         _ url: URL,
+        createMissingParentDirectories: Bool = false,
         inheritedSymlinks: [SymlinkCheckpoint] = [],
         followedFinalSymlink: Bool = false,
         depth: Int = 0
@@ -459,7 +485,7 @@ nonisolated struct SafeFileWriter {
         }
         let openedParent = try openDirectory(
             url.deletingLastPathComponent(),
-            createMissing: false,
+            createMissing: createMissingParentDirectories,
             rejectFinalSymlink: false
         )
         let parent = openedParent.descriptor
@@ -482,6 +508,7 @@ nonisolated struct SafeFileWriter {
             do {
                 return try resolveTarget(
                     nextURL,
+                    createMissingParentDirectories: false,
                     inheritedSymlinks: inheritedSymlinks + openedParent.symlinks + [checkpoint],
                     followedFinalSymlink: true,
                     depth: depth + 1
@@ -1019,7 +1046,7 @@ nonisolated struct SafeFileWriter {
         )
         let staleCandidates = candidates
             .sorted { $0.name < $1.name }
-            .dropLast(max(0, backupRetention))
+            .dropLast(backupRetention)
         var recoveryArtifacts: [RecoveryArtifact] = []
         for stale in staleCandidates {
             if case let .retained(artifact) = removeIdentifiedArtifact(
@@ -1070,10 +1097,11 @@ nonisolated struct SafeFileWriter {
             }
             guard let baseName, name.hasPrefix("\(baseName)-") else { continue }
             var info = Darwin.stat()
-            let isRegular = name.withCString {
-                fstatat(directoryFD, $0, &info, AT_SYMLINK_NOFOLLOW) == 0 && (info.st_mode & S_IFMT) == S_IFREG
+            let metadataResult = name.withCString {
+                fstatat(directoryFD, $0, &info, AT_SYMLINK_NOFOLLOW)
             }
-            if isRegular {
+            guard metadataResult == 0 else { throw currentPOSIXError() }
+            if (info.st_mode & S_IFMT) == S_IFREG {
                 candidates.append((
                     name: name,
                     identity: Identity(device: info.st_dev, inode: info.st_ino)

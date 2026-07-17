@@ -8,7 +8,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// Editable name/value data imported from one unambiguous dotenv assignment.
-struct EnvFileEntry: Identifiable, Equatable {
+nonisolated struct EnvFileEntry: Identifiable, Equatable {
     /// Ephemeral identity used only for SwiftUI collection diffing.
     let id = UUID()
     /// Environment variable name parsed from the assignment.
@@ -18,7 +18,7 @@ struct EnvFileEntry: Identifiable, Equatable {
 }
 
 /// Reads and writes dotenv-style files (one NAME=value per line).
-enum EnvFileCodec {
+nonisolated enum EnvFileCodec {
     /// Preferred document type for `.env` exports, with plain text as a fallback.
     static let contentType = UTType(filenameExtension: "env") ?? .plainText
 
@@ -44,7 +44,7 @@ enum EnvFileCodec {
 }
 
 /// Minimal text document for the SwiftUI file exporter.
-struct EnvFileDocument: FileDocument {
+nonisolated struct EnvFileDocument: FileDocument {
     /// File types accepted by the importer, ordered from specific to general.
     static var readableContentTypes: [UTType] { [EnvFileCodec.contentType, .plainText] }
 

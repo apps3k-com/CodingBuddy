@@ -8,7 +8,7 @@ import Testing
 
 @Suite("Secret action snapshot")
 struct SecretActionSnapshotTests {
-    private struct Row: Identifiable, Equatable {
+    nonisolated private struct Row: Identifiable, Equatable {
         let id: Int
         var value: String
     }

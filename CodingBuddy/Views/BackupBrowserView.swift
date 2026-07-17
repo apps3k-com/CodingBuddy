@@ -3,6 +3,7 @@
 //  CodingBuddy
 //
 
+import Accessibility
 import AppKit
 import SwiftUI
 
@@ -17,8 +18,12 @@ struct BackupBrowserView: View {
     @State private var searchText = ""
     /// Row pending destructive restore confirmation.
     @State private var restoreCandidate: BackupBrowserItem?
-    /// Last restore failure shown as an alert.
-    @State private var restoreError: String?
+    /// Last restore failure shown with any retained recovery artifacts.
+    @State private var restoreFailure: BackupRestoreFailurePresentation?
+    /// VoiceOver target used when backup discovery becomes safety-blocked.
+    @AccessibilityFocusState private var discoveryRefusalFocused: Bool
+    /// VoiceOver target used when restore recovery remains unresolved.
+    @AccessibilityFocusState private var restoreRecoveryFocused: Bool
 
     /// Backup rows after applying the current search filter.
     private var filteredItems: [BackupBrowserItem] {
@@ -32,11 +37,17 @@ struct BackupBrowserView: View {
 
     /// Native split layout: backup table on the left, preview on the right.
     var body: some View {
-        HSplitView {
-            backupTable
-                .frame(minWidth: 520, maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            BackupPreviewPane(store: store, item: selectedItem)
-                .frame(minWidth: 360, maxWidth: .infinity)
+        VStack(spacing: 0) {
+            if let restoreRecoveryAttention = store.restoreRecoveryAttention {
+                restoreRecoveryBanner(restoreRecoveryAttention)
+                Divider()
+            }
+            HSplitView {
+                backupTable
+                    .frame(minWidth: 520, maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                BackupPreviewPane(store: store, item: selectedItem)
+                    .frame(minWidth: 360, maxWidth: .infinity)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .navigationTitle("Backups")
@@ -47,16 +58,27 @@ struct BackupBrowserView: View {
                     restoreCandidate = selectedItem
                 }
                 .help("Restore the selected backup")
-                .disabled(selectedItem?.canRestore != true)
+                .disabled(selectedItem?.canRestore != true || store.restoreRecoveryAttention != nil)
 
                 Button("Refresh", systemImage: "arrow.clockwise") {
-                    store.reload()
+                    reload()
                 }
                 .help("Refresh backups")
             }
         }
         .onAppear {
-            store.reload()
+            reload()
+        }
+        .task(id: store.discoveryError) {
+            guard let refusal = store.discoveryError else { return }
+            await focusAndAnnounceDiscoveryRefusal(refusal)
+        }
+        .task(id: store.restoreRecoveryAttention) {
+            guard let presentation = store.restoreRecoveryAttention else {
+                restoreRecoveryFocused = false
+                return
+            }
+            await focusAndAnnounceRestoreRecovery(presentation)
         }
         .confirmationDialog(
             "Restore backup?",
@@ -76,15 +98,71 @@ struct BackupBrowserView: View {
             Text(verbatim: item.targetURL?.path ?? item.backupURL.lastPathComponent)
         }
         .alert(
-            "Restore Failed",
+            restoreFailure?.title ?? "",
             isPresented: Binding(
-                get: { restoreError != nil },
-                set: { if !$0 { restoreError = nil } }
+                get: { restoreFailure != nil },
+                set: { if !$0 { restoreFailure = nil } }
             )
         ) {
-            Button("OK", role: .cancel) {}
+            if let recoveryURLs = restoreFailure?.recoveryURLs, !recoveryURLs.isEmpty {
+                Button("Show Recovery Files in Finder") {
+                    NSWorkspace.shared.activateFileViewerSelecting(recoveryURLs)
+                    restoreFailure = nil
+                }
+                Button("Copy Recovery Path") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(
+                        recoveryURLs.map(\.path).joined(separator: "\n"),
+                        forType: .string
+                    )
+                    restoreFailure = nil
+                }
+            }
+            Button("OK", role: .cancel) { restoreFailure = nil }
         } message: {
-            Text(restoreError ?? "")
+            Text(restoreFailure?.message ?? "")
+        }
+    }
+
+    /// Persistent recovery band kept visible after the one-time alert is dismissed.
+    private func restoreRecoveryBanner(_ presentation: BackupRestoreFailurePresentation) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(presentation.title)
+                    .fontWeight(.medium)
+                    .accessibilityFocused($restoreRecoveryFocused)
+                Text(presentation.message)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer()
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) { restoreRecoveryActions(presentation) }
+                VStack(alignment: .trailing, spacing: 8) { restoreRecoveryActions(presentation) }
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.orange.opacity(0.08))
+        .accessibilityElement(children: .contain)
+    }
+
+    /// Finder, clipboard, and explicit resolution actions for retained restore attention.
+    @ViewBuilder
+    private func restoreRecoveryActions(_ presentation: BackupRestoreFailurePresentation) -> some View {
+        if !presentation.recoveryURLs.isEmpty {
+            Button("Show Recovery Files in Finder", systemImage: "folder") {
+                NSWorkspace.shared.activateFileViewerSelecting(presentation.recoveryURLs)
+            }
+            Button("Copy Recovery Path", systemImage: "doc.on.doc") {
+                copyRecoveryPaths(presentation.recoveryURLs)
+            }
+        }
+        Button("Mark Reviewed", systemImage: "checkmark") {
+            store.markRestoreRecoveryReviewed()
         }
     }
 
@@ -146,10 +224,11 @@ struct BackupBrowserView: View {
             if let discoveryError = store.discoveryError {
                 ContentUnavailableView {
                     Label("Backups Could Not Be Scanned Safely", systemImage: "exclamationmark.shield")
+                        .accessibilityFocused($discoveryRefusalFocused)
                 } description: {
                     Text(discoveryError.localizedDescription)
                 } actions: {
-                    Button("Try Again", systemImage: "arrow.clockwise") { store.reload() }
+                    Button("Try Again", systemImage: "arrow.clockwise") { reload() }
                     Button("Show in Finder", systemImage: "folder") {
                         NSWorkspace.shared.activateFileViewerSelecting([store.backupDirectory])
                     }
@@ -176,13 +255,52 @@ struct BackupBrowserView: View {
     private func restore(_ item: BackupBrowserItem) {
         do {
             try store.restore(item)
-            store.reload()
-            restoreError = nil
+            reload()
+            restoreFailure = nil
             restoreCandidate = nil
             selection = item.id
         } catch {
-            restoreError = error.localizedDescription
+            let presentation = BackupRestoreFailurePresentation(error: error)
+            restoreFailure = presentation
         }
+    }
+
+    /// Reloads backup metadata and announces any fail-closed discovery result.
+    private func reload() {
+        store.reload()
+    }
+
+    /// Moves VoiceOver to the refusal and announces only its sanitized explanation.
+    private func focusAndAnnounceDiscoveryRefusal(_ refusal: BackupBrowserScanner.ScanError) async {
+        await Task.yield()
+        guard store.discoveryError == refusal else { return }
+        discoveryRefusalFocused = true
+        AccessibilityNotification.Announcement(refusal.localizedDescription).post()
+    }
+
+    /// Retains VoiceOver context when a restore needs review after its alert closes.
+    private func focusAndAnnounceRestoreRecovery(
+        _ presentation: BackupRestoreFailurePresentation
+    ) async {
+        while restoreFailure != nil {
+            try? await Task.sleep(for: .milliseconds(100))
+            guard !Task.isCancelled else { return }
+        }
+        await Task.yield()
+        guard !Task.isCancelled,
+              store.restoreRecoveryAttention == presentation,
+              restoreFailure == nil else { return }
+        restoreRecoveryFocused = true
+        AccessibilityNotification.Announcement(presentation.message).post()
+    }
+
+    /// Copies every retained recovery path without clearing persistent attention.
+    private func copyRecoveryPaths(_ recoveryURLs: [URL]) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(
+            recoveryURLs.map(\.path).joined(separator: "\n"),
+            forType: .string
+        )
     }
 
     /// Formats optional byte counts for compact table display.

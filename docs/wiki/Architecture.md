@@ -92,21 +92,40 @@ every component. Only the exact immutable macOS `/var`, `/tmp`, and `/etc`
 compatibility aliases are translated after their targets are revalidated.
 App-owned directories are created with `mkdirat` and then checked for owner,
 mode, type, and inode identity, including `EEXIST` races. Resets then stage
-the exact selected directory entries in an owner-only transaction. Reset leaves
-are identified twice with descriptor-relative `fstatat(..., AT_SYMLINK_NOFOLLOW)`
+the exact selected directory entries in an owner-only transaction. The displayed
+scanner generation also captures every top-level root entry, its complete
+bounded recursive subtree, and every represented credential leaf as a
+descriptor-bound identity.
+At action time a fresh bounded scan and fresh no-follow inventory must exactly
+match that snapshot before the first rename. Each final rename boundary reopens
+the parent through the root descriptor and re-captures the exact leaf subtree;
+Reset All additionally proves the remaining root-name set plus its private
+transaction directory. Directory enumeration reopens `.`
+with `openat` so repeated passes have independent offsets; `dup` is deliberately
+not used because it would share the original open-file-description offset.
+Reset leaves are identified repeatedly through descriptor-relative
+`fstatat(..., AT_SYMLINK_NOFOLLOW)`
 and moved with an exclusive `renameatx_np`; they are never opened. The same
 transaction therefore safely handles regular files, directories, symlinks,
 FIFOs and other reset-only special entries without following or reading their
-contents. A post-rename identity check proves that the staged object is the one
-validated before mutation; a replacement race aborts and enters the normal
+contents. A post-rename identity and recursive subtree check proves that the
+staged object still matches the confirmation inventory; a change through a
+previously opened directory descriptor aborts and enters the normal
 rollback/recovery path. Before invoking the
 path-based Trash API, the store moves that validated transaction
 descriptor-relative and exclusively into CodingBuddy's private `0700` staging
-root, rechecks its identity there, and accepts success only when the Trash API's
-result has the same identity and the staging name is gone. Intermediate
-components are opened descriptor-relative with no-follow semantics. Recovery
-uses exclusive renames, so a destination created after preflight is never
-overwritten. A failure restores only entries actually staged and otherwise
+root, rechecks every staged leaf identity and directory subtree there, and
+accepts success only when the
+Trash API's result has the same identity and the staging name is gone. The
+subtree check occurs immediately before the path-based system API; macOS does
+not expose an atomic "validate and trash" operation, so a hostile same-UID
+process retaining a descriptor could still mutate after that final boundary.
+Intermediate
+components are opened descriptor-relative with no-follow semantics. Before its
+first rename, recovery preflights every transaction source identity and every
+destination; one missing or replaced source retains the complete transaction
+unchanged. Recovery then uses exclusive renames, so a destination created after
+preflight is never overwritten. A failure restores only entries actually staged and otherwise
 retains explicit recovery state; silent partial success is not accepted. The
 transaction descriptor remains open across the Trash call. If validation or
 rollback then fails, `F_GETPATH` resolves its current location and CodingBuddy

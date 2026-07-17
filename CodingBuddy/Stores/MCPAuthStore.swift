@@ -30,9 +30,11 @@ final class MCPAuthStore {
     @ObservationIgnored private let trashItem: (URL) throws -> URL
     /// Injectable synchronization point for adversarial reset tests.
     @ObservationIgnored private let beforeResetStage: (Int, URL) throws -> Void
-    /// Runs after final no-follow validation and immediately before the leaf rename.
+    /// Runs at the injected race boundary before final no-follow revalidation and rename.
     @ObservationIgnored private let beforeResetRename: (Int, URL) throws -> Void
-    /// Runs after recovery preflight and immediately before each exclusive rename.
+    /// Runs after a leaf entered the private transaction but before its subtree is revalidated.
+    @ObservationIgnored private let afterResetRename: (Int, URL) throws -> Void
+    /// Runs at the recovery race boundary before final no-follow revalidation and exclusive rename.
     @ObservationIgnored private let beforeRecoveryRename: (Int, URL) throws -> Void
     /// Runs immediately before the transaction enters private app staging.
     @ObservationIgnored private let beforeTrashStage: (URL) throws -> Void
@@ -43,9 +45,11 @@ final class MCPAuthStore {
     private(set) var rootExists = false
     /// Sanitized safety refusals from the latest bounded credential scan.
     private(set) var scanRefusals: Set<MCPAuthScanRefusal> = []
+    /// Descriptor-bound reset inventory captured with the currently displayed entries.
+    @ObservationIgnored private var resetInventory: CredentialInventory?
     /// Whether the latest scan omitted an artifact, making destructive reset coverage incomplete.
     var hasIncompleteCredentialInventory: Bool {
-        scanRefusals.contains(where: \.preventsCredentialReset)
+        scanRefusals.contains(where: \.preventsCredentialReset) || resetInventory == nil
     }
     /// Root whose bounded recovery discovery was refused because the path,
     /// permissions, identity, or entry count was unsafe.
@@ -86,6 +90,7 @@ final class MCPAuthStore {
         trashItem: @escaping (URL) throws -> URL = MCPAuthStore.moveToTrash,
         beforeResetStage: @escaping (Int, URL) throws -> Void = { _, _ in },
         beforeResetRename: @escaping (Int, URL) throws -> Void = { _, _ in },
+        afterResetRename: @escaping (Int, URL) throws -> Void = { _, _ in },
         beforeRecoveryRename: @escaping (Int, URL) throws -> Void = { _, _ in },
         beforeTrashStage: @escaping (URL) throws -> Void = { _ in }
     ) {
@@ -113,6 +118,7 @@ final class MCPAuthStore {
         self.trashItem = trashItem
         self.beforeResetStage = beforeResetStage
         self.beforeResetRename = beforeResetRename
+        self.afterResetRename = afterResetRename
         self.beforeRecoveryRename = beforeRecoveryRename
         self.beforeTrashStage = beforeTrashStage
         reload()
@@ -127,6 +133,16 @@ final class MCPAuthStore {
         let result = MCPAuthScanner.scanResult(root: rootDirectory, knownServerURLs: knownURLs)
         entries = result.entries
         scanRefusals = result.refusals
+        guard !result.refusals.contains(where: \.preventsCredentialReset) else {
+            resetInventory = nil
+            return
+        }
+        do {
+            resetInventory = try credentialInventory(for: result.entries)
+        } catch {
+            resetInventory = nil
+            scanRefusals.insert(.credentialArtifact)
+        }
     }
 
     // MARK: - Mutations
@@ -136,7 +152,7 @@ final class MCPAuthStore {
     @discardableResult
     func reset(_ entry: MCPAuthEntry) -> Bool {
         perform {
-            try resetItems(entry.files.map(\.url))
+            try resetItems(expectedEntry: entry)
         }
     }
 
@@ -144,7 +160,7 @@ final class MCPAuthStore {
     /// server re-runs its OAuth flow on next use.
     func resetAll() {
         perform {
-            try resetItems(nil)
+            try resetItems(expectedEntry: nil)
         }
     }
 
@@ -309,6 +325,9 @@ final class MCPAuthStore {
         if let localized = error as? SafeFileWriter.WriteError {
             return localized.localizedDescription
         }
+        if let localized = error as? SafeFileWriter.CleanupDurabilityError {
+            return localized.localizedDescription
+        }
         return String(localized: "CodingBuddy could not complete the credential operation. No unconfirmed changes were written.")
     }
 
@@ -319,6 +338,8 @@ final class MCPAuthStore {
     /// Top-level reset and recovery discovery shares the scanner's explicit
     /// version-directory ceiling so no earlier path can bypass that bound.
     private static let maximumResetRootEntries = MCPAuthScanner.maximumVersionDirectoryCount
+    /// Recursive reset inventory ceiling shared across all cache subtrees.
+    private static let maximumResetDescendantEntries = MCPAuthScanner.maximumCredentialArtifactCount
 
     /// Owned descriptor used to keep reset operations anchored to the exact
     /// directories validated before mutation.
@@ -352,6 +373,52 @@ final class MCPAuthStore {
         var isDirectory: Bool { mode & S_IFMT == S_IFDIR }
         /// Whether the identity describes a regular file.
         var isRegularFile: Bool { mode & S_IFMT == S_IFREG }
+    }
+
+    /// Complete reset-relevant namespace bound to one successful scanner generation.
+    private struct CredentialInventory: Equatable {
+        /// Every top-level cache child because reset-all moves the complete root inventory.
+        let rootItems: [RootItem]
+        /// Credential artifacts grouped by their helper version and server hash.
+        let entries: [Entry]
+
+        /// One no-follow top-level cache child.
+        struct RootItem: Equatable {
+            /// Descriptor-relative child name.
+            let name: String
+            /// Exact filesystem identity accepted during inventory capture.
+            let identity: ResetFileIdentity
+            /// Every recursively nested artifact moved with this root item by reset-all.
+            let descendants: [Descendant]
+        }
+
+        /// One no-follow descendant below a top-level cache child.
+        struct Descendant: Equatable {
+            /// Slash-separated path relative to the owning top-level item.
+            let relativePath: String
+            /// Exact filesystem identity accepted during inventory capture.
+            let identity: ResetFileIdentity
+        }
+
+        /// One scanner-visible version/hash group.
+        struct Entry: Equatable {
+            /// Version directory containing the credential artifacts.
+            let versionDirectory: String
+            /// Opaque MCP server hash used by `mcp-remote`.
+            let hash: String
+            /// Exact no-follow artifact identities in deterministic path order.
+            let files: [File]
+        }
+
+        /// One resettable credential artifact.
+        struct File: Equatable {
+            /// Path below the credential root, retained without an absolute user path.
+            let relativePath: String
+            /// Exact filesystem identity accepted during inventory capture.
+            let identity: ResetFileIdentity
+            /// Every descendant moved when a reset-only artifact is itself a directory.
+            let descendants: [Descendant]
+        }
     }
 
     /// Durable identity binding for a recovery transaction moved outside the
@@ -416,6 +483,10 @@ final class MCPAuthStore {
         let originalURL: URL
         /// Path components relative to the opened credential root.
         let components: [String]
+        /// Exact no-follow identity approved by the confirmation snapshot.
+        let expectedIdentity: ResetFileIdentity
+        /// Complete bounded subtree approved with a directory artifact.
+        let expectedDescendants: [CredentialInventory.Descendant]
     }
 
     /// One item already moved into the private transaction directory.
@@ -432,8 +503,10 @@ final class MCPAuthStore {
         let stagedName: String
         /// Identity accepted immediately before the namespace mutation.
         let validatedIdentity: ResetFileIdentity
-        /// No-follow identity observed inside the transaction after the rename.
+        /// Exact identity expected inside the transaction after the rename.
         let stagedIdentity: ResetFileIdentity
+        /// Complete bounded subtree approved by the confirmation snapshot.
+        let expectedDescendants: [CredentialInventory.Descendant]
     }
 
     /// Internal transaction failures that must never be treated as permission
@@ -456,9 +529,9 @@ final class MCPAuthStore {
     /// Stages every requested item with descriptor-relative no-follow renames,
     /// then sends the single transaction container to the Trash.
     ///
-    /// A `nil` selection means reset-all and is re-enumerated only after the
-    /// root descriptor has been opened and validated.
-    private func resetItems(_ itemURLs: [URL]?) throws {
+    /// A `nil` selection means reset-all and uses only the complete inventory
+    /// captured for the confirmation UI, then revalidates it at each rename boundary.
+    private func resetItems(expectedEntry: MCPAuthEntry?) throws {
         refreshRecoveryDirectory()
         if recoveryDiscoveryRefusedAt != nil {
             throw MCPAuthError.unsafeCredentialCache
@@ -467,9 +540,46 @@ final class MCPAuthStore {
             throw MCPAuthError.recoveryPending(directory: lastRecoveryDirectory)
         }
 
+        guard !scanRefusals.contains(where: \.preventsCredentialReset),
+              let expectedInventory = resetInventory else {
+            throw MCPAuthError.unsafeCredentialCache
+        }
+        if let expectedEntry {
+            guard entries.first(where: { $0.id == expectedEntry.id }) == expectedEntry else {
+                throw MCPAuthError.fileChangedExternally
+            }
+        }
+
+        let knownURLs = MCPAuthScanner.configuredServerURLs(homeDirectory: configHomeDirectory)
+        let freshScan = MCPAuthScanner.scanResult(
+            root: rootDirectory,
+            knownServerURLs: knownURLs
+        )
+        guard !freshScan.refusals.contains(where: \.preventsCredentialReset) else {
+            throw MCPAuthError.unsafeCredentialCache
+        }
+
         let root = try openResetRoot()
         let rootIdentity = try identity(of: root.rawValue)
-        let requests = try resetRequests(itemURLs, root: root, identity: rootIdentity)
+        let freshInventory = try credentialInventory(
+            for: freshScan.entries,
+            root: root,
+            rootIdentity: rootIdentity
+        )
+        guard freshInventory == expectedInventory else {
+            throw MCPAuthError.fileChangedExternally
+        }
+
+        if let expectedEntry {
+            guard let freshEntry = freshScan.entries.first(where: { $0.id == expectedEntry.id }),
+                  freshEntry == expectedEntry else {
+                throw MCPAuthError.fileChangedExternally
+            }
+        }
+        let requests = try resetRequests(
+            expectedEntry: expectedEntry,
+            inventory: expectedInventory
+        )
         guard !requests.isEmpty else { return }
 
         let transactionName = Self.resetTransactionPrefix + UUID().uuidString
@@ -483,19 +593,28 @@ final class MCPAuthStore {
         var moves: [ResetMove] = []
         do {
             for (index, request) in requests.enumerated() {
+                let expectedRootNames: Set<String>? = if expectedEntry == nil {
+                    Set(requests[index...].compactMap { $0.components.first })
+                        .union([transactionName])
+                } else {
+                    nil
+                }
                 let move = try stage(
                     request,
                     index: index,
                     root: root,
                     rootIdentity: rootIdentity,
-                    transaction: transaction
+                    transaction: transaction,
+                    expectedRootNames: expectedRootNames
                 )
                 moves.append(move)
+                try afterResetRename(index, request.originalURL)
                 guard move.stagedIdentity == move.validatedIdentity,
                       try identity(named: move.stagedName, relativeTo: transaction)
                         == move.stagedIdentity else {
                     throw ResetTransactionError.unsafeComponent(move.originalURL)
                 }
+                try validateStagedMove(move, transaction: transaction)
             }
             try validateRoot(root, expected: rootIdentity)
             try validateTransaction(
@@ -557,6 +676,9 @@ final class MCPAuthStore {
             )
             guard try identity(of: transaction.rawValue) == transactionIdentity else {
                 throw ResetTransactionError.unsafeComponent(stagedURL)
+            }
+            for move in moves {
+                try validateStagedMove(move, transaction: transaction)
             }
 
             let trashedURL = try trashItem(stagedURL)
@@ -633,60 +755,198 @@ final class MCPAuthStore {
         return stagingRoot
     }
 
-    /// Converts caller-provided URLs or a fresh reset-all enumeration into
-    /// unique, non-overlapping relative requests.
+    /// Derives mutation requests only from the namespace the user confirmed.
     private func resetRequests(
-        _ itemURLs: [URL]?,
-        root: ResetFileDescriptor,
-        identity rootIdentity: ResetFileIdentity
+        expectedEntry: MCPAuthEntry?,
+        inventory: CredentialInventory
     ) throws -> [ResetRequest] {
-        let urls: [URL]
-        if let itemURLs {
-            urls = itemURLs
-        } else {
-            try validateRoot(root, expected: rootIdentity)
-            let names: [String]
-            do {
-                names = try boundedEntryNames(
-                    in: root,
-                    expected: rootIdentity,
-                    at: rootDirectory,
-                    maximumCount: Self.maximumResetRootEntries
-                )
-            } catch ResetTransactionError.tooManyEntries {
-                throw MCPAuthError.unsafeCredentialCache
-            }
-            urls = names
-                .filter { !$0.hasPrefix(Self.resetTransactionPrefix) }
-                .map { rootDirectory.appendingPathComponent($0) }
-        }
-
-        let rootComponents = rootDirectory.standardizedFileURL.pathComponents
-        var seen = Set<[String]>()
-        var requests: [ResetRequest] = []
-        for url in urls {
-            let components = url.standardizedFileURL.pathComponents
-            guard components.count > rootComponents.count,
-                  Array(components.prefix(rootComponents.count)) == rootComponents else {
-                throw ResetTransactionError.unsafeComponent(url)
-            }
-            let relative = Array(components.dropFirst(rootComponents.count))
-            guard relative.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." }),
-                  seen.insert(relative).inserted else {
-                throw ResetTransactionError.unsafeComponent(url)
-            }
-            requests.append(ResetRequest(originalURL: url, components: relative))
-        }
-
-        for request in requests {
-            guard !requests.contains(where: {
-                $0.components.count < request.components.count
-                    && request.components.starts(with: $0.components)
+        if let expectedEntry {
+            guard let entry = inventory.entries.first(where: {
+                $0.versionDirectory == expectedEntry.versionDirectory
+                    && $0.hash == expectedEntry.hash
             }) else {
-                throw ResetTransactionError.unsafeComponent(request.originalURL)
+                throw MCPAuthError.fileChangedExternally
+            }
+            return try entry.files.map { file in
+                let components = file.relativePath.split(separator: "/").map(String.init)
+                guard !components.isEmpty,
+                      components.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." }) else {
+                    throw MCPAuthError.fileChangedExternally
+                }
+                return ResetRequest(
+                    originalURL: rootDirectory.appendingPathComponent(file.relativePath),
+                    components: components,
+                    expectedIdentity: file.identity,
+                    expectedDescendants: file.descendants
+                )
             }
         }
-        return requests
+
+        return inventory.rootItems
+            .filter { !$0.name.hasPrefix(Self.resetTransactionPrefix) }
+            .map { item in
+                ResetRequest(
+                    originalURL: rootDirectory.appendingPathComponent(item.name),
+                    components: [item.name],
+                    expectedIdentity: item.identity,
+                    expectedDescendants: item.descendants
+                )
+            }
+    }
+
+    /// Captures a complete no-follow inventory with a newly opened reset root.
+    private func credentialInventory(for entries: [MCPAuthEntry]) throws -> CredentialInventory {
+        let root = try openResetRoot()
+        let rootIdentity = try identity(of: root.rawValue)
+        return try credentialInventory(
+            for: entries,
+            root: root,
+            rootIdentity: rootIdentity
+        )
+    }
+
+    /// Binds scanner output to exact root children and descriptor-relative leaf identities.
+    private func credentialInventory(
+        for entries: [MCPAuthEntry],
+        root: ResetFileDescriptor,
+        rootIdentity: ResetFileIdentity
+    ) throws -> CredentialInventory {
+        try validateRoot(root, expected: rootIdentity)
+        let rootNames = try boundedEntryNames(
+            in: root,
+            expected: rootIdentity,
+            at: rootDirectory,
+            maximumCount: Self.maximumResetRootEntries
+        )
+        var remainingDescendantCount = Self.maximumResetDescendantEntries
+        var rootItems: [CredentialInventory.RootItem] = []
+        for name in rootNames.sorted() {
+            let itemURL = rootDirectory.appendingPathComponent(name, isDirectory: true)
+            let itemIdentity = try identity(named: name, relativeTo: root)
+            let descendants: [CredentialInventory.Descendant]
+            if itemIdentity.isDirectory {
+                let directory = try openDirectory(named: name, relativeTo: root)
+                guard try identity(of: directory.rawValue) == itemIdentity else {
+                    throw ResetTransactionError.unsafeComponent(itemURL)
+                }
+                descendants = try credentialDescendants(
+                    in: directory,
+                    expected: itemIdentity,
+                    at: itemURL,
+                    prefix: "",
+                    remainingCount: &remainingDescendantCount
+                )
+            } else {
+                descendants = []
+            }
+            rootItems.append(CredentialInventory.RootItem(
+                name: name,
+                identity: itemIdentity,
+                descendants: descendants
+            ))
+        }
+
+        let inventoryEntries = try entries.map { entry in
+            let files = try entry.files.map { file -> CredentialInventory.File in
+                let components = try relativeComponents(for: file.url)
+                guard components.count >= 2,
+                      let rootItem = rootItems.first(where: { $0.name == components[0] }) else {
+                    throw ResetTransactionError.unsafeComponent(file.url)
+                }
+                let pathBelowRootItem = components.dropFirst().joined(separator: "/")
+                guard let fileItem = rootItem.descendants.first(where: {
+                    $0.relativePath == pathBelowRootItem
+                }) else {
+                    throw ResetTransactionError.unsafeComponent(file.url)
+                }
+                let descendantPrefix = pathBelowRootItem + "/"
+                let fileDescendants = rootItem.descendants.compactMap { descendant -> CredentialInventory.Descendant? in
+                    guard descendant.relativePath.hasPrefix(descendantPrefix) else { return nil }
+                    return CredentialInventory.Descendant(
+                        relativePath: String(descendant.relativePath.dropFirst(descendantPrefix.count)),
+                        identity: descendant.identity
+                    )
+                }
+                return CredentialInventory.File(
+                    relativePath: components.joined(separator: "/"),
+                    identity: fileItem.identity,
+                    descendants: fileDescendants
+                )
+            }.sorted { $0.relativePath < $1.relativePath }
+            return CredentialInventory.Entry(
+                versionDirectory: entry.versionDirectory,
+                hash: entry.hash,
+                files: files
+            )
+        }.sorted {
+            ($0.versionDirectory, $0.hash) < ($1.versionDirectory, $1.hash)
+        }
+
+        try validateRoot(root, expected: rootIdentity)
+        return CredentialInventory(rootItems: rootItems, entries: inventoryEntries)
+    }
+
+    /// Validates one scanner URL as a safe path below the configured cache root.
+    private func relativeComponents(for url: URL) throws -> [String] {
+        let rootComponents = rootDirectory.standardizedFileURL.pathComponents
+        let pathComponents = url.standardizedFileURL.pathComponents
+        guard pathComponents.count > rootComponents.count,
+              Array(pathComponents.prefix(rootComponents.count)) == rootComponents else {
+            throw ResetTransactionError.unsafeComponent(url)
+        }
+        let relative = Array(pathComponents.dropFirst(rootComponents.count))
+        guard relative.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." }) else {
+            throw ResetTransactionError.unsafeComponent(url)
+        }
+        return relative
+    }
+
+    /// Recursively captures one no-follow subtree under a shared aggregate entry budget.
+    private func credentialDescendants(
+        in directory: ResetFileDescriptor,
+        expected directoryIdentity: ResetFileIdentity,
+        at directoryURL: URL,
+        prefix: String,
+        remainingCount: inout Int,
+        validatePathIdentity: Bool = true
+    ) throws -> [CredentialInventory.Descendant] {
+        let names = try boundedEntryNames(
+            in: directory,
+            expected: directoryIdentity,
+            at: directoryURL,
+            maximumCount: remainingCount,
+            validatePathIdentity: validatePathIdentity
+        ).sorted()
+        remainingCount -= names.count
+
+        var descendants: [CredentialInventory.Descendant] = []
+        for name in names {
+            let relativePath = prefix.isEmpty ? name : "\(prefix)/\(name)"
+            let childURL = directoryURL.appendingPathComponent(name)
+            let childIdentity = try identity(named: name, relativeTo: directory)
+            descendants.append(CredentialInventory.Descendant(
+                relativePath: relativePath,
+                identity: childIdentity
+            ))
+            if childIdentity.isDirectory {
+                let child = try openDirectory(named: name, relativeTo: directory)
+                guard try identity(of: child.rawValue) == childIdentity else {
+                    throw ResetTransactionError.unsafeComponent(childURL)
+                }
+                descendants += try credentialDescendants(
+                    in: child,
+                    expected: childIdentity,
+                    at: childURL,
+                    prefix: relativePath,
+                    remainingCount: &remainingCount,
+                    validatePathIdentity: validatePathIdentity
+                )
+            }
+        }
+        guard try identity(of: directory.rawValue) == directoryIdentity else {
+            throw ResetTransactionError.unsafeComponent(directoryURL)
+        }
+        return descendants
     }
 
     /// Creates an owner-only transaction directory relative to the validated
@@ -708,13 +968,17 @@ final class MCPAuthStore {
         index: Int,
         root: ResetFileDescriptor,
         rootIdentity: ResetFileIdentity,
-        transaction: ResetFileDescriptor
+        transaction: ResetFileDescriptor,
+        expectedRootNames: Set<String>?
     ) throws -> ResetMove {
         let parentComponents = Array(request.components.dropLast())
         let destinationName = try requireLeaf(request.components, url: request.originalURL)
         let initialParent = try openDirectory(components: parentComponents, root: root)
         let initialParentIdentity = try identity(of: initialParent.rawValue)
         let itemIdentity = try identity(named: destinationName, relativeTo: initialParent)
+        guard itemIdentity == request.expectedIdentity else {
+            throw MCPAuthError.fileChangedExternally
+        }
 
         try beforeResetStage(index, request.originalURL)
         try validateRoot(root, expected: rootIdentity)
@@ -729,13 +993,34 @@ final class MCPAuthStore {
 
         try beforeResetRename(index, request.originalURL)
         try validateRoot(root, expected: rootIdentity)
-        guard try identity(of: verifiedParent.rawValue) == initialParentIdentity else {
-            throw ResetTransactionError.unsafeComponent(request.originalURL)
+        let actionParent = try openDirectory(components: parentComponents, root: root)
+        guard try identity(of: verifiedParent.rawValue) == initialParentIdentity,
+              try identity(of: actionParent.rawValue) == initialParentIdentity,
+              try identity(named: destinationName, relativeTo: actionParent)
+                == request.expectedIdentity else {
+            throw MCPAuthError.fileChangedExternally
+        }
+        try validateConfirmedSubtree(
+            request,
+            destinationName: destinationName,
+            parent: actionParent
+        )
+        if let expectedRootNames {
+            let actualNames = try boundedEntryNames(
+                in: root,
+                expected: rootIdentity,
+                at: rootDirectory,
+                maximumCount: Self.maximumResetRootEntries + 1
+            )
+            guard Set(actualNames) == expectedRootNames,
+                  actualNames.count == expectedRootNames.count else {
+                throw MCPAuthError.fileChangedExternally
+            }
         }
 
         let stagedName = String(format: "%04d-%@", index, destinationName)
         guard renameatx_np(
-            verifiedParent.rawValue,
+            actionParent.rawValue,
             destinationName,
             transaction.rawValue,
             stagedName,
@@ -744,18 +1029,84 @@ final class MCPAuthStore {
             throw currentPOSIXError()
         }
 
-        let stagedIdentity = try identity(named: stagedName, relativeTo: transaction)
-
         let move = ResetMove(
             originalURL: request.originalURL,
             parentComponents: parentComponents,
-            destinationParent: verifiedParent,
+            destinationParent: actionParent,
             destinationName: destinationName,
             stagedName: stagedName,
             validatedIdentity: itemIdentity,
-            stagedIdentity: stagedIdentity
+            stagedIdentity: itemIdentity,
+            expectedDescendants: request.expectedDescendants
         )
         return move
+    }
+
+    /// Re-captures a confirmed directory artifact immediately before its namespace move.
+    private func validateConfirmedSubtree(
+        _ request: ResetRequest,
+        destinationName: String,
+        parent: ResetFileDescriptor
+    ) throws {
+        try validateConfirmedSubtree(
+            expectedIdentity: request.expectedIdentity,
+            expectedDescendants: request.expectedDescendants,
+            destinationName: destinationName,
+            parent: parent,
+            originalURL: request.originalURL
+        )
+    }
+
+    /// Revalidates one moved item while it is still contained by the private transaction.
+    private func validateStagedMove(
+        _ move: ResetMove,
+        transaction: ResetFileDescriptor
+    ) throws {
+        try validateConfirmedSubtree(
+            expectedIdentity: move.stagedIdentity,
+            expectedDescendants: move.expectedDescendants,
+            destinationName: move.stagedName,
+            parent: transaction,
+            originalURL: move.originalURL,
+            validatePathIdentity: false
+        )
+    }
+
+    /// Compares one exact descriptor-relative subtree with the confirmation inventory.
+    private func validateConfirmedSubtree(
+        expectedIdentity: ResetFileIdentity,
+        expectedDescendants: [CredentialInventory.Descendant],
+        destinationName: String,
+        parent: ResetFileDescriptor,
+        originalURL: URL,
+        validatePathIdentity: Bool = true
+    ) throws {
+        guard try identity(named: destinationName, relativeTo: parent) == expectedIdentity else {
+            throw MCPAuthError.fileChangedExternally
+        }
+        guard expectedIdentity.isDirectory else {
+            guard expectedDescendants.isEmpty else {
+                throw MCPAuthError.fileChangedExternally
+            }
+            return
+        }
+
+        let directory = try openDirectory(named: destinationName, relativeTo: parent)
+        guard try identity(of: directory.rawValue) == expectedIdentity else {
+            throw MCPAuthError.fileChangedExternally
+        }
+        var remainingCount = Self.maximumResetDescendantEntries
+        let descendants = try credentialDescendants(
+            in: directory,
+            expected: expectedIdentity,
+            at: originalURL,
+            prefix: "",
+            remainingCount: &remainingCount,
+            validatePathIdentity: validatePathIdentity
+        )
+        guard descendants == expectedDescendants else {
+            throw MCPAuthError.fileChangedExternally
+        }
     }
 
     /// Restores every staged item only after preflighting all destinations.
@@ -789,6 +1140,23 @@ final class MCPAuthStore {
 
         do {
             try validateRoot(root, expected: rootIdentity)
+            let sourceConflicts = moves.compactMap { move -> URL? in
+                let currentIdentity = try? identity(
+                    named: move.stagedName,
+                    relativeTo: transaction
+                )
+                return currentIdentity == move.stagedIdentity ? nil : move.originalURL
+            }
+            guard sourceConflicts.isEmpty else {
+                try throwRecoveryConflict(
+                    at: recoveryURL,
+                    destinations: sourceConflicts,
+                    primaryError: primaryError,
+                    transactionIdentity: transactionIdentity,
+                    requiresPersistentRecord: requiresPersistentRecord
+                )
+            }
+
             var conflicts: [URL] = []
             for move in moves {
                 let currentParent = try openDirectory(components: move.parentComponents, root: root)
@@ -808,9 +1176,7 @@ final class MCPAuthStore {
             }
 
             for (index, move) in moves.reversed().enumerated() {
-                try beforeRecoveryRename(index, move.originalURL)
                 try validateRoot(root, expected: rootIdentity)
-
                 let expectedParentIdentity = try identity(of: move.destinationParent.rawValue)
                 let currentParent = try openDirectory(components: move.parentComponents, root: root)
                 guard try identity(of: currentParent.rawValue) == expectedParentIdentity,
@@ -824,10 +1190,29 @@ final class MCPAuthStore {
                     )
                 }
 
+                try beforeRecoveryRename(index, move.originalURL)
+                try validateRoot(root, expected: rootIdentity)
+
+                let recoveryParent = try openDirectory(components: move.parentComponents, root: root)
+                guard try identity(of: recoveryParent.rawValue) == expectedParentIdentity,
+                      try !itemExists(move.destinationName, relativeTo: recoveryParent),
+                      (try? identity(
+                          named: move.stagedName,
+                          relativeTo: transaction
+                      )) == move.stagedIdentity else {
+                    try throwRecoveryConflict(
+                        at: recoveryURL,
+                        destinations: [move.originalURL],
+                        primaryError: primaryError,
+                        transactionIdentity: transactionIdentity,
+                        requiresPersistentRecord: requiresPersistentRecord
+                    )
+                }
+
                 let renameResult = renameatx_np(
                     transaction.rawValue,
                     move.stagedName,
-                    currentParent.rawValue,
+                    recoveryParent.rawValue,
                     move.destinationName,
                     UInt32(RENAME_EXCL)
                 )
@@ -847,7 +1232,7 @@ final class MCPAuthStore {
                 do {
                     try validateRoot(root, expected: rootIdentity)
                     let pathParent = try openDirectory(components: move.parentComponents, root: root)
-                    guard try identity(of: currentParent.rawValue) == expectedParentIdentity,
+                    guard try identity(of: recoveryParent.rawValue) == expectedParentIdentity,
                           try identity(of: pathParent.rawValue) == expectedParentIdentity,
                           try identity(named: move.destinationName, relativeTo: pathParent)
                             == move.stagedIdentity else {
@@ -857,7 +1242,7 @@ final class MCPAuthStore {
                     do {
                         try returnRecoveredItemToTransaction(
                             move,
-                            from: currentParent,
+                            from: recoveryParent,
                             transaction: transaction
                         )
                     } catch {
@@ -1581,24 +1966,35 @@ final class MCPAuthStore {
         }
     }
 
-    /// Enumerates one already-open directory through a duplicate descriptor,
+    /// Enumerates one already-open directory through an independently opened descriptor,
     /// stopping before an attacker-controlled number of names is materialized.
     private func boundedEntryNames(
         in directory: ResetFileDescriptor,
         expected: ResetFileIdentity,
         at url: URL,
-        maximumCount: Int
+        maximumCount: Int,
+        validatePathIdentity: Bool = true
     ) throws -> [String] {
+        let initialPathMatches: Bool
+        if validatePathIdentity {
+            initialPathMatches = try identity(at: url) == expected
+        } else {
+            initialPathMatches = true
+        }
         guard maximumCount >= 0,
               try identity(of: directory.rawValue) == expected,
-              try identity(at: url) == expected else {
+              initialPathMatches else {
             throw ResetTransactionError.unsafeRoot(url)
         }
 
-        let duplicate = Darwin.dup(directory.rawValue)
-        guard duplicate >= 0 else { throw currentPOSIXError() }
-        guard let stream = fdopendir(duplicate) else {
-            Darwin.close(duplicate)
+        let enumerationDescriptor = Darwin.openat(
+            directory.rawValue,
+            ".",
+            O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC
+        )
+        guard enumerationDescriptor >= 0 else { throw currentPOSIXError() }
+        guard let stream = fdopendir(enumerationDescriptor) else {
+            Darwin.close(enumerationDescriptor)
             throw currentPOSIXError()
         }
         defer { closedir(stream) }
@@ -1619,9 +2015,15 @@ final class MCPAuthStore {
             }
             errno = 0
         }
+        let finalPathMatches: Bool
+        if validatePathIdentity {
+            finalPathMatches = try identity(at: url) == expected
+        } else {
+            finalPathMatches = true
+        }
         guard errno == 0,
               try identity(of: directory.rawValue) == expected,
-              try identity(at: url) == expected else {
+              finalPathMatches else {
             throw ResetTransactionError.unsafeRoot(url)
         }
         return names.sorted()

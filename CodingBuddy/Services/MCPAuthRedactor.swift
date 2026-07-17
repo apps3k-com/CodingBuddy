@@ -30,6 +30,11 @@ nonisolated enum MCPAuthRedactor {
             // Non-JSON files (code_verifier.txt) are secrets in their entirety.
             return mask
         }
+        guard policy != .credentialArtifact || object is [String: Any] else {
+            // Credential artifacts are object-shaped; every other root could be
+            // an opaque secret and must therefore fail closed as one value.
+            return mask
+        }
         let redacted = redact(object, policy: policy)
         guard let output = try? JSONSerialization.data(
             withJSONObject: redacted, options: [.fragmentsAllowed, .prettyPrinted, .sortedKeys]

@@ -38,6 +38,23 @@ nonisolated enum SecretDraftManualLockDecision: Equatable {
     case requestConfirmation
 }
 
+/// Presentation outcome after a secret authentication request completes.
+nonisolated enum SecretAuthenticationPresentation: Equatable {
+    /// Authentication succeeded and the caller may continue its protected action.
+    case succeeded
+    /// User, lifecycle, or task cancellation intentionally produces no app feedback.
+    case silentFailure
+    /// A sanitized recoverable failure must remain visible beside the protected action.
+    case visibleFailure(String)
+
+    /// Separates a genuine authentication failure from success and silent cancellation.
+    static func resolve(didUnlock: Bool, errorMessage: String?) -> Self {
+        if didUnlock { return .succeeded }
+        guard let errorMessage, !errorMessage.isEmpty else { return .silentFailure }
+        return .visibleFailure(errorMessage)
+    }
+}
+
 /// Pure policy separating secret ownership from SwiftUI presentation behavior.
 nonisolated enum SecretDraftProtectionPolicy {
     /// Decides how an editor responds to an automatic unlocked-to-locked transition.
@@ -80,6 +97,9 @@ private struct SecretDraftProtectionModifier: ViewModifier {
     @State private var showsImmediateLockPrompt = false
     @State private var isRelockWarningVisible = false
     @State private var relockScheduleID = UUID()
+    @State private var authenticationFailure: String?
+    @FocusState private var reauthenticateFocused: Bool
+    @AccessibilityFocusState private var reauthenticateAccessibilityFocused: Bool
 
     /// Adds focused-command handling, automatic expiry, and dirty-state choice.
     func body(content: Content) -> some View {
@@ -88,6 +108,7 @@ private struct SecretDraftProtectionModifier: ViewModifier {
             .onChange(of: secrets.isUnlocked) { wasUnlocked, isUnlocked in
                 if isUnlocked {
                     isRelockWarningVisible = false
+                    authenticationFailure = nil
                     relockScheduleID = UUID()
                 }
                 guard wasUnlocked, !isUnlocked else { return }
@@ -101,6 +122,10 @@ private struct SecretDraftProtectionModifier: ViewModifier {
                     clearAndDismiss()
                     if reportDiscard { reportAutomaticDiscard() }
                 }
+            }
+            .onChange(of: secrets.unlockedUntil) {
+                isRelockWarningVisible = false
+                relockScheduleID = UUID()
             }
             .onChange(of: hasUnsavedChanges) {
                 relockScheduleID = UUID()
@@ -173,6 +198,7 @@ private struct SecretDraftProtectionModifier: ViewModifier {
         }
         guard !Task.isCancelled,
               secrets.isUnlocked,
+              secrets.unlockedUntil == deadline,
               hasUnsavedChanges,
               deadline.timeIntervalSinceNow > 0 else { return }
         isRelockWarningVisible = true
@@ -189,15 +215,23 @@ private struct SecretDraftProtectionModifier: ViewModifier {
     /// Persistent pre-expiry actions that avoid silent draft loss.
     private func relockWarning(deadline: Date) -> some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 8) {
-                    relockWarningLabel(deadline: deadline, now: context.date)
-                    Spacer()
-                    relockWarningActions
+            VStack(alignment: .leading, spacing: 8) {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 8) {
+                        relockWarningLabel(deadline: deadline, now: context.date)
+                        Spacer()
+                        relockWarningActions
+                    }
+                    VStack(alignment: .leading, spacing: 8) {
+                        relockWarningLabel(deadline: deadline, now: context.date)
+                        relockWarningActions
+                    }
                 }
-                VStack(alignment: .leading, spacing: 8) {
-                    relockWarningLabel(deadline: deadline, now: context.date)
-                    relockWarningActions
+                if let authenticationFailure {
+                    Label(authenticationFailure, systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .padding(10)
@@ -229,16 +263,47 @@ private struct SecretDraftProtectionModifier: ViewModifier {
             }
         }
         Button(String(localized: "Reauthenticate")) {
-            Task { @MainActor in
-                if await secrets.requestUnlock() {
-                    isRelockWarningVisible = false
-                    relockScheduleID = UUID()
-                }
-            }
+            requestReauthentication()
         }
+        .focused($reauthenticateFocused)
+        .accessibilityFocused($reauthenticateAccessibilityFocused)
         Button(String(localized: "Discard and Lock"), role: .destructive) {
             clearAndDismiss()
             secrets.lock()
+        }
+    }
+
+    /// Reauthenticates without dismissing or replacing the editor's current draft.
+    private func requestReauthentication() {
+        Task { @MainActor in
+            let didUnlock = await secrets.requestUnlock()
+            let presentation = SecretAuthenticationPresentation.resolve(
+                didUnlock: didUnlock,
+                errorMessage: secrets.lastError
+            )
+            secrets.clearError()
+            switch presentation {
+            case .succeeded:
+                authenticationFailure = nil
+                isRelockWarningVisible = false
+                relockScheduleID = UUID()
+            case .silentFailure:
+                break
+            case .visibleFailure(let message):
+                authenticationFailure = message
+                AccessibilityNotification.Announcement(message).post()
+                focusReauthenticateControl()
+            }
+        }
+    }
+
+    /// Returns keyboard and VoiceOver focus to the failed recovery action.
+    private func focusReauthenticateControl() {
+        Task { @MainActor in
+            await Task.yield()
+            guard warningDeadline != nil else { return }
+            reauthenticateFocused = true
+            reauthenticateAccessibilityFocused = true
         }
     }
 }

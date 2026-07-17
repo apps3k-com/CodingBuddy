@@ -135,6 +135,59 @@ struct AgentDoctorTests {
         })
     }
 
+    /// Verifies unsafe token artifacts are described as reset-only rather than absent.
+    @Test func resetOnlyCredentialDiagnosticUsesTruthfulCopy() throws {
+        let home = try makeTempDir()
+        let mcpAuth = home.appendingPathComponent(".mcp-auth/mcp-remote-1.0.0", isDirectory: true)
+        try FileManager.default.createDirectory(at: mcpAuth, withIntermediateDirectories: true)
+        let hash = String(repeating: "78", count: 16)
+        let external = home.appendingPathComponent("external-tokens.json")
+        try #"{"access_token":"secret"}"#.write(
+            to: external,
+            atomically: true,
+            encoding: .utf8
+        )
+        try FileManager.default.createSymbolicLink(
+            at: mcpAuth.appendingPathComponent("\(hash)_tokens.json"),
+            withDestinationURL: external
+        )
+
+        let diagnostic = try #require(AgentDoctorScanner(homeDirectory: home).diagnostics().first {
+            $0.code == .incompleteCredential
+                && $0.tool == .mcpAuth
+                && $0.subject == String(hash.prefix(12))
+        })
+
+        #expect(diagnostic.detail == String(
+            localized: "This artifact is reset-only because CodingBuddy cannot read it safely."
+        ))
+        #expect(diagnostic.detail != String(localized: "The MCP Auth entry has no tokens file."))
+    }
+
+    /// A refused bounded scan must never collapse to a misleading healthy result.
+    @Test func reportsIncompleteMCPAuthScanWhenAggregateBudgetIsExceeded() throws {
+        let home = try makeTempDir()
+        let version = home.appendingPathComponent(
+            ".mcp-auth/mcp-remote-1.0.0",
+            isDirectory: true
+        )
+        try FileManager.default.createDirectory(at: version, withIntermediateDirectories: true)
+        let payload = Data(repeating: 0x20, count: MCPAuthScanner.maximumCredentialFileSize)
+        for index in 0..<5 {
+            let hash = String(format: "%032x", index + 1)
+            try payload.write(to: version.appendingPathComponent("\(hash)_tokens.json"))
+        }
+
+        let diagnostics = AgentDoctorScanner(homeDirectory: home).diagnostics()
+        let scanFinding = try #require(diagnostics.first {
+            $0.code == .credentialScanIncomplete && $0.tool == .mcpAuth
+        })
+
+        #expect(scanFinding.severity == .warning)
+        #expect(scanFinding.source == "mcp-auth-scan")
+        #expect(scanFinding.subject == nil)
+    }
+
     @Test func storeDoesNotScanUntilReload() async throws {
         let home = try makeTempDir()
         let store = AgentDoctorStore(homeDirectory: home)

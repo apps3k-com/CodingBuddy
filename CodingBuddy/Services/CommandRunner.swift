@@ -37,6 +37,26 @@ nonisolated struct CommandRequest: Equatable, Sendable {
         self.maximumOutputBytes = max(1, maximumOutputBytes)
         self.acceptedExitCodes = acceptedExitCodes
     }
+
+    /// Original absolute local path represented by the caller's file URL.
+    var absoluteExecutablePath: String? {
+        guard executableURL.isFileURL,
+              executableURL.baseURL == nil,
+              executableURL.relativePath.hasPrefix("/"),
+              executableURL.host == nil || executableURL.host == "localhost" else {
+            return nil
+        }
+        return executableURL.path
+    }
+
+    /// Whether any launch string would be truncated at the POSIX C boundary.
+    var containsEmbeddedNUL: Bool {
+        absoluteExecutablePath?.utf8.contains(0) == true
+            || arguments.contains { $0.utf8.contains(0) }
+            || environment.contains { key, value in
+                key.utf8.contains(0) || value.utf8.contains(0)
+            }
+    }
 }
 
 /// Captured process output after a successful native invocation.
@@ -67,6 +87,18 @@ nonisolated protocol CommandProcessReaping: Sendable {
         processID: pid_t,
         completion: @escaping @Sendable (Int32?) -> Void
     )
+}
+
+/// Injectable allocator for owned POSIX argument and environment strings.
+nonisolated protocol CommandCStringAllocating: Sendable {
+    /// Returns one `free`-compatible copy, or `nil` when allocation fails.
+    func duplicate(_ value: String) -> UnsafeMutablePointer<CChar>?
+}
+
+/// Injectable boundary that makes a pipe descriptor safe for serial-queue draining.
+nonisolated protocol CommandPipeConfiguring: Sendable {
+    /// Enables nonblocking reads while preserving all existing descriptor flags.
+    func configureNonBlocking(_ descriptor: Int32) -> Bool
 }
 
 /// Timing policy for escalating process-group termination to a hard completion deadline.
@@ -128,30 +160,42 @@ nonisolated enum CommandRunnerError: LocalizedError, Equatable, Sendable {
 nonisolated struct FoundationCommandRunner: CommandRunning {
     private let processReaper: any CommandProcessReaping
     private let terminationTiming: CommandTerminationTiming
+    private let cStringAllocator: any CommandCStringAllocating
+    private let pipeConfigurator: any CommandPipeConfiguring
 
     /// Creates a runner with injectable process lifecycle boundaries for deterministic tests.
     init(
         processReaper: (any CommandProcessReaping)? = nil,
-        terminationTiming: CommandTerminationTiming = .standard
+        terminationTiming: CommandTerminationTiming = .standard,
+        cStringAllocator: (any CommandCStringAllocating)? = nil,
+        pipeConfigurator: (any CommandPipeConfiguring)? = nil
     ) {
         self.processReaper = processReaper ?? POSIXCommandProcessReaper.shared
         self.terminationTiming = terminationTiming
+        self.cStringAllocator = cStringAllocator ?? POSIXCommandCStringAllocator()
+        self.pipeConfigurator = pipeConfigurator ?? POSIXCommandPipeConfigurator()
     }
 
     /// Runs a command in a dedicated process group with bounded cancellation and output capture.
     func run(_ request: CommandRequest) async throws -> CommandResult {
-        guard request.executableURL.path.hasPrefix("/") else {
+        guard let executablePath = request.absoluteExecutablePath else {
             throw CommandRunnerError.executableMustBeAbsolute
         }
-        guard FileManager.default.isExecutableFile(atPath: request.executableURL.path) else {
-            throw CommandRunnerError.executableUnavailable(request.executableURL.path)
+        guard !request.containsEmbeddedNUL else {
+            throw CommandRunnerError.launchFailed
+        }
+        guard FileManager.default.isExecutableFile(atPath: executablePath) else {
+            throw CommandRunnerError.executableUnavailable(executablePath)
         }
         guard !Task.isCancelled else { throw CommandRunnerError.cancelled }
 
         let execution = ProcessExecution(
             request: request,
+            executablePath: executablePath,
             processReaper: processReaper,
-            terminationTiming: terminationTiming
+            terminationTiming: terminationTiming,
+            cStringAllocator: cStringAllocator,
+            pipeConfigurator: pipeConfigurator
         )
         return try await withTaskCancellationHandler {
             try await execution.start()
@@ -183,8 +227,11 @@ private nonisolated final class ProcessExecution: @unchecked Sendable {
     }
 
     private let request: CommandRequest
+    private let executablePath: String
     private let processReaper: any CommandProcessReaping
     private let terminationTiming: CommandTerminationTiming
+    private let cStringAllocator: any CommandCStringAllocating
+    private let pipeConfigurator: any CommandPipeConfiguring
     private let queue = DispatchQueue(label: "com.apps3k.CodingBuddy.CommandRunner.execution")
     private var continuation: CheckedContinuation<CommandResult, any Error>?
     private var processID: pid_t?
@@ -197,6 +244,7 @@ private nonisolated final class ProcessExecution: @unchecked Sendable {
     private var terminationStartedAt: DispatchTime?
     private var killSentAt: DispatchTime?
     private var stopReason: StopReason?
+    private var terminalError: CommandRunnerError?
     private var leaderDidExit = false
     private var leaderExitCode: Int32?
     private var isCompletingTermination = false
@@ -205,12 +253,18 @@ private nonisolated final class ProcessExecution: @unchecked Sendable {
     /// Creates one single-use process execution state machine.
     init(
         request: CommandRequest,
+        executablePath: String,
         processReaper: any CommandProcessReaping,
-        terminationTiming: CommandTerminationTiming
+        terminationTiming: CommandTerminationTiming,
+        cStringAllocator: any CommandCStringAllocating,
+        pipeConfigurator: any CommandPipeConfiguring
     ) {
         self.request = request
+        self.executablePath = executablePath
         self.processReaper = processReaper
         self.terminationTiming = terminationTiming
+        self.cStringAllocator = cStringAllocator
+        self.pipeConfigurator = pipeConfigurator
     }
 
     /// Launches the request and returns without ever depending on pipe EOF.
@@ -286,6 +340,10 @@ private nonisolated final class ProcessExecution: @unchecked Sendable {
                 throw CommandRunnerError.launchFailed
             }
         }
+        guard pipeConfigurator.configureNonBlocking(descriptors[0]) else {
+            closeDescriptors(descriptors)
+            throw CommandRunnerError.launchFailed
+        }
         return descriptors
     }
 
@@ -317,13 +375,13 @@ private nonisolated final class ProcessExecution: @unchecked Sendable {
             .merging(request.environment) { _, override in override }
             .map { "\($0.key)=\($0.value)" }
             .sorted()
-        let arguments = [request.executableURL.path] + request.arguments
+        let arguments = [executablePath] + request.arguments
         var pid: pid_t = 0
-        let result = withCStringArray(arguments) { argumentPointers in
-            withCStringArray(environment) { environmentPointers in
+        let result = try withCStringArray(arguments, allocator: cStringAllocator) { argumentPointers in
+            try withCStringArray(environment, allocator: cStringAllocator) { environmentPointers in
                 posix_spawn(
                     &pid,
-                    request.executableURL.path,
+                    executablePath,
                     &actions,
                     &attributes,
                     argumentPointers,
@@ -336,9 +394,6 @@ private nonisolated final class ProcessExecution: @unchecked Sendable {
     }
 
     private func makeReader(descriptor: Int32, isStandardError: Bool) -> PipeReader {
-        let flags = fcntl(descriptor, F_GETFL)
-        if flags >= 0 { _ = fcntl(descriptor, F_SETFL, flags | O_NONBLOCK) }
-
         let reader = PipeReader(descriptor: descriptor, queue: queue) { [weak self] data in
             self?.receive(data, isStandardError: isStandardError) ?? false
         }
@@ -382,9 +437,9 @@ private nonisolated final class ProcessExecution: @unchecked Sendable {
 
     private func processBindingWasLost() {
         cancelTimeout()
-        cancelTermination()
-        closeReaders()
-        finish(throwing: CommandRunnerError.launchFailed)
+        cancelReadersWithoutDraining()
+        terminalError = .launchFailed
+        beginGroupTermination()
     }
 
     private func completeAfterGroupTermination() {
@@ -397,6 +452,10 @@ private nonisolated final class ProcessExecution: @unchecked Sendable {
 
         if let stopReason {
             finish(throwing: stopReason.error)
+            return
+        }
+        if let terminalError {
+            finish(throwing: terminalError)
             return
         }
         guard leaderDidExit else { return }
@@ -564,6 +623,23 @@ private nonisolated final class ProcessExecution: @unchecked Sendable {
     }
 }
 
+/// Production allocator whose ownership contract matches `free` in the caller.
+private nonisolated struct POSIXCommandCStringAllocator: CommandCStringAllocating {
+    /// Duplicates one validated Swift string with the Darwin allocator.
+    func duplicate(_ value: String) -> UnsafeMutablePointer<CChar>? {
+        strdup(value)
+    }
+}
+
+/// Production descriptor configurator for nonblocking output capture.
+private nonisolated struct POSIXCommandPipeConfigurator: CommandPipeConfiguring {
+    /// Preserves descriptor flags and adds `O_NONBLOCK` atomically from the caller's perspective.
+    func configureNonBlocking(_ descriptor: Int32) -> Bool {
+        let flags = fcntl(descriptor, F_GETFL)
+        return flags >= 0 && fcntl(descriptor, F_SETFL, flags | O_NONBLOCK) == 0
+    }
+}
+
 /// Process-wide child owner that polls with `WNOHANG` and never blocks command completion.
 private nonisolated final class POSIXCommandProcessReaper: CommandProcessReaping, @unchecked Sendable {
     /// Shared owner prevents one blocked thread per child that has not become waitable yet.
@@ -681,14 +757,25 @@ private nonisolated final class PipeReader: @unchecked Sendable {
 /// Calls a POSIX API with a temporary, null-terminated C string array.
 private nonisolated func withCStringArray<Result>(
     _ strings: [String],
-    body: (UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>) -> Result
-) -> Result {
-    var pointers = strings.map { strdup($0) }
-    pointers.append(nil)
+    allocator: any CommandCStringAllocating,
+    body: (UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>) throws -> Result
+) throws -> Result {
+    var pointers: [UnsafeMutablePointer<CChar>?] = []
     defer {
         for pointer in pointers where pointer != nil { free(pointer) }
     }
-    return pointers.withUnsafeMutableBufferPointer { buffer in
-        body(buffer.baseAddress!)
+    pointers.reserveCapacity(strings.count + 1)
+    for string in strings {
+        guard !string.utf8.contains(0), let pointer = allocator.duplicate(string) else {
+            throw CommandRunnerError.launchFailed
+        }
+        pointers.append(pointer)
+    }
+    pointers.append(nil)
+    return try pointers.withUnsafeMutableBufferPointer { buffer in
+        guard let baseAddress = buffer.baseAddress else {
+            throw CommandRunnerError.launchFailed
+        }
+        return try body(baseAddress)
     }
 }

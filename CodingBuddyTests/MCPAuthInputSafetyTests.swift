@@ -91,6 +91,23 @@ struct MCPAuthInputSafetyTests {
         #expect(!preview.contains("LEAK"))
     }
 
+    /// Verifies every non-object credential JSON root is treated as one opaque secret.
+    @Test func redactorMasksNonObjectCredentialJSONRoots() {
+        let roots = [
+            #""raw-secret""#,
+            #"["raw-secret", {"scope":"read"}]"#,
+            "123",
+            "true",
+            "null",
+        ]
+
+        for root in roots {
+            let preview = MCPAuthRedactor.maskedPreview(text: root, isJSON: true)
+            #expect(preview == "••••••••")
+            #expect(!preview.contains("raw-secret"))
+        }
+    }
+
     /// Verifies credential artifacts above the documented 1 MiB ceiling are skipped.
     @Test func scannerRejectsOversizedCredentialFile() throws {
         let temporaryDirectory = try makeTempDir()
@@ -215,6 +232,58 @@ struct MCPAuthInputSafetyTests {
 
         #expect(result.entries.isEmpty)
         #expect(result.refusals == [.credentialArtifactEnumeration])
+    }
+
+    /// Verifies many individually bounded versions cannot exceed the scan-wide artifact budget.
+    @Test func scannerBoundsAggregateArtifactCountAcrossVersions() throws {
+        let temporaryDirectory = try makeTempDir()
+        defer { try? FileManager.default.removeItem(at: temporaryDirectory) }
+        let root = temporaryDirectory.appendingPathComponent(".mcp-auth", isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+
+        var remaining = MCPAuthScanner.maximumCredentialArtifactCount + 1
+        var versionIndex = 0
+        while remaining > 0 {
+            let version = root.appendingPathComponent("mcp-remote-\(versionIndex)", isDirectory: true)
+            try FileManager.default.createDirectory(at: version, withIntermediateDirectories: false)
+            let count = min(remaining, MCPAuthScanner.maximumCredentialArtifactsPerVersion)
+            for artifactIndex in 0..<count {
+                let name = credentialFileName(suffix: "artifact-\(versionIndex)-\(artifactIndex)")
+                try Data().write(to: version.appendingPathComponent(name))
+            }
+            remaining -= count
+            versionIndex += 1
+        }
+
+        let result = MCPAuthScanner.scanResult(root: root, knownServerURLs: [])
+        let discoveredFileCount = result.entries.reduce(0) { $0 + $1.files.count }
+
+        #expect(discoveredFileCount == MCPAuthScanner.maximumCredentialArtifactCount)
+        #expect(result.refusals == [.aggregateScanBudget])
+    }
+
+    /// Verifies accepted per-file sizes cannot multiply beyond the scan-wide byte budget.
+    @Test func scannerBoundsAggregateCredentialBytes() throws {
+        let temporaryDirectory = try makeTempDir()
+        defer { try? FileManager.default.removeItem(at: temporaryDirectory) }
+        let fixture = try makeCredentialDirectory(in: temporaryDirectory)
+        let fullSizeFileCount = MCPAuthScanner.maximumCredentialScanByteCount
+            / MCPAuthScanner.maximumCredentialFileSize
+        let payload = Data(repeating: 0x20, count: MCPAuthScanner.maximumCredentialFileSize)
+        for index in 0...fullSizeFileCount {
+            try payload.write(
+                to: fixture.version.appendingPathComponent(
+                    credentialFileName(suffix: "artifact-\(index)")
+                )
+            )
+        }
+
+        let result = MCPAuthScanner.scanResult(root: fixture.root, knownServerURLs: [])
+        let entry = try #require(result.entries.first)
+
+        #expect(entry.files.count == fullSizeFileCount + 1)
+        #expect(entry.files.filter(\.isSafelyReadable).count == fullSizeFileCount)
+        #expect(result.refusals == [.aggregateScanBudget])
     }
 
     /// Verifies an unsafe cache-root symlink is reported rather than presented as an empty cache.

@@ -64,6 +64,19 @@ struct Fixture {
     ///
     /// A meaningful line makes the contiguous documentation block count.
     let documentedAfterEmptyLine: String
+
+    let storedBeforeCallable: String
+    func callableAfterStoredProperty() {}
+
+    init(
+        loader: () -> String = {
+            let localValue = "fixture"
+            return localValue
+        }
+    ) {
+        let localValue = loader()
+        _ = localValue
+    }
 }
 
 /// A protocol fixture.
@@ -96,6 +109,15 @@ cat > "$FIXTURE_ROOT/CodingBuddy/Generated.swift" <<'SWIFT'
 // Copyright Fixture Authors.
 // @generated
 struct UndocumentedGeneratedType {}
+SWIFT
+
+cat > "$FIXTURE_ROOT/CodingBuddy/InlineGeneratedMarker.swift" <<'SWIFT'
+/* @generated */ struct InlineGeneratedMarkerType {}
+SWIFT
+
+cat > "$FIXTURE_ROOT/CodingBuddy/StandaloneBlockGenerated.swift" <<'SWIFT'
+/* @generated */
+struct UndocumentedBlockGeneratedType {}
 SWIFT
 
 cat > "$FIXTURE_ROOT/CodingBuddy/GeneratedProse.swift" <<'SWIFT'
@@ -143,18 +165,18 @@ expect_json() {
     fi
 }
 
-expect_json eligible 16
+expect_json eligible 20
 expect_json documented 9
-expect_json missing 7
-expect_json excluded_declarations 7
+expect_json missing 11
+expect_json excluded_declarations 8
 expect_json swiftui_body 1
-expect_json local_declarations 6
+expect_json local_declarations 7
 expect_json test_files 1
-expect_json generated_files 1
-expect_json files_scanned 6
+expect_json generated_files 2
+expect_json files_scanned 7
 expect_json passed true
 printf '%s\n' "$JSON" | grep -Fq '"test_files":["CodingBuddyTests/CheckerTests.swift"]'
-printf '%s\n' "$JSON" | grep -Fq '"generated_files":["CodingBuddy/Generated.swift"]'
+printf '%s\n' "$JSON" | grep -Fq '"generated_files":["CodingBuddy/Generated.swift","CodingBuddy/StandaloneBlockGenerated.swift"]'
 
 HUMAN=$(
     "$ROOT/scripts/check-docstring-coverage.sh" \
@@ -165,23 +187,35 @@ printf '%s\n' "$HUMAN" | grep -Fq 'Excluded test files:'
 printf '%s\n' "$HUMAN" | grep -Fq '  CodingBuddyTests/CheckerTests.swift'
 printf '%s\n' "$HUMAN" | grep -Fq 'Excluded generated files:'
 printf '%s\n' "$HUMAN" | grep -Fq '  CodingBuddy/Generated.swift'
+printf '%s\n' "$HUMAN" | grep -Fq '  CodingBuddy/StandaloneBlockGenerated.swift'
 printf '%s\n' "$HUMAN" | grep -Fq 'CodingBuddy/EmptyDocumentation.swift:2 (type)'
 printf '%s\n' "$HUMAN" | grep -Fq 'CodingBuddy/GeneratedProse.swift:2 (type)'
 printf '%s\n' "$HUMAN" | grep -Fq 'CodingBuddy/GeneratedString.swift:1 (property)'
+printf '%s\n' "$HUMAN" | grep -Fq 'CodingBuddy/InlineGeneratedMarker.swift:1 (type)'
 printf '%s\n' "$HUMAN" | grep -Fq 'CodingBuddy/LateGeneratedMarker.swift:1 (type)'
+printf '%s\n' "$HUMAN" | grep -Fq 'CodingBuddy/Fixture.swift:55 (property)'
+printf '%s\n' "$HUMAN" | grep -Fq 'CodingBuddy/Fixture.swift:56 (func)'
+if printf '%s\n' "$HUMAN" | grep -Fq 'CodingBuddy/Fixture.swift:61 (property)'; then
+    echo "error: default-argument closure local was reported as an API declaration" >&2
+    exit 1
+fi
+if printf '%s\n' "$HUMAN" | grep -Fq 'CodingBuddy/Fixture.swift:66 (property)'; then
+    echo "error: initializer-body local was reported as an API declaration" >&2
+    exit 1
+fi
 printf '%s\n' "$HUMAN" | grep -Fq 'CodingBuddy/WhitespaceDocumentation.swift:2 (type)'
 
 FAILURE_STDOUT="$FIXTURE_ROOT/threshold.json"
 FAILURE_STDERR="$FIXTURE_ROOT/threshold.err"
 if "$ROOT/scripts/check-docstring-coverage.sh" \
     --source-root "$FIXTURE_ROOT" \
-        --minimum 57 \
+        --minimum 46 \
     --json > "$FAILURE_STDOUT" 2> "$FAILURE_STDERR"; then
-    echo "error: expected the 57 percent fixture threshold to fail" >&2
+    echo "error: expected the 46 percent fixture threshold to fail" >&2
     exit 1
 fi
-grep -q '"coverage_percent":56.25' "$FAILURE_STDOUT"
+grep -q '"coverage_percent":45.0' "$FAILURE_STDOUT"
 grep -q '"passed":false' "$FAILURE_STDOUT"
-grep -q 'below the required 57%' "$FAILURE_STDERR"
+grep -q 'below the required 46%' "$FAILURE_STDERR"
 
 echo "Docstring coverage fixtures passed."

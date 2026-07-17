@@ -9,6 +9,137 @@ import Testing
 @testable import CodingBuddy
 
 struct CommandRunnerTests {
+    @Test func relativeFileURLIsRejectedBeforeItsResolvedPathCanBeUsed() async {
+        let relativeURL = URL(fileURLWithPath: "bin/sh")
+        #expect(relativeURL.baseURL != nil)
+        #expect(relativeURL.path.hasPrefix("/"))
+
+        do {
+            _ = try await FoundationCommandRunner().run(CommandRequest(
+                executableURL: relativeURL,
+                arguments: []
+            ))
+            Issue.record("Expected the original relative file URL to be rejected")
+        } catch let error as CommandRunnerError {
+            #expect(error == .executableMustBeAbsolute)
+        } catch {
+            Issue.record("Expected CommandRunnerError, got \(error)")
+        }
+    }
+
+    @Test func nonFileURLWithAbsolutePathIsRejected() async throws {
+        let remoteURL = try #require(URL(string: "https://example.com/bin/sh"))
+        #expect(remoteURL.path == "/bin/sh")
+
+        do {
+            _ = try await FoundationCommandRunner().run(CommandRequest(
+                executableURL: remoteURL,
+                arguments: []
+            ))
+            Issue.record("Expected the non-file URL to be rejected")
+        } catch let error as CommandRunnerError {
+            #expect(error == .executableMustBeAbsolute)
+        } catch {
+            Issue.record("Expected CommandRunnerError, got \(error)")
+        }
+    }
+
+    @Test func embeddedNULInArgumentFailsBeforeLaunch() async {
+        do {
+            _ = try await FoundationCommandRunner().run(CommandRequest(
+                executableURL: URL(fileURLWithPath: "/usr/bin/true"),
+                arguments: ["safe\0truncated"]
+            ))
+            Issue.record("Expected the NUL-containing argument to be rejected")
+        } catch let error as CommandRunnerError {
+            #expect(error == .launchFailed)
+        } catch {
+            Issue.record("Expected CommandRunnerError, got \(error)")
+        }
+    }
+
+    @Test func embeddedNULInEnvironmentFailsBeforeLaunch() async {
+        do {
+            _ = try await FoundationCommandRunner().run(CommandRequest(
+                executableURL: URL(fileURLWithPath: "/usr/bin/true"),
+                arguments: [],
+                environment: ["CODING_BUDDY_TEST": "safe\0truncated"]
+            ))
+            Issue.record("Expected the NUL-containing environment value to be rejected")
+        } catch let error as CommandRunnerError {
+            #expect(error == .launchFailed)
+        } catch {
+            Issue.record("Expected CommandRunnerError, got \(error)")
+        }
+    }
+
+    @Test func cStringAllocationFailureFailsBeforeSpawn() async throws {
+        let marker = FileManager.default.temporaryDirectory
+            .appending(path: "CommandRunnerAllocationMarker-" + UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: marker) }
+        let runner = FoundationCommandRunner(cStringAllocator: FailingAfterOneCStringAllocator())
+
+        do {
+            _ = try await runner.run(CommandRequest(
+                executableURL: URL(fileURLWithPath: "/bin/sh"),
+                arguments: ["-c", "printf launched > \"$1\"", "fixture", marker.path]
+            ))
+            Issue.record("Expected C-string allocation failure to abort launch")
+        } catch let error as CommandRunnerError {
+            #expect(error == .launchFailed)
+        } catch {
+            Issue.record("Expected CommandRunnerError, got \(error)")
+        }
+        #expect(!FileManager.default.fileExists(atPath: marker.path))
+    }
+
+    @Test func nonblockingPipeSetupFailureFailsBeforeSpawn() async throws {
+        let marker = FileManager.default.temporaryDirectory
+            .appending(path: "CommandRunnerPipeMarker-" + UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: marker) }
+        let runner = FoundationCommandRunner(pipeConfigurator: FailingCommandPipeConfigurator())
+
+        do {
+            _ = try await runner.run(CommandRequest(
+                executableURL: URL(fileURLWithPath: "/bin/sh"),
+                arguments: ["-c", "printf launched > \"$1\"", "fixture", marker.path]
+            ))
+            Issue.record("Expected nonblocking pipe setup failure to abort launch")
+        } catch let error as CommandRunnerError {
+            #expect(error == .launchFailed)
+        } catch {
+            Issue.record("Expected CommandRunnerError, got \(error)")
+        }
+        #expect(!FileManager.default.fileExists(atPath: marker.path))
+    }
+
+    @Test func lostProcessBindingTerminatesGroupBeforeReturning() async throws {
+        let reaper = LostBindingCommandProcessReaper()
+        defer { reaper.forceCleanup() }
+        let runner = FoundationCommandRunner(
+            processReaper: reaper,
+            terminationTiming: .fastTest
+        )
+        let clock = ContinuousClock()
+        let started = clock.now
+
+        do {
+            _ = try await runner.run(CommandRequest(
+                executableURL: URL(fileURLWithPath: "/bin/sh"),
+                arguments: ["-c", "trap '' TERM; while :; do /bin/sleep 1; done"],
+                timeout: 30
+            ))
+            Issue.record("Expected the lost process binding to fail")
+        } catch let error as CommandRunnerError {
+            #expect(error == .launchFailed)
+        }
+
+        let processID = try #require(reaper.processID)
+        #expect(started.duration(to: clock.now) < .seconds(1))
+        #expect(await reaper.reapTerminatedChild())
+        #expect(await waitUntilProcessGroupExits(processID))
+    }
+
     @Test(arguments: OutputFloodStream.allCases)
     func combinedOutputLimitStopsFloodingProcessGroup(stream: OutputFloodStream) async throws {
         let fixture = try CommandFixture(script: #"""
@@ -373,6 +504,72 @@ private nonisolated final class DeferredCommandProcessReaper: CommandProcessReap
     }
 }
 
+private nonisolated final class FailingAfterOneCStringAllocator: CommandCStringAllocating, @unchecked Sendable {
+    private let lock = NSLock()
+    private var allocationCount = 0
+
+    /// Exercises cleanup of one successful allocation before simulating exhaustion.
+    func duplicate(_ value: String) -> UnsafeMutablePointer<CChar>? {
+        lock.withLock {
+            allocationCount += 1
+            return allocationCount == 1 ? strdup(value) : nil
+        }
+    }
+}
+
+private nonisolated struct FailingCommandPipeConfigurator: CommandPipeConfiguring {
+    /// Simulates an `fcntl` failure while the pipe is still parent-owned.
+    func configureNonBlocking(_ descriptor: Int32) -> Bool {
+        false
+    }
+}
+
+private nonisolated final class LostBindingCommandProcessReaper: CommandProcessReaping, @unchecked Sendable {
+    private let lock = NSLock()
+    private var storedProcessID: pid_t?
+
+    /// Process identifier captured from the launch before binding loss is reported.
+    var processID: pid_t? {
+        lock.withLock { storedProcessID }
+    }
+
+    /// Reports lost ownership immediately while preserving the identifier for cleanup assertions.
+    func reap(
+        processID: pid_t,
+        completion: @escaping @Sendable (Int32?) -> Void
+    ) {
+        lock.withLock { storedProcessID = processID }
+        completion(nil)
+    }
+
+    /// Reaps the leader after the runner's bounded group-termination sequence.
+    func reapTerminatedChild() async -> Bool {
+        guard let processID else { return false }
+        for _ in 0..<200 {
+            var status: Int32 = 0
+            var result: pid_t
+            repeat {
+                result = waitpid(processID, &status, WNOHANG)
+            } while result == -1 && errno == EINTR
+            if result == processID || (result == -1 && errno == ECHILD) { return true }
+            if result == -1 { return false }
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+        return false
+    }
+
+    /// Prevents a failed assertion from leaking the injected child beyond the test.
+    func forceCleanup() {
+        guard let processID else { return }
+        _ = Darwin.kill(-processID, SIGKILL)
+        var status: Int32 = 0
+        var result: pid_t
+        repeat {
+            result = waitpid(processID, &status, 0)
+        } while result == -1 && errno == EINTR
+    }
+}
+
 private struct CommandFixture {
     let directory: URL
     let script: URL
@@ -453,11 +650,11 @@ private struct FixtureProcesses {
     }
 }
 
-private enum CommandRunnerTestError: Error {
+private nonisolated enum CommandRunnerTestError: Error {
     case processIdentifiersUnavailable
 }
 
-enum OutputFloodStream: String, CaseIterable, Sendable {
+nonisolated enum OutputFloodStream: String, CaseIterable, Sendable {
     case stdout
     case stderr
     case mixed

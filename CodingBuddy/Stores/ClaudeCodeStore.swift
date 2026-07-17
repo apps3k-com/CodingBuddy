@@ -270,12 +270,36 @@ final class ClaudeCodeStore {
         }
     }
 
+    /// Thread-safe cancellation signal shared with detached filesystem work.
+    nonisolated final class ScanCancellation: @unchecked Sendable {
+        /// Serializes access to the cancellation bit across actor and detached-task boundaries.
+        private let lock = NSLock()
+        /// One-way cancellation bit protected by `lock`.
+        private var cancelled = false
+
+        /// Marks the scan as cancelled; repeated calls are harmless.
+        func cancel() {
+            lock.lock()
+            cancelled = true
+            lock.unlock()
+        }
+
+        /// Whether the owning reload generation has been superseded or dismissed.
+        var isCancelled: Bool {
+            lock.lock()
+            defer { lock.unlock() }
+            return cancelled
+        }
+    }
+
     /// Value-only request passed to an injected background snapshot loader.
-    nonisolated struct LoadRequest: Equatable, Sendable {
+    nonisolated struct LoadRequest: Sendable {
         /// Explicit home directory; the loader never consults process HOME.
         let homeDirectory: URL
         /// Bounded-read policy for this scan.
         let readLimits: ReadLimits
+        /// Shared signal that lets synchronous detached work stop promptly.
+        let cancellation: ScanCancellation
     }
 
     /// Injectable actor-safe loading boundary used for deterministic cancellation tests.
@@ -322,6 +346,8 @@ final class ClaudeCodeStore {
     @ObservationIgnored private let loadSnapshot: SnapshotLoader
     @ObservationIgnored private var reloadTask: Task<Void, Never>?
     @ObservationIgnored private var reloadRequestID: UUID?
+    /// Signal owned by the current generation so replacement and navigation can stop disk work.
+    @ObservationIgnored private var reloadCancellation: ScanCancellation?
     @ObservationIgnored private lazy var monitor = FileChangeMonitor { [weak self] in
         self?.reload()
     }
@@ -333,9 +359,15 @@ final class ClaudeCodeStore {
         transactionHook: ((SafeFileWriter.TransactionPoint) throws -> Void)? = nil,
         readLimits: ReadLimits = .production,
         loadSnapshot: @escaping SnapshotLoader = { request in
-            await Task.detached(priority: .userInitiated) {
+            let worker = Task.detached(priority: .userInitiated) {
                 DiskSnapshotLoader(request: request).load()
-            }.value
+            }
+            return await withTaskCancellationHandler {
+                await worker.value
+            } onCancel: {
+                request.cancellation.cancel()
+                worker.cancel()
+            }
         }
     ) {
         self.homeDirectory = homeDirectory.standardizedFileURL
@@ -351,6 +383,7 @@ final class ClaudeCodeStore {
     }
 
     deinit {
+        reloadCancellation?.cancel()
         reloadTask?.cancel()
     }
 
@@ -420,23 +453,35 @@ final class ClaudeCodeStore {
 
     /// Cancels older work, clears stale rows, and starts one generation-bound scan.
     func reload() {
+        reloadCancellation?.cancel()
         reloadTask?.cancel()
         let requestID = UUID()
+        let cancellation = ScanCancellation()
         reloadRequestID = requestID
+        reloadCancellation = cancellation
         loadState = .loading
         sourceStatuses = []
         envEntries = []
         servers = []
         monitor.cancelPending()
-        let request = LoadRequest(homeDirectory: homeDirectory, readLimits: readLimits)
+        let request = LoadRequest(
+            homeDirectory: homeDirectory,
+            readLimits: readLimits,
+            cancellation: cancellation
+        )
         let loader = loadSnapshot
 
         reloadTask = Task { [weak self, loader] in
-            let snapshot = await loader(request)
+            let snapshot = await withTaskCancellationHandler {
+                await loader(request)
+            } onCancel: {
+                cancellation.cancel()
+            }
             guard let self,
                   !Task.isCancelled,
                   reloadRequestID == requestID
             else { return }
+            reloadCancellation = nil
             publish(snapshot)
         }
     }
@@ -444,6 +489,8 @@ final class ClaudeCodeStore {
     /// Cancels an in-flight navigation-triggered load and returns to a neutral state.
     func cancelLoading() {
         guard loadState == .loading else { return }
+        reloadCancellation?.cancel()
+        reloadCancellation = nil
         reloadTask?.cancel()
         reloadRequestID = nil
         sourceStatuses = []
@@ -552,9 +599,9 @@ nonisolated private struct DiskSnapshotLoader {
         /// The directory entry was safely proven absent.
         case missing
         /// A bounded regular file was decoded as UTF-8.
-        case available(String)
+        case available(String, byteCount: Int)
         /// The input was deliberately rejected with a path-free reason.
-        case refused(ClaudeCodeStore.SourceRefusalReason)
+        case refused(ClaudeCodeStore.SourceRefusalReason, chargedBytes: Int)
     }
 
     /// Directory traversal result used for roots and project records.
@@ -578,15 +625,31 @@ nonisolated private struct DiskSnapshotLoader {
     private var reader: SafeFileWriter {
         SafeFileWriter(backupDirectory: homeDirectory.appendingPathComponent(".codingbuddy-read-only"))
     }
+    /// Whether either the detached task or its owning reload generation was cancelled.
+    private var isCancelled: Bool {
+        request.cancellation.isCancelled || Task.isCancelled
+    }
+
+    /// Empty result returned only to unwind superseded work; cancelled generations are never published.
+    private var cancelledSnapshot: ClaudeCodeStore.Snapshot {
+        ClaudeCodeStore.Snapshot(
+            sourceStatuses: [],
+            envEntries: [],
+            servers: [],
+            watchURLs: []
+        )
+    }
 
     /// Produces one immutable snapshot without accessing observable state.
     func load() -> ClaudeCodeStore.Snapshot {
+        guard !isCancelled else { return cancelledSnapshot }
         var statuses: [ClaudeCodeStore.SourceStatus] = []
         var entries: [ClaudeCodeStore.EnvEntry] = []
         var servers: [ClaudeCodeStore.ServerSnapshot] = []
         var watchURLs: [URL] = []
 
         let directoryResult = classifyDirectory(claudeDirectory)
+        guard !isCancelled else { return cancelledSnapshot }
         statuses.append(sourceStatus(
             id: "claude-directory",
             kind: .claudeDirectory,
@@ -597,8 +660,10 @@ nonisolated private struct DiskSnapshotLoader {
         switch directoryResult {
         case .available:
             for source in ClaudeCodeStore.EnvEntry.Source.allCases {
+                guard !isCancelled else { return cancelledSnapshot }
                 let fileURL = claudeDirectory.appendingPathComponent(source.fileName)
                 let result = loadSettings(source, at: fileURL)
+                guard !isCancelled else { return cancelledSnapshot }
                 statuses.append(result.status)
                 entries += result.entries
                 if result.status.availability == .available { watchURLs.append(fileURL) }
@@ -622,6 +687,7 @@ nonisolated private struct DiskSnapshotLoader {
         }
 
         let stateResult = loadClaudeState(at: claudeJSONURL)
+        guard !isCancelled else { return cancelledSnapshot }
         statuses.append(stateResult.status)
         statuses += stateResult.projectStatuses
         servers += stateResult.servers
@@ -657,11 +723,11 @@ nonisolated private struct DiskSnapshotLoader {
             return (ClaudeCodeStore.SourceStatus(
                 id: id, kind: .settings(source), availability: .missing, revealURL: nil
             ), [])
-        case .refused(let reason):
+        case .refused(let reason, _):
             return (ClaudeCodeStore.SourceStatus(
                 id: id, kind: .settings(source), availability: .refused(reason), revealURL: fileURL
             ), [])
-        case .available(let text):
+        case .available(let text, _):
             guard let parsed = try? JSONSerialization.jsonObject(with: Data(text.utf8)) else {
                 return refusedSettings(id: id, source: source, url: fileURL, reason: .malformedJSON)
             }
@@ -713,11 +779,11 @@ nonisolated private struct DiskSnapshotLoader {
             return (ClaudeCodeStore.SourceStatus(
                 id: id, kind: .claudeState, availability: .missing, revealURL: nil
             ), [], [])
-        case .refused(let reason):
+        case .refused(let reason, _):
             return (ClaudeCodeStore.SourceStatus(
                 id: id, kind: .claudeState, availability: .refused(reason), revealURL: fileURL
             ), [], [])
-        case .available(let text):
+        case .available(let text, _):
             guard let parsed = try? JSONSerialization.jsonObject(with: Data(text.utf8)) else {
                 return refusedClaudeState(url: fileURL, reason: .malformedJSON)
             }
@@ -745,7 +811,9 @@ nonisolated private struct DiskSnapshotLoader {
 
             var aggregateBytes = 0
             for (index, project) in projects.prefix(request.readLimits.projectCount).enumerated() {
+                guard !isCancelled else { break }
                 let result = loadProject(project, index: index, aggregateBytes: aggregateBytes)
+                guard !isCancelled else { break }
                 statuses.append(result.status)
                 servers += result.servers
                 aggregateBytes = result.aggregateBytes
@@ -784,6 +852,11 @@ nonisolated private struct DiskSnapshotLoader {
         aggregateBytes: Int
     ) {
         let id = "project-mcp-\(index)"
+        guard !isCancelled else {
+            return (ClaudeCodeStore.SourceStatus(
+                id: id, kind: .projectMCP, availability: .refused(.unreadable), revealURL: nil
+            ), [], aggregateBytes)
+        }
         guard project.key.hasPrefix("/") else {
             return (ClaudeCodeStore.SourceStatus(
                 id: id, kind: .projectMCP, availability: .refused(.unsafePath), revealURL: nil
@@ -818,27 +891,28 @@ nonisolated private struct DiskSnapshotLoader {
         } ?? []).map(ClaudeCodeStore.ServerSnapshot.init)
         let localNames = Set(projectServers.map(\.name))
         let mcpURL = projectURL.appendingPathComponent(".mcp.json")
+        let remainingBytes = max(0, request.readLimits.projectMCPBytes - aggregateBytes)
+        let readCeiling = min(request.readLimits.projectMCPFileBytes, remainingBytes)
 
-        switch boundedText(at: mcpURL, maximumByteCount: request.readLimits.projectMCPFileBytes) {
+        switch boundedText(at: mcpURL, maximumByteCount: readCeiling) {
         case .missing:
             return (ClaudeCodeStore.SourceStatus(
                 id: id, kind: .projectMCP, availability: .missing, revealURL: nil
             ), projectServers, aggregateBytes)
-        case .refused(let reason):
+        case .refused(let reason, let chargedBytes):
+            let consumedBytes = min(
+                request.readLimits.projectMCPBytes,
+                aggregateBytes + chargedBytes
+            )
+            let aggregateLimitPreventedRead = remainingBytes == 0
+                || readCeiling < request.readLimits.projectMCPFileBytes
+            let refusalReason = reason == .tooLarge && aggregateLimitPreventedRead
+                ? ClaudeCodeStore.SourceRefusalReason.projectByteLimit
+                : reason
             return (ClaudeCodeStore.SourceStatus(
-                id: id, kind: .projectMCP, availability: .refused(reason), revealURL: mcpURL
-            ), projectServers, aggregateBytes)
-        case .available(let text):
-            let byteCount = text.utf8.count
-            guard byteCount <= request.readLimits.projectMCPBytes,
-                  aggregateBytes <= request.readLimits.projectMCPBytes - byteCount else {
-                return (ClaudeCodeStore.SourceStatus(
-                    id: id,
-                    kind: .projectMCP,
-                    availability: .refused(.projectByteLimit),
-                    revealURL: mcpURL
-                ), projectServers, aggregateBytes)
-            }
+                id: id, kind: .projectMCP, availability: .refused(refusalReason), revealURL: mcpURL
+            ), projectServers, consumedBytes)
+        case .available(let text, let byteCount):
             let consumedBytes = aggregateBytes + byteCount
             guard let parsed = try? JSONSerialization.jsonObject(with: Data(text.utf8)) else {
                 return (ClaudeCodeStore.SourceStatus(
@@ -865,26 +939,31 @@ nonisolated private struct DiskSnapshotLoader {
 
     /// Captures one bounded regular file without following user-controlled symbolic links.
     private func boundedText(at url: URL, maximumByteCount: Int) -> TextResult {
+        guard !isCancelled else { return .refused(.unreadable, chargedBytes: 0) }
         do {
             let snapshot = try reader.noFollowSnapshot(at: url, maximumByteCount: maximumByteCount)
+            guard !isCancelled else {
+                return .refused(.unreadable, chargedBytes: maximumByteCount)
+            }
             guard let text = try snapshot.utf8Content() else { return .missing }
-            return .available(text)
+            return .available(text, byteCount: text.utf8.count)
         } catch SafeFileWriter.WriteError.targetTooLarge {
-            return .refused(.tooLarge)
+            return .refused(.tooLarge, chargedBytes: maximumByteCount)
         } catch SafeFileWriter.WriteError.unsafeTarget,
                 SafeFileWriter.WriteError.danglingSymlink {
-            return .refused(.unsafePath)
+            return .refused(.unsafePath, chargedBytes: 0)
         } catch let error as CocoaError where error.code == .fileReadInapplicableStringEncoding {
-            return .refused(.invalidUTF8)
+            return .refused(.invalidUTF8, chargedBytes: maximumByteCount)
         } catch let error as POSIXError where error.code == .EACCES || error.code == .EPERM {
-            return .refused(.unreadable)
+            return .refused(.unreadable, chargedBytes: 0)
         } catch {
-            return .refused(.unsupportedFileType)
+            return .refused(.unsupportedFileType, chargedBytes: maximumByteCount)
         }
     }
 
     /// Opens every directory component descriptor-relatively and rejects symlinks at any level.
     private func classifyDirectory(_ url: URL) -> DirectoryResult {
+        guard !isCancelled else { return .refused(.unreadable) }
         guard url.isFileURL, url.path.hasPrefix("/") else { return .refused(.unsafePath) }
         let path = normalizedSystemAliasPath(url.standardizedFileURL.path)
         let components = path.split(separator: "/", omittingEmptySubsequences: true)
@@ -899,6 +978,7 @@ nonisolated private struct DiskSnapshotLoader {
         defer { Darwin.close(descriptor) }
 
         for (index, component) in components.enumerated() {
+            guard !isCancelled else { return .refused(.unreadable) }
             let next = component.withCString {
                 openat(
                     descriptor,
