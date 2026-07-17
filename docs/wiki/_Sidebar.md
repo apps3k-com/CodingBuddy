@@ -9,6 +9,7 @@
 - [Agent PR Monitor Design](Agent-PR-Monitor)
 - [Capability Hygiene](Capability-Hygiene)
 - [Pull Request Review Desk](Review-Desk)
+- [GitHub Projects](User-Guide-EN#github-projects-workspace)
 - [Data Model & Safety](Data-Model)
 - [Development Setup](Development-Setup)
 - [Conventions](Conventions)

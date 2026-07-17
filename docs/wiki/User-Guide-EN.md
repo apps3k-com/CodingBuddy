@@ -113,6 +113,64 @@ background, mutate GitHub, or rank Health, Security, and package signals yet.
 Those sources will join the same deterministic queue after their guidance
 contracts land.
 
+## GitHub Projects workspace
+
+The **Repositories → Projects** entry (alpha) turns one organization Project
+into a native planning workspace without copying its issues into CodingBuddy.
+Enter the organization login, choose a Project and one single-select field such
+as **Status**, then switch between **Table** and **Board**. Both views use the
+same rows and filters, including repository, search, and drift filters. Items
+whose repository is hidden by GitHub permissions remain visible as unavailable
+evidence instead of silently disappearing. Archived items are opt-in. Empty
+Projects, Projects without a single-select field, and filters with no matches
+have distinct states; **Reset Filters** restores the default view.
+
+If GitHub removes an option that is still assigned to an item, CodingBuddy keeps
+that value in a separate **Unavailable value** lane instead of presenting it as
+**No value**. The same warning appears in the table, inspector, and move
+confirmation. An organization with no accessible Projects and a Project that is
+read-only for the current viewer each show their own permission guidance.
+
+Select an item to inspect **Details**, **Drift**, and **Evidence**. The local
+lifecycle policy assigns stable Project option IDs to Backlog, Ready, In
+progress, In review, Ready to merge, Done, or Canceled roles. Optional rules can
+require related items in the same Project, require a closing issue for pull
+requests, flag parents whose children are not aligned, and require explicitly
+selected Project workflows. CodingBuddy never guesses policy from option or
+workflow names. Until every option has a role, the workspace says that
+configuration is required and links directly to the policy editor. Incomplete
+evidence is announced as a partial assessment, never as "no drift."
+When a saved policy references options or workflows that GitHub no longer
+provides, the editor lists those unavailable references. They can be removed
+explicitly and are discarded before the repaired policy is saved only when a
+complete field or workflow read proves that they were removed. A bounded,
+incomplete read preserves the saved IDs and shows an evidence warning instead.
+
+Use **Move to** from a row, board card, or inspector. A high-risk confirmation
+names the exact item, current value, and destination before it describes the
+risk. Moves are disabled whenever
+pagination, field values, relationships, workflows, authorization, or policy
+evidence is incomplete. Every move is checked again against the current viewer,
+item, field definition, and policy after confirmation. CodingBuddy then sends
+one mutation and reads the item back. It never retries an uncertain write. If
+the request or readback is cancelled after the mutation starts, or GitHub may
+otherwise have accepted a request without a provable result, all moves
+stay locked until **Verify on GitHub** re-fetches the Project.
+
+Only the CodingBuddy GitHub App can change Projects. A fine-grained personal
+access token can still read the workspace but cannot pass move preflight. Local
+preferences contain organization, selected IDs, filters, view mode, and policy;
+Project item content is not cached on disk. If a write cannot be verified,
+CodingBuddy stores only its minimal ID- and digest-based recovery context so the
+write lock survives an app restart and **Verify on GitHub** remains available.
+
+Refresh controls identify the snapshot's relative age and exact capture time.
+If a refresh fails while verified data remains visible, the warning also names
+that retained snapshot so stale and current evidence are distinguishable.
+
+v1 limits: no drag and drop, bulk moves, Project creation, field editing,
+arbitrary workflow editing, background sync, or automatic drift repair.
+
 ## Secrets stay masked
 
 Variables whose names look like credentials (`GITHUB_TOKEN`, `AWS_SECRET_ACCESS_KEY`, anything with `TOKEN`, `KEY`, `SECRET`, `PASSWORD`, `AUTH`, …) show `••••••••` instead of their value.

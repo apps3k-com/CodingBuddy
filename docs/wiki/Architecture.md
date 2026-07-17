@@ -300,6 +300,51 @@ Successful reply verification additionally requires the exact comment ID from
 GitHub's mutation receipt. Without a receipt, equal concurrent text is not
 treated as proof that CodingBuddy authored the reply.
 
+### GitHub Projects evidence and mutation boundary
+
+`GitHubProjectsClient` reads organization Projects, single-select field
+definitions, Project workflows, items, status values, issue and pull-request
+state, and bounded relationship edges through native GraphQL requests. Every
+connection has explicit request, page, node, and aggregate-response-byte limits.
+Cursor cycles, duplicate identities, changing totals, unknown provider enums,
+partial GraphQL errors, omitted relationship pages, or exhausted limits produce
+typed incomplete evidence; they never become a healthy or writable snapshot.
+Nullable selected-value properties retain the Project item and mark its field
+evidence incomplete instead of aborting the whole workspace read.
+
+`GitHubProjectDriftAnalyzer` runs independent lifecycle, reverse-transition,
+linkage, parent/child roll-up, and automation rules. Lifecycle roles and expected
+workflows are configured by stable provider IDs. Names remain display-only, so
+renaming a status or workflow cannot silently change policy. Missing issue
+completion reasons and redacted repository scope are explicit evidence gaps.
+Saved option and workflow IDs are removed only when the corresponding
+connection was read completely; absence from a bounded partial read is never
+treated as deletion.
+The table, board, inspector, and filters all consume one
+`GitHubProjectBoardProjection`, which guarantees that changing presentation does
+not change the audited item set.
+
+`GitHubProjectsStore` persists local view preferences and the ID-based policy.
+Provider item content remains memory-only. A separate minimal ambiguous-write
+record contains only the preflight IDs, timestamps, and digests required to keep
+the global write lock and exact readback route across process restarts. The
+store also owns the mutation state machine. A move begins with a fresh server
+read that binds a one-use nonce
+to the authenticated principal, Project item, selected field, complete snapshot,
+field-definition digest, policy digest, and destination. Personal access tokens
+are rejected before this preflight performs a network request. Cancellation,
+policy edits, refreshes, and credential changes invalidate unused authority.
+
+After confirmation, the client consumes the nonce, performs one more complete
+read, and compares every bound input before sending exactly one
+`updateProjectV2ItemFieldValue` or `clearProjectV2ItemFieldValue` mutation. It
+never retries a write automatically. A final readback must prove the selected
+value. Transport loss, partial provider responses, mismatched receipts, any
+cancellation after mutation transport begins, or unprovable readback enter a
+global ambiguous state that blocks further moves
+until the user explicitly re-fetches and reconciles the Project. This prevents a
+timeout from turning into a duplicate or contradictory planning transition.
+
 ### MCP inventory disclosure boundary
 
 `MCPServerInventoryScanner` preserves every source occurrence, including a

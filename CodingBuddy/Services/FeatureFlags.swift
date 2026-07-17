@@ -77,6 +77,8 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
     case agentPRMonitor
     /// Enables the focused GitHub pull request Review Desk.
     case pullRequestReviewDesk
+    /// Enables the GitHub Projects board and planning drift auditor.
+    case githubProjectsBoard
     /// Enables local backup discovery and restore.
     case backupBrowser
     /// Enables a default external editor preference for text-like files.
@@ -111,6 +113,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
         case .capabilityHygiene: .alpha
         case .agentPRMonitor: .alpha
         case .pullRequestReviewDesk: .alpha
+        case .githubProjectsBoard: .alpha
         case .backupBrowser: .alpha
         case .defaultEditorPreference: .alpha
         case .collapsibleSidebarSections: .alpha

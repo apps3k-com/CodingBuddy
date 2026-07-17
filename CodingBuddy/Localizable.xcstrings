@@ -12273,6 +12273,936 @@
         "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub-Status verifizieren …" } }
       }
     },
+    "Project move verified on GitHub" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Verschiebung auf GitHub verifiziert" } }
+      }
+    },
+    "GitHub did not apply the Project move." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub hat die Project-Verschiebung nicht angewendet." } }
+      }
+    },
+    "CodingBuddy could not complete the GitHub Projects request." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "CodingBuddy konnte die GitHub-Projects-Anfrage nicht abschließen." } }
+      }
+    },
+    "Table" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Tabelle" } }
+      }
+    },
+    "Board" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Board" } }
+      }
+    },
+    "Issue" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Issue" } }
+      }
+    },
+    "Draft issue" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Entwurfs-Issue" } }
+      }
+    },
+    "Unavailable item" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht verfügbarer Eintrag" } }
+      }
+    },
+    "Merged" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Gemergt" } }
+      }
+    },
+    "Draft" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Entwurf" } }
+      }
+    },
+    "Backlog" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Backlog" } }
+      }
+    },
+    "In progress" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "In Arbeit" } }
+      }
+    },
+    "In review" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Im Review" } }
+      }
+    },
+    "Ready to merge" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Merge-bereit" } }
+      }
+    },
+    "Canceled" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Abgebrochen" } }
+      }
+    },
+    "Lifecycle" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Lifecycle" } }
+      }
+    },
+    "Reverse transition" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Rückwärtsübergang" } }
+      }
+    },
+    "Linkage" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Verknüpfung" } }
+      }
+    },
+    "Roll-up" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Zusammenfassung" } }
+      }
+    },
+    "Automation" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Automatisierung" } }
+      }
+    },
+    "Notice" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Hinweis" } }
+      }
+    },
+    "Critical" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Kritisch" } }
+      }
+    },
+    "Projects" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Projects" } }
+      }
+    },
+    "Move" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Verschieben" } }
+      }
+    },
+    "Organization" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Organisation" } }
+      }
+    },
+    "GitHub organization" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub-Organisation" } }
+      }
+    },
+    "Load organization Projects" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Projects der Organisation laden" } }
+      }
+    },
+    "Project" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project" } }
+      }
+    },
+    "Choose Project" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project auswählen" } }
+      }
+    },
+    "GitHub Project" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub Project" } }
+      }
+    },
+    "Field" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Feld" } }
+      }
+    },
+    "Choose field" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Feld auswählen" } }
+      }
+    },
+    "Board field" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Board-Feld" } }
+      }
+    },
+    "Open GitHub authorization settings" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub-Autorisierungseinstellungen öffnen" } }
+      }
+    },
+    "Loading GitHub Projects..." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub Projects werden geladen …" } }
+      }
+    },
+    "Project discovery reached the configured safety limit." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die Project-Suche hat das konfigurierte Sicherheitslimit erreicht." } }
+      }
+    },
+    "Project evidence is incomplete. Changes are disabled." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die Project-Evidenz ist unvollständig. Änderungen sind deaktiviert." } }
+      }
+    },
+    "Validating current Project state..." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Aktueller Project-Status wird geprüft …" } }
+      }
+    },
+    "Applying Project move..." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Verschiebung wird angewendet …" } }
+      }
+    },
+    "Project move needs verification" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Verschiebung muss verifiziert werden" } }
+      }
+    },
+    "Verifying Project move on GitHub..." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Verschiebung wird auf GitHub verifiziert …" } }
+      }
+    },
+    "Project move remains unverified. GitHub verification failed: %@" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Verschiebung bleibt unverifiziert. GitHub-Verifizierung fehlgeschlagen: %@" } }
+      }
+    },
+    "Verify on GitHub" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Auf GitHub verifizieren" } }
+      }
+    },
+    "Project state changed. Review the refreshed item." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Der Project-Status hat sich geändert. Prüfe den aktualisierten Eintrag." } }
+      }
+    },
+    "Choose a GitHub Project" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub Project auswählen" } }
+      }
+    },
+    "No accessible Projects" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine zugänglichen Projects" } }
+      }
+    },
+    "No organization Projects are visible to the current GitHub authorization. Check organization access and Project permissions." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Für die aktuelle GitHub-Autorisierung sind keine Projects der Organisation sichtbar. Prüfe den Organisationszugriff und die Project-Berechtigungen." } }
+      }
+    },
+    "GitHub Project table" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub-Project-Tabelle" } }
+      }
+    },
+    "%lld items" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%lld Einträge" } }
+      }
+    },
+    "1 item" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "1 Eintrag" } }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@, %@" } }
+      }
+    },
+    "Selects the item and opens its evidence inspector." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Wählt den Eintrag aus und öffnet den Evidenz-Inspector." } }
+      }
+    },
+    "GitHub Project board" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub-Project-Board" } }
+      }
+    },
+    "View" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Ansicht" } }
+      }
+    },
+    "Project view" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Ansicht" } }
+      }
+    },
+    "Filter repositories" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Repositories filtern" } }
+      }
+    },
+    "Drift" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Abweichungen" } }
+      }
+    },
+    "Filter planning drift" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Planungsabweichungen filtern" } }
+      }
+    },
+    "Configure lifecycle policy" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Lifecycle-Policy konfigurieren" } }
+      }
+    },
+    "Refresh Project" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project aktualisieren" } }
+      }
+    },
+    "Move to" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Verschieben nach" } }
+      }
+    },
+    "No value" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Kein Wert" } }
+      }
+    },
+    "Unavailable value: %@" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht verfügbarer Wert: %@" } }
+      }
+    },
+    "Unavailable value" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht verfügbarer Wert" } }
+      }
+    },
+    "Dismiss" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Schließen" } }
+      }
+    },
+    "%lld drift findings" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%lld Abweichungen" } }
+      }
+    },
+    "1 drift finding" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "1 Abweichung" } }
+      }
+    },
+    "This move enters, leaves, or clears a terminal lifecycle state." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Diese Verschiebung erreicht, verlässt oder leert einen terminalen Lifecycle-Status." } }
+      }
+    },
+    "This move conflicts with the current GitHub issue or pull request state." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Diese Verschiebung widerspricht dem aktuellen GitHub-Status des Issues oder Pull Requests." } }
+      }
+    },
+    "GitHub evidence cannot classify this move safely." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die GitHub-Evidenz reicht nicht aus, um diese Verschiebung sicher einzuordnen." } }
+      }
+    },
+    "Review the current Project item before moving it." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Prüfe den aktuellen Project-Eintrag vor dem Verschieben." } }
+      }
+    },
+    "Project item inspector" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Eintrags-Inspector" } }
+      }
+    },
+    "Unavailable" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht verfügbar" } }
+      }
+    },
+    "Open on GitHub" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Auf GitHub öffnen" } }
+      }
+    },
+    "No known drift" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine bekannte Abweichung" } }
+      }
+    },
+    "Repository scope is unavailable" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Repository-Scope ist nicht verfügbar" } }
+      }
+    },
+    "Field values are incomplete" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Feldwerte sind unvollständig" } }
+      }
+    },
+    "Relationships are incomplete" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Beziehungen sind unvollständig" } }
+      }
+    },
+    "Lifecycle roles" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Lifecycle-Rollen" } }
+      }
+    },
+    "Not classified" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht klassifiziert" } }
+      }
+    },
+    "Relationship rules" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Beziehungsregeln" } }
+      }
+    },
+    "Require related items in this Project" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Verknüpfte Einträge in diesem Project verlangen" } }
+      }
+    },
+    "Require a closing issue for pull requests" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Schließendes Issue für Pull Requests verlangen" } }
+      }
+    },
+    "Flag active parents when every child is terminal" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Aktive Eltern markieren, wenn alle Kinder terminal sind" } }
+      }
+    },
+    "Required automations" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Erforderliche Automatisierungen" } }
+      }
+    },
+    "No Project workflows available" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine Project-Workflows verfügbar" } }
+      }
+    },
+    "Disabled" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Deaktiviert" } }
+      }
+    },
+    "The selected project field is unavailable or has changed." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Das ausgewählte Project-Feld ist nicht verfügbar oder wurde geändert." } }
+      }
+    },
+    "%@ has no value for %@." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ hat keinen Wert für %@." } }
+      }
+    },
+    "%@ returned more than one value for %@." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ hat mehr als einen Wert für %@ zurückgegeben." } }
+      }
+    },
+    "Lifecycle field needs attention" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Lifecycle-Feld erfordert Aufmerksamkeit" } }
+      }
+    },
+    "Project option no longer exists" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Option existiert nicht mehr" } }
+      }
+    },
+    "%@ still references the removed option %@." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ verweist weiterhin auf die entfernte Option %@." } }
+      }
+    },
+    "Not every field value was available for %@." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht jeder Feldwert war für %@ verfügbar." } }
+      }
+    },
+    "Not every relationship was available for %@." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht jede Beziehung war für %@ verfügbar." } }
+      }
+    },
+    "The issue completion reason is unavailable for %@." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Der Abschlussgrund des Issues ist für %@ nicht verfügbar." } }
+      }
+    },
+    "Required automation is missing, but no active Project item can own the finding." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Eine erforderliche Automatisierung fehlt, aber kein aktiver Project-Eintrag kann den Befund tragen." } }
+      }
+    },
+    "%lld field options still need a lifecycle role." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%lld Feldoptionen benötigen noch eine Lifecycle-Rolle." } }
+      }
+    },
+    "Terminal work remains active" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Terminale Arbeit bleibt aktiv" } }
+      }
+    },
+    "%@ is %@ but remains in the active %@ lane." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ ist %@, bleibt aber in der aktiven Spalte %@." } }
+      }
+    },
+    "Issue completion reason conflicts with the lane" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Issue-Abschlussgrund widerspricht der Spalte" } }
+      }
+    },
+    "%@ was closed with reason %@ but remains in %@." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ wurde mit dem Grund %@ geschlossen, bleibt aber in %@." } }
+      }
+    },
+    "Active work remains terminal" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Aktive Arbeit bleibt terminal" } }
+      }
+    },
+    "%@ is open but remains in the terminal %@ lane." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ ist offen, bleibt aber in der terminalen Spalte %@." } }
+      }
+    },
+    "Pull request does not close an issue" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Pull Request schließt kein Issue" } }
+      }
+    },
+    "%@ has no closing issue relationship." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ hat keine Beziehung zu einem schließenden Issue." } }
+      }
+    },
+    "Related work is outside this project" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Verknüpfte Arbeit liegt außerhalb dieses Projects" } }
+      }
+    },
+    "%@ references %@, which is not a visible item in this project." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ verweist auf %@, das in diesem Project nicht sichtbar ist." } }
+      }
+    },
+    "Parent completed before its children" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Elterneintrag vor seinen Kindern abgeschlossen" } }
+      }
+    },
+    "%@ is terminal while child %@ is still active." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ ist terminal, während das Kind %@ noch aktiv ist." } }
+      }
+    },
+    "Parent may be ready to complete" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Elterneintrag ist möglicherweise abschließbar" } }
+      }
+    },
+    "All %lld known children of %@ are terminal, but the parent remains active." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Alle %lld bekannten Kinder von %@ sind terminal, aber der Elterneintrag bleibt aktiv." } }
+      }
+    },
+    "Child issue is outside this project" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Untergeordnetes Issue liegt außerhalb dieses Projects" } }
+      }
+    },
+    "%@ tracks child %@, which is not a visible project item." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ verfolgt das Kind %@, das kein sichtbarer Project-Eintrag ist." } }
+      }
+    },
+    "Required project automation is unavailable" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Erforderliche Project-Automatisierung ist nicht verfügbar" } }
+      }
+    },
+    "Required workflow %@ is missing or disabled." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Der erforderliche Workflow %@ fehlt oder ist deaktiviert." } }
+      }
+    },
+    "The project field list is incomplete." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die Project-Feldliste ist unvollständig." } }
+      }
+    },
+    "The project item list is incomplete." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die Project-Eintragsliste ist unvollständig." } }
+      }
+    },
+    "The project workflow list is incomplete." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die Project-Workflow-Liste ist unvollständig." } }
+      }
+    },
+    "%lld items have incomplete field values." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%lld Einträge haben unvollständige Feldwerte." } }
+      }
+    },
+    "%lld items have incomplete relationship evidence." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%lld Einträge haben unvollständige Beziehungsevidenz." } }
+      }
+    },
+    "Sign in to GitHub to load Projects." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Melde dich bei GitHub an, um Projects zu laden." } }
+      }
+    },
+    "Enter a valid GitHub organization login." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Gib einen gültigen GitHub-Organisations-Login ein." } }
+      }
+    },
+    "The selected GitHub Project is invalid." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Das ausgewählte GitHub Project ist ungültig." } }
+      }
+    },
+    "The GitHub authorization cannot access organization Projects." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die GitHub-Autorisierung kann nicht auf Organisations-Projects zugreifen." } }
+      }
+    },
+    "The GitHub organization is unavailable to this authorization." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die GitHub-Organisation ist für diese Autorisierung nicht verfügbar." } }
+      }
+    },
+    "The selected GitHub Project is unavailable." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Das ausgewählte GitHub Project ist nicht verfügbar." } }
+      }
+    },
+    "GitHub is unreachable. Check the network and try again." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub ist nicht erreichbar. Prüfe das Netzwerk und versuche es erneut." } }
+      }
+    },
+    "GitHub returned incomplete Project data." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub hat unvollständige Project-Daten zurückgegeben." } }
+      }
+    },
+    "GitHub Project pagination changed before the read completed." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die GitHub-Project-Pagination hat sich vor Abschluss des Lesevorgangs geändert." } }
+      }
+    },
+    "GitHub returned duplicate Project identities." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub hat doppelte Project-Identitäten zurückgegeben." } }
+      }
+    },
+    "The GitHub Project exceeds the safe snapshot limit." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Das GitHub Project überschreitet das sichere Snapshot-Limit." } }
+      }
+    },
+    "The GitHub Project changed. Refresh before trying again." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Das GitHub Project wurde geändert. Aktualisiere es vor einem erneuten Versuch." } }
+      }
+    },
+    "Sign in with the CodingBuddy GitHub App before changing Projects." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Melde dich mit der CodingBuddy GitHub App an, bevor du Projects änderst." } }
+      }
+    },
+    "The requested Project change is no longer valid." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die angeforderte Project-Änderung ist nicht mehr gültig." } }
+      }
+    },
+    "Complete Project evidence and lifecycle roles are required before changing an item." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Vor dem Ändern eines Eintrags sind vollständige Project-Evidenz und Lifecycle-Rollen erforderlich." } }
+      }
+    },
+    "GitHub may have applied the change. Verify the item before trying again." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub könnte die Änderung angewendet haben. Verifiziere den Eintrag vor einem erneuten Versuch." } }
+      }
+    },
+    "GitHub rejected the Project change." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub hat die Project-Änderung abgelehnt." } }
+      }
+    },
+    "Search Project items" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Einträge durchsuchen" } }
+      }
+    },
+    "Confirm Project move" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Verschiebung bestätigen" } }
+      }
+    },
+    "Type" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Typ" } }
+      }
+    },
+    "Title" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Titel" } }
+      }
+    },
+    "Lifecycle policy requires configuration" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Lifecycle-Policy muss konfiguriert werden" } }
+      }
+    },
+    "Assign every field option a lifecycle role before assessing drift or moving items." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Weise jeder Feldoption eine Lifecycle-Rolle zu, bevor Abweichungen bewertet oder Einträge verschoben werden." } }
+      }
+    },
+    "Configure policy" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Policy konfigurieren" } }
+      }
+    },
+    "No single-select fields" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine Single-Select-Felder" } }
+      }
+    },
+    "Project fields unavailable" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Felder nicht verfügbar" } }
+      }
+    },
+    "GitHub did not provide a complete field list. Refresh before choosing a board field." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub hat keine vollständige Feldliste bereitgestellt. Aktualisiere das Project, bevor du ein Board-Feld auswählst." } }
+      }
+    },
+    "This Project has no single-select fields available for a table or board." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dieses Project hat keine Single-Select-Felder für eine Tabelle oder ein Board." } }
+      }
+    },
+    "Choose a board field" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Board-Feld auswählen" } }
+      }
+    },
+    "Select a single-select field to define the table values and board columns." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Wähle ein Single-Select-Feld aus, um Tabellenwerte und Board-Spalten festzulegen." } }
+      }
+    },
+    "No Project items" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine Project-Einträge" } }
+      }
+    },
+    "Project items unavailable" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project-Einträge nicht verfügbar" } }
+      }
+    },
+    "GitHub did not provide a complete item list. Refresh before evaluating this Project." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub hat keine vollständige Eintragsliste bereitgestellt. Aktualisiere das Project vor der Bewertung." } }
+      }
+    },
+    "This Project snapshot contains no items." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dieser Project-Snapshot enthält keine Einträge." } }
+      }
+    },
+    "No matching Project items" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine passenden Project-Einträge" } }
+      }
+    },
+    "Change the search or Project filters to show items." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Ändere die Suche oder die Project-Filter, um Einträge anzuzeigen." } }
+      }
+    },
+    "Reset Filters" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Filter zurücksetzen" } }
+      }
+    },
+    "No active Project items" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine aktiven Project-Einträge" } }
+      }
+    },
+    "This Project contains only archived items." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dieses Project enthält nur archivierte Einträge." } }
+      }
+    },
+    "Show archived items" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Archivierte Einträge anzeigen" } }
+      }
+    },
+    "No visible Project items" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine sichtbaren Project-Einträge" } }
+      }
+    },
+    "GitHub did not return any items that can be shown for this field." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub hat keine Einträge zurückgegeben, die für dieses Feld angezeigt werden können." } }
+      }
+    },
+    "Include archived items" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Archivierte Einträge einbeziehen" } }
+      }
+    },
+    "%@, %@, %@" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@, %@, %@" } }
+      }
+    },
+    "%@, %@, %@, %@, %@" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@, %@, %@, %@, %@" } }
+      }
+    },
+    "%@. Drift assessment incomplete." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@. Bewertung der Abweichungen unvollständig." } }
+      }
+    },
+    "%@. Lifecycle policy requires configuration." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "%@. Lifecycle-Policy muss konfiguriert werden." } }
+      }
+    },
+    "No drift found" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Keine Abweichung gefunden" } }
+      }
+    },
+    "Drift assessment incomplete" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Bewertung der Abweichungen unvollständig" } }
+      }
+    },
+    "Drift assessment is incomplete. Known findings are shown, but CodingBuddy cannot confirm an all-clear." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Die Bewertung der Abweichungen ist unvollständig. Bekannte Befunde werden angezeigt, aber CodingBuddy kann keine Entwarnung bestätigen." } }
+      }
+    },
+    "Read-only access. GitHub does not allow this account to update Project items." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Schreibgeschützter Zugriff. GitHub erlaubt diesem Konto nicht, Project-Einträge zu aktualisieren." } }
+      }
+    },
+    "Drift assessment unavailable" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Bewertung der Abweichungen nicht verfügbar" } }
+      }
+    },
+    "Missing Project evidence means CodingBuddy cannot rule out drift." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Wegen fehlender Project-Evidenz kann CodingBuddy Abweichungen nicht ausschließen." } }
+      }
+    },
+    "Refresh Project. Snapshot age: %@. Captured: %@." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Project aktualisieren. Snapshot-Alter: %@. Erfasst: %@." } }
+      }
+    },
+    "Showing snapshot captured %@ (%@). Refresh failed: %@" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Snapshot vom %@ wird angezeigt (%@). Aktualisierung fehlgeschlagen: %@" } }
+      }
+    },
+    "Move “%@” from “%@” to “%@”. %@" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "„%@“ von „%@“ nach „%@“ verschieben. %@" } }
+      }
+    },
+    "This field value is no longer available in the Project configuration." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dieser Feldwert ist in der Project-Konfiguration nicht mehr verfügbar." } }
+      }
+    },
+    "GitHub returned multiple values for this single-select field." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub hat mehrere Werte für dieses Single-Select-Feld zurückgegeben." } }
+      }
+    },
+    "Unavailable references" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht verfügbare Referenzen" } }
+      }
+    },
+    "Incomplete policy evidence" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Unvollständige Policy-Evidenz" } }
+      }
+    },
+    "GitHub returned an incomplete field or workflow list. Missing policy references are preserved until a complete refresh proves they were removed." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub hat eine unvollständige Feld- oder Workflow-Liste zurückgegeben. Fehlende Policy-Referenzen bleiben erhalten, bis eine vollständige Aktualisierung ihre Entfernung belegt." } }
+      }
+    },
+    "This policy still references Project options or workflows that GitHub no longer provides. Saving removes these references." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Diese Policy referenziert noch Project-Optionen oder Workflows, die GitHub nicht mehr bereitstellt. Beim Speichern werden diese Referenzen entfernt." } }
+      }
+    },
+    "Removed field option" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Entfernte Feldoption" } }
+      }
+    },
+    "Removed workflow" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Entfernter Workflow" } }
+      }
+    },
+    "Remove unavailable references" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht verfügbare Referenzen entfernen" } }
+      }
+    },
     "merge commit" : {
       "localizations" : {
         "de" : {

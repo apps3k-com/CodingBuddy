@@ -275,6 +275,28 @@ fine-grained personal access tokens remain read-only for migration and monitor
 compatibility. The destination is visible only while `agentPRMonitor` is also
 enabled.
 
+### `githubProjectsBoard` — maturity: alpha
+
+Adds **Repositories → Projects**, a native GitHub Projects workspace for one
+organization at a time. It discovers organization Projects, renders a selected
+single-select field as either a dense table or a horizontally scrolling board,
+and evaluates lifecycle, reverse-transition, linkage, parent/child roll-up, and
+explicit workflow drift from one immutable snapshot.
+
+The board stores only local presentation preferences and the stable IDs used by
+its configurable lifecycle policy. GitHub item content is never persisted.
+Personal access tokens remain read-only; moves require the CodingBuddy GitHub
+App credential, complete bounded evidence, a fresh identity-bound preflight,
+one non-retried mutation, and post-write verification. Ambiguous outcomes lock
+all further moves until an explicit GitHub re-fetch reconciles the item.
+
+v1 supports one organization, one Project, and one single-select board field at
+a time. It intentionally excludes drag and drop, bulk moves, Project creation,
+field/schema editing, arbitrary workflow editing, background sync, and automatic
+drift repair. `githubProjectsBoard` controls the destination independently. It
+shares the GitHub App authorization boundary with Review Desk but does not
+depend on the `pullRequestReviewDesk` feature flag.
+
 ### `backupBrowser` — maturity: alpha
 
 Safety section for browsing CodingBuddy's managed backup directory. It lists

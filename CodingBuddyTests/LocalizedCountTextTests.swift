@@ -42,6 +42,13 @@ struct LocalizedCountTextTests {
                 pluralFormat: "%lld variables"
             ) == "0 variables"
         )
+        #expect(LocalizedCountText.items(1) == String(localized: "1 item"))
+        #expect(LocalizedCountText.items(2) == String(format: String(localized: "%lld items"), 2))
+        #expect(LocalizedCountText.driftFindings(1) == String(localized: "1 drift finding"))
+        #expect(
+            LocalizedCountText.driftFindings(2)
+                == String(format: String(localized: "%lld drift findings"), 2)
+        )
         #expect(
             LocalizedCountText.countText(
                 1,
@@ -68,6 +75,10 @@ struct LocalizedCountTextTests {
             "%lld servers",
             "1 file",
             "%lld files",
+            "1 item",
+            "%lld items",
+            "1 drift finding",
+            "%lld drift findings",
             "Import 1 Variable",
             "Import %lld Variables"
         ]
