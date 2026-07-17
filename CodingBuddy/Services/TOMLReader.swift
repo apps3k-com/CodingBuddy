@@ -102,10 +102,15 @@ nonisolated struct TOMLTable: Equatable {
         return nil
     }
 
-    /// Returns only string elements from the array at a nested key path.
+    /// Returns the string array at a nested key path only when every element matches.
     func stringArray(at path: [String]) -> [String]? {
         guard case .array(let items) = value(at: path) else { return nil }
-        return items.compactMap { if case .string(let s) = $0 { s } else { nil } }
+        var strings: [String] = []
+        for item in items {
+            guard case .string(let string) = item else { return nil }
+            strings.append(string)
+        }
+        return strings
     }
 
     /// Returns the table at a nested path, or the root values for an empty path.
@@ -141,6 +146,7 @@ nonisolated enum TOMLReader {
         var currentPath: [String] = []
         var skippingTable = false
         var isComplete = true
+        var occupiedPaths: [[String]: PathOccupation] = [:]
 
         let lines = text.components(separatedBy: "\n")
         var index = 0
@@ -160,6 +166,9 @@ nonisolated enum TOMLReader {
                 if let keys = parseKeyPath(inner) {
                     currentPath = keys
                     skippingTable = false
+                    if !claimTablePath(keys, in: &occupiedPaths) {
+                        isComplete = false
+                    }
                 } else {
                     skippingTable = true
                     isComplete = false
@@ -199,8 +208,18 @@ nonisolated enum TOMLReader {
                 continue
             }
 
+            let canonicalPath = currentPath + keyPath
+            guard claimValuePath(
+                canonicalPath,
+                tableContextDepth: currentPath.count,
+                in: &occupiedPaths
+            ) else {
+                isComplete = false
+                continue
+            }
+
             if let value = parseValue(rawValue.trimmingCharacters(in: .whitespacesAndNewlines)) {
-                set(&root, path: currentPath + keyPath, value: value)
+                set(&root, path: canonicalPath, value: value)
             } else {
                 isComplete = false
             }
@@ -225,7 +244,11 @@ nonisolated enum TOMLReader {
             guard raw.hasSuffix("]") else { return nil }
             let inner = String(raw.dropFirst().dropLast())
             var items: [TOMLValue] = []
-            for item in splitTopLevel(inner) {
+            var members = splitTopLevel(inner)
+            if members.count == 1, members[0].isEmpty { return .array([]) }
+            if members.last?.isEmpty == true { members.removeLast() }
+            guard !members.isEmpty, members.allSatisfy({ !$0.isEmpty }) else { return nil }
+            for item in members {
                 guard let parsed = parseValue(item) else { return nil }
                 items.append(parsed)
             }
@@ -234,11 +257,15 @@ nonisolated enum TOMLReader {
             guard raw.hasSuffix("}") else { return nil }
             let inner = String(raw.dropFirst().dropLast())
             var table: [String: TOMLValue] = [:]
-            for pair in splitTopLevel(inner) {
+            let members = splitTopLevel(inner)
+            if members.count == 1, members[0].isEmpty { return .table([:]) }
+            guard members.allSatisfy({ !$0.isEmpty }) else { return nil }
+            for pair in members {
                 guard let equals = topLevelEqualsIndex(in: pair) else { return nil }
                 let key = String(pair[..<equals]).trimmingCharacters(in: .whitespaces)
                 let value = String(pair[pair.index(after: equals)...]).trimmingCharacters(in: .whitespaces)
                 guard let keyPath = parseKeyPath(key), keyPath.count == 1,
+                      table[keyPath[0]] == nil,
                       let parsed = parseValue(value) else { return nil }
                 table[keyPath[0]] = parsed
             }
@@ -354,8 +381,7 @@ nonisolated enum TOMLReader {
         return nil
     }
 
-    /// Splits on top-level commas (outside strings, brackets, braces),
-    /// dropping empty segments (trailing commas).
+    /// Splits on top-level commas (outside strings, brackets, braces), preserving malformed gaps.
     private static func splitTopLevel(_ text: String) -> [String] {
         var parts: [String] = []
         var current = ""
@@ -386,12 +412,84 @@ nonisolated enum TOMLReader {
             }
         }
         parts.append(current)
-        return parts
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
+        return parts.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
     }
 
     // MARK: - Assembly
+
+    /// Canonical path occupancy distinguishes extendable tables from closed values.
+    private enum PathOccupation {
+        /// A parent table implied by a deeper declaration.
+        case implicitHeaderTable
+        /// A table created by a dotted key and therefore closed to later table redeclaration.
+        case dottedKeyTable
+        /// A table declared by a table header.
+        case explicitTable
+        /// A scalar, array, or closed inline-table value.
+        case value
+    }
+
+    /// Claims one explicit table without reopening a value or redeclaring a table.
+    private static func claimTablePath(
+        _ path: [String],
+        in occupiedPaths: inout [[String]: PathOccupation]
+    ) -> Bool {
+        guard claimParentTables(
+            of: path,
+            creating: .implicitHeaderTable,
+            in: &occupiedPaths
+        ) else { return false }
+        switch occupiedPaths[path] {
+        case nil:
+            occupiedPaths[path] = .explicitTable
+            return true
+        case .implicitHeaderTable:
+            occupiedPaths[path] = .explicitTable
+            return true
+        case .dottedKeyTable, .explicitTable, .value:
+            return false
+        }
+    }
+
+    /// Claims one exact key while refusing any table/value collision on its path.
+    private static func claimValuePath(
+        _ path: [String],
+        tableContextDepth: Int,
+        in occupiedPaths: inout [[String]: PathOccupation]
+    ) -> Bool {
+        guard claimParentTables(
+            of: path,
+            creating: .dottedKeyTable,
+            preservingPrefixesThrough: tableContextDepth,
+            in: &occupiedPaths
+        ), occupiedPaths[path] == nil else {
+            return false
+        }
+        occupiedPaths[path] = .value
+        return true
+    }
+
+    /// Materializes implicit parent tables unless a closed value already owns a prefix.
+    private static func claimParentTables(
+        of path: [String],
+        creating occupation: PathOccupation,
+        preservingPrefixesThrough preservedDepth: Int = 0,
+        in occupiedPaths: inout [[String]: PathOccupation]
+    ) -> Bool {
+        guard !path.isEmpty else { return false }
+        for length in 1..<path.count {
+            let prefix = Array(path.prefix(length))
+            if occupiedPaths[prefix] == .value { return false }
+            if occupiedPaths[prefix] == nil {
+                occupiedPaths[prefix] = occupation
+            } else if length > preservedDepth,
+                      occupiedPaths[prefix] == .implicitHeaderTable,
+                      occupation == .dottedKeyTable {
+                occupiedPaths[prefix] = .dottedKeyTable
+            }
+        }
+        return true
+    }
 
     private static func set(_ table: inout [String: TOMLValue], path: [String], value: TOMLValue) {
         guard let first = path.first else { return }

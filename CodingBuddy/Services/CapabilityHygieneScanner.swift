@@ -70,6 +70,10 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
         var sources: [CapabilitySourceRecord] = []
         var notices: [CapabilityScanNotice] = []
 
+        guard !Task.isCancelled else {
+            return cancelledResult(sources: sources, notices: notices)
+        }
+
         guard let homeDescriptor = SecureDescriptorIO.openAbsoluteDirectory(homeDirectory.path) else {
             let status: CapabilitySourceStatus = .refused(.symbolicLink)
             sources.append(.init(sourcePath: homeDirectory.path, kind: nil, status: status))
@@ -85,6 +89,9 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             sources: &sources,
             notices: &notices
         )
+        guard !Task.isCancelled else {
+            return cancelledResult(sources: sources, notices: notices)
+        }
         scanCodexConfig(
             homeDescriptor: homeDescriptor,
             budget: &budget,
@@ -92,11 +99,17 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             sources: &sources,
             notices: &notices
         )
+        guard !Task.isCancelled else {
+            return cancelledResult(sources: sources, notices: notices)
+        }
         _ = detectExclusiveClaudeManagedMCP(
             budget: &budget,
             sources: &sources,
             notices: &notices
         )
+        guard !Task.isCancelled else {
+            return cancelledResult(sources: sources, notices: notices)
+        }
         scanClaudeConfiguration(
             homeDescriptor: homeDescriptor,
             budget: &budget,
@@ -105,6 +118,9 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             notices: &notices,
             secretFingerprintKey: secretFingerprintKey
         )
+        guard !Task.isCancelled else {
+            return cancelledResult(sources: sources, notices: notices)
+        }
         scanCursorConfiguration(
             homeDescriptor: homeDescriptor,
             budget: &budget,
@@ -113,6 +129,9 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             notices: &notices,
             secretFingerprintKey: secretFingerprintKey
         )
+        guard !Task.isCancelled else {
+            return cancelledResult(sources: sources, notices: notices)
+        }
         scanClaudePlugins(
             homeDescriptor: homeDescriptor,
             budget: &budget,
@@ -121,11 +140,31 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             notices: &notices,
             secretFingerprintKey: secretFingerprintKey
         )
+        guard !Task.isCancelled else {
+            return cancelledResult(sources: sources, notices: notices)
+        }
 
         return CapabilityScanResult(
             items: items.sorted(by: Self.itemOrder),
             sources: Array(Set(sources)).sorted(by: Self.sourceOrder),
             notices: Array(Set(notices)).sorted(by: Self.noticeOrder),
+            precedenceEvidence: []
+        )
+    }
+
+    /// Returns fail-closed evidence when the owning task abandons an in-flight scan.
+    private func cancelledResult(
+        sources: [CapabilitySourceRecord],
+        notices: [CapabilityScanNotice]
+    ) -> CapabilityScanResult {
+        var cancelledSources = sources
+        var cancelledNotices = notices
+        cancelledSources.append(.init(sourcePath: homeDirectory.path, kind: nil, status: .partial(.unavailable)))
+        cancelledNotices.append(.init(reason: .unavailable, sourcePath: homeDirectory.path))
+        return CapabilityScanResult(
+            items: [],
+            sources: Array(Set(cancelledSources)).sorted(by: Self.sourceOrder),
+            notices: Array(Set(cancelledNotices)).sorted(by: Self.noticeOrder),
             precedenceEvidence: []
         )
     }
@@ -144,6 +183,7 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             (".claude/skills", .claudeCode),
         ]
         for (relativePath, consumer) in roots {
+            guard !Task.isCancelled else { return }
             let displayPath = homeDirectory.appendingPathComponent(relativePath).path
             switch SecureDescriptorIO.openDirectory(relativePath, beneath: homeDescriptor) {
             case .failure(.missing):
@@ -155,6 +195,8 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             case let .success(rootDescriptor):
                 defer { Darwin.close(rootDescriptor) }
                 var rootStatus: CapabilitySourceStatus = .complete
+                var rootItems: [CapabilityInventoryItem] = []
+                var discoveryNodes: [BehaviorTreeNode] = []
                 discoverSkills(
                     directoryDescriptor: rootDescriptor,
                     relativeDirectory: "",
@@ -162,10 +204,35 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
                     consumer: consumer,
                     depth: 0,
                     budget: &budget,
-                    items: &items,
+                    items: &rootItems,
+                    discoveryNodes: &discoveryNodes,
                     rootStatus: &rootStatus,
                     notices: &notices
                 )
+                if rootStatus == .complete, !Task.isCancelled {
+                    do {
+                        let verification = try behaviorTreeMetadataSnapshot(
+                            directoryDescriptor: rootDescriptor,
+                            relativeDirectory: "",
+                            depth: 0,
+                            budget: &budget
+                        )
+                        if verification != discoveryNodes.sorted(by: { $0.path < $1.path }) {
+                            rootStatus = .partial(.unavailable)
+                            rootItems.removeAll()
+                            notices.append(.init(reason: .unavailable, sourcePath: displayPath))
+                        }
+                    } catch let failure as SecureReadFailure {
+                        rootStatus = .partial(failure.reason)
+                        rootItems.removeAll()
+                        notices.append(.init(reason: failure.reason, sourcePath: displayPath))
+                    } catch {
+                        rootStatus = .partial(.unavailable)
+                        rootItems.removeAll()
+                        notices.append(.init(reason: .unavailable, sourcePath: displayPath))
+                    }
+                }
+                items += rootItems
                 sources.append(.init(sourcePath: displayPath, kind: .skill, status: rootStatus))
             }
         }
@@ -180,9 +247,15 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
         depth: Int,
         budget: inout ScanBudget,
         items: inout [CapabilityInventoryItem],
+        discoveryNodes: inout [BehaviorTreeNode],
         rootStatus: inout CapabilitySourceStatus,
         notices: inout [CapabilityScanNotice]
     ) {
+        guard !Task.isCancelled else {
+            rootStatus = .partial(.unavailable)
+            notices.append(.init(reason: .unavailable, sourcePath: displayRoot + "/" + relativeDirectory))
+            return
+        }
         guard depth <= limits.maximumDepth else {
             rootStatus = .partial(.depthLimit)
             notices.append(.init(reason: .depthLimit, sourcePath: displayRoot + "/" + relativeDirectory))
@@ -196,6 +269,15 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             notices.append(.init(reason: failure.reason, sourcePath: displayRoot + "/" + relativeDirectory))
             return
         } catch { return }
+        discoveryNodes += entries.map { entry in
+            BehaviorTreeNode(
+                path: relativeDirectory.isEmpty ? entry.name : relativeDirectory + "/" + entry.name,
+                kind: entry.kind,
+                identity: entry.identity
+            )
+        }
+        let displayDirectory = displayRoot + (relativeDirectory.isEmpty ? "" : "/" + relativeDirectory)
+        testingAfterDirectoryEnumeration?(displayDirectory)
 
         if entries.contains(where: { $0.name == "SKILL.md" }) {
             let result = skillItem(
@@ -211,6 +293,11 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
         }
 
         for entry in entries where entry.kind == .directory {
+            guard !Task.isCancelled else {
+                rootStatus = .partial(.unavailable)
+                notices.append(.init(reason: .unavailable, sourcePath: displayDirectory))
+                return
+            }
             let childRelative = relativeDirectory.isEmpty ? entry.name : relativeDirectory + "/" + entry.name
             switch SecureDescriptorIO.openChildDirectory(
                 named: entry.name,
@@ -226,6 +313,7 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
                     depth: depth + 1,
                     budget: &budget,
                     items: &items,
+                    discoveryNodes: &discoveryNodes,
                     rootStatus: &rootStatus,
                     notices: &notices
                 )
@@ -302,6 +390,10 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
         budget: inout ScanBudget,
         notices: inout [CapabilityScanNotice]
     ) -> SkillTreeSnapshot {
+        guard !Task.isCancelled else {
+            notices.append(.init(reason: .unavailable, sourcePath: displayPath))
+            return .init(files: [], nodes: [], status: .partial(.unavailable))
+        }
         guard depth <= limits.maximumDepth else {
             notices.append(.init(reason: .depthLimit, sourcePath: displayPath))
             return .init(files: [], nodes: [], status: .partial(.depthLimit))
@@ -325,6 +417,10 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
         }
         var status: CapabilitySourceStatus = .complete
         for entry in entries {
+            guard !Task.isCancelled else {
+                notices.append(.init(reason: .unavailable, sourcePath: displayPath))
+                return .init(files: files, nodes: nodes, status: .partial(.unavailable))
+            }
             let relative = relativeDirectory.isEmpty ? entry.name : relativeDirectory + "/" + entry.name
             switch entry.kind {
             case .regularFile:
@@ -419,6 +515,7 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
         depth: Int,
         budget: inout ScanBudget
     ) throws -> [BehaviorTreeNode] {
+        guard !Task.isCancelled else { throw SecureReadFailure.unavailable }
         guard depth <= limits.maximumDepth else { throw SecureReadFailure.depthLimit }
         let entries = try SecureDescriptorIO.entries(in: directoryDescriptor, budget: &budget)
         var nodes = entries.map { entry in
@@ -429,6 +526,7 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             )
         }
         for entry in entries where entry.kind == .directory {
+            guard !Task.isCancelled else { throw SecureReadFailure.unavailable }
             let childRelative = relativeDirectory.isEmpty ? entry.name : relativeDirectory + "/" + entry.name
             switch SecureDescriptorIO.openChildDirectory(
                 named: entry.name,
@@ -479,14 +577,9 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             }
             return
         }
-        if Self.hasDuplicateTOMLDeclarations(text) {
-            sources[sources.count - 1] = .init(sourcePath: displayPath, kind: .mcpServer, status: .partial(.malformedTOML))
-            notices.append(.init(reason: .malformedTOML, sourcePath: displayPath))
-            return
-        }
-
         let parseResult = TOMLReader.parseWithDiagnostics(text)
-        if !parseResult.isComplete {
+        let readResult = CodexConfigReader.read(parseResult)
+        if !readResult.isComplete {
             markSourcePartial(
                 displayPath,
                 kind: .mcpServer,
@@ -495,8 +588,9 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
                 notices: &notices
             )
         }
-        let serversInConfig = CodexConfigReader.servers(in: parseResult.table)
-        for server in serversInConfig {
+        for serverResult in readResult.serverResults {
+            guard !Task.isCancelled else { return }
+            let server = serverResult.server
             items.append(mcpItem(
                 name: server.name,
                 consumer: .codex,
@@ -506,14 +600,14 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
                 transport: .infer(type: nil, url: server.url, command: server.command),
                 secretNames: server.referencedEnvVarNames + server.inlineEnvKeys,
                 headerNames: [],
-                activationState: parseResult.isComplete
-                    ? (server.isEnabled ? .enabled : .disabled)
+                activationState: readResult.isComplete && serverResult.isComplete
+                    ? (serverResult.enabledState == true ? .enabled : .disabled)
                     : .unknown,
                 canonicalFingerprint: nil,
                 sourceStatus: .partial(.behaviorDefinitionUnavailable)
             ))
         }
-        if !serversInConfig.isEmpty {
+        if !readResult.serverResults.isEmpty {
             markSourcePartial(
                 displayPath,
                 kind: .mcpServer,
@@ -636,6 +730,7 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             projects = [:]
         }
         for projectPath in projects.keys.sorted() {
+            guard !Task.isCancelled else { return }
             guard budget.consumeRoot() else {
                 notices.append(.init(reason: .rootLimit, sourcePath: projectPath))
                 sources.append(.init(sourcePath: projectPath, kind: .mcpServer, status: .partial(.rootLimit)))
@@ -647,6 +742,7 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
                     servers,
                     consumer: .claudeCode,
                     sourcePath: displayPath,
+                    pointerPrefix: "/projects/" + Self.pointerComponent(projectPath) + "/mcpServers",
                     scope: projectPath,
                     repositoryUsage: [projectPath],
                     activationState: .unknown,
@@ -805,11 +901,13 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
         }
 
         for identity in plugins.keys.sorted() {
+            guard !Task.isCancelled else { return }
             guard let occurrences = plugins[identity] as? [[String: Any]] else {
                 markSourcePartial(displayPath, kind: .plugin, reason: .unsupportedFormat, sources: &sources, notices: &notices)
                 continue
             }
             for (index, occurrence) in occurrences.enumerated() {
+                guard !Task.isCancelled else { return }
                 let installPath = occurrence["installPath"] as? String
                 let hasRootBudget = installPath == nil || budget.consumeRoot()
                 let installStatus: CapabilitySourceStatus = hasRootBudget
@@ -923,6 +1021,7 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
         }
         var result: [String: CapabilityActivationState] = [:]
         for (identity, value) in enabledPlugins {
+            guard !Task.isCancelled else { return result }
             guard let number = value as? NSNumber,
                   CFGetTypeID(number) == CFBooleanGetTypeID() else {
                 markSourcePartial(displayPath, kind: .plugin, reason: .unsupportedFormat, sources: &sources, notices: &notices)
@@ -958,6 +1057,7 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
         _ servers: [String: Any],
         consumer: CapabilityConsumer,
         sourcePath: String,
+        pointerPrefix: String = "/mcpServers",
         scope: String,
         repositoryUsage: [String],
         activationState: CapabilityActivationState,
@@ -966,6 +1066,10 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
         var items: [CapabilityInventoryItem] = []
         var incompleteReason: CapabilitySourceReason?
         for name in servers.keys.sorted() {
+            guard !Task.isCancelled else {
+                incompleteReason = .unavailable
+                break
+            }
             guard let server = servers[name] as? [String: Any] else {
                 incompleteReason = .unsupportedFormat
                 continue
@@ -987,7 +1091,7 @@ nonisolated struct CapabilityHygieneScanner: Sendable {
             items.append(mcpItem(
                 name: name,
                 consumer: consumer,
-                sourcePath: sourcePath + "#/mcpServers/" + Self.pointerComponent(name),
+                sourcePath: sourcePath + "#" + pointerPrefix + "/" + Self.pointerComponent(name),
                 scope: scope,
                 repositoryUsage: repositoryUsage,
                 transport: .infer(type: type, url: url, command: command),
@@ -1448,6 +1552,7 @@ private nonisolated enum SecureDescriptorIO {
         data.reserveCapacity(expected)
         var buffer = [UInt8](repeating: 0, count: min(16 * 1024, max(expected + 1, 1)))
         while true {
+            guard !Task.isCancelled else { throw SecureReadFailure.unavailable }
             let count = Darwin.read(descriptor, &buffer, buffer.count)
             guard count >= 0 else { throw SecureReadFailure.unavailable }
             if count == 0 { break }
@@ -1475,6 +1580,7 @@ private nonisolated enum SecureDescriptorIO {
         var result: [SecureDirectoryEntry] = []
         errno = 0
         while let entry = Darwin.readdir(directory) {
+            guard !Task.isCancelled else { throw SecureReadFailure.unavailable }
             let name = withUnsafePointer(to: &entry.pointee.d_name) {
                 $0.withMemoryRebound(to: CChar.self, capacity: Int(MAXNAMLEN) + 1) {
                     String(validatingUTF8: $0)
@@ -1774,25 +1880,6 @@ private nonisolated extension CapabilityHygieneScanner {
             }
         }
         return values
-    }
-
-    /// Rejects duplicate table names or duplicate keys within one TOML table.
-    static func hasDuplicateTOMLDeclarations(_ text: String) -> Bool {
-        var tables = Set<String>()
-        var keys = Set<String>()
-        for rawLine in text.components(separatedBy: .newlines) {
-            let line = rawLine.trimmingCharacters(in: .whitespaces)
-            guard !line.isEmpty, !line.hasPrefix("#") else { continue }
-            if line.hasPrefix("["), line.hasSuffix("]") {
-                let table = String(line.dropFirst().dropLast())
-                if !tables.insert(table).inserted { return true }
-                keys = []
-            } else if let separator = line.firstIndex(of: "=") {
-                let key = line[..<separator].trimmingCharacters(in: .whitespaces)
-                if !keys.insert(key).inserted { return true }
-            }
-        }
-        return false
     }
 
     /// Produces a fixed classification that cannot disclose commands, URLs, or arguments.

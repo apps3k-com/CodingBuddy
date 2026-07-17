@@ -1,6 +1,59 @@
 import Foundation
 import Observation
 
+/// Atomic off-main output published by one capability reload generation.
+private nonisolated struct CapabilityHygienePipelineResult: Sendable {
+    /// Bounded filesystem evidence.
+    let snapshot: CapabilityScanResult
+    /// Bounded analysis derived from exactly that snapshot.
+    let analysis: CapabilityAnalysisResult
+}
+
+/// Structured worker that keeps filesystem scanning and analysis off MainActor.
+private nonisolated enum CapabilityHygienePipeline {
+    /// Runs the production scanner and analyzer in one cancellation-linked worker.
+    static func run(homeDirectory: URL) async -> CapabilityHygienePipelineResult? {
+        await worker {
+            let snapshot = CapabilityHygieneScanner(homeDirectory: homeDirectory).scan()
+            guard !Task.isCancelled else { return nil }
+            return result(for: snapshot)
+        }
+    }
+
+    /// Analyzes an injected asynchronous snapshot off MainActor for deterministic tests.
+    static func analyze(_ snapshot: CapabilityScanResult) async -> CapabilityHygienePipelineResult? {
+        await worker { result(for: snapshot) }
+    }
+
+    /// Links parent cancellation to the detached CPU/filesystem worker.
+    private static func worker(
+        _ operation: @escaping @Sendable () -> CapabilityHygienePipelineResult?
+    ) async -> CapabilityHygienePipelineResult? {
+        let task = Task.detached(priority: .userInitiated) { () -> CapabilityHygienePipelineResult? in
+            guard !Task.isCancelled else { return nil }
+            let output = operation()
+            guard !Task.isCancelled else { return nil }
+            return output
+        }
+        return await withTaskCancellationHandler {
+            await task.value
+        } onCancel: {
+            task.cancel()
+        }
+    }
+
+    /// Produces analysis from the same immutable snapshot passed by the scanner.
+    private static func result(for snapshot: CapabilityScanResult) -> CapabilityHygienePipelineResult {
+        CapabilityHygienePipelineResult(
+            snapshot: snapshot,
+            analysis: CapabilityHygieneAnalyzer.analyze(
+                in: snapshot.items,
+                precedenceEvidence: snapshot.precedenceEvidence
+            )
+        )
+    }
+}
+
 /// Stable presentation phases for the local capability scan.
 nonisolated enum CapabilityHygienePhase: Equatable, Sendable {
     /// No scan has started and no prior snapshot exists.
@@ -23,8 +76,8 @@ final class CapabilityHygieneStore {
     /// User-entered query applied to findings and inventory rows.
     var searchText = ""
 
-    /// Injectable asynchronous scan boundary used by deterministic state tests.
-    @ObservationIgnored private let scan: @Sendable () async -> CapabilityScanResult
+    /// Cancellation-linked scan-and-analysis boundary used by production and state tests.
+    @ObservationIgnored private let load: @Sendable () async -> CapabilityHygienePipelineResult?
     /// Current background reload, cancelled when a newer reload starts.
     @ObservationIgnored private var reloadTask: Task<Void, Never>?
     /// Identity of the only reload still permitted to publish a result.
@@ -36,13 +89,13 @@ final class CapabilityHygieneStore {
         scan: (@Sendable () async -> CapabilityScanResult)? = nil
     ) {
         if let scan {
-            self.scan = scan
-        } else {
-            self.scan = {
-                await Task.detached(priority: .userInitiated) {
-                    CapabilityHygieneScanner(homeDirectory: homeDirectory).scan()
-                }.value
+            self.load = {
+                let snapshot = await scan()
+                guard !Task.isCancelled else { return nil }
+                return await CapabilityHygienePipeline.analyze(snapshot)
             }
+        } else {
+            self.load = { await CapabilityHygienePipeline.run(homeDirectory: homeDirectory) }
         }
     }
 
@@ -127,19 +180,16 @@ final class CapabilityHygieneStore {
         let requestID = UUID()
         reloadRequestID = requestID
         phase = .scanning
-        let scan = scan
+        let load = load
 
-        reloadTask = Task { [weak self, scan] in
-            let result = await scan()
-            guard let self,
+        reloadTask = Task { [weak self, load] in
+            guard let output = await load(),
+                  let self,
                   !Task.isCancelled,
                   reloadRequestID == requestID
             else { return }
-            snapshot = result
-            analysis = CapabilityHygieneAnalyzer.analyze(
-                in: result.items,
-                precedenceEvidence: result.precedenceEvidence
-            )
+            snapshot = output.snapshot
+            analysis = output.analysis
             phase = .loaded
         }
     }

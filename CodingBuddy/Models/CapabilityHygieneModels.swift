@@ -175,8 +175,10 @@ nonisolated struct CapabilityInventoryItem: Identifiable, Equatable, Hashable, S
 
     /// Stable occurrence identity that does not depend on the opaque fingerprint.
     var id: String {
-        [kind.rawValue, consumer.rawValue, effectiveScope, sourcePath, runtimeIdentity]
-            .joined(separator: "|")
+        CapabilityStableID.encode(
+            namespace: "inventory-item-v1",
+            components: [kind.rawValue, consumer.rawValue, effectiveScope, sourcePath, runtimeIdentity]
+        )
     }
 
     /// Whether exact-content analysis is supported for this occurrence.
@@ -266,7 +268,12 @@ nonisolated struct CapabilitySourceRecord: Identifiable, Equatable, Hashable, Se
     let status: CapabilitySourceStatus
 
     /// Stable source identity.
-    var id: String { "\(kind?.rawValue ?? "mixed")|\(sourcePath)" }
+    var id: String {
+        CapabilityStableID.encode(
+            namespace: "source-record-v1",
+            components: [kind?.rawValue ?? "", sourcePath]
+        )
+    }
 }
 
 /// Value-free scanner notice for safety refusals and bounded-resource decisions.
@@ -277,7 +284,12 @@ nonisolated struct CapabilityScanNotice: Identifiable, Equatable, Hashable, Send
     let sourcePath: String
 
     /// Stable notice identity.
-    var id: String { "\(reason.rawValue)|\(sourcePath)" }
+    var id: String {
+        CapabilityStableID.encode(
+            namespace: "scan-notice-v1",
+            components: [reason.rawValue, sourcePath]
+        )
+    }
 }
 
 /// Complete result of one static, bounded capability scan.
@@ -377,5 +389,20 @@ nonisolated struct CapabilityHygieneFinding: Identifiable, Equatable, Hashable, 
     let shadowResolution: CapabilityShadowResolution?
 
     /// Stable finding identity.
-    var id: String { ([kind.rawValue] + itemIDs.sorted()).joined(separator: "|") }
+    var id: String {
+        CapabilityStableID.encode(
+            namespace: "finding-v1",
+            components: [kind.rawValue] + itemIDs.sorted()
+        )
+    }
+}
+
+/// Length-prefixed model identities remain unambiguous for arbitrary provider-controlled text.
+private nonisolated enum CapabilityStableID {
+    /// Encodes a typed identity without relying on a delimiter that may appear in a component.
+    static func encode(namespace: String, components: [String]) -> String {
+        ([namespace] + components)
+            .map { "\($0.utf8.count):\($0)" }
+            .joined()
+    }
 }

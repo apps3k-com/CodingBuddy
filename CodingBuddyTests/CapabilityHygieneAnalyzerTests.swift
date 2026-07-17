@@ -85,6 +85,40 @@ nonisolated struct CapabilityHygieneAnalyzerTests {
         #expect(result.findings.count <= 10)
     }
 
+    /// Candidate-generation work is bounded across groups, even when repeated tokens collapse to one pair.
+    @Test func overlapCandidateAttemptBudgetSpansAllGroups() {
+        let items = [
+            item(
+                consumer: .codex,
+                identity: "alpha-beta-gamma-one",
+                sourcePath: "/codex/one"
+            ),
+            item(
+                consumer: .codex,
+                identity: "alpha-beta-gamma-two",
+                sourcePath: "/codex/two"
+            ),
+            item(
+                consumer: .claudeCode,
+                identity: "alpha-beta-gamma-one",
+                sourcePath: "/claude/one"
+            ),
+            item(
+                consumer: .claudeCode,
+                identity: "alpha-beta-gamma-two",
+                sourcePath: "/claude/two"
+            ),
+        ]
+
+        let result = CapabilityHygieneAnalyzer.analyze(
+            in: items,
+            limits: .init(maximumOverlapComparisons: 4, maximumFindings: 10)
+        )
+
+        #expect(result.isTruncated)
+        #expect(result.examinedOverlapComparisons == 2)
+    }
+
     /// Shadowing evidence is valid only in a shared, explicit evaluation context.
     @Test func shadowingRequiresApplicableEvaluationScope() {
         let winner = item(

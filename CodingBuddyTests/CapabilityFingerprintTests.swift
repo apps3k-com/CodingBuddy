@@ -10,6 +10,24 @@ import Testing
 
 /// Equality and non-disclosure tests for opaque capability fingerprints.
 nonisolated struct CapabilityFingerprintTests {
+    /// Creates a complete occurrence for stable-identity tests.
+    private func item(scope: String, sourcePath: String, identity: String) -> CapabilityInventoryItem {
+        CapabilityInventoryItem(
+            kind: .skill,
+            consumer: .codex,
+            runtimeIdentity: identity,
+            sourcePath: sourcePath,
+            effectiveScope: scope,
+            registrationState: .installed,
+            activationState: .enabled,
+            sourceStatus: .complete,
+            canonicalFingerprint: .publicContent(
+                schemaVersion: "test-v1",
+                data: Data(sourcePath.utf8)
+            )
+        )
+    }
+
     /// One scan key preserves equality while different scans cannot create reusable secret hashes.
     @Test func secretBearingFingerprintsAreScanLocal() {
         let firstKey = SymmetricKey(size: .bits256)
@@ -47,5 +65,35 @@ nonisolated struct CapabilityFingerprintTests {
         let versionTwo = CapabilityFingerprint.publicContent(schemaVersion: "skill-tree-v2", data: data)
 
         #expect(versionOne != versionTwo)
+    }
+
+    /// Provider-controlled delimiters cannot collapse distinct occurrence identities.
+    @Test func inventoryIDsAreUnambiguous() {
+        let first = item(scope: "user", sourcePath: "/skills|review", identity: "helper")
+        let second = item(scope: "user", sourcePath: "/skills", identity: "review|helper")
+
+        #expect(first.id != second.id)
+    }
+
+    /// Delimiters inside occurrence IDs cannot collapse distinct finding identities.
+    @Test func findingIDsAreUnambiguous() {
+        let first = CapabilityHygieneFinding(
+            kind: .possibleOverlap,
+            itemIDs: ["alpha|beta", "gamma"],
+            explanation: "fixture",
+            recommendation: "fixture",
+            similarity: 0.75,
+            shadowResolution: nil
+        )
+        let second = CapabilityHygieneFinding(
+            kind: .possibleOverlap,
+            itemIDs: ["alpha", "beta|gamma"],
+            explanation: "fixture",
+            recommendation: "fixture",
+            similarity: 0.75,
+            shadowResolution: nil
+        )
+
+        #expect(first.id != second.id)
     }
 }

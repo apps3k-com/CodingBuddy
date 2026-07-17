@@ -66,8 +66,16 @@ nonisolated enum CapabilityHygieneAnalyzer {
             return CapabilityHygieneFinding(
                 kind: .exactDuplicate,
                 itemIDs: group.map(\.id).sorted(),
-                explanation: "The occurrences have the same kind, exact runtime identity, and complete canonical behavior.",
-                recommendation: "Compare provider scopes manually before consolidating. CodingBuddy will not alter either source.",
+                explanation: String(
+                    localized: "Capability hygiene exact duplicate explanation",
+                    defaultValue:
+                        "The occurrences have the same kind, exact runtime identity, and complete canonical behavior."
+                ),
+                recommendation: String(
+                    localized: "Capability hygiene exact duplicate recommendation",
+                    defaultValue:
+                        "Compare provider scopes manually before consolidating. CodingBuddy will not alter either source."
+                ),
                 similarity: nil,
                 shadowResolution: nil
             )
@@ -104,8 +112,19 @@ nonisolated enum CapabilityHygieneAnalyzer {
             return CapabilityHygieneFinding(
                 kind: .shadowing,
                 itemIDs: [winner.id, loser.id].sorted(),
-                explanation: "Provider precedence rule \(evidence.ruleIdentifier) selects one occurrence over the other.",
-                recommendation: "Review the typed winner and loser manually. CodingBuddy will not remove the shadowed source.",
+                explanation: String.localizedStringWithFormat(
+                    String(
+                        localized: "Capability hygiene shadowing explanation format",
+                        defaultValue:
+                            "Provider precedence rule %1$@ selects one occurrence over the other."
+                    ),
+                    evidence.ruleIdentifier
+                ),
+                recommendation: String(
+                    localized: "Capability hygiene shadowing recommendation",
+                    defaultValue:
+                        "Review the typed winner and loser manually. CodingBuddy will not remove the shadowed source."
+                ),
                 similarity: nil,
                 shadowResolution: resolution
             )
@@ -119,10 +138,11 @@ nonisolated enum CapabilityHygieneAnalyzer {
         maximumFindings: Int
     ) -> OverlapResult {
         let groups = Dictionary(grouping: items) {
-            "\($0.kind.rawValue)|\($0.consumer.rawValue)|\($0.effectiveScope)"
+            OverlapGroupKey(kind: $0.kind, consumer: $0.consumer, effectiveScope: $0.effectiveScope)
         }
         var result: [CapabilityHygieneFinding] = []
         var comparisons = 0
+        var candidateAttempts = 0
         var truncated = false
         for groupKey in groups.keys.sorted() {
             guard let group = groups[groupKey] else { continue }
@@ -134,7 +154,6 @@ nonisolated enum CapabilityHygieneAnalyzer {
                 for token in tokenSet.sorted() { indexesByToken[token, default: []].append(index) }
             }
             var candidates: Set<IndexPair> = []
-            var candidateAttempts = 0
             candidateLoop: for token in indexesByToken.keys.sorted() {
                 guard let indexes = indexesByToken[token], indexes.count >= 2 else { continue }
                 for leftOffset in 0..<(indexes.count - 1) {
@@ -165,8 +184,19 @@ nonisolated enum CapabilityHygieneAnalyzer {
                 result.append(CapabilityHygieneFinding(
                     kind: .possibleOverlap,
                     itemIDs: [left.id, right.id].sorted(),
-                    explanation: "Distinct runtime identities share \(shared.count) lossy search tokens; overlap is possible, not proven.",
-                    recommendation: "Compare documented responsibilities manually. CodingBuddy will not consolidate these occurrences.",
+                    explanation: String.localizedStringWithFormat(
+                        String(
+                            localized: "Capability hygiene possible overlap explanation format",
+                            defaultValue:
+                                "Distinct runtime identities share %1$lld lossy search tokens; overlap is possible, not proven."
+                        ),
+                        Int64(shared.count)
+                    ),
+                    recommendation: String(
+                        localized: "Capability hygiene possible overlap recommendation",
+                        defaultValue:
+                            "Compare documented responsibilities manually. CodingBuddy will not consolidate these occurrences."
+                    ),
                     similarity: score,
                     shadowResolution: nil
                 ))
@@ -203,8 +233,11 @@ nonisolated enum CapabilityHygieneAnalyzer {
 
     /// Supplies deterministic finding order.
     private static func findingOrder(_ lhs: CapabilityHygieneFinding, _ rhs: CapabilityHygieneFinding) -> Bool {
-        (lhs.kind, lhs.itemIDs.joined(separator: "|"), lhs.id)
-            < (rhs.kind, rhs.itemIDs.joined(separator: "|"), rhs.id)
+        guard lhs.kind == rhs.kind else { return lhs.kind < rhs.kind }
+        let leftIDs = lhs.itemIDs.sorted()
+        let rightIDs = rhs.itemIDs.sorted()
+        guard leftIDs == rightIDs else { return leftIDs.lexicographicallyPrecedes(rightIDs) }
+        return lhs.id < rhs.id
     }
 }
 
@@ -213,6 +246,17 @@ private nonisolated struct ExactKey: Hashable {
     let kind: CapabilityKind
     let runtimeIdentity: String
     let fingerprint: CapabilityFingerprint
+}
+
+/// Structured group key prevents provider-controlled scopes from aliasing across groups.
+private nonisolated struct OverlapGroupKey: Hashable, Comparable {
+    let kind: CapabilityKind
+    let consumer: CapabilityConsumer
+    let effectiveScope: String
+
+    static func < (lhs: Self, rhs: Self) -> Bool {
+        (lhs.kind, lhs.consumer, lhs.effectiveScope) < (rhs.kind, rhs.consumer, rhs.effectiveScope)
+    }
 }
 
 /// Ordered candidate pair used by the bounded inverted-token index.

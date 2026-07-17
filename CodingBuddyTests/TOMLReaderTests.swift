@@ -90,6 +90,127 @@ struct TOMLReaderTests {
         #expect(table.int(at: ["other"]) == 1)
     }
 
+    @Test func diagnosticsRejectCanonicalDuplicateKeysWithoutOverwritingFirstValue() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        key = "first"
+        "key" = "second"
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["key"]) == "first")
+    }
+
+    @Test func diagnosticsRejectCanonicalDuplicateTablesWithTrailingComments() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [mcp_servers.review] # first declaration
+        command = "review"
+
+        [mcp_servers."review"] # duplicate canonical path
+        enabled = false
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "review")
+    }
+
+    @Test func diagnosticsRejectValueThenTablePathCollision() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        mcp_servers.review = { command = "first" }
+
+        [mcp_servers.review]
+        command = "second"
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "first")
+    }
+
+    @Test func diagnosticsRejectTableThenValuePathCollision() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [mcp_servers.review]
+        command = "first"
+
+        [mcp_servers]
+        review = { command = "second" }
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "first")
+    }
+
+    @Test func diagnosticsRejectDottedKeyParentReopenedAsTable() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        mcp_servers.review.command = "first"
+
+        [mcp_servers.review]
+        enabled = true
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "first")
+    }
+
+    @Test func deeperHeaderMayDeclareItsImplicitParentLater() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [mcp_servers.review.tools.inspect]
+        enabled = true
+
+        [mcp_servers.review]
+        command = "review"
+        """)
+
+        #expect(result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "review")
+        #expect(result.table.bool(at: ["mcp_servers", "review", "tools", "inspect", "enabled"]) == true)
+    }
+
+    @Test func dottedTraversalClosesAnImplicitHeaderParent() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [a.b.c]
+        x = 1
+
+        [a]
+        b.d = 2
+
+        [a.b]
+        e = 3
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.int(at: ["a", "b", "c", "x"]) == 1)
+        #expect(result.table.int(at: ["a", "b", "d"]) == 2)
+    }
+
+    @Test func diagnosticsRejectEmptyArrayAndInlineTableMembers() {
+        let arrayResult = TOMLReader.parseWithDiagnostics("values = [1,,2]")
+        let tableResult = TOMLReader.parseWithDiagnostics("values = { a = 1,, b = 2 }")
+
+        #expect(!arrayResult.isComplete)
+        #expect(arrayResult.table.value(at: ["values"]) == nil)
+        #expect(!tableResult.isComplete)
+        #expect(tableResult.table.value(at: ["values"]) == nil)
+    }
+
+    @Test func diagnosticsRejectDuplicateCanonicalInlineTableKeys() {
+        let result = TOMLReader.parseWithDiagnostics("values = { key = 1, \"key\" = 2 }")
+
+        #expect(!result.isComplete)
+        #expect(result.table.value(at: ["values"]) == nil)
+    }
+
+    @Test func emptyContainersAndTrailingArrayCommaRemainValid() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        empty_array = []
+        empty_table = {}
+        values = [1, 2,]
+        """)
+
+        #expect(result.isComplete)
+        #expect(result.table.value(at: ["empty_array"]) == .array([]))
+        #expect(result.table.value(at: ["empty_table"]) == .table([:]))
+        #expect(result.table.value(at: ["values"]) == .array([.int(1), .int(2)]))
+    }
+
     /// Rejects trailing tokens after strings instead of accepting a misleading partial value.
     @Test func diagnosticsRejectTrailingStringTokens() {
         let result = TOMLReader.parseWithDiagnostics("""

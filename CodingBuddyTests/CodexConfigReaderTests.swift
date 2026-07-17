@@ -56,4 +56,56 @@ struct CodexConfigReaderTests {
         let referenced = Set(servers.flatMap(\.referencedEnvVarNames))
         #expect(referenced == ["APPS3K_MCP_AUTH_TOKEN", "LOCAL_TOKEN"])
     }
+
+    @Test func omittedEnabledAndEnvVarsUseCodexDefaultsWithoutDiagnostics() throws {
+        let result = CodexConfigReader.read("""
+        [mcp_servers.review]
+        command = "review"
+        """)
+        let serverResult = try #require(result.serverResults.first)
+
+        #expect(result.isComplete)
+        #expect(result.serverResults.count == 1)
+        #expect(serverResult.isComplete)
+        #expect(serverResult.enabledState == true)
+        #expect(serverResult.server.envVarAllowlist == [])
+    }
+
+    @Test func invalidEnabledTypeProducesUnknownActivation() throws {
+        let result = CodexConfigReader.read("""
+        [mcp_servers.review]
+        command = "review"
+        enabled = "false"
+        """)
+        let serverResult = try #require(result.serverResults.first)
+
+        #expect(!result.isComplete)
+        #expect(result.serverResults.count == 1)
+        #expect(!serverResult.isComplete)
+        #expect(serverResult.enabledState == nil)
+    }
+
+    @Test func invalidEnvVarsTypesProduceIncompleteSchemaWithoutPartialValues() throws {
+        let mixedArray = CodexConfigReader.read("""
+        [mcp_servers.mixed]
+        command = "mixed"
+        env_vars = ["TOKEN", 42]
+        """)
+        let scalar = CodexConfigReader.read("""
+        [mcp_servers.scalar]
+        command = "scalar"
+        env_vars = "TOKEN"
+        """)
+        let mixedServer = try #require(mixedArray.serverResults.first)
+        let scalarServer = try #require(scalar.serverResults.first)
+
+        #expect(!mixedArray.isComplete)
+        #expect(!mixedServer.isComplete)
+        #expect(mixedServer.enabledState == true)
+        #expect(mixedServer.server.envVarAllowlist == [])
+        #expect(!scalar.isComplete)
+        #expect(!scalarServer.isComplete)
+        #expect(scalarServer.enabledState == true)
+        #expect(scalarServer.server.envVarAllowlist == [])
+    }
 }

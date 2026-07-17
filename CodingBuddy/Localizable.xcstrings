@@ -1,6 +1,66 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Capability hygiene exact duplicate explanation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Vorkommen haben dieselbe Art, exakt dieselbe Laufzeit-Identität und vollständig übereinstimmendes kanonisches Verhalten."
+          }
+        }
+      }
+    },
+    "Capability hygiene exact duplicate recommendation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergleiche vor dem Konsolidieren die Provider-Scopes manuell. CodingBuddy ändert keine der beiden Quellen."
+          }
+        }
+      }
+    },
+    "Capability hygiene shadowing explanation format" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Provider-Präzedenzregel %1$@ wählt ein Vorkommen gegenüber dem anderen aus."
+          }
+        }
+      }
+    },
+    "Capability hygiene shadowing recommendation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfe den typisierten Gewinner und Verlierer manuell. CodingBuddy entfernt die überschriebene Quelle nicht."
+          }
+        }
+      }
+    },
+    "Capability hygiene possible overlap explanation format" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unterschiedliche Laufzeit-Identitäten teilen %1$lld verlustbehaftete Suchbegriffe; eine Überschneidung ist möglich, aber nicht belegt."
+          }
+        }
+      }
+    },
+    "Capability hygiene possible overlap recommendation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergleiche die dokumentierten Aufgaben manuell. CodingBuddy konsolidiert diese Vorkommen nicht."
+          }
+        }
+      }
+    },
     "No capabilities in verified sources" : {
       "localizations" : {
         "de" : {

@@ -263,6 +263,43 @@ struct CapabilityHygieneTests {
         #expect(shadowing.isEmpty)
     }
 
+    /// Verifies embedded Claude project servers use distinct RFC 6901 source pointers.
+    @Test func embeddedClaudeProjectMCPPointersIncludeEscapedProjectPaths() throws {
+        let home = try makeHome()
+        defer { try? FileManager.default.removeItem(at: home) }
+        let firstProject = home.appendingPathComponent("projects/project~one", isDirectory: true)
+        let secondProject = home.appendingPathComponent("projects/project-two", isDirectory: true)
+        try FileManager.default.createDirectory(at: firstProject, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: secondProject, withIntermediateDirectories: true)
+        try write(
+            """
+            {"projects":{"\(firstProject.path)":{"mcpServers":{"shared":{"command":"first"}}},"\(secondProject.path)":{"mcpServers":{"shared":{"command":"second"}}}}}
+            """,
+            to: home.appendingPathComponent(".claude.json")
+        )
+
+        let result = CapabilityHygieneScanner(homeDirectory: home).scan()
+        let embedded = result.items.filter {
+            $0.consumer == .claudeCode
+                && $0.runtimeIdentity == "shared"
+                && [firstProject.path, secondProject.path].contains($0.effectiveScope)
+                && $0.sourcePath.contains("#/projects/")
+        }
+        let escapedFirst = firstProject.path
+            .replacingOccurrences(of: "~", with: "~0")
+            .replacingOccurrences(of: "/", with: "~1")
+        let escapedSecond = secondProject.path
+            .replacingOccurrences(of: "~", with: "~0")
+            .replacingOccurrences(of: "/", with: "~1")
+        let source = try #require(result.sources.first { $0.sourcePath.hasSuffix("/.claude.json") }).sourcePath
+
+        #expect(embedded.count == 2)
+        #expect(Set(embedded.map(\.sourcePath)) == [
+            source + "#/projects/\(escapedFirst)/mcpServers/shared",
+            source + "#/projects/\(escapedSecond)/mcpServers/shared",
+        ])
+    }
+
     /// Verifies possible overlap is conservative and cannot cross consumer boundaries.
     @Test func possibleOverlapIsDeterministicAndDoesNotCrossConsumers() throws {
         let first = item(identity: "github-pr-security-review", sourcePath: "/a", content: "a")
@@ -549,7 +586,11 @@ struct CapabilityHygieneTests {
             homeDirectory: home,
             testingAfterDescriptorRead: { relativePath in
                 guard relativePath == ".cursor/mcp.json" else { return }
-                try! Data(#"{"mcpServers":[]}"#.utf8).write(to: URL(fileURLWithPath: sourcePath))
+                do {
+                    try Data(#"{"mcpServers":[]}"#.utf8).write(to: URL(fileURLWithPath: sourcePath))
+                } catch {
+                    Issue.record("Could not mutate the descriptor-read fixture: \(error)")
+                }
             }
         )
 
@@ -663,6 +704,29 @@ struct CapabilityHygieneTests {
             [mcp_servers.review]
             command = "review"
             enabled = "false" trailing
+            """,
+            to: home.appendingPathComponent(".codex/config.toml")
+        )
+
+        let result = CapabilityHygieneScanner(homeDirectory: home).scan()
+        let server = try #require(result.items.first { $0.consumer == .codex && $0.runtimeIdentity == "review" })
+
+        #expect(server.activationState == .unknown)
+        #expect(result.sources.contains {
+            $0.sourcePath.hasSuffix(".codex/config.toml") && $0.status == .partial(.malformedTOML)
+        })
+        #expect(CapabilityHygieneAnalyzer.findings(in: result.items).isEmpty)
+    }
+
+    /// Verifies schema-invalid Codex fields fail closed even when the TOML is syntactically valid.
+    @Test func invalidCodexEnabledTypeRetainsInventoryWithUnknownActivation() throws {
+        let home = try makeHome()
+        defer { try? FileManager.default.removeItem(at: home) }
+        try write(
+            """
+            [mcp_servers.review]
+            command = "review"
+            enabled = "false"
             """,
             to: home.appendingPathComponent(".codex/config.toml")
         )
@@ -791,14 +855,22 @@ struct CapabilityHygieneTests {
             homeDirectory: home,
             testingAfterDescriptorRead: { relativePath in
                 guard relativePath == "SKILL.md", FileManager.default.fileExists(atPath: originalPath) else { return }
-                try! FileManager.default.removeItem(atPath: sourcePath)
-                try! FileManager.default.moveItem(atPath: originalPath, toPath: sourcePath)
+                do {
+                    try FileManager.default.removeItem(atPath: sourcePath)
+                    try FileManager.default.moveItem(atPath: originalPath, toPath: sourcePath)
+                } catch {
+                    Issue.record("Could not perform the descriptor-read ABA fixture mutation: \(error)")
+                }
             },
             testingAfterDirectoryEnumeration: { displayPath in
                 guard displayPath.hasSuffix("/.codex/skills/review/SKILL.md"),
                       FileManager.default.fileExists(atPath: replacementPath) else { return }
-                try! FileManager.default.moveItem(atPath: sourcePath, toPath: originalPath)
-                try! FileManager.default.moveItem(atPath: replacementPath, toPath: sourcePath)
+                do {
+                    try FileManager.default.moveItem(atPath: sourcePath, toPath: originalPath)
+                    try FileManager.default.moveItem(atPath: replacementPath, toPath: sourcePath)
+                } catch {
+                    Issue.record("Could not perform the directory-enumeration ABA fixture mutation: \(error)")
+                }
             }
         )
 
@@ -808,5 +880,119 @@ struct CapabilityHygieneTests {
             $0.sourcePath.hasSuffix(".codex/skills") && $0.status == .partial(.unavailable)
         })
         #expect(result.notices.contains { $0.reason == .unavailable })
+    }
+
+    /// Verifies a skill added after discovery enumeration cannot leave the root complete.
+    @Test func skillDiscoveryRevalidationRejectsConcurrentAddition() throws {
+        let home = try makeHome()
+        defer { try? FileManager.default.removeItem(at: home) }
+        let root = home.appendingPathComponent(".codex/skills", isDirectory: true)
+        let lateSkill = root.appendingPathComponent("late/SKILL.md")
+        try write("---\nname: stable\n---\nstable\n", to: root.appendingPathComponent("stable/SKILL.md"))
+        let scanner = CapabilityHygieneScanner(
+            homeDirectory: home,
+            testingAfterDirectoryEnumeration: { displayPath in
+                guard displayPath.hasSuffix("/.codex/skills"),
+                      !FileManager.default.fileExists(atPath: lateSkill.path) else { return }
+                do {
+                    try FileManager.default.createDirectory(
+                        at: lateSkill.deletingLastPathComponent(),
+                        withIntermediateDirectories: true
+                    )
+                    try Data("---\nname: late\n---\nlate\n".utf8).write(to: lateSkill)
+                } catch {
+                    Issue.record("Could not add the concurrent skill fixture: \(error)")
+                }
+            }
+        )
+
+        let result = scanner.scan()
+
+        #expect(!result.items.contains { $0.consumer == .codex && $0.kind == .skill })
+        #expect(result.sources.contains { $0.sourcePath.hasSuffix("/.codex/skills") && $0.status == .partial(.unavailable) })
+        #expect(result.notices.contains { $0.sourcePath.hasSuffix("/.codex/skills") && $0.reason == .unavailable })
+    }
+
+    /// Verifies removal after discovery enumeration cannot leave the owning root complete.
+    @Test func skillDiscoveryRejectsConcurrentRemoval() throws {
+        let home = try makeHome()
+        defer { try? FileManager.default.removeItem(at: home) }
+        let root = home.appendingPathComponent(".codex/skills", isDirectory: true)
+        let removedSkill = root.appendingPathComponent("removed", isDirectory: true)
+        try write("---\nname: removed\n---\nremoved\n", to: removedSkill.appendingPathComponent("SKILL.md"))
+        let scanner = CapabilityHygieneScanner(
+            homeDirectory: home,
+            testingAfterDirectoryEnumeration: { displayPath in
+                guard displayPath.hasSuffix("/.codex/skills"),
+                      FileManager.default.fileExists(atPath: removedSkill.path) else { return }
+                do {
+                    try FileManager.default.removeItem(at: removedSkill)
+                } catch {
+                    Issue.record("Could not remove the concurrent skill fixture: \(error)")
+                }
+            }
+        )
+
+        let result = scanner.scan()
+
+        #expect(!result.items.contains { $0.runtimeIdentity == "removed" })
+        #expect(result.sources.contains { $0.sourcePath.hasSuffix("/.codex/skills") && $0.status == .partial(.unavailable) })
+    }
+
+    /// Verifies a replaced discovery directory is rejected by its enumerated identity.
+    @Test func skillDiscoveryRejectsConcurrentDirectoryReplacement() throws {
+        let home = try makeHome()
+        defer { try? FileManager.default.removeItem(at: home) }
+        let root = home.appendingPathComponent(".codex/skills", isDirectory: true)
+        let current = root.appendingPathComponent("review", isDirectory: true)
+        let displaced = home.appendingPathComponent("displaced-review", isDirectory: true)
+        let replacement = home.appendingPathComponent("replacement-review", isDirectory: true)
+        try write("---\nname: original\n---\noriginal\n", to: current.appendingPathComponent("SKILL.md"))
+        try write("---\nname: replacement\n---\nreplacement\n", to: replacement.appendingPathComponent("SKILL.md"))
+        let scanner = CapabilityHygieneScanner(
+            homeDirectory: home,
+            testingAfterDirectoryEnumeration: { displayPath in
+                guard displayPath.hasSuffix("/.codex/skills"),
+                      FileManager.default.fileExists(atPath: replacement.path) else { return }
+                do {
+                    try FileManager.default.moveItem(at: current, to: displaced)
+                    try FileManager.default.moveItem(at: replacement, to: current)
+                } catch {
+                    Issue.record("Could not replace the concurrent skill fixture: \(error)")
+                }
+            }
+        )
+
+        let result = scanner.scan()
+
+        #expect(!result.items.contains { ["original", "replacement"].contains($0.runtimeIdentity) })
+        #expect(result.sources.contains { $0.sourcePath.hasSuffix("/.codex/skills") && $0.status == .partial(.unavailable) })
+    }
+
+    /// Verifies task cancellation stops traversal and returns only fail-closed evidence.
+    @Test func cancelledScanStopsBeforeTheNextSkillRoot() async throws {
+        let home = try makeHome()
+        defer { try? FileManager.default.removeItem(at: home) }
+        let codexRoot = home.appendingPathComponent(".codex/skills", isDirectory: true)
+        let agentsRoot = home.appendingPathComponent(".agents/skills", isDirectory: true)
+        try write("---\nname: codex\n---\ncodex\n", to: codexRoot.appendingPathComponent("codex/SKILL.md"))
+        try write("---\nname: agents\n---\nagents\n", to: agentsRoot.appendingPathComponent("agents/SKILL.md"))
+        let scanner = CapabilityHygieneScanner(
+            homeDirectory: home,
+            testingAfterDirectoryEnumeration: { displayPath in
+                guard displayPath.hasSuffix("/.codex/skills") else { return }
+                withUnsafeCurrentTask { $0?.cancel() }
+            }
+        )
+
+        let result = await Task.detached { scanner.scan() }.value
+
+        #expect(result.items.isEmpty)
+        #expect(result.sources.contains {
+            $0.sourcePath.hasSuffix(home.lastPathComponent)
+                && $0.kind == nil
+                && $0.status == .partial(.unavailable)
+        })
+        #expect(!result.sources.contains { $0.sourcePath.hasSuffix("/.agents/skills") })
     }
 }

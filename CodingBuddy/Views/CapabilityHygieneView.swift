@@ -18,7 +18,7 @@ nonisolated enum CapabilityHygieneMode: String, CaseIterable, Sendable {
 }
 
 /// Sortable presentation values for one finding without changing analyzer identity.
-private struct CapabilityFindingPresentationRow: Identifiable {
+private nonisolated struct CapabilityFindingPresentationRow: Identifiable {
     /// Underlying typed analyzer result.
     let finding: CapabilityHygieneFinding
     /// Compact identities shown in the table.
@@ -37,7 +37,7 @@ private struct CapabilityFindingPresentationRow: Identifiable {
 }
 
 /// Sortable presentation values for one retained inventory occurrence.
-private struct CapabilityInventoryPresentationRow: Identifiable {
+private nonisolated struct CapabilityInventoryPresentationRow: Identifiable {
     /// Underlying typed occurrence.
     let item: CapabilityInventoryItem
 
@@ -623,7 +623,7 @@ private struct CapabilityCoverageDetails: View {
 }
 
 /// One value-free path inside a grouped coverage disclosure.
-private struct CapabilityCoverageEntry: Identifiable {
+private nonisolated struct CapabilityCoverageEntry: Identifiable {
     /// Stable source or notice identity.
     let id: String
     /// Value-free source path.
@@ -631,7 +631,7 @@ private struct CapabilityCoverageEntry: Identifiable {
 }
 
 /// Collapsible coverage group sharing one typed status and reason.
-private struct CapabilityCoverageGroup: Identifiable {
+private nonisolated struct CapabilityCoverageGroup: Identifiable {
     /// Stable group identity.
     let id: String
     /// Localized typed status.
@@ -1026,7 +1026,7 @@ private extension CapabilitySourceStatus {
     }
 
     /// Locale-independent sort value for the native table.
-    var sortKey: String {
+    nonisolated var sortKey: String {
         switch self {
         case .missing: "0-missing"
         case .complete: "1-complete"
