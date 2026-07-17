@@ -27,3 +27,13 @@ The authoritative short versions live in the repo: [CLAUDE.md](https://github.co
 
 - Swift Testing; parser/writer changes require test changes.
 - No test ever touches real dotfiles or `$HOME`.
+
+## Documentation quality
+
+- Eligible app declarations require `///` documentation; repository coverage must remain at or above 90%.
+- Run `./scripts/check-docstring-coverage.sh` locally. Add `--json` for machine-readable totals, exclusions, excluded paths, coverage, threshold, and pass/fail state.
+- Run `./scripts/test-docstring-coverage.sh` after changing the checker. CI executes these deterministic lexer and policy fixtures before enforcing the repository threshold.
+- The denominator covers the app module's types, enum cases, functions, initializers, subscripts, type aliases, associated types, operators, and properties.
+- Empty or whitespace-only `///` blocks are missing documentation; at least one line must contain meaningful text.
+- Tests, generated source with an exact `@generated` marker on its own line in leading header comments before code, local declarations, private implementation details, overrides that inherit their contract, and SwiftUI's standard `body` property are excluded. Generator-like prose, strings, and comments after code do not exclude files. The checker reports every exclusion category and excluded file path so the metric cannot silently shrink.
+- Braces and comment markers inside normal, raw, or multiline Swift strings and nested block comments are ignored for scope tracking.

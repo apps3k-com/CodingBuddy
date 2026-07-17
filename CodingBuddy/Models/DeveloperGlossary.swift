@@ -7,14 +7,23 @@ import Foundation
 
 /// Curated developer terms that can be referenced from guidance.
 nonisolated enum DeveloperTerm: String, CaseIterable, Hashable, Sendable {
+    /// Continuous integration automation.
     case ci
+    /// Pull request review workflow.
     case pr
+    /// Model Context Protocol integrations.
     case mcp
+    /// Delegated authorization without password sharing.
     case oauth
+    /// A permission or configuration boundary.
     case scope
+    /// A worktree with uncommitted changes.
     case dirtyWorktree = "dirty-worktree"
+    /// Local-versus-remote commit divergence.
     case aheadBehind = "ahead-behind"
+    /// A package held at a fixed version.
     case packagePin = "package-pin"
+    /// A dependency explicitly declared by the project or user.
     case directDependency = "direct-dependency"
 }
 
@@ -22,8 +31,11 @@ nonisolated enum DeveloperTerm: String, CaseIterable, Hashable, Sendable {
 nonisolated struct DeveloperGlossaryEntry: Identifiable, Equatable, Sendable {
     /// Stable term identity; never derived from localized display text.
     var id: String { term.rawValue }
+    /// Stable, non-localized term represented by this entry.
     let term: DeveloperTerm
+    /// Localized short label for display.
     let title: String
+    /// Localized plain-language explanation.
     let definition: String
 }
 

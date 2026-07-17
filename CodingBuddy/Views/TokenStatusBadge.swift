@@ -7,6 +7,7 @@ import SwiftUI
 
 /// Token lifecycle badge shared by every credential section.
 struct TokenStatusBadge: View {
+    /// Token lifecycle state rendered without exposing credential contents.
     let status: TokenStatus
 
     var body: some View {
@@ -28,6 +29,10 @@ struct TokenStatusBadge: View {
         case .incomplete:
             Text("Incomplete (no tokens)")
                 .foregroundStyle(.secondary)
+        case .resetOnly:
+            Text("Reset only")
+                .foregroundStyle(.orange)
+                .help("CodingBuddy found token artifacts but refused to read them safely.")
         }
     }
 }

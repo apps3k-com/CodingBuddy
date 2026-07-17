@@ -7,11 +7,13 @@ import Foundation
 
 /// Finds one active, executable installation for each supported manager.
 nonisolated protocol ExecutableLocating: Sendable {
+    /// Returns the first verified executable for a manager, or `nil` when none is available.
     func installation(for manager: PackageManagerKind) -> PackageManagerInstallation?
 }
 
 /// UserDefaults keys for explicit package-manager executable overrides.
 nonisolated enum PackageExecutablePreference {
+    /// Produces the stable defaults key used for one manager's explicit path override.
     static func key(for manager: PackageManagerKind) -> String {
         "packageMaintenance.executable.\(manager.rawValue)"
     }
@@ -19,11 +21,16 @@ nonisolated enum PackageExecutablePreference {
 
 /// Deterministic executable discovery without invoking a login shell.
 nonisolated struct PackageExecutableLocator: ExecutableLocating, @unchecked Sendable {
+    /// Preference source for explicit executable overrides.
     let defaults: UserDefaults
+    /// File-system dependency used to validate candidates and discover managed versions.
     let fileManager: FileManager
+    /// Home directory used to construct user-scoped candidate paths.
     let homeDirectory: URL
+    /// Captured process environment used to construct manager-specific launch environments.
     let processEnvironment: [String: String]
 
+    /// Creates a locator with injectable environment and file-system dependencies.
     init(
         defaults: UserDefaults = .standard,
         fileManager: FileManager = .default,
@@ -36,6 +43,7 @@ nonisolated struct PackageExecutableLocator: ExecutableLocating, @unchecked Send
         self.processEnvironment = processEnvironment
     }
 
+    /// Selects the first executable candidate and returns the environment needed to invoke it.
     func installation(for manager: PackageManagerKind) -> PackageManagerInstallation? {
         for url in candidateURLs(for: manager) where isExecutableFile(url) {
             return PackageManagerInstallation(

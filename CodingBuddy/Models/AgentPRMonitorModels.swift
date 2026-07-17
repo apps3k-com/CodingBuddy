@@ -15,6 +15,9 @@ nonisolated struct GitHubRepositoryRef: Identifiable, Codable, Equatable, Hashab
     /// Stable identifier used for persistence and table filtering.
     var id: String { "\(owner)/\(name)" }
 
+    /// Case-insensitive GitHub identity used for deduplication without changing display spelling.
+    var canonicalID: String { id.lowercased() }
+
     /// Human-readable `owner/name` repository label.
     var displayName: String { id }
 
@@ -385,16 +388,21 @@ nonisolated struct AgentPRReviewSummary: Equatable, Hashable, Sendable {
     let latestReviews: [AgentPRReview]
     /// Current and historical review threads returned by GitHub.
     let threads: [AgentPRReviewThread]
+    /// Whether GitHub indicated there are more latest reviews than were fetched.
+    let hasTruncatedLatestReviews: Bool
     /// Whether GitHub indicated there are more review threads than v1 fetched.
     let hasTruncatedThreads: Bool
 
     /// Derived high-level review state.
     var state: AgentPRReviewSummaryState {
-        if latestReviews.contains(where: { $0.state == .changesRequested }) {
+        if decision == .changesRequested || latestReviews.contains(where: { $0.state == .changesRequested }) {
             return .changesRequested
         }
+        if hasTruncatedLatestReviews { return .unknown }
         switch decision {
-        case .approved, .none:
+        case .approved:
+            return .approved
+        case .none:
             return .approved
         case .reviewRequired:
             return .reviewRequired
@@ -414,7 +422,7 @@ nonisolated struct AgentPRReviewSummary: Equatable, Hashable, Sendable {
     var findingsState: AgentPRFindingsState {
         if state == .changesRequested { return .changesRequested }
         if unresolvedFindingCount > 0 { return .unresolvedFindings(count: unresolvedFindingCount) }
-        if hasTruncatedThreads { return .reviewPending }
+        if hasTruncatedLatestReviews || hasTruncatedThreads { return .reviewPending }
         if state == .reviewRequired || state == .pending { return .reviewPending }
         return .none
     }
@@ -424,11 +432,13 @@ nonisolated struct AgentPRReviewSummary: Equatable, Hashable, Sendable {
         decision: AgentPRReviewDecision,
         latestReviews: [AgentPRReview],
         threads: [AgentPRReviewThread],
+        hasTruncatedLatestReviews: Bool = false,
         hasTruncatedThreads: Bool = false
     ) {
         self.decision = decision
         self.latestReviews = latestReviews
         self.threads = threads
+        self.hasTruncatedLatestReviews = hasTruncatedLatestReviews
         self.hasTruncatedThreads = hasTruncatedThreads
     }
 }

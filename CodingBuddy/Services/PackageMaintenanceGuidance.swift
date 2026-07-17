@@ -7,25 +7,37 @@ import Foundation
 
 /// Release-note state used by guidance without carrying note content or destinations.
 nonisolated enum PackageGuidanceReleaseNotesState: String, Equatable, Sendable {
+    /// Release notes have not been requested.
     case idle
+    /// Release-note lookup is in progress.
     case loading
+    /// Release-note lookup produced a usable result.
     case loaded
+    /// No release notes or fallback source could be resolved.
     case unavailable
 }
 
 /// Existing Package Maintenance routes that guidance is allowed to request.
 nonisolated enum PackageMaintenanceGuidanceRoute: Equatable, Sendable {
+    /// Opens the reviewable update-plan flow.
     case prepareUpdatePlan
+    /// Opens release notes for the selected target version.
     case openReleaseNotes
+    /// Opens package-manager executable settings.
     case openSettings
+    /// Repeats the package inventory scan.
     case reload
 }
 
 /// Availability of the existing package-maintenance routes when guidance is built.
 nonisolated struct PackageMaintenanceGuidanceActionAvailability: Equatable, Sendable {
+    /// Whether an update plan can currently be prepared.
     let canPrepareUpdatePlan: Bool
+    /// Whether resolved release notes can currently be opened.
     let canOpenReleaseNotes: Bool
+    /// Whether package-maintenance settings can currently be opened.
     let canOpenSettings: Bool
+    /// Whether the package inventory can currently be reloaded.
     let canReload: Bool
 
     /// Common test and production state when no package operation blocks a route.
@@ -39,12 +51,15 @@ nonisolated struct PackageMaintenanceGuidanceActionAvailability: Equatable, Send
 
 /// Inspector inputs resolved at the feature boundary so executable tests can cover legacy and guided behavior.
 nonisolated struct PackageMaintenanceInspectorPresentation: Equatable, Sendable {
+    /// Status shown by the inspector after applying the selected update mode.
     let displayedStatus: PackageStatus
+    /// Explainable recommendation shown when guidance is enabled.
     let guidance: Guidance?
 }
 
 /// Testable feature-gate seam used by the package maintenance inspector.
 nonisolated enum PackageMaintenanceGuidanceViewPolicy {
+    /// Resolves the legacy or target-aware status according to the guidance feature flag.
     static func displayedStatus(
         isGuidanceEnabled: Bool,
         package: InstalledPackage,
@@ -54,6 +69,7 @@ nonisolated enum PackageMaintenanceGuidanceViewPolicy {
         return PackageMaintenanceGuidance.selectedStatus(for: package, mode: mode)
     }
 
+    /// Builds the inspector status and optional guidance at the feature-gate boundary.
     static func inspectorPresentation(
         isGuidanceEnabled: Bool,
         package: InstalledPackage,
@@ -856,25 +872,40 @@ nonisolated enum PackageMaintenanceGuidance {
 }
 
 private nonisolated enum PackageGuidanceState: String, Sendable {
+    /// The installed package already matches the selected target.
     case current
+    /// A non-major update is available.
     case routineUpdate = "routine-update"
+    /// The selected target crosses a major-version boundary.
     case majorUpdate = "major-update"
+    /// Inventory reports an update but no exact target can be selected.
     case unavailableUpdate = "unavailable-update"
+    /// Package-manager policy prevents updating a pinned package.
     case pinned
+    /// The package delegates updates to its own updater.
     case selfUpdating = "self-updating"
+    /// The discovered package-manager installation is not writable.
     case notWritable = "not-writable"
+    /// Available metadata cannot support a stronger package-state claim.
     case unknown
 }
 
 private nonisolated enum RouteAction: String, Sendable {
+    /// Requests review of a generated update plan.
     case reviewUpdate = "review-update"
+    /// Requests navigation to resolved release notes.
     case openReleaseNotes = "open-release-notes"
+    /// Requests navigation to package-manager settings.
     case openSettings = "open-settings"
+    /// Requests a fresh package scan.
     case refresh
 }
 
 private nonisolated enum NonRouteAction: String, Sendable {
+    /// Indicates that the selected target requires no package change.
     case noUpdateNeeded = "no-update-needed"
+    /// Recommends removing an external package-manager pin.
     case unpin
+    /// Recommends using the package's own update mechanism.
     case selfUpdate = "self-update"
 }

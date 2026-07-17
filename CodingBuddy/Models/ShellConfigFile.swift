@@ -9,16 +9,21 @@ import Foundation
 /// interactive login shell: .zshenv → .zprofile → .zshrc. Later files win when
 /// the same variable is assigned in more than one of them.
 nonisolated enum ShellConfigFile: String, CaseIterable, Identifiable, Hashable {
+    /// Environment file loaded for every zsh invocation.
     case zshenv = ".zshenv"
+    /// Profile loaded for login shells.
     case zprofile = ".zprofile"
+    /// Configuration loaded for interactive shells.
     case zshrc = ".zshrc"
 
+    /// Stable file-name identity.
     var id: String { rawValue }
 
     /// Position in zsh's load order; files with a higher value load later and
     /// override assignments from earlier files.
     var loadOrder: Int { Self.allCases.firstIndex(of: self) ?? 0 }
 
+    /// Resolves the startup file without following or validating the target.
     func url(in homeDirectory: URL) -> URL {
         homeDirectory.appendingPathComponent(rawValue, isDirectory: false)
     }

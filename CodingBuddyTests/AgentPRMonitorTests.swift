@@ -82,6 +82,36 @@ struct AgentPRMonitorTests {
         #expect(readiness.state == .waiting)
     }
 
+    /// Verifies a missing provider decision cannot become approved from truncated latest reviews.
+    @Test func truncatedLatestReviewsWithoutDecisionStayPending() {
+        let review = AgentPRReviewSummary(
+            decision: .none,
+            latestReviews: [
+                AgentPRReview(authorLogin: "apps3000", state: .approved, submittedAt: nil, url: nil),
+            ],
+            threads: [],
+            hasTruncatedLatestReviews: true
+        )
+
+        #expect(review.state == .unknown)
+        #expect(review.findingsState == .reviewPending)
+    }
+
+    /// Verifies an approved provider decision cannot hide unseen latest reviews.
+    @Test func truncatedLatestReviewsOverrideApprovedDecision() {
+        let review = AgentPRReviewSummary(
+            decision: .approved,
+            latestReviews: [
+                AgentPRReview(authorLogin: "apps3000", state: .approved, submittedAt: nil, url: nil),
+            ],
+            threads: [],
+            hasTruncatedLatestReviews: true
+        )
+
+        #expect(review.state == .unknown)
+        #expect(review.findingsState == .reviewPending)
+    }
+
     /// Verifies pull request search covers the owning repository.
     @Test func pullRequestSearchMatchesRepositoryName() {
         let website = GitHubRepositoryRef(owner: "apps3k-com", name: "Website")
@@ -227,6 +257,54 @@ struct AgentPRMonitorTests {
         #expect(transport.requests.count == 1)
     }
 
+    /// Verifies GraphQL review coverage prevents approval when the decision is absent.
+    @Test func clientTreatsTruncatedLatestReviewsWithoutDecisionAsNotReady() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let transport = RecordingGitHubTransport(
+            result: .response(
+                Data(Self.graphQLTruncatedLatestReviewsWithoutDecisionResponse.utf8),
+                statusCode: 200,
+                headers: [:]
+            )
+        )
+        let client = GitHubClient(tokenStore: tokenStore, transport: transport)
+
+        let snapshot = try await client.fetchOpenPullRequests(repository: repository)
+
+        let row = try #require(snapshot.rows.first)
+        let requestBody = try #require(transport.requests.first?.httpBody)
+        let requestJSON = try #require(JSONSerialization.jsonObject(with: requestBody) as? [String: Any])
+        let query = try #require(requestJSON["query"] as? String)
+        #expect(query.contains("latestReviews(first: 100)"))
+        #expect(row.review.decision == .none)
+        #expect(row.review.hasTruncatedLatestReviews)
+        #expect(row.review.state == .unknown)
+        #expect(row.review.findingsState == .reviewPending)
+        #expect(row.readiness.state == .waiting)
+    }
+
+    /// Verifies decoded approved decisions remain pending when latest reviews are incomplete.
+    @Test func clientTreatsApprovedDecisionWithTruncatedLatestReviewsAsNotReady() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let response = Self.graphQLTruncatedLatestReviewsWithoutDecisionResponse.replacingOccurrences(
+            of: #""reviewDecision": null"#,
+            with: #""reviewDecision": "APPROVED""#
+        )
+        let transport = RecordingGitHubTransport(
+            result: .response(Data(response.utf8), statusCode: 200, headers: [:])
+        )
+        let client = GitHubClient(tokenStore: tokenStore, transport: transport)
+
+        let snapshot = try await client.fetchOpenPullRequests(repository: repository)
+
+        let row = try #require(snapshot.rows.first)
+        #expect(row.review.decision == .approved)
+        #expect(row.review.hasTruncatedLatestReviews)
+        #expect(row.review.state == .unknown)
+        #expect(row.review.findingsState == .reviewPending)
+        #expect(row.readiness.state == .waiting)
+    }
+
     /// Verifies REST fallback fills missing GraphQL status rollups for visible rows.
     @Test func clientFallsBackToRESTWhenGraphQLStatusRollupIsMissing() async throws {
         let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
@@ -246,6 +324,163 @@ struct AgentPRMonitorTests {
         #expect(transport.requests.count == 3)
         #expect(transport.requests[1].url?.path == "/repos/apps3k-com/CodingBuddy/commits/abc123/check-runs")
         #expect(transport.requests[2].url?.path == "/repos/apps3k-com/CodingBuddy/commits/abc123/status")
+    }
+
+    /// Verifies combined-status total_count fetches a later page containing a failure.
+    @Test func clientPaginatesRESTStatusesWhenTotalCountExceedsFirstPage() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let transport = RecordingGitHubTransport(results: [
+            .response(Data(Self.graphQLMissingStatusResponse.utf8), statusCode: 200, headers: [:]),
+            .response(Data(Self.restCheckRunsResponse.utf8), statusCode: 200, headers: [:]),
+            .response(
+                Data(Self.restStatusesPage(totalCount: 2, context: "cubic", state: "SUCCESS").utf8),
+                statusCode: 200,
+                headers: [:]
+            ),
+            .response(
+                Data(Self.restStatusesPage(totalCount: 2, context: "security", state: "FAILURE").utf8),
+                statusCode: 200,
+                headers: [:]
+            ),
+        ])
+        let client = GitHubClient(tokenStore: tokenStore, transport: transport)
+
+        let snapshot = try await client.fetchOpenPullRequests(repository: repository)
+
+        let row = try #require(snapshot.rows.first)
+        let statusRequests = transport.requests.filter { $0.url?.path.hasSuffix("/status") == true }
+        let requestedPages = statusRequests.compactMap { request -> String? in
+            guard let url = request.url,
+                  let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+                return nil
+            }
+            return components.queryItems?.first { $0.name == "page" }?.value
+        }
+        #expect(statusRequests.allSatisfy { request in
+            guard let url = request.url,
+                  let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+                return false
+            }
+            return components.queryItems?.first { $0.name == "per_page" }?.value == "100"
+        })
+        #expect(requestedPages == ["1", "2"])
+        #expect(row.checks.contexts.map(\.name) == ["build-and-test", "cubic", "security"])
+        #expect(row.checks.state == .failed)
+        #expect(row.readiness.state == .attentionNeeded)
+    }
+
+    /// Verifies a shifted page that repeats a context cannot numerically satisfy total_count.
+    @Test func clientFailsClosedWhenRESTStatusPaginationRepeatsContext() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let transport = RecordingGitHubTransport(results: [
+            .response(Data(Self.graphQLMissingStatusResponse.utf8), statusCode: 200, headers: [:]),
+            .response(Data(Self.restCheckRunsResponse.utf8), statusCode: 200, headers: [:]),
+            .response(
+                Data(Self.restStatusesPage(
+                    totalCount: 2,
+                    context: "cubic",
+                    state: "SUCCESS",
+                    combinedState: "SUCCESS"
+                ).utf8),
+                statusCode: 200,
+                headers: [:]
+            ),
+            .response(
+                Data(Self.restStatusesPage(
+                    totalCount: 2,
+                    context: "CUBIC",
+                    state: "SUCCESS",
+                    combinedState: "SUCCESS"
+                ).utf8),
+                statusCode: 200,
+                headers: [:]
+            ),
+        ])
+        let client = GitHubClient(tokenStore: tokenStore, transport: transport)
+
+        let snapshot = try await client.fetchOpenPullRequests(repository: repository)
+
+        let row = try #require(snapshot.rows.first)
+        #expect(row.checks.contexts.map(\.name) == ["build-and-test", "cubic"])
+        #expect(row.checks.isTruncated)
+        #expect(row.checks.state == .unknown)
+        #expect(row.readiness.state == .waiting)
+        #expect(transport.requests.count == 4)
+    }
+
+    /// Verifies GitHub's global combined state cannot disagree with the fetched contexts.
+    @Test func clientFailsClosedWhenRESTCombinedStateDisagreesWithContexts() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let transport = RecordingGitHubTransport(results: [
+            .response(Data(Self.graphQLMissingStatusResponse.utf8), statusCode: 200, headers: [:]),
+            .response(Data(Self.restCheckRunsResponse.utf8), statusCode: 200, headers: [:]),
+            .response(
+                Data(Self.restStatusesPage(
+                    totalCount: 1,
+                    context: "cubic",
+                    state: "SUCCESS",
+                    combinedState: "FAILURE"
+                ).utf8),
+                statusCode: 200,
+                headers: [:]
+            ),
+        ])
+        let client = GitHubClient(tokenStore: tokenStore, transport: transport)
+
+        let snapshot = try await client.fetchOpenPullRequests(repository: repository)
+
+        let row = try #require(snapshot.rows.first)
+        #expect(row.checks.isTruncated)
+        #expect(row.checks.state == .unknown)
+        #expect(row.readiness.state == .waiting)
+    }
+
+    /// Verifies an unfetched Link page makes visible green REST statuses unknown.
+    @Test func clientFailsClosedWhenRESTStatusPageLimitLeavesNextLink() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let nextLink = #"<https://api.github.com/repos/apps3k-com/CodingBuddy/commits/abc123/status?per_page=100&page=2>; rel="next""#
+        let transport = RecordingGitHubTransport(results: [
+            .response(Data(Self.graphQLMissingStatusResponse.utf8), statusCode: 200, headers: [:]),
+            .response(Data(Self.restCheckRunsResponse.utf8), statusCode: 200, headers: [:]),
+            .response(
+                Data(Self.restStatusesPage(totalCount: nil, context: "cubic", state: "SUCCESS").utf8),
+                statusCode: 200,
+                headers: ["Link": nextLink]
+            ),
+        ])
+        let client = GitHubClient(tokenStore: tokenStore, transport: transport, statusPageLimit: 1)
+
+        let snapshot = try await client.fetchOpenPullRequests(repository: repository)
+
+        let row = try #require(snapshot.rows.first)
+        #expect(row.checks.contexts.map(\.name) == ["build-and-test", "cubic"])
+        #expect(row.checks.isTruncated)
+        #expect(row.checks.state == .unknown)
+        #expect(row.readiness.state == .waiting)
+        #expect(transport.requests.count == 3)
+    }
+
+    /// Verifies check-run total_count prevents a false green result when Link is absent.
+    @Test func clientFailsClosedWhenRESTCheckRunCountExceedsFetchedPage() async throws {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let truncatedChecks = Self.restCheckRunsResponse.replacingOccurrences(
+            of: #""total_count": 1"#,
+            with: #""total_count": 2"#
+        )
+        let transport = RecordingGitHubTransport(results: [
+            .response(Data(Self.graphQLMissingStatusResponse.utf8), statusCode: 200, headers: [:]),
+            .response(Data(truncatedChecks.utf8), statusCode: 200, headers: [:]),
+            .response(Data(Self.restEmptyStatusesResponse.utf8), statusCode: 200, headers: [:]),
+        ])
+        let client = GitHubClient(tokenStore: tokenStore, transport: transport)
+
+        let snapshot = try await client.fetchOpenPullRequests(repository: repository)
+
+        let row = try #require(snapshot.rows.first)
+        #expect(row.checks.contexts.map(\.name) == ["build-and-test"])
+        #expect(row.checks.isTruncated)
+        #expect(row.checks.state == .unknown)
+        #expect(row.readiness.state == .waiting)
     }
 
     /// Verifies GitHub transport failures map to safe, typed UI errors.
@@ -583,6 +818,32 @@ struct AgentPRMonitorTests {
         #expect(defaults.string(forKey: AgentPRMonitorStore.watchedRepositoriesKey) == "apps3k-com/CodingBuddy\napps3k-com/Docs")
     }
 
+    /// Verifies persisted and newly added GitHub case variants resolve to one watchlist identity.
+    @Test func storeDeduplicatesAndRemovesRepositoriesCaseInsensitively() {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let defaults = MemoryAgentPRMonitorDefaults()
+        defaults.setAgentPRMonitorString(
+            "Apps3K-Com/CodingBuddy\napps3k-com/codingbuddy",
+            forKey: AgentPRMonitorStore.watchedRepositoriesKey
+        )
+        let store = AgentPRMonitorStore(
+            tokenStore: tokenStore,
+            client: StubAgentPRMonitorClient(results: []),
+            defaults: defaults
+        )
+        let lowercase = GitHubRepositoryRef(owner: "apps3k-com", name: "codingbuddy")
+
+        store.addWatchedRepository(lowercase)
+
+        #expect(store.watchedRepositories.count == 1)
+        #expect(store.watchedRepositories.first?.displayName == "Apps3K-Com/CodingBuddy")
+
+        store.removeWatchedRepository(lowercase)
+
+        #expect(store.watchedRepositories.isEmpty)
+        #expect(defaults.string(forKey: AgentPRMonitorStore.watchedRepositoriesKey) == nil)
+    }
+
     /// Verifies adding the first repository after clearing setup leaves the monitor refreshable.
     @Test func storeAddingFirstRepositoryAfterClearResetsSetupState() {
         let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
@@ -855,6 +1116,7 @@ struct AgentPRMonitorTests {
                 rows: [samplePullRequest(number: 61)],
                 rateLimit: GitHubRateLimitState(remaining: 10, resetAt: nil)
             )),
+            .failure(.networkUnavailable),
         ])
         let store = AgentPRMonitorStore(
             tokenStore: tokenStore,
@@ -865,12 +1127,28 @@ struct AgentPRMonitorTests {
         store.selectRepository(repository)
         store.refresh()
         try await waitForRefresh(in: store)
+        store.refresh()
+        try await waitForRefresh(in: store)
+        #expect(store.repositoryRefreshStates[repository] == .refreshFailed(.networkUnavailable))
         store.handleGitHubAuthorizationChange(.removed)
 
         #expect(store.state == .needsToken)
         #expect(store.rows.isEmpty)
         #expect(store.rateLimit == nil)
         #expect(!store.isRefreshing)
+        #expect(store.repositoryRefreshStates.isEmpty)
+
+        let queue = PRAttentionQueueBuilder.snapshot(
+            rows: store.rows,
+            repositories: store.watchedRepositories,
+            freshnessByRepository: [:],
+            defaultFreshness: AgentPRMonitorView.guidanceFreshness(for: store.state),
+            actionAvailability: .allAvailable
+        )
+        #expect(!queue.items.isEmpty)
+        #expect(queue.items.allSatisfy {
+            $0.guidance.recommendedAction.id == AgentPRGuidanceRoute.openSettings.rawValue
+        })
     }
 
     /// Verifies deleting the token clears private row data and refresh metadata.
@@ -897,6 +1175,7 @@ struct AgentPRMonitorTests {
         #expect(store.rows.isEmpty)
         #expect(store.rateLimit == nil)
         #expect(!store.isRefreshing)
+        #expect(store.repositoryRefreshStates.isEmpty)
     }
 
     /// Verifies failed token deletion still stops any visible refresh state.
@@ -1232,6 +1511,68 @@ struct AgentPRMonitorTests {
     }
     """
 
+    /// GraphQL fixture with no review decision and an incomplete latest-review page.
+    private static let graphQLTruncatedLatestReviewsWithoutDecisionResponse = """
+    {
+      "data": {
+        "repository": {
+          "pullRequests": {
+            "nodes": [
+              {
+                "number": 54,
+                "title": "feat: add native Agent PR Monitor for coding-agent pull requests",
+                "url": "https://github.com/apps3k-com/CodingBuddy/pull/54",
+                "isDraft": false,
+                "updatedAt": "2026-06-28T10:20:00Z",
+                "author": { "login": "apps3000" },
+                "headRefName": "bvk/agent-pr-monitor-v1",
+                "headRefOid": "abc123",
+                "baseRefName": "main",
+                "closingIssuesReferences": { "nodes": [] },
+                "reviewDecision": null,
+                "latestReviews": {
+                  "nodes": [
+                    {
+                      "author": { "login": "apps3000" },
+                      "state": "APPROVED",
+                      "submittedAt": "2026-06-28T10:21:00Z",
+                      "url": "https://github.com/apps3k-com/CodingBuddy/pull/54#pullrequestreview-1"
+                    }
+                  ],
+                  "pageInfo": { "hasNextPage": true }
+                },
+                "reviewThreads": { "nodes": [] },
+                "commits": {
+                  "nodes": [
+                    {
+                      "commit": {
+                        "oid": "abc123",
+                        "statusCheckRollup": {
+                          "contexts": {
+                            "nodes": [
+                              {
+                                "__typename": "CheckRun",
+                                "name": "build-and-test",
+                                "status": "COMPLETED",
+                                "conclusion": "SUCCESS",
+                                "detailsUrl": "https://github.com/apps3k-com/CodingBuddy/actions/runs/1"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "rateLimit": { "remaining": 4998, "resetAt": "2026-06-28T11:00:00Z" }
+      }
+    }
+    """
+
     /// GraphQL fixture requiring REST status fallback.
     private static let graphQLMissingStatusResponse = """
     {
@@ -1275,6 +1616,7 @@ struct AgentPRMonitorTests {
     /// REST check-runs fixture used by fallback tests.
     private static let restCheckRunsResponse = """
     {
+      "total_count": 1,
       "check_runs": [
         {
           "name": "build-and-test",
@@ -1286,9 +1628,18 @@ struct AgentPRMonitorTests {
     }
     """
 
+    /// Empty REST combined-status fixture used when only check-run coverage is under test.
+    private static let restEmptyStatusesResponse = """
+    {
+      "total_count": 0,
+      "statuses": []
+    }
+    """
+
     /// REST combined-status fixture used by fallback tests.
     private static let restStatusesResponse = """
     {
+      "total_count": 1,
       "statuses": [
         {
           "context": "cubic",
@@ -1298,6 +1649,30 @@ struct AgentPRMonitorTests {
       ]
     }
     """
+
+    /// Builds one REST combined-status page with optional total coverage metadata.
+    private static func restStatusesPage(
+        totalCount: Int?,
+        context: String,
+        state: String,
+        combinedState: String? = nil
+    ) -> String {
+        let totalCountField = totalCount.map { "\"total_count\": \($0)," } ?? ""
+        let combinedStateField = combinedState.map { "\"state\": \"\($0)\"," } ?? ""
+        return """
+        {
+          \(totalCountField)
+          \(combinedStateField)
+          "statuses": [
+            {
+              "context": "\(context)",
+              "state": "\(state)",
+              "target_url": "https://github.com/apps3k-com/CodingBuddy/statuses/\(context)"
+            }
+          ]
+        }
+        """
+    }
 
     /// GraphQL fixture with an unsafe provider error string.
     private static let graphQLUnknownErrorResponse = """

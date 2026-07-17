@@ -59,6 +59,8 @@ nonisolated enum AgentDiagnosticCode: String, CaseIterable, Sendable {
     case expiredCredential
     /// An OAuth cache entry exists without the token file needed for a complete login.
     case incompleteCredential
+    /// MCP Auth input was deliberately omitted, so Agent Doctor could not prove a complete scan.
+    case credentialScanIncomplete
 }
 
 /// One read-only Agent Doctor finding. It intentionally stores metadata and
@@ -190,6 +192,20 @@ nonisolated struct AgentDiagnostic: Identifiable, Equatable, Hashable, Sendable 
             source: source,
             subject: name,
             suggestion: String(localized: "Reset the entry and reconnect the MCP server.")
+        )
+    }
+
+    /// Creates a warning when bounded MCP Auth inspection cannot cover the complete cache.
+    static func credentialScanIncomplete() -> AgentDiagnostic {
+        AgentDiagnostic(
+            code: .credentialScanIncomplete,
+            severity: .warning,
+            tool: .mcpAuth,
+            title: String(localized: "Credential scan was incomplete"),
+            detail: String(localized: "CodingBuddy deliberately omitted credential cache input that could not be inspected safely."),
+            source: "mcp-auth-scan",
+            subject: nil,
+            suggestion: String(localized: "Open MCP Auth, review the safety warning, and retry the scan.")
         )
     }
 }

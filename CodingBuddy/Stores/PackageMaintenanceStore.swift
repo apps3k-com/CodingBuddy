@@ -8,10 +8,14 @@ import Observation
 
 /// Table filter for global package inventory.
 nonisolated enum PackageInventoryFilter: String, CaseIterable, Sendable {
+    /// Packages with an available target for the selected update mode.
     case updates
+    /// Packages explicitly installed rather than transitive dependencies.
     case direct
+    /// Complete discovered package inventory.
     case all
 
+    /// Localized label used by the inventory filter control.
     var displayName: String {
         switch self {
         case .updates: String(localized: "Updates")
@@ -23,18 +27,27 @@ nonisolated enum PackageInventoryFilter: String, CaseIterable, Sendable {
 
 /// Loading and update state for Software Updates.
 nonisolated enum PackageMaintenanceState: Equatable, Sendable {
+    /// No scan has started yet.
     case idle
+    /// Package providers are being scanned.
     case loading
+    /// Preview commands are validating a proposed update plan.
     case preparing
+    /// Inventory is available for interaction.
     case loaded
+    /// A confirmed update plan is executing sequentially.
     case updating
 }
 
 /// Release-note state loaded only for the selected package.
 nonisolated enum PackageReleaseNotesState: Equatable, Sendable {
+    /// No package is selected for release-note lookup.
     case idle
+    /// Release notes are being fetched for the selected target version.
     case loading
+    /// Release notes were resolved successfully.
     case loaded(PackageReleaseNotes)
+    /// No trustworthy release notes could be resolved.
     case unavailable
 }
 
@@ -46,11 +59,17 @@ final class PackageMaintenanceStore {
     private(set) var state = PackageMaintenanceState.idle
     private(set) var updateEvents: [PackageUpdateEvent] = []
     private(set) var releaseNotesState = PackageReleaseNotesState.idle
+    /// Package identifiers selected for a prospective update plan.
     var selection = Set<InstalledPackage.ID>()
+    /// Active inventory subset shown in the table.
     var filter = PackageInventoryFilter.updates
+    /// Version policy used to resolve each package's target.
     var updateMode = PackageUpdateMode.compatible
+    /// User-entered package or provider query.
     var searchText = ""
+    /// Validated plan awaiting explicit user confirmation.
     var pendingPlan: PackageUpdatePlan?
+    /// Last scan, preview, or update error surfaced by the view.
     var lastError: String?
 
     @ObservationIgnored private let service: PackageMaintenanceService
@@ -61,6 +80,7 @@ final class PackageMaintenanceStore {
     @ObservationIgnored private var planTask: Task<Void, Never>?
     @ObservationIgnored private var releaseNotesTask: Task<Void, Never>?
 
+    /// Creates a coordinator with injectable providers and command execution.
     init(
         service: PackageMaintenanceService = PackageMaintenanceService(),
         runner: any CommandRunning = FoundationCommandRunner(),
@@ -78,6 +98,7 @@ final class PackageMaintenanceStore {
         releaseNotesTask?.cancel()
     }
 
+    /// Flattened package inventory sorted by provider and localized name.
     var packages: [InstalledPackage] {
         snapshots.values
             .flatMap(\.packages)
@@ -87,6 +108,7 @@ final class PackageMaintenanceStore {
             }
     }
 
+    /// Inventory matching the active filter, update mode, and search query.
     var filteredPackages: [InstalledPackage] {
         packages.filter { package in
             let matchesFilter = switch filter {
@@ -101,10 +123,14 @@ final class PackageMaintenanceStore {
         }
     }
 
+    /// Number of packages with an available target under the active mode.
     var updateCount: Int { packages.filter { $0.isUpdateAvailable(for: updateMode) }.count }
+    /// Whether a confirmed update plan is currently executing.
     var isUpdating: Bool { state == .updating }
+    /// Whether preview commands are validating a proposed plan.
     var isPreparing: Bool { state == .preparing }
 
+    /// Starts a fresh provider scan unless a mutation workflow is active.
     func reload() {
         guard !isUpdating, !isPreparing else { return }
         reloadTask?.cancel()
@@ -120,6 +146,7 @@ final class PackageMaintenanceStore {
         }
     }
 
+    /// Builds and previews a plan for selected packages before confirmation.
     func prepareUpdatePlan() {
         do {
             let selected = packages.filter { selection.contains($0.id) && $0.isUpdateAvailable(for: updateMode) }
@@ -147,6 +174,7 @@ final class PackageMaintenanceStore {
         }
     }
 
+    /// Executes the confirmed plan sequentially and records per-package outcomes.
     func confirmPendingPlan() {
         guard let plan = pendingPlan, !plan.items.isEmpty else { return }
         pendingPlan = nil
@@ -189,10 +217,12 @@ final class PackageMaintenanceStore {
         }
     }
 
+    /// Requests cancellation and leaves the current command to terminate safely.
     func cancelUpdates() {
         updateTask?.cancel()
     }
 
+    /// Loads release notes only for the selected package's resolved target version.
     func loadReleaseNotes(for package: InstalledPackage) {
         releaseNotesTask?.cancel()
         guard let target = package.targetVersion(for: updateMode) else {
@@ -208,6 +238,7 @@ final class PackageMaintenanceStore {
         }
     }
 
+    /// Cancels release-note loading and clears selection-specific state.
     func clearReleaseNotes() {
         releaseNotesTask?.cancel()
         releaseNotesState = .idle

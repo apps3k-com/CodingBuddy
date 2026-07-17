@@ -139,7 +139,11 @@ nonisolated struct AgentDoctorScanner: Sendable {
         guard isDirectory(mcpAuthDirectory) else { return [] }
 
         let knownURLs = MCPAuthScanner.configuredServerURLs(homeDirectory: homeDirectory)
-        return MCPAuthScanner.scan(root: mcpAuthDirectory, knownServerURLs: knownURLs).flatMap { entry in
+        let scanResult = MCPAuthScanner.scanResult(
+            root: mcpAuthDirectory,
+            knownServerURLs: knownURLs
+        )
+        var diagnostics = scanResult.entries.flatMap { entry in
             var diagnostics = entry.files.flatMap(mcpAuthPermissionDiagnostics)
             let name = String(entry.hash.prefix(12))
             switch entry.status {
@@ -149,9 +153,29 @@ nonisolated struct AgentDoctorScanner: Sendable {
                 diagnostics.append(.expiredCredential(tool: .mcpAuth, name: name, source: entry.id))
             case .incomplete:
                 diagnostics.append(.incompleteCredential(tool: .mcpAuth, name: name, source: entry.id))
+            case .resetOnly:
+                diagnostics.append(resetOnlyCredential(name: name, source: entry.id))
             }
             return diagnostics
         }
+        if scanResult.hasSafetyRefusal {
+            diagnostics.append(.credentialScanIncomplete())
+        }
+        return diagnostics
+    }
+
+    /// Describes credential artifacts that exist but were deliberately not read safely.
+    private func resetOnlyCredential(name: String, source: String) -> AgentDiagnostic {
+        AgentDiagnostic(
+            code: .incompleteCredential,
+            severity: .warning,
+            tool: .mcpAuth,
+            title: String(localized: "OAuth login cache is incomplete"),
+            detail: String(localized: "This artifact is reset-only because CodingBuddy cannot read it safely."),
+            source: source,
+            subject: name,
+            suggestion: String(localized: "Reset the entry and reconnect the MCP server.")
+        )
     }
 
     /// Returns true only when the path exists and is a directory.

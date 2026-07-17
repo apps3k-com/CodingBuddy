@@ -7,23 +7,31 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
+/// Searchable zsh assignment table with guarded secret disclosure and safe mutations.
 struct VariableListView: View {
+    /// Store owning parsed assignments and all shell-file mutations.
     var store: EnvStore
+    /// Authentication state controlling reveal and copy actions for secrets.
     var secrets: SecretsGuard
+    /// Sidebar scope limiting the displayed and exported assignments.
     var scope: SidebarScope
 
-    @Environment(MenuActions.self) private var menuActions
     @AppStorage("hideOverriddenVariables") private var hideOverridden = false
     @State private var searchText = ""
     @State private var selection: EnvVariable.ID?
     @State private var editorMode: VariableEditorView.Mode?
     @State private var pendingDeletion: EnvVariable?
     @State private var isExporting = false
+    @State private var exportDocument: EnvFileDocument?
     @State private var isImporting = false
     @State private var importPayload: ImportPayload?
+    @State private var secretActionGeneration = 0
+    @AccessibilityFocusState private var accessRefusalFocused: Bool
 
     private struct ImportPayload: Identifiable {
+        /// Session-local identity used to present the import preview sheet.
         let id = UUID()
+        /// Parsed dotenv entries awaiting user selection and target choice.
         var entries: [EnvFileEntry]
     }
 
@@ -31,11 +39,25 @@ struct VariableListView: View {
         FeatureFlag.hideOverriddenVariables.isEnabled && hideOverridden
     }
 
+    /// Completeness and action policy for the selected sidebar scope.
+    private var accessState: EnvScopeAccessState {
+        store.accessState(in: scope.file)
+    }
+
+    /// Whether the current scope may start mutations or data transfer.
+    private var actionsAvailable: Bool {
+        accessState.allowsActions
+    }
+
+    /// Parsed assignments before search filtering.
+    private var scopedVariables: [EnvVariable] {
+        store.variables(in: scope.file, hidingOverridden: isHiding)
+    }
+
     /// What the table shows — and exactly what the .env export writes.
     private var filtered: [EnvVariable] {
-        let scoped = store.variables(in: scope.file, hidingOverridden: isHiding)
-        guard !searchText.isEmpty else { return scoped }
-        return scoped.filter {
+        guard !searchText.isEmpty else { return scopedVariables }
+        return scopedVariables.filter {
             // Masked values are excluded from value search: matching them
             // would confirm a secret's presence without authentication.
             $0.name.localizedCaseInsensitiveContains(searchText)
@@ -88,14 +110,14 @@ struct VariableListView: View {
         .contextMenu(forSelectionType: EnvVariable.ID.self) { ids in
             if let variable = variable(for: ids.first) {
                 Button("Edit…") { edit(variable) }
-                    .disabled(!variable.isEditable)
+                    .disabled(!actionsAvailable || !variable.isEditable)
                 Divider()
                 Button("Copy Name") { copy(variable.name) }
                 Button("Copy Value") { copyValue(of: variable) }
                 Button("Copy Line") { copyLine(of: variable) }
                 Divider()
                 Button("Delete…", role: .destructive) { pendingDeletion = variable }
-                    .disabled(!variable.isEditable)
+                    .disabled(!actionsAvailable || !variable.isEditable)
             }
         } primaryAction: { ids in
             if let variable = variable(for: ids.first) {
@@ -104,13 +126,14 @@ struct VariableListView: View {
         }
         .searchable(text: $searchText, prompt: "Search variables")
         .navigationTitle(scope.title)
-        .navigationSubtitle(Text(LocalizedCountText.variables(filtered.count)))
+        .navigationSubtitle(navigationSubtitle)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("New Variable", systemImage: "plus") {
                     editorMode = .new(scope.file ?? .zshrc)
                 }
                 .help("Add a new variable")
+                .disabled(!actionsAvailable)
             }
             if FeatureFlag.hideOverriddenVariables.isEnabled {
                 ToolbarItem {
@@ -121,13 +144,14 @@ struct VariableListView: View {
             if FeatureFlag.envImportExport.isEnabled {
                 ToolbarItem {
                     Menu {
-                        Button("Import from .env…") { isImporting = true }
+                        Button("Import from .env…") { beginImport() }
                         Button("Export visible as .env…") { requestExport() }
                             .disabled(filtered.allSatisfy { !$0.isEditable })
                     } label: {
                         Label("Import/Export", systemImage: "square.and.arrow.up.on.square")
                     }
                     .help("Import or export .env files")
+                    .disabled(!actionsAvailable)
                 }
             }
             if FeatureFlag.secretsProtection.isEnabled,
@@ -147,10 +171,11 @@ struct VariableListView: View {
         }
         .fileExporter(
             isPresented: $isExporting,
-            document: EnvFileDocument(text: EnvFileCodec.encode(filtered)),
+            document: exportDocument,
             contentType: EnvFileCodec.contentType,
             defaultFilename: "variables.env"
         ) { result in
+            exportDocument = nil
             if case .failure(let error) = result {
                 store.lastError = error.localizedDescription
             }
@@ -170,7 +195,7 @@ struct VariableListView: View {
             ImportPreviewView(store: store, entries: payload.entries)
         }
         .sheet(item: $editorMode) { mode in
-            VariableEditorView(store: store, mode: mode)
+            VariableEditorView(store: store, secrets: secrets, mode: mode)
         }
         .confirmationDialog(
             "Delete “\(pendingDeletion?.name ?? "")” from \(pendingDeletion?.file.rawValue ?? "")?",
@@ -188,20 +213,52 @@ struct VariableListView: View {
             Text("A backup of the file is written automatically before the change.")
         }
         .onChange(of: store.variables) { oldVariables, newVariables in
+            invalidatePendingSecretAction()
             // Reloads rebuild the list with fresh line indices; re-resolve the
             // selected id so the selection survives shifting lines.
             let resolved = SelectionResolver.resolve(selection, from: oldVariables, in: newVariables)
             if resolved != selection { selection = resolved }
         }
-        .onChange(of: menuActions.importRequest) {
-            if FeatureFlag.envImportExport.isEnabled { isImporting = true }
+        .onChange(of: accessState, initial: true) { _, newState in
+            invalidatePendingSecretAction()
+            if !newState.allowsActions {
+                cancelUnavailableActions()
+                accessRefusalFocused = true
+            } else {
+                accessRefusalFocused = false
+            }
         }
-        .onChange(of: menuActions.exportRequest) {
-            if FeatureFlag.envImportExport.isEnabled { requestExport() }
+        .onChange(of: scope) {
+            invalidatePendingSecretAction()
+        }
+        .onChange(of: searchText) {
+            invalidatePendingSecretAction()
+        }
+        .onChange(of: hideOverridden) {
+            invalidatePendingSecretAction()
+        }
+        .onChange(of: secrets.isUnlocked) { _, isUnlocked in
+            if !isUnlocked {
+                invalidatePendingSecretAction()
+                isExporting = false
+                exportDocument = nil
+            }
+        }
+        .onChange(of: isExporting) { _, isPresented in
+            if !isPresented { exportDocument = nil }
+        }
+        .onDisappear { invalidatePendingSecretAction() }
+        .focusedSceneValue(\.envTransferCommandActions, transferCommandActions)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if !accessState.isComplete, !filtered.isEmpty {
+                accessStatusBanner
+            }
         }
         .overlay {
             if filtered.isEmpty {
-                if searchText.isEmpty {
+                if !accessState.isComplete {
+                    refusedUnavailableView
+                } else if searchText.isEmpty {
                     ContentUnavailableView(
                         "No Variables",
                         systemImage: "shippingbox",
@@ -210,6 +267,80 @@ struct VariableListView: View {
                 } else {
                     ContentUnavailableView.search(text: searchText)
                 }
+            }
+        }
+    }
+
+    /// Localized subtitle that never presents an incomplete row count as complete.
+    private var navigationSubtitle: Text {
+        if accessState.isComplete {
+            Text(LocalizedCountText.variables(filtered.count))
+        } else {
+            Text("Incomplete data")
+        }
+    }
+
+    /// Heading for a single refused file or a partially loaded multi-file scope.
+    private var accessTitle: LocalizedStringKey {
+        accessState.refusals.count == 1
+            ? "Shell file unavailable"
+            : "Some shell files are unavailable"
+    }
+
+    /// Inline status used when valid rows from other files remain available.
+    private var accessStatusBanner: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(accessTitle, systemImage: "exclamationmark.triangle.fill")
+                .font(.headline)
+                .foregroundStyle(.orange)
+                .accessibilityLabel(Text("Shell file access blocked"))
+                .accessibilityFocused($accessRefusalFocused)
+            refusalDetails
+            Text("This view is incomplete. Changes, import, and export are disabled.")
+                .foregroundStyle(.secondary)
+            accessRecoveryActions
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.bar)
+        .overlay(alignment: .bottom) { Divider() }
+    }
+
+    /// Full unavailable state used when the incomplete scope has no visible rows.
+    private var refusedUnavailableView: some View {
+        ContentUnavailableView {
+            Label(accessTitle, systemImage: "exclamationmark.triangle")
+                .accessibilityLabel(Text("Shell file access blocked"))
+                .accessibilityFocused($accessRefusalFocused)
+        } description: {
+            VStack(spacing: 6) {
+                refusalDetails
+                Text("This view is incomplete. Changes, import, and export are disabled.")
+            }
+        } actions: {
+            accessRecoveryActions
+        }
+    }
+
+    /// Safe file names and categorized reasons for every refused source.
+    private var refusalDetails: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            ForEach(accessState.refusals) { refusal in
+                Text(verbatim: "\(refusal.file.rawValue): \(refusal.reason.localizedDescription)")
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    /// Focusable recovery commands shared by the inline and empty states.
+    private var accessRecoveryActions: some View {
+        HStack {
+            Button("Retry", systemImage: "arrow.clockwise") {
+                store.reload()
+            }
+            Button("Show in Finder", systemImage: "folder") {
+                revealRefusedFiles()
             }
         }
     }
@@ -228,42 +359,93 @@ struct VariableListView: View {
         isProtected(variable) && !secrets.isUnlocked
     }
 
-    /// Runs `action` immediately, or after successful authentication when the
-    /// variable's value is currently masked.
-    private func withUnlockIfNeeded(for variable: EnvVariable, _ action: @escaping @MainActor () -> Void) {
+    /// Runs `action` only while the authenticated row and visible snapshot remain unchanged.
+    private func withUnlockIfNeeded(
+        for variable: EnvVariable,
+        _ action: @escaping @MainActor (EnvVariable) -> Void
+    ) {
+        let snapshot = SecretActionSnapshot(generation: secretActionGeneration, value: variable)
+        let runIfCurrent: @MainActor () -> Void = {
+            guard actionsAvailable,
+                  let current = snapshot.resolve(
+                      currentGeneration: secretActionGeneration,
+                      in: filtered
+                  ) else { return }
+            action(current)
+        }
         guard isMasked(variable) else {
-            action()
+            runIfCurrent()
             return
         }
         Task {
-            if await secrets.requestUnlock() { action() }
+            guard await secrets.requestUnlock() else { return }
+            runIfCurrent()
         }
     }
 
     private func edit(_ variable: EnvVariable) {
-        guard variable.isEditable else { return }
-        withUnlockIfNeeded(for: variable) { editorMode = .edit(variable) }
+        guard actionsAvailable, variable.isEditable else { return }
+        withUnlockIfNeeded(for: variable) { current in editorMode = .edit(current) }
     }
 
     private func copyValue(of variable: EnvVariable) {
-        withUnlockIfNeeded(for: variable) { copy(variable.rawValue) }
+        withUnlockIfNeeded(for: variable) { current in copy(current.rawValue) }
     }
 
     private func copyLine(of variable: EnvVariable) {
-        withUnlockIfNeeded(for: variable) { copy(variable.sourceLine) }
+        withUnlockIfNeeded(for: variable) { current in copy(current.sourceLine) }
     }
 
     /// Exporting reveals values in the written file — authenticate first when
     /// any visible variable is masked.
     private func requestExport() {
-        if let masked = filtered.first(where: { isMasked($0) }) {
-            withUnlockIfNeeded(for: masked) { isExporting = true }
+        guard actionsAvailable else { return }
+        let expectedVariables = filtered
+        if let masked = expectedVariables.first(where: { isMasked($0) }) {
+            withUnlockIfNeeded(for: masked) { _ in
+                guard actionsAvailable, filtered == expectedVariables else { return }
+                presentExport(of: expectedVariables)
+            }
         } else {
-            isExporting = true
+            presentExport(of: expectedVariables)
         }
     }
 
+    /// Freezes the authorized visible rows before presenting the asynchronous save panel.
+    private func presentExport(of variables: [EnvVariable]) {
+        exportDocument = EnvFileDocument(text: EnvFileCodec.encode(variables))
+        isExporting = true
+    }
+
+    /// Presents the importer only while the current snapshot is complete.
+    private func beginImport() {
+        guard actionsAvailable else { return }
+        isImporting = true
+    }
+
+    /// Menu actions exist only for the active feature and a complete source snapshot.
+    private var transferCommandActions: EnvTransferCommandActions? {
+        guard FeatureFlag.envImportExport.isEnabled, actionsAvailable else { return nil }
+        let importAction: () -> Void = { beginImport() }
+        let exportAction: (() -> Void)?
+        if filtered.contains(where: \.isEditable) {
+            exportAction = { requestExport() }
+        } else {
+            exportAction = nil
+        }
+        return EnvTransferCommandActions(
+            importEnvironment: importAction,
+            exportEnvironment: exportAction
+        )
+    }
+
+    /// Invalidates asynchronous disclosure work after any relevant presentation change.
+    private func invalidatePendingSecretAction() {
+        secretActionGeneration &+= 1
+    }
+
     private func readImportFile(at url: URL) {
+        guard actionsAvailable else { return }
         guard let content = try? String(contentsOf: url, encoding: .utf8) else {
             store.lastError = String(localized: "The file could not be read.")
             return
@@ -274,6 +456,23 @@ struct VariableListView: View {
         } else {
             importPayload = ImportPayload(entries: entries)
         }
+    }
+
+    /// Dismisses action UI if a watcher reload discovers a refused source.
+    private func cancelUnavailableActions() {
+        editorMode = nil
+        pendingDeletion = nil
+        isExporting = false
+        exportDocument = nil
+        isImporting = false
+        importPayload = nil
+    }
+
+    /// Reveals refused files without displaying their absolute paths in the app.
+    private func revealRefusedFiles() {
+        let urls = accessState.refusals.map { $0.file.url(in: store.homeDirectory) }
+        guard !urls.isEmpty else { return }
+        NSWorkspace.shared.activateFileViewerSelecting(urls)
     }
 
     private func copy(_ string: String) {

@@ -134,8 +134,12 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
     private static let pullRequestPageSize = 50
     /// Number of repositories requested per REST page.
     private static let repositoryPageSize = 100
+    /// Maximum number of legacy commit statuses requested per REST page.
+    private static let statusPageSize = 100
     /// Maximum number of repository pages read for one picker load.
     let repositoryPageLimit: Int
+    /// Maximum number of legacy commit-status pages read for one pull request.
+    let statusPageLimit: Int
 
     /// Creates a GitHub client with injectable token and transport dependencies.
     init(
@@ -143,13 +147,15 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
         transport: any GitHubTransport = URLSessionGitHubTransport(),
         graphQLEndpoint: URL = URL(string: "https://api.github.com/graphql")!,
         restBaseURL: URL = URL(string: "https://api.github.com")!,
-        repositoryPageLimit: Int = 10
+        repositoryPageLimit: Int = 10,
+        statusPageLimit: Int = 10
     ) {
         self.tokenStore = tokenStore
         self.transport = transport
         self.graphQLEndpoint = graphQLEndpoint
         self.restBaseURL = restBaseURL
         self.repositoryPageLimit = max(1, repositoryPageLimit)
+        self.statusPageLimit = max(1, statusPageLimit)
     }
 
     /// Fetches open pull requests for one repository through GitHub GraphQL.
@@ -329,26 +335,91 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
             repository: repository,
             rateLimit: checkRunsRateLimit
         )
-        let checkRuns = try decodeRESTCheckRuns(from: checkRunsData)
+        let checkRunsPage = try decodeRESTCheckRuns(from: checkRunsData)
+        let hasTruncatedCheckRuns = Self.hasNextLink(checkRunsResponse)
+            || checkRunsPage.totalCount.map { $0 != checkRunsPage.contexts.count } == true
 
-        let statusesRequest = restRequest(
-            pathComponents: ["repos", repository.owner, repository.name, "commits", headSHA, "status"],
-            token: token
-        )
-        let (statusesData, statusesResponse) = try await perform(request: statusesRequest)
-        let statusesRateLimit = Self.rateLimit(from: statusesResponse)
-        try Self.validate(
-            response: statusesResponse,
-            data: statusesData,
-            repository: repository,
-            rateLimit: statusesRateLimit
-        )
-        let statuses = try decodeRESTStatuses(from: statusesData)
+        var statusPage = 1
+        var statuses: [AgentPRStatusContext] = []
+        var seenStatusContexts = Set<String>()
+        var declaredStatusCount: Int?
+        var declaredCombinedState: AgentPRStatusState?
+        var statusesRateLimit: GitHubRateLimitState?
+        var hasTruncatedStatuses = false
+        repeat {
+            let statusesRequest = restRequest(
+                pathComponents: ["repos", repository.owner, repository.name, "commits", headSHA, "status"],
+                token: token,
+                queryItems: [
+                    URLQueryItem(name: "per_page", value: "\(Self.statusPageSize)"),
+                    URLQueryItem(name: "page", value: "\(statusPage)"),
+                ]
+            )
+            let (statusesData, statusesResponse) = try await perform(request: statusesRequest)
+            let pageRateLimit = Self.rateLimit(from: statusesResponse)
+            statusesRateLimit = pageRateLimit ?? statusesRateLimit
+            try Self.validate(
+                response: statusesResponse,
+                data: statusesData,
+                repository: repository,
+                rateLimit: pageRateLimit
+            )
+            let decodedPage = try decodeRESTStatuses(from: statusesData)
+            let statusCountBeforePage = statuses.count
+            for status in decodedPage.statuses {
+                guard let canonicalContext = status.canonicalContext else {
+                    hasTruncatedStatuses = true
+                    statuses.append(status.statusContext)
+                    continue
+                }
+                guard seenStatusContexts.insert(canonicalContext).inserted else {
+                    hasTruncatedStatuses = true
+                    continue
+                }
+                statuses.append(status.statusContext)
+            }
+
+            if let rawCombinedState = decodedPage.state {
+                let pageCombinedState = AgentPRStatusState(statusContextState: rawCombinedState)
+                if pageCombinedState == .unknown {
+                    hasTruncatedStatuses = true
+                }
+                if let declaredCombinedState, declaredCombinedState != pageCombinedState {
+                    hasTruncatedStatuses = true
+                }
+                declaredCombinedState = declaredCombinedState ?? pageCombinedState
+            }
+
+            if let totalCount = decodedPage.totalCount {
+                if let declaredStatusCount, declaredStatusCount != totalCount {
+                    hasTruncatedStatuses = true
+                }
+                declaredStatusCount = totalCount
+            }
+
+            let hasMoreByCount = declaredStatusCount.map { statuses.count < $0 } == true
+            let hasMore = Self.hasNextLink(statusesResponse) || hasMoreByCount
+            guard hasMore else { break }
+            let madeProgress = statuses.count > statusCountBeforePage
+            guard statusPage < statusPageLimit, madeProgress else {
+                hasTruncatedStatuses = true
+                break
+            }
+            statusPage += 1
+        } while true
+
+        if let declaredStatusCount, statuses.count != declaredStatusCount {
+            hasTruncatedStatuses = true
+        }
+        if let declaredCombinedState,
+           Self.combinedStatusState(for: statuses) != declaredCombinedState {
+            hasTruncatedStatuses = true
+        }
 
         return RESTStatusFallback(
-            contexts: checkRuns + statuses,
+            contexts: checkRunsPage.contexts + statuses,
             rateLimit: statusesRateLimit ?? checkRunsRateLimit,
-            isTruncated: Self.hasNextLink(checkRunsResponse)
+            isTruncated: hasTruncatedCheckRuns || hasTruncatedStatuses
         )
     }
 
@@ -386,21 +457,35 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
     }
 
     /// Decodes REST check runs into normalized status contexts.
-    private func decodeRESTCheckRuns(from data: Data) throws -> [AgentPRStatusContext] {
+    private func decodeRESTCheckRuns(
+        from data: Data
+    ) throws -> (contexts: [AgentPRStatusContext], totalCount: Int?) {
         do {
-            return try JSONDecoder.github.decode(RESTCheckRunsResponse.self, from: data).checkRuns.map(\.statusContext)
+            let response = try JSONDecoder.github.decode(RESTCheckRunsResponse.self, from: data)
+            return (response.checkRuns.map(\.statusContext), response.totalCount)
         } catch {
             throw GitHubClientError.decodingFailed
         }
     }
 
-    /// Decodes REST combined commit statuses into normalized status contexts.
-    private func decodeRESTStatuses(from data: Data) throws -> [AgentPRStatusContext] {
+    /// Decodes one REST combined commit-status page with its coverage metadata.
+    private func decodeRESTStatuses(from data: Data) throws -> RESTCommitStatusResponse {
         do {
-            return try JSONDecoder.github.decode(RESTCommitStatusResponse.self, from: data).statuses.map(\.statusContext)
+            return try JSONDecoder.github.decode(RESTCommitStatusResponse.self, from: data)
         } catch {
             throw GitHubClientError.decodingFailed
         }
+    }
+
+    /// Rebuilds GitHub's combined legacy-status state from the unique fetched contexts.
+    private static func combinedStatusState(
+        for contexts: [AgentPRStatusContext]
+    ) -> AgentPRStatusState {
+        guard !contexts.isEmpty else { return .pending }
+        if contexts.contains(where: { $0.state.isFailure }) { return .failure }
+        if contexts.contains(where: { $0.state.isWaiting }) { return .pending }
+        if contexts.allSatisfy({ $0.state == .success }) { return .success }
+        return .unknown
     }
 
     /// Decodes REST repository entries into picker summaries.
@@ -525,7 +610,8 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
               nodes { number title url state }
             }
             reviewDecision
-            latestReviews(first: 10) {
+            latestReviews(first: 100) {
+              pageInfo { hasNextPage }
               nodes { author { login } state submittedAt url }
             }
             reviewThreads(first: 50) {
@@ -629,11 +715,17 @@ private nonisolated struct RESTRepositoryNode: Decodable {
     }
 
     private enum CodingKeys: String, CodingKey {
+        /// Maps the repository name without transformation.
         case name
+        /// Maps the optional repository description without transformation.
         case description
+        /// Maps GitHub's reserved `private` field to the Swift privacy property.
         case isPrivate = "private"
+        /// Maps the repository archive flag without transformation.
         case archived
+        /// Maps GitHub's snake-case push timestamp.
         case pushedAt = "pushed_at"
+        /// Maps the nested owner payload without transformation.
         case owner
     }
 }
@@ -721,6 +813,7 @@ private nonisolated struct PullRequestNode: Decodable {
             decision: AgentPRReviewDecision(graphQLValue: reviewDecision),
             latestReviews: latestReviews.nodes.map(\.agentReview),
             threads: reviewThreads.nodes.map(\.agentThread),
+            hasTruncatedLatestReviews: latestReviews.pageInfo?.hasNextPage == true,
             hasTruncatedThreads: reviewThreads.pageInfo?.hasNextPage == true
         )
         return AgentPullRequest(
@@ -795,6 +888,8 @@ private nonisolated struct IssueNode: Decodable {
 private nonisolated struct ReviewConnection: Decodable {
     /// Latest review nodes.
     let nodes: [ReviewNode]
+    /// Pagination metadata when more latest reviews exist.
+    let pageInfo: PageInfo?
 }
 
 /// GraphQL review node.
@@ -926,13 +1021,21 @@ private nonisolated struct StatusContextNode: Decodable {
     let targetUrl: URL?
 
     private enum CodingKeys: String, CodingKey {
+        /// Maps GraphQL's concrete-type discriminator.
         case typename = "__typename"
+        /// Maps a check run's display name.
         case name
+        /// Maps a check run's execution status.
         case status
+        /// Maps a check run's terminal conclusion.
         case conclusion
+        /// Maps a check run's provider details URL.
         case detailsUrl
+        /// Maps a legacy status context's name.
         case context
+        /// Maps a legacy status context's state.
         case state
+        /// Maps a legacy status context's provider URL.
         case targetUrl
     }
 
@@ -965,10 +1068,15 @@ private nonisolated struct RESTStatusFallback: Sendable {
 
 /// REST check-runs response.
 private nonisolated struct RESTCheckRunsResponse: Decodable {
+    /// Total check-run count declared by GitHub across all pages.
+    let totalCount: Int?
     /// Check runs attached to the commit.
     let checkRuns: [RESTCheckRun]
 
     private enum CodingKeys: String, CodingKey {
+        /// Maps GitHub's snake-case total count.
+        case totalCount = "total_count"
+        /// Maps GitHub's snake-case check-run collection.
         case checkRuns = "check_runs"
     }
 }
@@ -985,9 +1093,13 @@ private nonisolated struct RESTCheckRun: Decodable {
     let detailsURL: URL?
 
     private enum CodingKeys: String, CodingKey {
+        /// Maps the check-run name without transformation.
         case name
+        /// Maps the check-run execution status without transformation.
         case status
+        /// Maps the check-run terminal conclusion without transformation.
         case conclusion
+        /// Maps GitHub's snake-case provider details URL.
         case detailsURL = "details_url"
     }
 
@@ -1003,8 +1115,21 @@ private nonisolated struct RESTCheckRun: Decodable {
 
 /// REST combined commit-status response.
 private nonisolated struct RESTCommitStatusResponse: Decodable {
+    /// Global combined state declared by GitHub for this page's commit snapshot.
+    let state: String?
+    /// Total legacy statuses GitHub reports for the commit.
+    let totalCount: Int?
     /// Legacy status contexts attached to the commit.
     let statuses: [RESTCommitStatus]
+
+    private enum CodingKeys: String, CodingKey {
+        /// Maps the combined state without transformation.
+        case state
+        /// Maps GitHub's snake-case total count.
+        case totalCount = "total_count"
+        /// Maps the status page without transformation.
+        case statuses
+    }
 }
 
 /// REST legacy status context entry.
@@ -1017,8 +1142,11 @@ private nonisolated struct RESTCommitStatus: Decodable {
     let targetURL: URL?
 
     private enum CodingKeys: String, CodingKey {
+        /// Maps the legacy status context name without transformation.
         case context
+        /// Maps the legacy status state without transformation.
         case state
+        /// Maps GitHub's snake-case provider target URL.
         case targetURL = "target_url"
     }
 
@@ -1029,6 +1157,13 @@ private nonisolated struct RESTCommitStatus: Decodable {
             state: AgentPRStatusState(statusContextState: state),
             detailsURL: targetURL
         )
+    }
+
+    /// Case-insensitive identity used to detect pagination shifts and duplicate contexts.
+    var canonicalContext: String? {
+        guard let context else { return nil }
+        let normalized = context.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return normalized.isEmpty ? nil : normalized
     }
 }
 

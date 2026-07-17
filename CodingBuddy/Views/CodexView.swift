@@ -8,13 +8,19 @@ import SwiftUI
 /// Codex section: editable `~/.codex/mcp.env` on top, the read-only MCP
 /// server overview from `config.toml` below.
 struct CodexView: View {
+    /// Store providing guarded access to Codex MCP environment configuration.
     var store: CodexStore
+    /// Authentication state controlling sensitive-value disclosure.
     var secrets: SecretsGuard
 
     private struct EditorState: Identifiable {
+        /// Stable sheet identity for an existing assignment or the add flow.
         var id: String { variable?.id.description ?? "new" }
+        /// Original assignment when editing, or `nil` when adding.
         var variable: EnvFileVariable?
+        /// Draft variable name.
         var name: String
+        /// Draft raw value preserved for shell-safe writing.
         var value: String
     }
 
@@ -176,26 +182,77 @@ struct CodexView: View {
             title: state.variable == nil ? String(localized: "New Variable") : String(localized: "Edit Variable"),
             name: state.name,
             value: state.value,
+            secrets: secrets,
+            protectsRevealedSecret: state.variable.map {
+                FeatureFlag.secretsProtection.isEnabled && SecretDetector.isSensitive(name: $0.name)
+            } ?? false,
             onSave: { name, value in
-                if let variable = state.variable {
+                let saved = if let variable = state.variable {
                     store.update(variable, name: name, rawValue: value)
                 } else {
                     store.add(name: name, rawValue: value)
                 }
-                editor = nil
+                if saved { editor = nil }
+                return saved
             },
-            onCancel: { editor = nil }
+            onCancel: { editor = nil },
+            onAutomaticDiscard: {
+                store.lastError = String(localized: "The unlock period ended. CodingBuddy discarded the unsaved cleartext draft.")
+            }
         )
     }
 }
 
 /// Minimal name/value editor sheet for plain env entries.
 private struct EnvEntryEditor: View {
+    /// Localized heading supplied by the owning workflow.
     let title: String
+    /// Draft environment variable name.
     @State var name: String
+    /// Draft raw environment value.
     @State var value: String
-    let onSave: (String, String) -> Void
+    /// Shared authentication state that bounds this draft's cleartext lifetime.
+    var secrets: SecretsGuard
+    /// Whether this editor received an existing sensitive value after authentication.
+    let protectsRevealedSecret: Bool
+    /// Save action that delegates mutation to the owning store.
+    let onSave: (String, String) -> Bool
+    /// Dismissal action that leaves configuration unchanged.
     let onCancel: () -> Void
+    /// Reports a dirty draft discarded by automatic expiry.
+    let onAutomaticDiscard: () -> Void
+    /// Initial name used to detect unsaved changes.
+    private let originalName: String
+    /// Initial value used to detect unsaved changes.
+    private let originalValue: String
+
+    /// Creates a draft editor with an immutable comparison snapshot.
+    init(
+        title: String,
+        name: String,
+        value: String,
+        secrets: SecretsGuard,
+        protectsRevealedSecret: Bool,
+        onSave: @escaping (String, String) -> Bool,
+        onCancel: @escaping () -> Void,
+        onAutomaticDiscard: @escaping () -> Void
+    ) {
+        self.title = title
+        _name = State(initialValue: name)
+        _value = State(initialValue: value)
+        self.secrets = secrets
+        self.protectsRevealedSecret = protectsRevealedSecret
+        self.onSave = onSave
+        self.onCancel = onCancel
+        self.onAutomaticDiscard = onAutomaticDiscard
+        originalName = name
+        originalValue = value
+    }
+
+    /// Whether closing the editor would lose a changed field.
+    private var hasUnsavedChanges: Bool {
+        name != originalName || value != originalValue
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -211,7 +268,7 @@ private struct EnvEntryEditor: View {
                 Spacer()
                 Button("Cancel", role: .cancel) { onCancel() }
                     .keyboardShortcut(.cancelAction)
-                Button("Save") { onSave(name, value) }
+                Button("Save") { _ = onSave(name, value) }
                     .keyboardShortcut(.defaultAction)
                     .buttonStyle(.borderedProminent)
                     .disabled(name.isEmpty)
@@ -219,5 +276,22 @@ private struct EnvEntryEditor: View {
         }
         .padding(16)
         .frame(width: 420)
+        .protectsSecretDraft(
+            secrets: secrets,
+            protectsRevealedSecret: protectsRevealedSecret,
+            currentName: name,
+            hasUnsavedChanges: hasUnsavedChanges,
+            canSave: !name.isEmpty,
+            saveAndDismiss: { onSave(name, value) },
+            clearAndDismiss: clearAndDismiss,
+            reportAutomaticDiscard: onAutomaticDiscard
+        )
+    }
+
+    /// Removes the raw value before handing dismissal back to the parent.
+    private func clearAndDismiss() {
+        value = ""
+        name = ""
+        onCancel()
     }
 }

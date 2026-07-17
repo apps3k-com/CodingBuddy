@@ -12,30 +12,47 @@ import Observation
 @Observable
 final class CraftAgentStore {
 
+    /// Workspace metadata decoded from Craft Agents configuration.
     nonisolated struct Workspace: Identifiable, Equatable, Hashable {
+        /// Craft's persistent workspace identifier.
         var id: String
+        /// Human-readable workspace name.
         var name: String
     }
 
+    /// Non-secret metadata describing a configured model-provider connection.
     nonisolated struct LLMConnection: Identifiable, Equatable, Hashable {
+        /// Stable provider slug used by Craft as the connection key.
         var slug: String
+        /// Human-readable connection name.
         var name: String
+        /// Provider family reported by Craft configuration.
         var providerType: String
+        /// Stable identity derived from Craft's provider slug.
         var id: String { slug }
     }
 
+    /// Metadata for one JSON token file without retaining its secret values.
     nonisolated struct SecretFile: Identifiable, Equatable, Hashable {
+        /// On-disk token-file location.
         var url: URL
+        /// Expiry assessment derived from non-secret timestamp fields.
         var status: TokenStatus
+        /// Stable file identity used by tables and reset actions.
         var id: String { url.path }
+        /// Display name derived from the token-file path.
         var fileName: String { url.lastPathComponent }
     }
 
+    /// Safe-to-display metadata for Craft's opaque encrypted credential store.
     nonisolated struct EncryptedStoreInfo: Equatable {
+        /// Encrypted file size without exposing its contents.
         var byteCount: Int
+        /// Last modification timestamp when available from the file system.
         var modified: Date?
     }
 
+    /// Root directory inspected for Craft Agents configuration and credentials.
     let craftDirectory: URL
     /// Injectable for tests: production moves to the Trash.
     @ObservationIgnored private let trashItem: (URL) throws -> Void
@@ -53,6 +70,7 @@ final class CraftAgentStore {
         self?.startWatching()
     }
 
+    /// Creates a read-mostly store with an injectable reversible Trash operation.
     init(
         craftDirectory: URL = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".craft-agent", isDirectory: true),
@@ -64,12 +82,16 @@ final class CraftAgentStore {
         startWatching()
     }
 
+    /// Non-secret Craft configuration used for workspace and provider discovery.
     var configURL: URL { craftDirectory.appendingPathComponent("config.json") }
+    /// Directory containing per-connection token files.
     var secretsDirectory: URL { craftDirectory.appendingPathComponent("secrets", isDirectory: true) }
+    /// Opaque encrypted credential store that CodingBuddy never reads.
     var encryptedStoreURL: URL { craftDirectory.appendingPathComponent("credentials.enc") }
 
     // MARK: - Loading
 
+    /// Reloads safe metadata while keeping encrypted credential contents opaque.
     func reload() {
         directoryExists = FileManager.default.fileExists(atPath: craftDirectory.path)
         loadConfig()
@@ -140,6 +162,7 @@ final class CraftAgentStore {
         perform { try trashItem(encryptedStoreURL) }
     }
 
+    /// Moves one connection's token file to the Trash so Craft can reauthenticate it.
     func reset(_ secret: SecretFile) {
         perform { try trashItem(secret.url) }
     }

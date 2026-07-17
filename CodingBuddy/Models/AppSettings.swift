@@ -8,8 +8,11 @@ import SwiftUI
 
 /// Appearance preference stored in UserDefaults ("appearanceMode").
 nonisolated enum AppearanceMode: String, CaseIterable {
+    /// Follow the current macOS appearance.
     case auto
+    /// Force the standard light Aqua appearance.
     case light
+    /// Force the standard dark Aqua appearance.
     case dark
 
     /// nil means "follow the system appearance".
@@ -33,10 +36,14 @@ nonisolated enum AppearanceMode: String, CaseIterable {
 /// Applied via the standard AppleLanguages per-app override, which takes
 /// effect on the next launch.
 nonisolated enum AppLanguage: String, CaseIterable {
+    /// Follow the language selected for the app or system by macOS.
     case system
+    /// Use the English localization after the next launch.
     case english = "en"
+    /// Use the German localization after the next launch.
     case german = "de"
 
+    /// Persists the per-app Apple language override for the next launch.
     func apply() {
         if self == .system {
             UserDefaults.standard.removeObject(forKey: "AppleLanguages")

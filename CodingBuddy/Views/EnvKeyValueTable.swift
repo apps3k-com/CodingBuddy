@@ -10,21 +10,31 @@ import SwiftUI
 /// Claude/Cursor env blocks). Rows are plain data — each section maps its own
 /// model and handles edits through the callbacks.
 struct EnvKeyValueTable: View {
+    /// Presentation-safe environment row independent of any tool-specific model.
     struct Row: Identifiable, Hashable {
+        /// Stable identity supplied by the owning tool section.
         let id: String
+        /// Environment variable name.
         var name: String
+        /// Raw value that remains masked until authorization when sensitive.
         var value: String
+        /// Whether source syntax can be safely round-tripped by the owning store.
         var isEditable = true
         /// Optional origin shown under the name (e.g. "settings.json").
         var sourceLabel: String?
     }
 
+    /// Rows supplied by the owning configuration section.
     var rows: [Row]
+    /// Authentication state used before revealing or copying sensitive values.
     var secrets: SecretsGuard
+    /// Optional edit action for safely round-trippable rows.
     var onEdit: ((Row) -> Void)?
+    /// Optional destructive action owned by the parent workflow.
     var onDelete: ((Row) -> Void)?
 
     @State private var selection: Row.ID?
+    @State private var secretActionGeneration = 0
 
     var body: some View {
         Table(rows, selection: $selection) {
@@ -67,12 +77,14 @@ struct EnvKeyValueTable: View {
         .contextMenu(forSelectionType: Row.ID.self) { ids in
             if let row = rows.first(where: { $0.id == ids.first }) {
                 if let onEdit {
-                    Button("Edit…") { withUnlockIfNeeded(for: row) { onEdit(row) } }
+                    Button("Edit…") { withUnlockIfNeeded(for: row, onEdit) }
                         .disabled(!row.isEditable)
                 }
                 Divider()
                 Button("Copy Name") { copy(row.name) }
-                Button("Copy Value") { withUnlockIfNeeded(for: row) { copy(row.value) } }
+                Button("Copy Value") {
+                    withUnlockIfNeeded(for: row) { current in copy(current.value) }
+                }
                 if let onDelete {
                     Divider()
                     Button("Delete…", role: .destructive) { onDelete(row) }
@@ -81,9 +93,14 @@ struct EnvKeyValueTable: View {
             }
         } primaryAction: { ids in
             if let onEdit, let row = rows.first(where: { $0.id == ids.first }), row.isEditable {
-                withUnlockIfNeeded(for: row) { onEdit(row) }
+                withUnlockIfNeeded(for: row, onEdit)
             }
         }
+        .onChange(of: rows) {
+            secretActionGeneration &+= 1
+            if !rows.contains(where: { $0.id == selection }) { selection = nil }
+        }
+        .onDisappear { secretActionGeneration &+= 1 }
     }
 
     private func isMasked(_ row: Row) -> Bool {
@@ -92,13 +109,26 @@ struct EnvKeyValueTable: View {
             && !secrets.isUnlocked
     }
 
-    private func withUnlockIfNeeded(for row: Row, _ action: @escaping @MainActor () -> Void) {
+    /// Authenticates a disclosure action and rejects it if the owning store replaced the row.
+    private func withUnlockIfNeeded(
+        for row: Row,
+        _ action: @escaping @MainActor (Row) -> Void
+    ) {
+        let snapshot = SecretActionSnapshot(generation: secretActionGeneration, value: row)
+        let runIfCurrent: @MainActor () -> Void = {
+            guard let current = snapshot.resolve(
+                currentGeneration: secretActionGeneration,
+                in: rows
+            ) else { return }
+            action(current)
+        }
         guard isMasked(row) else {
-            action()
+            runIfCurrent()
             return
         }
         Task {
-            if await secrets.requestUnlock() { action() }
+            guard await secrets.requestUnlock() else { return }
+            runIfCurrent()
         }
     }
 

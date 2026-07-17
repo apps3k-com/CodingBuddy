@@ -548,11 +548,14 @@ enum AgentPRViewActions {
         }
 
         switch route {
+        /// Opens the selected pull request in the user's browser.
         case .openPullRequest:
             openURL(row.url)
+        /// Requests a fresh read-only snapshot from GitHub.
         case .refresh:
             guard let refresh else { return nil }
             refresh()
+        /// Opens authorization settings when GitHub access needs attention.
         case .openSettings:
             guard let openSettings else { return nil }
             openSettings()

@@ -10,26 +10,32 @@ nonisolated enum PRAttentionQueueBuilder {
     /// Builds one ranked snapshot without retaining provider error text or adding persistence.
     static func snapshot(
         rows: [AgentPullRequest],
+        repositories: [GitHubRepositoryRef] = [],
         freshnessByRepository: [GitHubRepositoryRef: AgentPRGuidanceFreshness],
         defaultFreshness: AgentPRGuidanceFreshness = .fresh,
         actionAvailability: AgentPRGuidanceActionAvailability = .allAvailable
     ) -> PRAttentionQueueSnapshot {
         let newestFirst = rows.sorted(by: stableSourceOrder)
-        var representedStaleRepositories = Set<GitHubRepositoryRef>()
+        let freshnessByIdentity = canonicalFreshness(freshnessByRepository)
+        var representedPullRequests = Set<String>()
+        var representedStaleRepositories = Set<String>()
         var items: [PRAttentionItem] = []
 
         for row in newestFirst {
-            let freshness = freshnessByRepository[row.repository] ?? defaultFreshness
+            let repositoryIdentity = row.repository.canonicalID
+            let pullRequestIdentity = "\(repositoryIdentity)#\(row.number)"
+            guard representedPullRequests.insert(pullRequestIdentity).inserted else { continue }
+            let freshness = freshnessByIdentity[repositoryIdentity] ?? defaultFreshness
             let state = AgentPRGuidanceCatalog.state(for: row, freshness: freshness)
 
             if state.isRepositoryScopedSnapshotState,
-               !representedStaleRepositories.insert(row.repository).inserted {
+               !representedStaleRepositories.insert(repositoryIdentity).inserted {
                 continue
             }
 
             items.append(
                 PRAttentionItem(
-                    row: row,
+                    source: .pullRequest(row),
                     freshness: freshness,
                     state: state,
                     priority: state.attentionPriority,
@@ -42,16 +48,80 @@ nonisolated enum PRAttentionQueueBuilder {
             )
         }
 
+        var knownRepositories: [String: GitHubRepositoryRef] = [:]
+        for repository in (repositories + Array(freshnessByRepository.keys)).sorted(by: repositoryOrder) {
+            knownRepositories[repository.canonicalID] = knownRepositories[repository.canonicalID] ?? repository
+        }
+        for repository in knownRepositories.values.sorted(by: repositoryOrder) {
+            guard !representedStaleRepositories.contains(repository.canonicalID) else { continue }
+            let freshness = freshnessByIdentity[repository.canonicalID] ?? defaultFreshness
+            guard let state = AgentPRGuidanceCatalog.repositoryState(for: freshness),
+                  let guidance = AgentPRGuidanceCatalog.guidance(
+                      for: repository,
+                      freshness: freshness,
+                      actionAvailability: actionAvailability
+                  ) else {
+                continue
+            }
+            items.append(
+                PRAttentionItem(
+                    source: .repository(repository),
+                    freshness: freshness,
+                    state: state,
+                    priority: state.attentionPriority,
+                    guidance: guidance
+                )
+            )
+        }
+
         return PRAttentionQueueSnapshot(items: items.sorted(by: attentionOrder))
     }
 
     /// Source order chooses a deterministic representative when repository freshness affects many PRs.
     private static func stableSourceOrder(_ lhs: AgentPullRequest, _ rhs: AgentPullRequest) -> Bool {
         if lhs.updatedAt != rhs.updatedAt { return lhs.updatedAt > rhs.updatedAt }
-        let lhsRepository = lhs.repository.id.lowercased()
-        let rhsRepository = rhs.repository.id.lowercased()
+        let lhsRepository = lhs.repository.canonicalID
+        let rhsRepository = rhs.repository.canonicalID
         if lhsRepository != rhsRepository { return lhsRepository < rhsRepository }
+        if lhs.repository.id != rhs.repository.id { return lhs.repository.id < rhs.repository.id }
         return lhs.number < rhs.number
+    }
+
+    /// Collapses case variants and keeps the most conservative freshness signal deterministically.
+    private static func canonicalFreshness(
+        _ source: [GitHubRepositoryRef: AgentPRGuidanceFreshness]
+    ) -> [String: AgentPRGuidanceFreshness] {
+        var result: [String: AgentPRGuidanceFreshness] = [:]
+        for (repository, freshness) in source.sorted(by: { repositoryOrder($0.key, $1.key) }) {
+            let identity = repository.canonicalID
+            guard let current = result[identity] else {
+                result[identity] = freshness
+                continue
+            }
+            if freshnessRiskRank(freshness) < freshnessRiskRank(current) {
+                result[identity] = freshness
+            }
+        }
+        return result
+    }
+
+    /// Fail-closed precedence when duplicate provider spellings disagree about freshness.
+    private static func freshnessRiskRank(_ freshness: AgentPRGuidanceFreshness) -> Int {
+        switch freshness {
+        case .authorizationRequired: 0
+        case .refreshFailed: 1
+        case .rateLimited: 2
+        case .refreshing: 3
+        case .fresh: 4
+        }
+    }
+
+    /// Stable provider-independent ordering for repository-only entries.
+    private static func repositoryOrder(_ lhs: GitHubRepositoryRef, _ rhs: GitHubRepositoryRef) -> Bool {
+        let lhsNormalized = lhs.id.lowercased()
+        let rhsNormalized = rhs.id.lowercased()
+        if lhsNormalized != rhsNormalized { return lhsNormalized < rhsNormalized }
+        return lhs.id < rhs.id
     }
 
     /// Product policy: state class first, then recent context and stable repository identity.
@@ -59,11 +129,14 @@ nonisolated enum PRAttentionQueueBuilder {
         if lhs.state.attentionRank != rhs.state.attentionRank {
             return lhs.state.attentionRank < rhs.state.attentionRank
         }
-        if lhs.row.updatedAt != rhs.row.updatedAt { return lhs.row.updatedAt > rhs.row.updatedAt }
-        let lhsRepository = lhs.row.repository.id.lowercased()
-        let rhsRepository = rhs.row.repository.id.lowercased()
+        if lhs.updatedAt != rhs.updatedAt {
+            return (lhs.updatedAt ?? .distantPast) > (rhs.updatedAt ?? .distantPast)
+        }
+        let lhsRepository = lhs.repository.canonicalID
+        let rhsRepository = rhs.repository.canonicalID
         if lhsRepository != rhsRepository { return lhsRepository < rhsRepository }
-        return lhs.row.number < rhs.row.number
+        if lhs.repository.id != rhs.repository.id { return lhs.repository.id < rhs.repository.id }
+        return (lhs.pullRequest?.number ?? 0) < (rhs.pullRequest?.number ?? 0)
     }
 }
 

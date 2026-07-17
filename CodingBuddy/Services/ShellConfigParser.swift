@@ -22,6 +22,7 @@ nonisolated enum ShellConfigParser {
         }
     }
 
+    /// Parses line-addressed shell assignments and associates each result with its source config file.
     static func variables(in content: String, file: ShellConfigFile) -> [EnvVariable] {
         content.components(separatedBy: "\n").enumerated().compactMap { index, line in
             parseLine(line).map {

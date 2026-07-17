@@ -22,6 +22,7 @@ struct PRAttentionQueueView: View {
     private var snapshot: PRAttentionQueueSnapshot {
         PRAttentionQueueBuilder.snapshot(
             rows: store.rows,
+            repositories: store.watchedRepositories,
             freshnessByRepository: freshnessByRepository,
             defaultFreshness: AgentPRMonitorView.guidanceFreshness(for: store.state),
             actionAvailability: actionAvailability
@@ -31,6 +32,15 @@ struct PRAttentionQueueView: View {
     /// Selected item if it remains in the latest queue snapshot.
     private var selectedItem: PRAttentionItem? {
         selection.flatMap { id in snapshot.items.first { $0.id == id } }
+    }
+
+    /// Inspector visibility follows selection and clears it when the user dismisses the inspector.
+    private var inspectorBinding: Binding<Bool> {
+        Binding {
+            selectedItem != nil
+        } set: { isPresented in
+            if !isPresented { selection = nil }
+        }
     }
 
     /// Repository-scoped freshness prevents one failed refresh from hiding other results.
@@ -50,19 +60,18 @@ struct PRAttentionQueueView: View {
         )
     }
 
-    /// Native dense table and inspector layout without a decorative dashboard layer.
+    /// Native dense table with the platform inspector pattern used elsewhere in CodingBuddy.
     var body: some View {
-        HSplitView {
-            queueTable
-                .frame(minWidth: 500, maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        queueTable
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .inspector(isPresented: inspectorBinding) {
             PRAttentionInspector(
                 item: selectedItem,
                 isRecommended: selectedItem?.id == snapshot.recommendedItem?.id,
                 performAction: performGuidanceAction
             )
-            .frame(minWidth: 340, idealWidth: 380, maxWidth: 480)
+            .inspectorColumnWidth(min: 320, ideal: 380, max: 480)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .navigationTitle("Attention Queue")
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
@@ -94,7 +103,7 @@ struct PRAttentionQueueView: View {
             if hasPartialSnapshotIssue {
                 HStack(spacing: 10) {
                     Label(
-                        "Some repository snapshots are not current. Other results remain available.",
+                        "Some repository snapshots are not current. Available repository status remains visible.",
                         systemImage: "exclamationmark.triangle"
                     )
                     .font(.callout)
@@ -117,33 +126,27 @@ struct PRAttentionQueueView: View {
                 }
                 .width(min: 88, ideal: 100, max: 120)
 
-                TableColumn("Repository") { item in
-                    Text(verbatim: item.row.repository.displayName)
-                        .font(.caption)
-                        .lineLimit(1)
-                }
-                .width(min: 120, ideal: 150)
-
-                TableColumn("Pull Request") { item in
+                TableColumn("Item") { item in
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(item.row.title)
+                        Text(item.titleDisplayName)
                             .fontWeight(.medium)
                             .lineLimit(1)
-                        Text(verbatim: "#\(item.row.number)")
-                            .font(.caption)
-                            .monospaced()
-                            .foregroundStyle(.secondary)
+                        HStack(spacing: 5) {
+                            Text(verbatim: item.repository.displayName)
+                                .lineLimit(1)
+                            if let number = item.pullRequest?.number {
+                                Text(verbatim: "#\(number)")
+                                    .monospaced()
+                            } else {
+                                Text("Repository status")
+                            }
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     }
                     .accessibilityElement(children: .combine)
                 }
-                .width(min: 190, ideal: 260)
-
-                TableColumn("Why now") { item in
-                    Text(item.reasonDisplayName)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                }
-                .width(min: 135, ideal: 175)
+                .width(min: 250, ideal: 360)
             }
             .overlay { queueOverlay }
         }
@@ -151,12 +154,12 @@ struct PRAttentionQueueView: View {
 
     /// Reports incomplete repository coverage without replacing successful repository rows.
     private var hasPartialSnapshotIssue: Bool {
-        guard !store.rows.isEmpty else { return false }
+        guard !snapshot.items.isEmpty else { return false }
         return store.watchedRepositories.contains { repository in
-            switch store.repositoryRefreshStates[repository] {
+            switch store.repositoryRefreshStates[repository] ?? store.state {
             case .needsToken, .rateLimited, .refreshFailed:
                 true
-            case .idle, .needsRepository, .loading, .loaded, .empty, nil:
+            case .idle, .needsRepository, .loading, .loaded, .empty:
                 false
             }
         }
@@ -164,49 +167,51 @@ struct PRAttentionQueueView: View {
 
     /// Setup, loading, failure, and empty states retain the source store's truth.
     @ViewBuilder private var queueOverlay: some View {
-        if case .needsToken = store.state {
-            ContentUnavailableView {
-                Label("GitHub token required", systemImage: "key")
-            } description: {
-                Text("Add a fine-grained read-only token before CodingBuddy can rank pull request work.")
-            } actions: {
-                Button("Open Settings", action: openSettings)
-            }
-        } else if store.watchedRepositories.isEmpty {
-            ContentUnavailableView {
-                Label("No watched repositories", systemImage: "book.closed")
-            } description: {
-                Text("Choose repositories in Agent PR Monitor to build your attention queue.")
-            } actions: {
-                Button("Open PR Monitor", action: showPRMonitor)
-            }
-        } else if store.isRefreshing, store.rows.isEmpty {
-            ProgressView(String(localized: "Loading attention queue..."))
-        } else if case .rateLimited(let resetAt) = store.state, store.rows.isEmpty {
-            ContentUnavailableView(
-                "GitHub rate limit reached",
-                systemImage: "clock.badge.exclamationmark",
-                description: Text(rateLimitMessage(resetAt: resetAt))
-            )
-        } else if case .refreshFailed(let error) = store.state, store.rows.isEmpty {
-            ContentUnavailableView {
-                Label("Attention queue unavailable", systemImage: "exclamationmark.triangle")
-            } description: {
-                Text(error.localizedDescription)
-            } actions: {
-                if error.isGitHubAuthorizationRecoverable {
+        if snapshot.items.isEmpty {
+            if case .needsToken = store.state {
+                ContentUnavailableView {
+                    Label("GitHub token required", systemImage: "key")
+                } description: {
+                    Text("Add a fine-grained read-only token before CodingBuddy can rank pull request work.")
+                } actions: {
                     Button("Open Settings", action: openSettings)
-                } else {
-                    Button("Refresh") { store.refresh() }
                 }
-            }
-        } else if snapshot.items.isEmpty {
-            ContentUnavailableView {
-                Label("No pull requests need sorting", systemImage: "checkmark.circle")
-            } description: {
-                Text("CodingBuddy did not find open pull requests in the current repository snapshots.")
-            } actions: {
-                Button("Open PR Monitor", action: showPRMonitor)
+            } else if store.watchedRepositories.isEmpty {
+                ContentUnavailableView {
+                    Label("No watched repositories", systemImage: "book.closed")
+                } description: {
+                    Text("Choose repositories in Agent PR Monitor to build your attention queue.")
+                } actions: {
+                    Button("Open PR Monitor", action: showPRMonitor)
+                }
+            } else if store.isRefreshing {
+                ProgressView(String(localized: "Loading attention queue..."))
+            } else if case .rateLimited(let resetAt) = store.state {
+                ContentUnavailableView(
+                    "GitHub rate limit reached",
+                    systemImage: "clock.badge.exclamationmark",
+                    description: Text(rateLimitMessage(resetAt: resetAt))
+                )
+            } else if case .refreshFailed(let error) = store.state {
+                ContentUnavailableView {
+                    Label("Attention queue unavailable", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(error.localizedDescription)
+                } actions: {
+                    if error.isGitHubAuthorizationRecoverable {
+                        Button("Open Settings", action: openSettings)
+                    } else {
+                        Button("Refresh") { store.refresh() }
+                    }
+                }
+            } else {
+                ContentUnavailableView {
+                    Label("No pull requests need sorting", systemImage: "checkmark.circle")
+                } description: {
+                    Text("CodingBuddy did not find open pull requests in the current repository snapshots.")
+                } actions: {
+                    Button("Open PR Monitor", action: showPRMonitor)
+                }
             }
         }
     }
@@ -233,19 +238,34 @@ struct PRAttentionQueueView: View {
     /// Routes the selected guidance through the same typed source action boundary as the PR Monitor.
     private func performGuidanceAction(_ actionID: String) {
         guard let item = selectedItem else { return }
-        AgentPRViewActions.perform(
-            actionID: actionID,
-            guidance: item.guidance,
-            row: item.row,
-            openURL: { _ = NSWorkspace.shared.open($0) },
-            refresh: store.isRefreshing ? nil : { store.refresh() },
-            openSettings: openSettings
-        )
+        if let row = item.pullRequest {
+            AgentPRViewActions.perform(
+                actionID: actionID,
+                guidance: item.guidance,
+                row: row,
+                openURL: { _ = NSWorkspace.shared.open($0) },
+                refresh: store.isRefreshing ? nil : { store.refresh() },
+                openSettings: openSettings
+            )
+            return
+        }
+
+        guard let route = AgentPRGuidanceCatalog.route(for: actionID, in: item.guidance) else { return }
+        switch route {
+        case .refresh:
+            guard !store.isRefreshing else { return }
+            store.refresh()
+        case .openSettings:
+            openSettings()
+        case .openPullRequest:
+            return
+        }
     }
 }
 
 /// Compact native priority label shared by every queue row.
 private struct AttentionPriorityLabel: View {
+    /// Priority whose label, symbol, and accessibility explanation are rendered.
     var priority: AttentionPriority
 
     var body: some View {
@@ -277,8 +297,11 @@ private struct AttentionPriorityLabel: View {
 
 /// Plain-language inspector for the selected queue item.
 private struct PRAttentionInspector: View {
+    /// Currently selected queue item, or `nil` when no row is selected.
     var item: PRAttentionItem?
+    /// Whether the selected item is the queue's current recommendation.
     var isRecommended: Bool
+    /// Typed guidance action delegated to the queue owner.
     var performAction: (String) -> Void
 
     var body: some View {
@@ -296,9 +319,11 @@ private struct PRAttentionInspector: View {
                         Text(item.priority.explanation)
                             .fixedSize(horizontal: false, vertical: true)
                         LabeledContent("Signal", value: item.reasonDisplayName)
-                        LabeledContent("Updated") {
-                            Text(item.row.updatedAt, format: .relative(presentation: .named))
+                        if let updatedAt = item.updatedAt {
+                            LabeledContent("Updated") {
+                                Text(updatedAt, format: .relative(presentation: .named))
                                 .foregroundStyle(.secondary)
+                            }
                         }
                     }
 
@@ -313,9 +338,9 @@ private struct PRAttentionInspector: View {
             }
         } else {
             ContentUnavailableView(
-                "Select a pull request",
+                "Select an item",
                 systemImage: "scope",
-                description: Text("Choose a queue row to understand its priority and recommended next action.")
+                description: Text("Choose an item to understand its priority and recommended next action.")
             )
         }
     }
@@ -328,15 +353,17 @@ private struct PRAttentionInspector: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
             }
-            Text(verbatim: item.row.repository.displayName)
+            Text(verbatim: item.repository.displayName)
                 .foregroundStyle(.secondary)
-            Text(item.row.title)
+            Text(item.titleDisplayName)
                 .font(.title3)
                 .fontWeight(.semibold)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 10) {
-                Text(verbatim: "#\(item.row.number)")
-                    .monospaced()
+                if let number = item.pullRequest?.number {
+                    Text(verbatim: "#\(number)")
+                        .monospaced()
+                }
                 AttentionPriorityLabel(priority: item.priority)
             }
         }
@@ -345,16 +372,50 @@ private struct PRAttentionInspector: View {
         .accessibilityAddTraits(.isHeader)
     }
 
-    /// VoiceOver label includes project, PR, and the user-facing urgency band.
+    /// VoiceOver label identifies the source type and user-facing urgency band.
     private func headerAccessibilityLabel(for item: PRAttentionItem) -> String {
-        String(
+        guard let row = item.pullRequest else {
+            if isRecommended {
+                return String(
+                    format: String(
+                        localized: "Attention inspector recommended repository header accessibility label",
+                        defaultValue: "Recommended. %1$@ repository status: %2$@. Priority: %3$@."
+                    ),
+                    item.repository.displayName,
+                    item.reasonDisplayName,
+                    item.priority.displayName
+                )
+            }
+            return String(
+                format: String(
+                    localized: "Attention inspector repository header accessibility label",
+                    defaultValue: "%1$@ repository status: %2$@. Priority: %3$@."
+                ),
+                item.repository.displayName,
+                item.reasonDisplayName,
+                item.priority.displayName
+            )
+        }
+        if isRecommended {
+            return String(
+                format: String(
+                    localized: "Attention inspector recommended header accessibility label",
+                    defaultValue: "Recommended. %1$@ pull request %2$lld: %3$@. Priority: %4$@."
+                ),
+                row.repository.displayName,
+                Int64(row.number),
+                row.title,
+                item.priority.displayName
+            )
+        }
+        return String(
             format: String(
                 localized: "Attention inspector header accessibility label",
                 defaultValue: "%1$@ pull request %2$lld: %3$@. Priority: %4$@."
             ),
-            item.row.repository.displayName,
-            Int64(item.row.number),
-            item.row.title,
+            row.repository.displayName,
+            Int64(row.number),
+            row.title,
             item.priority.displayName
         )
     }

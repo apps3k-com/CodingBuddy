@@ -12,6 +12,7 @@ import Foundation
 final class FileWatcher {
     private let source: DispatchSourceFileSystemObject
 
+    /// Opens a path for event-only observation, failing when the path is unavailable.
     init?(url: URL, onChange: @escaping @MainActor () -> Void) {
         let descriptor = open(url.resolvingSymlinksInPath().path, O_EVTONLY)
         guard descriptor >= 0 else { return nil }
@@ -31,6 +32,7 @@ final class FileWatcher {
         self.source = source
     }
 
+    /// Stops observation and closes the owned file descriptor.
     func cancel() {
         source.cancel()
     }

@@ -37,17 +37,32 @@ jobs:
     name: Feature flags are documented
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
       - name: Check FeatureFlags.swift against docs/FEATURE_FLAGS.md
         run: ./scripts/check-feature-flags.sh
+
+  docstring-coverage:
+    name: Swift docstring coverage is at least 90%
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - name: Verify docstring checker fixtures
+        run: ./scripts/test-docstring-coverage.sh
+      - name: Measure repository docstring coverage
+        run: ./scripts/check-docstring-coverage.sh --json
 
   docs-updated:
     name: Wiki sources updated for user-visible changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Require docs/wiki changes alongside app changes
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
@@ -56,14 +71,24 @@ jobs:
         run: |
           CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
           echo "$CHANGED"
-          if echo "$CHANGED" | grep -qE '^CodingBuddy/.*\.(swift|xcstrings)$'; then
-            if echo "$CHANGED" | grep -qE '^docs/(wiki/|FEATURE_FLAGS\.md)'; then
-              echo "App change ships with documentation updates — OK."
-            elif echo "$PR_BODY" | grep -qiE '(^|\s)Docs:\s*none(\s|$)'; then
+          if echo "$CHANGED" | grep -qE '^CodingBuddy/.*\.(swift|xcstrings|storyboard|xib)$'; then
+            if printf '%s\n' "$PR_BODY" | grep -qiE '(^|[[:space:]])Docs:[[:space:]]*none([[:space:]]|$)'; then
               echo "PR declares 'Docs: none' — OK."
             else
-              echo "::error::App code changed but neither docs/wiki/ nor docs/FEATURE_FLAGS.md was updated. Update the wiki sources (EN + DE) or declare 'Docs: none' in the PR description."
-              exit 1
+              missing_guides=""
+              for guide in \
+                docs/wiki/User-Guide-EN.md \
+                docs/wiki/Benutzerhandbuch-DE.md
+              do
+                if ! printf '%s\n' "$CHANGED" | grep -Fqx "$guide"; then
+                  missing_guides="$missing_guides $guide"
+                fi
+              done
+              if [ -n "$missing_guides" ]; then
+                echo "::error::User-visible app code changed without both required user guides:$missing_guides. Update both exact files or declare 'Docs: none' in the PR description."
+                exit 1
+              fi
+              echo "App change ships with both required user guides — OK."
             fi
           else
             echo "No app code changes — OK."

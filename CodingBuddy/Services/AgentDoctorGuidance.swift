@@ -205,6 +205,30 @@ nonisolated enum AgentDoctorGuidance {
                 technicalEvidence: evidence,
                 glossaryTerms: [.mcp, .oauth]
             )
+
+        case .credentialScanIncomplete:
+            return Guidance(
+                id: guidanceID(for: diagnostic),
+                explanation: String(
+                    localized: "Agent Doctor guidance incomplete credential scan explanation",
+                    defaultValue:
+                        "Agent Doctor deliberately omitted part of the MCP Auth cache because it could not inspect that input within its safety limits."
+                ),
+                relevance: String(
+                    localized: "Agent Doctor guidance incomplete credential scan relevance",
+                    defaultValue:
+                        "A complete credential-cache scan is required before an empty or healthy result can be trusted."
+                ),
+                consequence: String(
+                    localized: "Agent Doctor guidance incomplete credential scan consequence",
+                    defaultValue:
+                        "Additional expired, incomplete, or unsafe credential artifacts may exist outside the reported findings."
+                ),
+                recommendedAction: openMCPAuthAction(),
+                alternatives: [],
+                technicalEvidence: evidence,
+                glossaryTerms: [.mcp, .oauth]
+            )
         }
     }
 
@@ -217,7 +241,7 @@ nonisolated enum AgentDoctorGuidance {
     /// Credential diagnostics always belong to MCP Auth, even if malformed input names another tool.
     static func destinationTool(for diagnostic: AgentDiagnostic) -> AgentDiagnosticTool {
         switch diagnostic.code {
-        case .expiredCredential, .incompleteCredential:
+        case .expiredCredential, .incompleteCredential, .credentialScanIncomplete:
             .mcpAuth
         case .missingDirectory,
              .missingZshStartupFiles,
@@ -397,6 +421,8 @@ nonisolated enum AgentDoctorGuidance {
                     )
                 )
             }
+        case .credentialScanIncomplete:
+            break
         }
 
         return evidence

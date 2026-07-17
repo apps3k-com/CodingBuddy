@@ -112,4 +112,24 @@ struct SecretsTerminologyTests {
         #expect(text.contains("bis CodingBuddy beendet wird"))
         #expect(!text.localizedCaseInsensitiveContains("bis zum Beenden"))
     }
+
+    /// Ensures every immediate-lock surface communicates the shared app-wide scope.
+    @Test func lockCopyNamesAllRevealedSecrets() throws {
+        let strings = try catalogStrings()
+        let keys = [
+            "Lock All Revealed Secrets",
+            "Lock All Revealed Secrets?",
+            "Immediately hide all revealed secrets throughout CodingBuddy",
+            "CodingBuddy will lock all revealed secrets in %lld seconds.",
+            "CodingBuddy will lock all revealed secrets soon."
+        ]
+
+        for key in keys {
+            let translation = try germanTranslation(for: key, in: strings)
+            #expect(translation.localizedCaseInsensitiveContains("alle"))
+            #expect(translation.contains("Secret"))
+        }
+        #expect(!strings.keys.contains("Lock Credential Editor"))
+        #expect(!strings.keys.contains("Lock Credential Views"))
+    }
 }

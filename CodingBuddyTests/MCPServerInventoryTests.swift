@@ -274,6 +274,131 @@ struct MCPServerInventoryTests {
         #expect(!item.summary.contains("query-secret"))
     }
 
+    /// Verifies command summaries hide sensitive header values while retaining useful safe headers.
+    @Test func summariesRedactSensitiveHeaderArguments() throws {
+        let home = try makeTempDir()
+        let cursor = home.appendingPathComponent(".cursor", isDirectory: true)
+        try FileManager.default.createDirectory(at: cursor, withIntermediateDirectories: true)
+        try """
+        {
+          "mcpServers": {
+            "header-runner": {
+              "command": "runner",
+              "args": [
+                "-H",
+                "Authorization: Bearer auth-secret",
+                "--header",
+                "Proxy-Authorization: Basic proxy-secret",
+                "-H",
+                "Cookie: session=cookie-secret",
+                "--header=Set-Cookie: session=set-cookie-secret",
+                "--header=X-API-Key: api-key-secret",
+                "--header",
+                "X-Service-Token: token-secret",
+                "-H",
+                "X-Client-Secret: client-secret",
+                "-HAuthorization: Bearer ghp_abcd1234",
+                "-H=X-API-Key: opaque-5678",
+                "--header=Accept: application/json",
+                "--header=Accept: application/json, text/event-stream",
+                "--header=Accept: application/ghp_abcd1234",
+                "--header=Accept: application/*ghp_abcd1234",
+                "--header=Content-Type: application/json",
+                "--header=X-Debug: Bearer custom-header-secret",
+                "--header=Referer: https://user:password@example.com/path?token=referer-secret",
+                "--header",
+                "Link: <https://user:password@example.org/callback?token=link-secret>; rel=next",
+                "-HX-Request-ID: request-attached-123",
+                "-H",
+                "X-Request-ID: request-123",
+                "-HOrigin: https://user:password@example.net/path?token=origin-secret",
+                "-H",
+                "Authorization Bearer malformed-secret",
+                "--header",
+                "invalid header ghp_malformed_name_secret: harmless"
+              ]
+            }
+          }
+        }
+        """.write(to: cursor.appendingPathComponent("mcp.json"), atomically: true, encoding: .utf8)
+
+        let summary = try #require(MCPServerInventoryScanner(homeDirectory: home).items().first).summary
+
+        #expect(summary.contains("-H Authorization: ••••••••"))
+        #expect(summary.contains("--header Proxy-Authorization: ••••••••"))
+        #expect(summary.contains("-H Cookie: ••••••••"))
+        #expect(summary.contains("--header=Set-Cookie: ••••••••"))
+        #expect(summary.contains("--header=X-API-Key: ••••••••"))
+        #expect(summary.contains("--header X-Service-Token: ••••••••"))
+        #expect(summary.contains("-H X-Client-Secret: ••••••••"))
+        #expect(summary.contains("-HAuthorization: ••••••••"))
+        #expect(summary.contains("-H=X-API-Key: ••••••••"))
+        #expect(summary.contains("--header=Accept: application/json"))
+        #expect(summary.contains("--header=Accept: application/json, text/event-stream"))
+        #expect(!summary.contains("--header=Accept: application/ghp_abcd1234"))
+        #expect(!summary.contains("--header=Accept: application/*ghp_abcd1234"))
+        #expect(summary.components(separatedBy: "--header=Accept: ••••••••").count == 3)
+        #expect(summary.contains("--header=Content-Type: application/json"))
+        #expect(summary.contains("--header=X-Debug: ••••••••"))
+        #expect(summary.contains("--header=Referer: ••••••••"))
+        #expect(summary.contains("--header Link: ••••••••"))
+        #expect(summary.contains("-HX-Request-ID: ••••••••"))
+        #expect(summary.contains("-H X-Request-ID: ••••••••"))
+        #expect(summary.contains("-HOrigin: ••••••••"))
+        #expect(summary.contains("-H ••••••••"))
+        #expect(summary.contains("--header ••••••••"))
+        #expect(!summary.contains("auth-secret"))
+        #expect(!summary.contains("proxy-secret"))
+        #expect(!summary.contains("cookie-secret"))
+        #expect(!summary.contains("set-cookie-secret"))
+        #expect(!summary.contains("api-key-secret"))
+        #expect(!summary.contains("custom-header-secret"))
+        #expect(!summary.contains("token-secret"))
+        #expect(!summary.contains("client-secret"))
+        #expect(!summary.contains("ghp_abcd1234"))
+        #expect(!summary.contains("opaque-5678"))
+        #expect(!summary.contains("referer-secret"))
+        #expect(!summary.contains("link-secret"))
+        #expect(!summary.contains("origin-secret"))
+        #expect(!summary.contains("malformed-secret"))
+        #expect(!summary.contains("ghp_malformed_name_secret"))
+        #expect(!summary.contains("user:password"))
+    }
+
+    /// Verifies same-named Claude project definitions remain distinct across both source files.
+    @Test func claudeProjectDefinitionsPreserveSameNamedOccurrences() throws {
+        let home = try makeTempDir()
+        let project = home.appendingPathComponent("Project", isDirectory: true)
+        try FileManager.default.createDirectory(at: project, withIntermediateDirectories: true)
+        try #"{"mcpServers":{"shared":{"command":"local-runner","args":["local.js"]}}}"#
+            .write(to: project.appendingPathComponent(".mcp.json"), atomically: true, encoding: .utf8)
+        try """
+        {
+          "projects": {
+            "\(project.path)": {
+              "mcpServers": {
+                "shared": {
+                  "command": "claude-runner",
+                  "args": ["claude.js"]
+                }
+              }
+            }
+          }
+        }
+        """.write(to: home.appendingPathComponent(".claude.json"), atomically: true, encoding: .utf8)
+
+        let occurrences = MCPServerInventoryScanner(homeDirectory: home).items()
+            .filter { $0.tool == .claudeCode && $0.scope == project.path && $0.name == "shared" }
+
+        #expect(occurrences.count == 2)
+        #expect(Set(occurrences.map(\.sourcePath)) == Set([
+            home.appendingPathComponent(".claude.json").path,
+            project.appendingPathComponent(".mcp.json").path,
+        ]))
+        #expect(Set(occurrences.map(\.summary)) == Set(["claude-runner claude.js", "local-runner local.js"]))
+        #expect(Set(occurrences.map(\.id)).count == 2)
+    }
+
     @Test func malformedURLSummariesFailClosedWithoutLeakingSecrets() throws {
         let home = try makeTempDir()
         let cursor = home.appendingPathComponent(".cursor", isDirectory: true)

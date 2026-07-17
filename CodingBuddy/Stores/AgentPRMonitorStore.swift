@@ -129,6 +129,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         if let saved = defaults.string(forKey: Self.watchedRepositoriesKey) {
             watchedRepositories = Self.repositoryList(from: saved)
         } else if let saved = defaults.string(forKey: Self.repositoryKey),
+                  /// Repository restored from the legacy single-watch preference.
                   let repository = GitHubRepositoryRef(displayName: saved) {
             watchedRepositories = [repository]
             persistWatchedRepositories()
@@ -169,7 +170,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
 
     /// Adds a repository to the watchlist without disturbing existing entries.
     func addWatchedRepository(_ repository: GitHubRepositoryRef) {
-        guard !watchedRepositories.contains(repository) else { return }
+        guard !watchedRepositories.contains(where: { $0.canonicalID == repository.canonicalID }) else { return }
         let wasEmpty = watchedRepositories.isEmpty
         watchedRepositories.append(repository)
         selectedRepository = selectedRepository ?? repository
@@ -182,16 +183,16 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
 
     /// Removes one repository from the watchlist while keeping the remaining entries.
     func removeWatchedRepository(_ repository: GitHubRepositoryRef) {
-        guard watchedRepositories.contains(repository) else { return }
+        guard watchedRepositories.contains(where: { $0.canonicalID == repository.canonicalID }) else { return }
         let wasRefreshing = isRefreshing
         refreshTask?.cancel()
-        watchedRepositories.removeAll { $0 == repository }
-        if selectedRepository == repository {
+        watchedRepositories.removeAll { $0.canonicalID == repository.canonicalID }
+        if selectedRepository?.canonicalID == repository.canonicalID {
             selectedRepository = watchedRepositories.first
         }
         persistWatchedRepositories()
-        repositorySnapshots.removeValue(forKey: repository)
-        repositoryRefreshStates.removeValue(forKey: repository)
+        repositorySnapshots = repositorySnapshots.filter { $0.key.canonicalID != repository.canonicalID }
+        repositoryRefreshStates = repositoryRefreshStates.filter { $0.key.canonicalID != repository.canonicalID }
         rows = cachedRows(for: watchedRepositories)
         if watchedRepositories.isEmpty {
             rateLimit = nil
@@ -231,11 +232,11 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
 
     /// Converts stored repository text into ordered unique references.
     private static func repositoryList(from storageValue: String) -> [GitHubRepositoryRef] {
-        var seen = Set<GitHubRepositoryRef>()
+        var seen = Set<String>()
         return storageValue
             .split(whereSeparator: \.isNewline)
             .compactMap { GitHubRepositoryRef(displayName: String($0)) }
-            .filter { seen.insert($0).inserted }
+            .filter { seen.insert($0.canonicalID).inserted }
     }
 
     /// Persists the watchlist using one owner/name reference per line.
@@ -335,6 +336,7 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         case .removed:
             refreshTask?.cancel()
             repositorySnapshots = [:]
+            repositoryRefreshStates = [:]
             rows = []
             rateLimit = nil
             isRefreshing = false

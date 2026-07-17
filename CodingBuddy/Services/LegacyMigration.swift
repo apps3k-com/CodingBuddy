@@ -9,6 +9,7 @@ import Foundation
 /// UserDefaults lived in the old bundle-id domain and backups in the old
 /// Application Support folder.
 nonisolated enum LegacyMigration {
+    /// Persistent-domain identifier used by releases shipped under the former app name.
     static let legacyDefaultsDomain = "apps3k.EnvVarBuddy"
 
     /// Runs both migrations against the real environment. Idempotent: keys

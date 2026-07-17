@@ -11,6 +11,7 @@ import Observation
 /// `~/.codex/config.toml`.
 @Observable
 final class CodexStore {
+    /// Directory containing Codex configuration and its dedicated MCP environment file.
     let codexDirectory: URL
 
     private(set) var directoryExists = false
@@ -25,12 +26,14 @@ final class CodexStore {
         self?.startWatching()
     }
 
+    /// Creates a store with injectable configuration and backup locations.
     init(
         codexDirectory: URL = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".codex", isDirectory: true),
         backupDirectory: URL? = nil
     ) {
         self.codexDirectory = codexDirectory
+        /// Backup destination shared with other guarded configuration writers.
         let backups = backupDirectory ?? FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("CodingBuddy/Backups", isDirectory: true)
@@ -40,11 +43,14 @@ final class CodexStore {
         startWatching()
     }
 
+    /// Credential-bearing dotenv file managed with owner-only creation permissions.
     var mcpEnvURL: URL { codexDirectory.appendingPathComponent("mcp.env") }
+    /// Read-only Codex configuration used to discover MCP server references.
     var configTOMLURL: URL { codexDirectory.appendingPathComponent("config.toml") }
 
     // MARK: - Loading
 
+    /// Reloads environment assignments and MCP server definitions from disk.
     func reload() {
         directoryExists = FileManager.default.fileExists(atPath: codexDirectory.path)
         variables = (try? String(contentsOf: mcpEnvURL, encoding: .utf8))
@@ -64,7 +70,9 @@ final class CodexStore {
 
     // MARK: - Mutations (mcp.env)
 
-    func update(_ variable: EnvFileVariable, name: String, rawValue: String) {
+    /// Revalidates and updates one assignment while preserving its source line semantics.
+    @discardableResult
+    func update(_ variable: EnvFileVariable, name: String, rawValue: String) -> Bool {
         perform {
             try writer.updateVariable(
                 variable, newName: name, newRawValue: rawValue,
@@ -73,28 +81,36 @@ final class CodexStore {
         }
     }
 
-    func add(name: String, rawValue: String) {
+    /// Adds a non-exported assignment to Codex's dedicated MCP environment file.
+    @discardableResult
+    func add(name: String, rawValue: String) -> Bool {
         perform {
             try writer.addVariables([(name, rawValue)], to: mcpEnvURL, exportStyle: .none)
         }
     }
 
-    func delete(_ variable: EnvFileVariable) {
+    /// Revalidates and removes one assignment from the MCP environment file.
+    @discardableResult
+    func delete(_ variable: EnvFileVariable) -> Bool {
         perform {
             try writer.deleteVariable(variable, at: mcpEnvURL)
         }
     }
 
-    private func perform(_ mutation: () throws -> Void) {
+    private func perform(_ mutation: () throws -> Void) -> Bool {
         monitor.cancelPending()
         do {
             try mutation()
             lastError = nil
+            reload()
+            startWatching()
+            return true
         } catch {
             lastError = error.localizedDescription
+            reload()
+            startWatching()
+            return false
         }
-        reload()
-        startWatching()
     }
 
     // MARK: - File watching

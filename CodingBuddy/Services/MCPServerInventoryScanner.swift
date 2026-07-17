@@ -83,11 +83,9 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
                 }
             }
 
-            let namesFromClaudeJSON = Set(projectServers.map(\.name))
             let localMCPJSON = URL(fileURLWithPath: path).appendingPathComponent(".mcp.json")
             if let localText = try? String(contentsOf: localMCPJSON, encoding: .utf8) {
                 rows += MCPServersJSONReader.servers(inDocument: localText, scope: path)
-                    .filter { !namesFromClaudeJSON.contains($0.name) }
                     .map { item(from: $0, tool: .claudeCode, sourcePath: localMCPJSON.path) }
             }
         }
@@ -244,10 +242,39 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
     private func redactedArgs(_ args: [String]) -> [String] {
         var result: [String] = []
         var redactNext = false
+        var redactHeaderNext = false
         for arg in args {
             if redactNext {
                 result.append("••••••••")
                 redactNext = false
+                continue
+            }
+
+            if redactHeaderNext {
+                result.append(redactedHeader(arg))
+                redactHeaderNext = false
+                continue
+            }
+
+            if arg == "-H" || arg == "--header" {
+                result.append(arg)
+                redactHeaderNext = true
+                continue
+            }
+
+            if arg.hasPrefix("--header=") {
+                let value = String(arg.dropFirst("--header=".count))
+                result.append("--header=" + redactedHeader(value))
+                continue
+            }
+
+            if arg.hasPrefix("-H"), arg.count > 2 {
+                let attached = String(arg.dropFirst(2))
+                if attached.hasPrefix("=") {
+                    result.append("-H=" + redactedHeader(String(attached.dropFirst())))
+                } else {
+                    result.append("-H" + redactedHeader(attached))
+                }
                 continue
             }
 
@@ -273,6 +300,53 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
             }
         }
         return result
+    }
+
+    /// Retains header names while exposing only narrowly validated non-secret values.
+    private func redactedHeader(_ value: String) -> String {
+        guard let colon = value.firstIndex(of: ":") else { return "••••••••" }
+        let name = String(value[..<colon]).trimmingCharacters(in: .whitespaces)
+        guard isValidHeaderFieldName(name) else { return "••••••••" }
+        let headerValue = String(value[value.index(after: colon)...])
+            .trimmingCharacters(in: .whitespaces)
+        guard let safeValue = safeHeaderValue(name: name, value: headerValue) else {
+            return "\(name): ••••••••"
+        }
+        return "\(name): \(safeValue)"
+    }
+
+    /// Accepts only bounded ASCII HTTP field names before exposing their text.
+    private func isValidHeaderFieldName(_ name: String) -> Bool {
+        let allowedPunctuation = Set("!#$%&'*+-.^_`|~".utf8)
+        let bytes = Array(name.utf8)
+        return (1...128).contains(bytes.count) && bytes.allSatisfy { byte in
+            (byte >= 48 && byte <= 57)
+                || (byte >= 65 && byte <= 90)
+                || (byte >= 97 && byte <= 122)
+                || allowedPunctuation.contains(byte)
+        }
+    }
+
+    /// Allows only complete media values that CodingBuddy knows cannot carry credentials.
+    private func safeHeaderValue(name: String, value: String) -> String? {
+        guard !value.isEmpty,
+              value.utf8.count <= 256
+        else { return nil }
+
+        let mediaRanges = value.split(separator: ",", omittingEmptySubsequences: false)
+        let allowedValues: Set<String>
+        if name.caseInsensitiveCompare("Accept") == .orderedSame {
+            allowedValues = ["application/json", "text/event-stream", "*/*"]
+        } else if name.caseInsensitiveCompare("Content-Type") == .orderedSame {
+            allowedValues = ["application/json"]
+        } else {
+            return nil
+        }
+
+        guard !mediaRanges.isEmpty,
+              mediaRanges.allSatisfy({ allowedValues.contains($0.trimmingCharacters(in: .whitespaces).lowercased()) })
+        else { return nil }
+        return value
     }
 
     /// Sanitizes standalone URL arguments or `--flag=<url>` values.

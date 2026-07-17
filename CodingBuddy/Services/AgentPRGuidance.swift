@@ -31,19 +31,29 @@ nonisolated enum AgentPRGuidanceRoute: String, CaseIterable, Sendable {
 
 /// Stable identifiers for the sanitized evidence emitted by Agent PR guidance.
 nonisolated enum AgentPRGuidanceEvidenceID: String, CaseIterable, Sendable {
+    /// Identifies the sanitized owner/name pair without exposing a remote URL.
     case repository = "agent-pr-monitor.evidence.repository"
+    /// Identifies the provider-assigned pull request number.
     case pullRequestNumber = "agent-pr-monitor.evidence.pr-number"
+    /// Identifies the app's conservative merge-readiness classification.
     case readiness = "agent-pr-monitor.evidence.readiness"
+    /// Identifies the aggregate state of required checks and status contexts.
     case continuousIntegration = "agent-pr-monitor.evidence.ci-state"
+    /// Identifies the current review decision without retaining reviewer content.
     case review = "agent-pr-monitor.evidence.review-state"
+    /// Identifies the count of unresolved review findings.
     case unresolvedFindings = "agent-pr-monitor.evidence.unresolved-findings"
+    /// Identifies the abbreviated commit revision used to qualify the evidence.
     case headSHA = "agent-pr-monitor.evidence.head-sha"
 }
 
 /// Availability of the existing feature routes at the time guidance is built.
 nonisolated struct AgentPRGuidanceActionAvailability: Equatable, Sendable {
+    /// Whether the row has a valid browser destination for the pull request.
     let canOpenPullRequest: Bool
+    /// Whether a repository refresh can currently be started.
     let canRefresh: Bool
+    /// Whether the GitHub authorization settings route can be opened.
     let canOpenSettings: Bool
 
     /// Common production state when all routes are ready to execute.
@@ -56,17 +66,29 @@ nonisolated struct AgentPRGuidanceActionAvailability: Equatable, Sendable {
 
 /// Shared deterministic PR classification used by guidance and attention ranking.
 nonisolated enum AgentPRGuidanceState: String, Equatable, Sendable {
+    /// The visible snapshot is stale because GitHub authorization needs repair.
     case staleAuthorization = "stale-authorization"
+    /// The visible snapshot is stale because GitHub is rate limiting refreshes.
     case staleRateLimit = "stale-rate-limit"
+    /// The visible snapshot is stale after a non-authorization refresh failure.
     case staleRefreshFailure = "stale-refresh-failure"
+    /// A refresh is in flight while the previous snapshot remains visible.
     case refreshing
+    /// All observed merge gates are satisfied, subject to GitHub's live state.
     case ready
+    /// Required checks are present but have not reached a terminal result.
     case waitingForContinuousIntegration = "waiting-for-ci"
+    /// Automated signals are green but a required review decision is still absent.
     case waitingForReview = "waiting-for-review"
+    /// GitHub has not exposed enough check or review evidence for a safe classification.
     case waitingForSignals = "waiting-for-signals"
+    /// At least one required check or status context has failed.
     case failedContinuousIntegration = "failed-ci"
+    /// The current review decision requires author changes.
     case changesRequested = "changes-requested"
+    /// Review threads still contain findings that must be resolved or answered.
     case unresolvedFindings = "unresolved-findings"
+    /// The pull request intentionally remains outside the ready-for-review workflow.
     case draft
 }
 
@@ -86,7 +108,7 @@ nonisolated enum AgentPRGuidanceCatalog {
         actionAvailability: AgentPRGuidanceActionAvailability
     ) -> Guidance {
         let state = state(for: row, freshness: freshness)
-        let copy = copy(for: state, row: row)
+        let copy = copy(for: state, unresolvedFindingCount: row.review.unresolvedFindingCount)
 
         return Guidance(
             id: "agent-pr-monitor.guidance.\(row.id).\(state.rawValue)",
@@ -104,6 +126,31 @@ nonisolated enum AgentPRGuidanceCatalog {
         )
     }
 
+    /// Builds repository-scoped guidance when a watched repository returned no pull request rows.
+    static func guidance(
+        for repository: GitHubRepositoryRef,
+        freshness: AgentPRGuidanceFreshness,
+        actionAvailability: AgentPRGuidanceActionAvailability
+    ) -> Guidance? {
+        guard let state = repositoryState(for: freshness) else { return nil }
+        let copy = copy(for: state, unresolvedFindingCount: 0)
+
+        return Guidance(
+            id: "agent-pr-monitor.guidance.repository.\(repository.id).\(state.rawValue)",
+            explanation: copy.explanation,
+            relevance: copy.relevance,
+            consequence: copy.consequence,
+            recommendedAction: recommendedAction(
+                for: state,
+                copy: copy,
+                availability: actionAvailability
+            ),
+            alternatives: [],
+            technicalEvidence: evidence(for: repository),
+            glossaryTerms: glossaryTerms(for: state)
+        )
+    }
+
     /// Resolves only the available primary action emitted by this exact guidance value.
     static func route(for actionID: String, in guidance: Guidance) -> AgentPRGuidanceRoute? {
         guard guidance.recommendedAction.id == actionID,
@@ -115,10 +162,15 @@ nonisolated enum AgentPRGuidanceCatalog {
 
     /// Localized copy associated with one deterministic state.
     private struct Copy {
+        /// Plain-language description of the observed state.
         let explanation: String
+        /// Reason the state matters to the current workflow.
         let relevance: String
+        /// Likely outcome if the state is left unchanged.
         let consequence: String
+        /// Result the recommended action is expected to produce.
         let expectedResult: String
+        /// Explicit justification when the state intentionally offers no action.
         let noActionReason: String?
     }
 
@@ -164,23 +216,34 @@ nonisolated enum AgentPRGuidanceCatalog {
         return .waitingForSignals
     }
 
+    /// Maps only repository-scoped freshness states and rejects a healthy placeholder.
+    static func repositoryState(for freshness: AgentPRGuidanceFreshness) -> AgentPRGuidanceState? {
+        switch freshness {
+        case .refreshing: .refreshing
+        case .authorizationRequired: .staleAuthorization
+        case .rateLimited: .staleRateLimit
+        case .refreshFailed: .staleRefreshFailure
+        case .fresh: nil
+        }
+    }
+
     /// Localized content that never incorporates provider-supplied error text.
-    private static func copy(for state: AgentPRGuidanceState, row: AgentPullRequest) -> Copy {
+    private static func copy(for state: AgentPRGuidanceState, unresolvedFindingCount: Int) -> Copy {
         switch state {
         case .refreshing:
             Copy(
                 explanation: String(
                     localized: "Agent PR guidance refreshing explanation",
                     defaultValue:
-                        "CodingBuddy is refreshing this repository, so this pull request still shows the previous snapshot."
+                        "CodingBuddy is refreshing this repository and has not yet confirmed its current pull request data."
                 ),
                 relevance: String(
                     localized: "Agent PR guidance refreshing relevance",
-                    defaultValue: "The visible status can update when the current read-only refresh finishes."
+                    defaultValue: "The queue can change when the current read-only refresh finishes."
                 ),
                 consequence: String(
                     localized: "Agent PR guidance refreshing consequence",
-                    defaultValue: "The pull request stays unchanged while CodingBuddy checks GitHub for newer signals."
+                    defaultValue: "No pull request is changed while CodingBuddy checks GitHub for newer signals."
                 ),
                 expectedResult: String(
                     localized: "Agent PR guidance wait for refresh expected result",
@@ -196,15 +259,15 @@ nonisolated enum AgentPRGuidanceCatalog {
                 explanation: String(
                     localized: "Agent PR guidance stale authorization explanation",
                     defaultValue:
-                        "This pull request shows the last successful snapshot because GitHub authorization needs attention."
+                        "CodingBuddy cannot confirm current pull request data for this repository because GitHub authorization needs attention."
                 ),
                 relevance: String(
                     localized: "Agent PR guidance stale authorization relevance",
-                    defaultValue: "CodingBuddy cannot confirm whether the pull request changed until authorization is restored."
+                    defaultValue: "Until authorization is restored, the queue cannot confirm which pull requests changed or need attention."
                 ),
                 consequence: String(
                     localized: "Agent PR guidance stale authorization consequence",
-                    defaultValue: "The visible readiness and review signals may be out of date."
+                    defaultValue: "Pull request work from this repository may be missing or out of date."
                 ),
                 expectedResult: String(
                     localized: "Agent PR guidance open Settings expected result",
@@ -216,7 +279,7 @@ nonisolated enum AgentPRGuidanceCatalog {
             Copy(
                 explanation: String(
                     localized: "Agent PR guidance stale rate limit explanation",
-                    defaultValue: "This pull request shows an older snapshot because GitHub is temporarily limiting requests."
+                    defaultValue: "CodingBuddy cannot confirm current pull request data because GitHub is temporarily limiting requests."
                 ),
                 relevance: String(
                     localized: "Agent PR guidance stale rate limit relevance",
@@ -224,7 +287,7 @@ nonisolated enum AgentPRGuidanceCatalog {
                 ),
                 consequence: String(
                     localized: "Agent PR guidance stale rate limit consequence",
-                    defaultValue: "The visible pull request status remains stale until a later refresh succeeds."
+                    defaultValue: "Pull request work from this repository remains unconfirmed until a later refresh succeeds."
                 ),
                 expectedResult: String(
                     localized: "Agent PR guidance wait for GitHub expected result",
@@ -239,15 +302,15 @@ nonisolated enum AgentPRGuidanceCatalog {
             Copy(
                 explanation: String(
                     localized: "Agent PR guidance stale refresh failure explanation",
-                    defaultValue: "The latest refresh failed, so this pull request still shows its last successful snapshot."
+                    defaultValue: "The latest refresh failed before CodingBuddy could confirm current pull request data for this repository."
                 ),
                 relevance: String(
                     localized: "Agent PR guidance stale refresh failure relevance",
-                    defaultValue: "A successful refresh is needed before CodingBuddy can confirm the current pull request status."
+                    defaultValue: "A successful refresh is needed before the queue can confirm which pull requests need attention."
                 ),
                 consequence: String(
                     localized: "Agent PR guidance stale refresh failure consequence",
-                    defaultValue: "Readiness and review information may remain out of date."
+                    defaultValue: "Pull request work from this repository may be missing or out of date."
                 ),
                 expectedResult: String(
                     localized: "Agent PR guidance refresh expected result",
@@ -390,7 +453,7 @@ nonisolated enum AgentPRGuidanceCatalog {
         case .unresolvedFindings:
             Copy(
                 explanation: unresolvedFindingsExplanation(
-                    count: row.review.unresolvedFindingCount
+                    count: unresolvedFindingCount
                 ),
                 relevance: String(
                     localized: "Agent PR guidance unresolved findings relevance",
@@ -611,6 +674,20 @@ nonisolated enum AgentPRGuidanceCatalog {
                     defaultValue: "Head commit"
                 ),
                 sanitizedValue: shortHeadSHA(row.headSHA)
+            ),
+        ]
+    }
+
+    /// Emits the repository identity alone when no concrete pull request snapshot exists.
+    private static func evidence(for repository: GitHubRepositoryRef) -> [TechnicalEvidence] {
+        [
+            TechnicalEvidence(
+                id: AgentPRGuidanceEvidenceID.repository.rawValue,
+                label: String(
+                    localized: "Agent PR guidance repository evidence label",
+                    defaultValue: "Repository"
+                ),
+                sanitizedValue: safeRepositoryName(repository)
             ),
         ]
     }

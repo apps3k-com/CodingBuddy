@@ -7,16 +7,22 @@ import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct EnvFileEntry: Identifiable, Equatable {
+/// Editable name/value data imported from one unambiguous dotenv assignment.
+nonisolated struct EnvFileEntry: Identifiable, Equatable {
+    /// Ephemeral identity used only for SwiftUI collection diffing.
     let id = UUID()
+    /// Environment variable name parsed from the assignment.
     var name: String
+    /// Unquoted value preserved for editing and later encoding.
     var rawValue: String
 }
 
 /// Reads and writes dotenv-style files (one NAME=value per line).
-enum EnvFileCodec {
+nonisolated enum EnvFileCodec {
+    /// Preferred document type for `.env` exports, with plain text as a fallback.
     static let contentType = UTType(filenameExtension: "env") ?? .plainText
 
+    /// Encodes only editable variables and appends a final newline when output is nonempty.
     static func encode(_ variables: [EnvVariable]) -> String {
         let lines = variables.filter(\.isEditable).map { variable -> String in
             let quoting = ShellQuoting.bestQuoting(for: variable.rawValue, preferred: .none) ?? .double
@@ -38,19 +44,24 @@ enum EnvFileCodec {
 }
 
 /// Minimal text document for the SwiftUI file exporter.
-struct EnvFileDocument: FileDocument {
+nonisolated struct EnvFileDocument: FileDocument {
+    /// File types accepted by the importer, ordered from specific to general.
     static var readableContentTypes: [UTType] { [EnvFileCodec.contentType, .plainText] }
 
+    /// UTF-8 text represented by the document.
     var text: String
 
+    /// Creates an exportable document from already encoded text.
     init(text: String) {
         self.text = text
     }
 
+    /// Loads regular-file bytes as UTF-8, producing empty text when no decodable payload exists.
     init(configuration: ReadConfiguration) throws {
         text = String(data: configuration.file.regularFileContents ?? Data(), encoding: .utf8) ?? ""
     }
 
+    /// Emits the current text as a regular UTF-8 file without additional normalization.
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         FileWrapper(regularFileWithContents: Data(text.utf8))
     }

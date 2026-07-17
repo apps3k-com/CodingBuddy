@@ -13,13 +13,20 @@ import Foundation
 /// nothing is returned).
 nonisolated enum JSONPatcher {
 
+    /// Fail-closed outcomes that prevent ambiguous or unverifiable byte edits.
     enum PatchError: LocalizedError, Equatable {
+        /// The source cannot be parsed as a JSON value.
         case malformedJSON
+        /// The requested object chain or member does not exist.
         case pathNotFound
+        /// A string replacement targeted a non-string JSON value.
         case notAString
+        /// An object on the traversed path contains ambiguous duplicate keys.
         case duplicateKey
+        /// The patched document does not equal the single expected semantic mutation.
         case verificationFailed
 
+        /// Localized explanation suitable for surfacing a rejected safe-edit operation.
         var errorDescription: String? {
             switch self {
             case .malformedJSON:
@@ -132,6 +139,7 @@ nonisolated enum JSONPatcher {
         transform: ([String: Any]) -> [String: Any]
     ) throws {
         guard let newParsed = try? parse(newText),
+              /// Parsed document produced by applying only the requested semantic mutation.
               let expected = mutated(old, parentPath: Array(path.dropLast()), transform: transform),
               (expected as AnyObject).isEqual(newParsed)
         else {
@@ -146,8 +154,10 @@ nonisolated enum JSONPatcher {
         guard let dict = node as? [String: Any] else { return nil }
         guard let key = parentPath.first else { return transform(dict) }
         guard let child = dict[key],
+              /// Recursively transformed child that preserves all siblings unchanged.
               let mutatedChild = mutated(child, parentPath: Array(parentPath.dropFirst()), transform: transform)
         else { return nil }
+        /// Copy-on-write parent updated with the single recursively transformed child.
         var copy = dict
         copy[key] = mutatedChild
         return copy
@@ -156,14 +166,20 @@ nonisolated enum JSONPatcher {
     // MARK: - Scanning
 
     private struct Member {
+        /// Decoded member key used for exact path matching.
         var key: String
+        /// Start of the encoded key, used when removing a complete pair.
         var keyStart: String.Index
+        /// Exact encoded value range, excluding surrounding pair whitespace.
         var valueRange: Range<String.Index>
     }
 
     private struct ObjectInfo {
+        /// Index of the object's opening brace.
         var openBrace: String.Index
+        /// Index of the matching closing brace.
         var closeBrace: String.Index
+        /// Members in source order with byte-precise string ranges.
         var members: [Member]
     }
 
@@ -206,6 +222,7 @@ nonisolated enum JSONPatcher {
 
     // MARK: - String encoding
 
+    /// Produces a quoted JSON string while escaping controls and preserving other Unicode scalars.
     static func encodeJSONString(_ value: String) -> String {
         var out = "\""
         for scalar in value.unicodeScalars {
@@ -229,26 +246,33 @@ nonisolated enum JSONPatcher {
     // MARK: - Low-level scanner
 
     private struct TextScanner {
+        /// Immutable source whose indices define all emitted ranges.
         let text: String
+        /// Cursor pointing to the next character to inspect.
         var index: String.Index
 
+        /// Creates a scanner at a validated source index, defaulting to the beginning.
         init(_ text: String, at index: String.Index? = nil) {
             self.text = text
             self.index = index ?? text.startIndex
         }
 
+        /// Current character, or `nil` once the cursor reaches the end.
         var current: Character? { index < text.endIndex ? text[index] : nil }
 
+        /// Advances by one extended grapheme cluster.
         mutating func advance() {
             index = text.index(after: index)
         }
 
+        /// Consumes JSON-insignificant spaces, tabs, and line breaks.
         mutating func skipWhitespace() {
             while let character = current, character == " " || character == "\t" || character == "\n" || character == "\r" {
                 advance()
             }
         }
 
+        /// Parses one object and records exact source ranges for its direct members.
         mutating func scanObject() throws -> ObjectInfo {
             guard current == "{" else { throw PatchError.malformedJSON }
             let open = index
@@ -279,6 +303,7 @@ nonisolated enum JSONPatcher {
             }
         }
 
+        /// Consumes one complete JSON value and returns its exact source range.
         mutating func skipValue() throws -> Range<String.Index> {
             switch current {
             case "\"":

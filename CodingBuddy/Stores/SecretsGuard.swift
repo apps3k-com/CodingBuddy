@@ -15,11 +15,33 @@ final class SecretsGuard {
     /// UserDefaults key for the unlock duration in seconds; -1 keeps the
     /// unlock until the app quits.
     static let unlockDurationKey = "secretsUnlockDuration"
+    /// Default reveal window when no explicit preference has been stored.
     static let defaultUnlockDuration: TimeInterval = 300
 
     private(set) var unlockedUntil: Date?
+    /// Recoverable authentication failure shown by the owning view.
+    private(set) var lastError: String?
     @ObservationIgnored private var pendingRelock: DispatchWorkItem?
+    /// Monotonic revocation generation used to reject authentication results
+    /// that complete after an explicit or scheduled lock.
+    @ObservationIgnored private var lockGeneration = 0
+    /// Injectable system-authentication boundary used by deterministic tests.
+    @ObservationIgnored private let authenticate: @Sendable (String) async throws -> Bool
 
+    /// Creates the production gate or a deterministic test gate.
+    init(
+        authenticate: @escaping @Sendable (String) async throws -> Bool = { reason in
+            let context = LAContext()
+            return try await context.evaluatePolicy(
+                .deviceOwnerAuthentication,
+                localizedReason: reason
+            )
+        }
+    ) {
+        self.authenticate = authenticate
+    }
+
+    /// Whether secret values may currently be rendered without masking.
     var isUnlocked: Bool {
         guard let unlockedUntil else { return false }
         return unlockedUntil > Date()
@@ -28,21 +50,35 @@ final class SecretsGuard {
     /// Prompts for biometrics or the account password. Returns true and
     /// starts the unlock window on success.
     func requestUnlock() async -> Bool {
-        let context = LAContext()
+        lastError = nil
+        let requestedGeneration = lockGeneration
         do {
-            let success = try await context.evaluatePolicy(
-                .deviceOwnerAuthentication,
-                localizedReason: String(localized: "reveal secret values")
-            )
-            if success { unlock() }
-            return success
+            let success = try await authenticate(String(localized: "reveal secret values"))
+            guard success,
+                  !Task.isCancelled,
+                  requestedGeneration == lockGeneration
+            else { return false }
+            unlock()
+            return true
         } catch {
-            // Cancelled or failed — the system UI already informed the user.
+            guard requestedGeneration == lockGeneration,
+                  !Task.isCancelled,
+                  !Self.isSilentCancellation(error) else { return false }
+            lastError = String(
+                localized: "Authentication could not be completed. Check your Mac authentication settings and try again."
+            )
             return false
         }
     }
 
+    /// Clears an authentication message after its owning alert is dismissed.
+    func clearError() {
+        lastError = nil
+    }
+
+    /// Immediately revokes the reveal window and any scheduled relock.
     func lock() {
+        lockGeneration &+= 1
         pendingRelock?.cancel()
         pendingRelock = nil
         unlockedUntil = nil
@@ -66,5 +102,16 @@ final class SecretsGuard {
         }
         pendingRelock = relock
         DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: relock)
+    }
+
+    /// User- and lifecycle-initiated cancellations need no duplicate app alert.
+    private static func isSilentCancellation(_ error: Error) -> Bool {
+        if error is CancellationError { return true }
+        let cocoaError = error as NSError
+        guard cocoaError.domain == LAError.errorDomain,
+              let code = LAError.Code(rawValue: cocoaError.code) else {
+            return false
+        }
+        return code == .userCancel || code == .appCancel || code == .systemCancel
     }
 }

@@ -290,8 +290,11 @@ private struct MCPServerInspector: View {
 private extension MCPServerInventoryItem {
     /// One source of truth for title, symbol, and tint in inventory status presentation.
     enum ConfigurationStatus {
+        /// Required environment values are not currently resolvable.
         case missingVariables
+        /// The configured transport cannot be classified safely.
         case unknownTransport
+        /// No known configuration blocker was detected.
         case configured
     }
 

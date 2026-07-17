@@ -338,8 +338,11 @@ struct SettingsView: View {
 
 /// One independently identified package-manager executable preference row.
 private struct PackageExecutableSettingsRow: View {
+    /// Package manager whose executable override is configured.
     let manager: PackageManagerKind
+    /// Editable executable path, empty when automatic discovery is used.
     @Binding var path: String
+    /// Action that presents an executable picker.
     var choose: () -> Void
 
     var body: some View {
