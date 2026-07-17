@@ -222,8 +222,44 @@ The **Repositories → Agent PR Monitor** entry (alpha) is a read-only table for
 - GitHub review and legacy-status collections are read with bounded pagination. If GitHub reports more entries than CodingBuddy can safely fetch, review and CI stay **unknown/pending** rather than being presented as approved or green.
 - Use **Refresh** to reload manually and **Open PR** to continue in the browser. The monitor never comments, approves, resolves threads or merges PRs.
 - Rate limits, missing permissions, denied repositories and offline errors are shown as UI-safe states while the last successful snapshot stays visible where possible. Repository-specific failures are scoped, so successful repositories remain visible when another watched repository fails. A failure with no cached PR rows remains visible as one repository-level entry in the Attention Queue.
+- Cached Review Desk rows name their stale repository, show the safe failure reason, and retain the last successful refresh time so stale and current rows are distinguishable.
 
 v1 limits: Agent PR Monitor reads GitHub.com only, does not update GitHub Projects and does not run in the background after CodingBuddy quits.
+
+### Pull Request Review Desk
+
+The **Repositories → Review Desk** entry (alpha) turns one monitored pull
+request into a focused workbench. Select a pull request, then use **Summary**,
+**Conversation**, and **Checks** in the inspector. Conversation puts unresolved
+inline threads first; resolved and outdated threads stay available without
+dominating the current work.
+
+Use **Settings → Security → Sign in with GitHub** before changing a pull
+request. Browser sign-in connects the CodingBuddy GitHub App and stores the
+result in Keychain. Copy the one-time code, then choose **Open GitHub**; the app
+keeps accessibility focus on the code instead of moving it into the browser.
+An existing fine-grained token remains useful for read-only
+monitoring, but it cannot reply, resolve, mark ready, or merge.
+
+- Reply sends one scoped inline-thread reply without an extra confirmation.
+- Resolve acts only on the selected unresolved thread and reloads GitHub state.
+- Ready for Review asks for confirmation and checks the pull request again.
+- Merge shows a strict confirmation, then repeats every eligibility check and
+  binds the request to the current head commit. It is available only when
+  GitHub itself enforces approving reviews, strict required checks, resolved
+  conversations and admin protection without bypass allowances. A locally green
+  pull request without that complete server proof remains unavailable. The menu
+  shows only merge methods currently enabled by the repository.
+
+Actions remain disabled while refresh is running or when GitHub data is
+partial, stale, paginated incompletely, unknown, or changed after confirmation.
+CodingBuddy does not assume a failed network response means a write failed; it
+reloads first and reports an ambiguous result until GitHub state is known. Use
+**Verify Again** to prove the exact transition from a complete snapshot, or
+**I Checked on GitHub** only after manually confirming the result there. Normal
+refresh and target changes stay blocked while the write outcome is unresolved.
+For replies, only GitHub's exact returned comment ID proves success; matching
+text posted concurrently by someone else remains ambiguous.
 
 ### Codex
 

@@ -16,6 +16,24 @@ nonisolated protocol GitHubTokenStore: Sendable {
 
     /// Removes the saved GitHub token if present.
     func deleteToken() throws
+
+    /// Returns the complete saved credential when the backend supports rotating OAuth tokens.
+    func loadCredential() throws -> GitHubCredential?
+
+    /// Saves an OAuth or PAT credential as one logical Keychain value.
+    func saveCredential(_ credential: GitHubCredential) throws
+}
+
+extension GitHubTokenStore {
+    /// Compatibility adapter for existing PAT-only test doubles and stores.
+    nonisolated func loadCredential() throws -> GitHubCredential? {
+        try loadToken().map(GitHubCredential.personalAccessToken)
+    }
+
+    /// Compatibility adapter that persists only the access token in PAT-only stores.
+    nonisolated func saveCredential(_ credential: GitHubCredential) throws {
+        try saveToken(credential.accessToken)
+    }
 }
 
 /// Keychain-specific failures that never include the raw token value.
@@ -51,6 +69,17 @@ nonisolated final class KeychainGitHubTokenStore: GitHubTokenStore, @unchecked S
 
     /// Returns the token from Keychain without exposing it anywhere else.
     func loadToken() throws -> String? {
+        try loadCredential()?.accessToken
+    }
+
+    /// Loads versioned credential metadata and migrates legacy raw PAT values in place on the next save.
+    func loadCredential() throws -> GitHubCredential? {
+        guard let data = try loadData() else { return nil }
+        return try GitHubCredentialCodec.decode(data)
+    }
+
+    /// Returns raw Keychain bytes without decoding or logging the secret-bearing value.
+    private func loadData() throws -> Data? {
         var query = baseQuery()
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -61,15 +90,25 @@ nonisolated final class KeychainGitHubTokenStore: GitHubTokenStore, @unchecked S
         guard status == errSecSuccess else {
             throw GitHubTokenStoreError.keychain(status: status)
         }
-        guard let data = item as? Data, let token = String(data: data, encoding: .utf8) else {
+        guard let data = item as? Data else {
             throw GitHubTokenStoreError.invalidData
         }
-        return token
+        return data
     }
 
     /// Saves a replacement token as a generic password item.
     func saveToken(_ token: String) throws {
-        let data = Data(token.utf8)
+        try saveCredential(.personalAccessToken(token))
+    }
+
+    /// Saves the complete credential in one versioned generic-password value.
+    func saveCredential(_ credential: GitHubCredential) throws {
+        let data = try GitHubCredentialCodec.encode(credential)
+        try saveData(data)
+    }
+
+    /// Updates or creates the single Keychain item atomically from the caller's perspective.
+    private func saveData(_ data: Data) throws {
         var query = baseQuery()
 
         let updateStatus = SecItemUpdate(query as CFDictionary, [
@@ -107,5 +146,49 @@ nonisolated final class KeychainGitHubTokenStore: GitHubTokenStore, @unchecked S
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
         ]
+    }
+}
+
+/// Versioned secret-bearing payload stored as one Keychain item.
+private nonisolated struct CredentialEnvelope: Codable {
+    /// Current persisted representation version.
+    static let currentVersion = 1
+    /// Representation version used for fail-closed decoding.
+    let version: Int
+    /// Complete PAT or rotating GitHub App credential.
+    let credential: GitHubCredential
+}
+
+/// Pure versioned codec separating credential validation from Keychain side effects.
+nonisolated enum GitHubCredentialCodec {
+    /// Encodes one complete credential into the current envelope version.
+    static func encode(_ credential: GitHubCredential) throws -> Data {
+        guard !credential.accessToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw GitHubTokenStoreError.invalidData
+        }
+        do {
+            return try JSONEncoder().encode(
+                CredentialEnvelope(version: CredentialEnvelope.currentVersion, credential: credential)
+            )
+        } catch {
+            throw GitHubTokenStoreError.invalidData
+        }
+    }
+
+    /// Decodes the current envelope or migrates one non-JSON legacy raw PAT.
+    static func decode(_ data: Data) throws -> GitHubCredential {
+        if let envelope = try? JSONDecoder().decode(CredentialEnvelope.self, from: data),
+           envelope.version == CredentialEnvelope.currentVersion,
+           !envelope.credential.accessToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return envelope.credential
+        }
+        guard let text = String(data: data, encoding: .utf8) else {
+            throw GitHubTokenStoreError.invalidData
+        }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed.first != "{" else {
+            throw GitHubTokenStoreError.invalidData
+        }
+        return .personalAccessToken(trimmed)
     }
 }

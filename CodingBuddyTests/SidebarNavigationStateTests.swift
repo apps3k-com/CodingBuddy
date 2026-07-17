@@ -20,6 +20,7 @@ struct SidebarNavigationStateTests {
             .repoReadinessChecklist,
             .mcpServerInventory,
             .agentPRMonitor,
+            .pullRequestReviewDesk,
             .backupBrowser,
             .packageMaintenance,
             .aiTool(.codex),

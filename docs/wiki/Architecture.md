@@ -259,6 +259,46 @@ repository sources. A stale watched repository that returned no PR row becomes
 one repository-level queue item with only refresh or Settings routes; it never
 receives a placeholder PR number or an Open PR action. Healthy repositories and
 their last trustworthy snapshots remain independently visible.
+Open-pull-request pagination tracks every cursor and PR number and enforces
+fixed page, node, and aggregate response-byte budgets. Cursor cycles,
+duplicates, or budget exhaustion fail the repository refresh instead of
+publishing a partial queue as complete.
+
+### GitHub Review Desk mutation boundary
+
+`GitHubCredentialCoordinator` is the only authorization path used by both the
+Agent PR Monitor and Review Desk. It serializes Keychain access and shares one
+OAuth refresh operation, but every caller revalidates an actor-owned revision
+and the complete credential after suspension. Removing or replacing a
+credential therefore wins over late device-flow and refresh responses, and
+concurrent monitor/detail reads cannot race independent refreshes. Fine-grained
+PATs remain read-only; write-capable credentials must originate from the
+configured GitHub App Device Flow.
+
+`GitHubPullRequestReviewClient` never promotes an Agent PR Monitor row into write
+authority. It loads a dedicated, fully paginated snapshot with consistency reads
+at both ends. All nested reads inherit one aggregate request/node/byte budget.
+The snapshot digest covers the authenticated viewer, pull-request identity,
+head/base state, checks, approvals, conversation, complete review threads, and
+the base branch's normalized classic branch-protection policy plus the
+repository-enabled merge methods. Merge eligibility
+requires server-enforced approving reviews, required strict status checks,
+conversation resolution, admin enforcement, and zero bypass allowances.
+Unknown or absent policy data, unknown enums, partial GraphQL errors, cursor
+anomalies, duplicate identities, drift, or exhausted budgets fail closed.
+
+Every mutation consumes one actor-ledger nonce before any subsequent network
+request. Its preflight binds the principal, target, snapshot digest, head OID,
+action parameters, and for replies the exact body digest. Cancelled confirmations
+revoke unused nonces. The client performs one fresh full read before one write,
+never retries an ambiguous write, and verifies server state afterward. Merge
+also sends GitHub's `expectedHeadOid` guard. Because protection policy is part
+of the digest and the second full read, a branch-rule change between confirmation
+and mutation aborts before the write.
+The UI and mutation boundary both reject methods the repository disabled.
+Successful reply verification additionally requires the exact comment ID from
+GitHub's mutation receipt. Without a receipt, equal concurrent text is not
+treated as proof that CodingBuddy authored the reply.
 
 ### MCP inventory disclosure boundary
 

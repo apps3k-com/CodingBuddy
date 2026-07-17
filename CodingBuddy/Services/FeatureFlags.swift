@@ -73,6 +73,8 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
     case mcpServerInventory
     /// Enables the read-only GitHub Agent PR Monitor.
     case agentPRMonitor
+    /// Enables the focused GitHub pull request Review Desk.
+    case pullRequestReviewDesk
     /// Enables local backup discovery and restore.
     case backupBrowser
     /// Enables a default external editor preference for text-like files.
@@ -105,6 +107,7 @@ nonisolated enum FeatureFlag: String, CaseIterable, Sendable {
         case .repoReadinessChecklist: .alpha
         case .mcpServerInventory: .alpha
         case .agentPRMonitor: .alpha
+        case .pullRequestReviewDesk: .alpha
         case .backupBrowser: .alpha
         case .defaultEditorPreference: .alpha
         case .collapsibleSidebarSections: .alpha

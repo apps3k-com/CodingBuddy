@@ -118,6 +118,8 @@ struct ContentView: View {
     @State private var githubAuthorizationStore: GitHubAuthorizationStore
     /// Agent PR Monitor store when the feature flag is enabled.
     @State private var agentPRMonitorStore: AgentPRMonitorStore?
+    /// Focused Review Desk store when the write-capable alpha feature is enabled.
+    @State private var pullRequestReviewDeskStore: PullRequestReviewDeskStore?
     /// Backup Browser store when the feature flag is enabled.
     @State private var backupBrowserStore: BackupBrowserStore? =
         FeatureFlag.backupBrowser.isEnabled ? BackupBrowserStore() : nil
@@ -149,9 +151,19 @@ struct ContentView: View {
         }
     ) {
         self.makeClaudeCodeStore = makeClaudeCodeStore
-        _githubAuthorizationStore = State(initialValue: GitHubAuthorizationStore(tokenStore: githubTokenStore))
+        let credentialCoordinator = GitHubCredentialCoordinator(tokenStore: githubTokenStore)
+        _githubAuthorizationStore = State(initialValue: GitHubAuthorizationStore(
+            tokenStore: githubTokenStore,
+            credentialCoordinator: credentialCoordinator
+        ))
         _agentPRMonitorStore = State(initialValue: FeatureFlag.agentPRMonitor.isEnabled
-            ? AgentPRMonitorStore(tokenStore: githubTokenStore)
+            ? AgentPRMonitorStore(
+                tokenStore: githubTokenStore,
+                credentialCoordinator: credentialCoordinator
+            )
+            : nil)
+        _pullRequestReviewDeskStore = State(initialValue: SidebarScope.pullRequestReviewDesk.isEnabled
+            ? PullRequestReviewDeskStore(credentialCoordinator: credentialCoordinator)
             : nil)
     }
 
@@ -238,7 +250,7 @@ struct ContentView: View {
                     }
                 }
                 if agentContextInspectorStore != nil || repoReadinessStore != nil
-                    || agentPRMonitorStore != nil {
+                    || agentPRMonitorStore != nil || pullRequestReviewDeskStore != nil {
                     sidebarSection(.repositories) {
                         Text("Repositories")
                     } content: {
@@ -256,6 +268,11 @@ struct ContentView: View {
                             Label("Agent PR Monitor", systemImage: "arrow.triangle.pull")
                                 .badge(agentPRMonitorStore.attentionCount)
                                 .tag(SidebarScope.agentPRMonitor)
+                        }
+                        if SidebarScope.pullRequestReviewDesk.isEnabled,
+                           pullRequestReviewDeskStore != nil {
+                            Label("Review Desk", systemImage: "text.bubble")
+                                .tag(SidebarScope.pullRequestReviewDesk)
                         }
                     }
                     .onAppear {
@@ -352,6 +369,18 @@ struct ContentView: View {
                 } else {
                     VariableListView(store: store, secrets: secrets, scope: .all)
                 }
+            case .pullRequestReviewDesk:
+                if let agentPRMonitorStore, let pullRequestReviewDeskStore {
+                    PullRequestReviewDeskView(
+                        monitorStore: agentPRMonitorStore,
+                        store: pullRequestReviewDeskStore
+                    ) {
+                        requestedSettingsPane = .security
+                        showSettings = true
+                    }
+                } else {
+                    VariableListView(store: store, secrets: secrets, scope: .all)
+                }
             case .backupBrowser:
                 if let backupBrowserStore {
                     BackupBrowserView(store: backupBrowserStore)
@@ -392,6 +421,7 @@ struct ContentView: View {
                 initialPane: requestedSettingsPane
             ) { change in
                 agentPRMonitorStore?.handleGitHubAuthorizationChange(change)
+                pullRequestReviewDeskStore?.refresh()
             }
         }
         .onChange(of: menuActions.settingsRequested, initial: true) {
