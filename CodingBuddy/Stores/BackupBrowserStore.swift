@@ -136,11 +136,7 @@ final class BackupBrowserStore {
 
         let current: BackupBrowserPreviewContent
         if let targetURL = selectedItem.targetURL {
-            if FileManager.default.fileExists(atPath: targetURL.resolvingSymlinksInPath().path) {
-                current = currentPreviewContent(from: targetURL, source: selectedItem.source)
-            } else {
-                current = .message(String(localized: "The target file does not exist yet."))
-            }
+            current = currentPreviewContent(from: targetURL, source: selectedItem.source)
         } else {
             current = .message(String(localized: "No supported restore target."))
         }
@@ -211,14 +207,23 @@ final class BackupBrowserStore {
         from url: URL,
         source: BackupBrowserSource
     ) -> BackupBrowserPreviewContent {
-        guard let snapshot = try? SecureInputReader.capture(
-            at: url.resolvingSymlinksInPath(),
-            maximumByteCount: Self.maximumBackupFileSize,
-            policy: .backup
-        ), let text = String(data: snapshot.data, encoding: .utf8) else {
+        let writer = SafeFileWriter(
+            backupDirectory: backupDirectory,
+            createMode: source.createMode
+        )
+        do {
+            let snapshot = try writer.snapshot(
+                at: url,
+                maximumByteCount: Self.maximumBackupFileSize,
+                createMissingParentDirectories: false
+            )
+            guard let text = try snapshot.utf8Content() else {
+                return .message(String(localized: "The target file does not exist yet."))
+            }
+            return redactedPreviewContent(text, source: source)
+        } catch {
             return .message(String(localized: "Could not read file."))
         }
-        return redactedPreviewContent(text, source: source)
     }
 
     /// Redacts structured JSON as a whole document and shell assignments fail closed.
@@ -356,7 +361,7 @@ nonisolated enum BackupShellPreviewRedactor {
             let next = nextIndex < value.endIndex ? value[nextIndex] : nil
             let previous = index > value.startIndex ? value[value.index(before: index)] : nil
             let startsPossibleComment = character == "#" && previous.map {
-                $0.isWhitespace || ";|&({".contains($0)
+                $0.isWhitespace || ";|&({)".contains($0)
             } ?? true
 
             if character == "$", next == "'" || next == "[" {

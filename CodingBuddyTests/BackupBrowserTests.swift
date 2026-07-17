@@ -436,6 +436,27 @@ struct BackupBrowserTests {
         #expect(linkType == .typeSymbolicLink)
     }
 
+    /// Verifies current previews resolve supported dotfile links through the secure snapshot API.
+    @Test func storePreviewReadsDotfileSymlinkWithoutExposingAssignmentValues() throws {
+        let root = try makeTempDir()
+        let home = root.appendingPathComponent("Home", isDirectory: true)
+        let backups = root.appendingPathComponent("Backups", isDirectory: true)
+        let realTarget = root.appendingPathComponent("dotfiles-zshrc")
+        let link = home.appendingPathComponent(".zshrc")
+        try write("GITHUB_TOKEN=current-secret\n", to: realTarget)
+        try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
+        try FileManager.default.createSymbolicLink(at: link, withDestinationURL: realTarget)
+        try write("GITHUB_TOKEN=backup-secret\n", to: backups.appendingPathComponent("zshrc-2026-06-28-001122-333"))
+        let store = BackupBrowserStore(homeDirectory: home, backupDirectory: backups)
+        store.reload()
+        let backup = try #require(store.items.first)
+
+        let preview = store.preview(for: backup)
+
+        #expect(preview.currentText.contains("GITHUB_TOKEN=••••••••"))
+        #expect(!preview.currentText.contains("current-secret"))
+    }
+
     /// Verifies shell previews hide every assignment regardless of its variable name.
     @Test func storePreviewRedactsAllShellValues() throws {
         let root = try makeTempDir()
@@ -563,6 +584,7 @@ struct BackupBrowserTests {
             "GITHUB_TOKEN=\"$(printf %s \"first-line\nnested-substitution-secret\")\"\nNORMAL=value",
             "GITHUB_TOKEN=\"`printf %s \"first-line\nnested-backtick-secret\"`\"\nNORMAL=value",
             "GITHUB_TOKEN=$(printf first # )\ncommented-delimiter-secret\n)\nNORMAL=value",
+            "GITHUB_TOKEN=$( (printf first)# )\ncomment-after-subshell-secret\n)\nNORMAL=value",
             "GITHUB_TOKEN=$'first\\'\nansi-c-quote-secret\n'\nNORMAL=value",
             "PIN=$[\nlegacy-arithmetic-secret\n]\nNORMAL=value",
             "env GITHUB_TOKEN='wrapper-line\nwrapper-secret'\nNORMAL=value",
@@ -575,7 +597,7 @@ struct BackupBrowserTests {
                 "quoted-secret", "continued-secret", "heredoc-secret",
                 "nested-substitution-secret", "nested-backtick-secret",
                 "commented-delimiter-secret", "ansi-c-quote-secret",
-                "legacy-arithmetic-secret", "wrapper-secret",
+                "comment-after-subshell-secret", "legacy-arithmetic-secret", "wrapper-secret",
             ] {
                 #expect(!preview.text.contains(secret))
             }

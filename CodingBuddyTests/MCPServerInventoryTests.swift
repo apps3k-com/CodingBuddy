@@ -313,7 +313,9 @@ struct MCPServerInventoryTests {
                 "X-Request-ID: request-123",
                 "-HOrigin: https://user:password@example.net/path?token=origin-secret",
                 "-H",
-                "Authorization Bearer malformed-secret"
+                "Authorization Bearer malformed-secret",
+                "--header",
+                "invalid header ghp_malformed_name_secret: harmless"
               ]
             }
           }
@@ -344,6 +346,7 @@ struct MCPServerInventoryTests {
         #expect(summary.contains("-H X-Request-ID: ••••••••"))
         #expect(summary.contains("-HOrigin: ••••••••"))
         #expect(summary.contains("-H ••••••••"))
+        #expect(summary.contains("--header ••••••••"))
         #expect(!summary.contains("auth-secret"))
         #expect(!summary.contains("proxy-secret"))
         #expect(!summary.contains("cookie-secret"))
@@ -358,6 +361,7 @@ struct MCPServerInventoryTests {
         #expect(!summary.contains("link-secret"))
         #expect(!summary.contains("origin-secret"))
         #expect(!summary.contains("malformed-secret"))
+        #expect(!summary.contains("ghp_malformed_name_secret"))
         #expect(!summary.contains("user:password"))
     }
 

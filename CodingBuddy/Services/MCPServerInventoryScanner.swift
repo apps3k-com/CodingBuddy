@@ -306,13 +306,25 @@ nonisolated struct MCPServerInventoryScanner: Sendable {
     private func redactedHeader(_ value: String) -> String {
         guard let colon = value.firstIndex(of: ":") else { return "••••••••" }
         let name = String(value[..<colon]).trimmingCharacters(in: .whitespaces)
-        guard !name.isEmpty else { return "••••••••" }
+        guard isValidHeaderFieldName(name) else { return "••••••••" }
         let headerValue = String(value[value.index(after: colon)...])
             .trimmingCharacters(in: .whitespaces)
         guard let safeValue = safeHeaderValue(name: name, value: headerValue) else {
             return "\(name): ••••••••"
         }
         return "\(name): \(safeValue)"
+    }
+
+    /// Accepts only bounded ASCII HTTP field names before exposing their text.
+    private func isValidHeaderFieldName(_ name: String) -> Bool {
+        let allowedPunctuation = Set("!#$%&'*+-.^_`|~".utf8)
+        let bytes = Array(name.utf8)
+        return (1...128).contains(bytes.count) && bytes.allSatisfy { byte in
+            (byte >= 48 && byte <= 57)
+                || (byte >= 65 && byte <= 90)
+                || (byte >= 97 && byte <= 122)
+                || allowedPunctuation.contains(byte)
+        }
     }
 
     /// Allows only complete media values that CodingBuddy knows cannot carry credentials.
