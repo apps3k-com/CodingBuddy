@@ -380,12 +380,15 @@ struct SettingsView: View {
     @ViewBuilder private var githubAuthorizationStatusLabel: some View {
         switch githubAuthorizationStore.state {
         case .authorized:
-            Label(
-                githubAuthorizationStore.credentialSource == .githubAppDeviceFlow
-                    ? "GitHub App connected"
-                    : "Read-only token saved",
-                systemImage: "checkmark.seal.fill"
-            )
+            Label {
+                Text(
+                    githubAuthorizationStore.credentialSource == .githubAppDeviceFlow
+                        ? String(localized: "GitHub App connected")
+                        : String(localized: "Read-only token saved")
+                )
+            } icon: {
+                Image(systemName: "checkmark.seal.fill")
+            }
                 .foregroundStyle(.green)
         case .missing:
             Label("No token saved", systemImage: "key")

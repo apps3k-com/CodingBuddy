@@ -24,6 +24,29 @@ struct PullRequestReviewDeskStoreTests {
         #expect(store.actionsAreEnabled)
     }
 
+    /// Verifies a cancelled older refresh cannot replace a newer loaded snapshot with failure.
+    @Test func cancelledRefreshCannotPublishLateFailure() async throws {
+        let snapshotResponses = Self.minimalReadResponses()
+        let transport = SupersededRefreshTransport(
+            responses: snapshotResponses + snapshotResponses,
+            suspendedRequestNumber: snapshotResponses.count + 1
+        )
+        let client = GitHubPullRequestReviewClient(transport: transport, pageSize: 1)
+        let store = makeStore(client: client)
+        #expect(store.select(pullRequest()))
+        try await waitUntil { store.state == .loaded }
+
+        let supersededRefresh = try #require(store.refresh())
+        try await transport.waitUntilSuspended()
+        let currentRefresh = try #require(store.refresh())
+        await currentRefresh.value
+        transport.failSuspendedRequest()
+        await supersededRefresh.value
+
+        #expect(store.state == .loaded)
+        #expect(store.snapshot?.coverage == .complete)
+    }
+
     /// Verifies a pending confirmation owns selection and cancellation revokes its nonce.
     @Test func cancelConfirmationRevokesPreflightAndReleasesSelection() async throws {
         let responses = Self.minimalReadResponses() + Self.minimalReadResponses()
@@ -42,8 +65,8 @@ struct PullRequestReviewDeskStoreTests {
         let preflight = try #require(store.pendingConfirmation?.preflight)
         #expect(!store.select(pullRequest(number: 110)))
 
-        store.cancelConfirmation()
-        for _ in 0..<20 { await Task.yield() }
+        let discardTask = try #require(store.cancelConfirmation())
+        await discardTask.value
 
         await #expect(throws: GitHubPullRequestReviewError.invalidMutation) {
             try await client.markReady(
@@ -197,6 +220,18 @@ struct PullRequestReviewDeskStoreTests {
         )
     }
 
+    /// Creates a store around a supplied client and the standard writable test credential.
+    private func makeStore(client: GitHubPullRequestReviewClient) -> PullRequestReviewDeskStore {
+        let credentialStore = ReviewDeskStoreCredentialStore(credential: appCredential)
+        return PullRequestReviewDeskStore(
+            client: client,
+            credentialCoordinator: GitHubCredentialCoordinator(
+                tokenStore: credentialStore,
+                oauthClient: nil
+            )
+        )
+    }
+
     /// Creates one monitor row without touching the existing monitor service.
     private func pullRequest(number: Int = 109) -> AgentPullRequest {
         AgentPullRequest(
@@ -272,12 +307,12 @@ struct PullRequestReviewDeskStoreTests {
 }
 
 /// Store-test-only timeout marker.
-private enum ReviewDeskStoreTestError: Error {
+private nonisolated enum ReviewDeskStoreTestError: Error {
     case timedOut
 }
 
 /// Thread-safe queued transport for store state transitions.
-private final class ReviewDeskStoreTransport: GitHubTransport, @unchecked Sendable {
+private nonisolated final class ReviewDeskStoreTransport: GitHubTransport, @unchecked Sendable {
     private let lock = NSLock()
     private var responses: [String]
     private var requests = 0
@@ -312,8 +347,66 @@ private final class ReviewDeskStoreTransport: GitHubTransport, @unchecked Sendab
     }
 }
 
+/// Transport that lets one cancelled refresh fail after a newer refresh completes.
+private nonisolated final class SupersededRefreshTransport: GitHubTransport, @unchecked Sendable {
+    private let lock = NSLock()
+    private var responses: [String]
+    private let suspendedRequestNumber: Int
+    private var requests = 0
+    private var suspendedContinuation: CheckedContinuation<(Data, HTTPURLResponse), Error>?
+
+    init(responses: [String], suspendedRequestNumber: Int) {
+        self.responses = responses
+        self.suspendedRequestNumber = suspendedRequestNumber
+    }
+
+    func data(for request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+        let requestNumber = lock.withLock { () -> Int in
+            requests += 1
+            return requests
+        }
+        if requestNumber == suspendedRequestNumber {
+            return try await withCheckedThrowingContinuation { continuation in
+                lock.withLock { suspendedContinuation = continuation }
+            }
+        }
+        let body = try lock.withLock { () throws -> String in
+            guard !responses.isEmpty else { throw URLError(.badServerResponse) }
+            return responses.removeFirst()
+        }
+        let data = Data(body.utf8)
+        return (
+            data,
+            HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: ["Content-Length": String(data.count)]
+            )!
+        )
+    }
+
+    /// Waits until the superseded request reaches its suspension boundary.
+    func waitUntilSuspended() async throws {
+        for _ in 0..<1_000 {
+            if lock.withLock({ suspendedContinuation != nil }) { return }
+            try await Task.sleep(for: .milliseconds(1))
+        }
+        throw ReviewDeskStoreTestError.timedOut
+    }
+
+    /// Delivers a late transport failure to the already-cancelled refresh.
+    func failSuspendedRequest() {
+        let continuation = lock.withLock { () -> CheckedContinuation<(Data, HTTPURLResponse), Error>? in
+            defer { suspendedContinuation = nil }
+            return suspendedContinuation
+        }
+        continuation?.resume(throwing: URLError(.networkConnectionLost))
+    }
+}
+
 /// Thread-safe in-memory credential backend for store tests.
-private final class ReviewDeskStoreCredentialStore: GitHubTokenStore, @unchecked Sendable {
+private nonisolated final class ReviewDeskStoreCredentialStore: GitHubTokenStore, @unchecked Sendable {
     private let lock = NSLock()
     private var credential: GitHubCredential?
 

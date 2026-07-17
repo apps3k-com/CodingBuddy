@@ -23,6 +23,8 @@ nonisolated enum GitHubCredentialCoordinatorError: LocalizedError, Equatable, Se
     case missingConfiguration
     /// Keychain could not load or persist the credential bundle.
     case credentialStorageFailed
+    /// Another authorization change invalidated a suspended sign-in or refresh.
+    case credentialChanged
 
     /// Localized explanation that never contains credential data.
     var errorDescription: String? {
@@ -35,6 +37,8 @@ nonisolated enum GitHubCredentialCoordinatorError: LocalizedError, Equatable, Se
             String(localized: "This CodingBuddy build is not configured for GitHub App sign-in.")
         case .credentialStorageFailed:
             String(localized: "CodingBuddy could not update GitHub authorization in Keychain.")
+        case .credentialChanged:
+            String(localized: "GitHub authorization changed. Try signing in again.")
         }
     }
 }
@@ -88,7 +92,7 @@ actor GitHubCredentialCoordinator {
         let credential = try await oauthClient.waitForAuthorization(authorization)
         guard revision == expectedRevision,
               try loadCredential() == baseline else {
-            throw CancellationError()
+            throw GitHubCredentialCoordinatorError.credentialChanged
         }
         do {
             try tokenStore.saveCredential(credential)
@@ -171,7 +175,7 @@ actor GitHubCredentialCoordinator {
         do {
             let refreshed = try await flight.task.value
             guard revision == expectedRevision else {
-                throw CancellationError()
+                throw GitHubCredentialCoordinatorError.credentialChanged
             }
             let current = try loadCredential()
             if current == credential {
@@ -181,7 +185,7 @@ actor GitHubCredentialCoordinator {
                     throw GitHubCredentialCoordinatorError.credentialStorageFailed
                 }
             } else if current != refreshed {
-                throw CancellationError()
+                throw GitHubCredentialCoordinatorError.credentialChanged
             }
             return refreshed
         } catch {

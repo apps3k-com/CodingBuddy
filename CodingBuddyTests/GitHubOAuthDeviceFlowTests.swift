@@ -8,7 +8,7 @@ import Testing
 @testable import CodingBuddy
 
 /// Deterministic protocol and validation tests for GitHub App device-flow authentication.
-struct GitHubOAuthDeviceFlowTests {
+nonisolated struct GitHubOAuthDeviceFlowTests {
     /// Verifies device authorization validates GitHub's URL and submits only the public client ID.
     @Test func requestsDeviceAuthorizationWithPinnedGitHubEndpoint() async throws {
         let transport = OAuthRecordingTransport(responses: [
@@ -155,7 +155,7 @@ struct GitHubOAuthDeviceFlowTests {
 }
 
 /// Thread-safe clock that turns cooperative sleeps into deterministic time advances.
-private final class OAuthTestClock: @unchecked Sendable {
+private nonisolated final class OAuthTestClock: @unchecked Sendable {
     /// Lock protecting date and sleep history.
     private let lock = NSLock()
     /// Mutable test date.
@@ -191,7 +191,7 @@ private final class OAuthTestClock: @unchecked Sendable {
 }
 
 /// Thread-safe queued OAuth transport that records every request.
-private final class OAuthRecordingTransport: GitHubTransport, @unchecked Sendable {
+private nonisolated final class OAuthRecordingTransport: GitHubTransport, @unchecked Sendable {
     /// One deterministic HTTP result.
     enum Response {
         /// JSON response with UTF-8 encoding.

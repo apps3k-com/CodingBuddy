@@ -153,15 +153,16 @@ final class PullRequestReviewDeskStore {
     }
 
     /// Reloads the selected pull request while retaining a previous verified snapshot.
-    func refresh() {
-        guard actionState.allowsNewAction, pendingConfirmation == nil else { return }
+    @discardableResult
+    func refresh() -> Task<Void, Never>? {
+        guard actionState.allowsNewAction, pendingConfirmation == nil else { return nil }
         guard let target = selectedTarget else {
             state = .idle
-            return
+            return nil
         }
         loadTask?.cancel()
         state = .loading
-        loadTask = Task { [client, credentialCoordinator] in
+        let task = Task { [client, credentialCoordinator] in
             do {
                 let credential = try await credentialCoordinator.credential(for: .readOnly)
                 let refreshed = try await client.fetchSnapshot(
@@ -175,10 +176,12 @@ final class PullRequestReviewDeskStore {
             } catch is CancellationError {
                 return
             } catch {
-                guard selectedTarget == target else { return }
+                guard !Task.isCancelled, selectedTarget == target else { return }
                 state = .failed(Self.safeMessage(for: error))
             }
         }
+        loadTask = task
+        return task
     }
 
     /// Replies to one unresolved inline thread after a fresh complete preflight.
@@ -230,14 +233,14 @@ final class PullRequestReviewDeskStore {
     }
 
     /// Cancels the current confirmation without affecting verified read state.
-    func cancelConfirmation() {
+    @discardableResult
+    func cancelConfirmation() -> Task<Void, Never>? {
         let preflight = pendingConfirmation?.preflight
         pendingConfirmation = nil
         actionState = .idle
-        if let preflight {
-            Task { [client] in
-                await client.discard(preflight: preflight)
-            }
+        guard let preflight else { return nil }
+        return Task { [client] in
+            await client.discard(preflight: preflight)
         }
     }
 
@@ -601,7 +604,7 @@ final class PullRequestReviewDeskStore {
     }
 
     /// Snapshot-bound context required to reconcile one uncertain mutation.
-    private struct AmbiguousMutation {
+    private nonisolated struct AmbiguousMutation {
         /// Pull request that owned the write.
         let target: PullRequestReviewTarget
         /// Exact scoped action that may have reached GitHub.
@@ -613,7 +616,7 @@ final class PullRequestReviewDeskStore {
     }
 
     /// Result of comparing a mutation baseline with fresh complete server state.
-    private enum MutationApplicationStatus {
+    private nonisolated enum MutationApplicationStatus {
         /// The expected state transition is proven.
         case applied
         /// Complete state proves the transition did not occur.

@@ -5134,7 +5134,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bereit"
+            "value" : "Konfliktfrei"
           }
         }
       }
@@ -10134,6 +10134,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Die GitHub-Anmeldung wurde abgebrochen."
+          }
+        }
+      }
+    },
+    "GitHub authorization changed. Try signing in again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die GitHub-Autorisierung wurde geändert. Versuche erneut, dich anzumelden."
           }
         }
       }

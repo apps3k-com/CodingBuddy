@@ -9,7 +9,7 @@ import Testing
 
 /// Regression coverage for complete Review Desk snapshots and guarded GraphQL mutations.
 @Suite(.serialized)
-struct GitHubPullRequestReviewClientTests {
+nonisolated struct GitHubPullRequestReviewClientTests {
     /// Stable repository fixture.
     private let repository = GitHubRepositoryRef(owner: "apps3k-com", name: "CodingBuddy")
     /// Stable pull request target fixture.
@@ -798,7 +798,7 @@ struct GitHubPullRequestReviewClientTests {
 }
 
 /// Deterministic FIFO transport that records every Review Desk request.
-private final class ReviewDeskRecordingTransport: GitHubTransport, @unchecked Sendable {
+private nonisolated final class ReviewDeskRecordingTransport: GitHubTransport, @unchecked Sendable {
     /// One queued transport outcome.
     enum Response {
         /// Successful HTTP response with a UTF-8 JSON body.

@@ -258,8 +258,8 @@ anmelden** an. Die Browser-Anmeldung verbindet die CodingBuddy GitHub App und
 speichert das Ergebnis im Schlüsselbund. Kopiere den einmaligen Code und wähle
 dann **GitHub öffnen**; der Bedienungshilfen-Fokus bleibt auf dem Code, statt
 automatisch in den Browser zu wechseln. Ein bestehender Fine-grained Token
-bleibt für den Nur-Lese-Monitor nutzbar, kann aber nicht antworten, Threads
-auflösen, einen Entwurf freigeben oder mergen.
+bleibt mit `Administration: read` für den Nur-Lese-Monitor nutzbar, kann aber
+nicht antworten, Threads auflösen, einen Entwurf freigeben oder mergen.
 
 - Antworten sendet ohne zusätzliche Bestätigung genau eine Inline-Thread-Antwort.
 - Auflösen wirkt nur auf den gewählten offenen Thread und lädt den GitHub-Stand neu.

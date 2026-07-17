@@ -1780,7 +1780,7 @@ private final class MemoryGitHubTokenStore: GitHubTokenStore, @unchecked Sendabl
 }
 
 /// Complete credential store used to prove monitor-side rotating-token integration.
-private final class MonitorCredentialStore: GitHubTokenStore, @unchecked Sendable {
+private nonisolated final class MonitorCredentialStore: GitHubTokenStore, @unchecked Sendable {
     /// Lock protecting the complete credential bundle.
     private let lock = NSLock()
     /// Current in-memory credential.
@@ -1823,7 +1823,7 @@ private final class MonitorCredentialStore: GitHubTokenStore, @unchecked Sendabl
 }
 
 /// OAuth transport returning one deterministic rotated credential for monitor tests.
-private final class MonitorOAuthRefreshTransport: GitHubTransport, @unchecked Sendable {
+private nonisolated final class MonitorOAuthRefreshTransport: GitHubTransport, @unchecked Sendable {
     /// Lock protecting the request count.
     private let lock = NSLock()
     /// Number of OAuth refresh calls.

@@ -239,7 +239,8 @@ request. Browser sign-in connects the CodingBuddy GitHub App and stores the
 result in Keychain. Copy the one-time code, then choose **Open GitHub**; the app
 keeps accessibility focus on the code instead of moving it into the browser.
 An existing fine-grained token remains useful for read-only
-monitoring, but it cannot reply, resolve, mark ready, or merge.
+monitoring when it includes `Administration: read`, but it cannot reply,
+resolve, mark ready, or merge.
 
 - Reply sends one scoped inline-thread reply without an extra confirmation.
 - Resolve acts only on the selected unresolved thread and reloads GitHub state.

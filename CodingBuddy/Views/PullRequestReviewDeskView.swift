@@ -9,7 +9,7 @@ import SwiftUI
 /// Focused native workbench for reading and acting on one GitHub pull request.
 struct PullRequestReviewDeskView: View {
     /// Inspector sections available through the segmented control.
-    private enum InspectorSection: String, CaseIterable, Identifiable {
+    private nonisolated enum InspectorSection: String, CaseIterable, Identifiable {
         /// Pull request state and action gate.
         case summary
         /// Top-level comments and inline review threads.
@@ -31,7 +31,7 @@ struct PullRequestReviewDeskView: View {
     }
 
     /// User-selectable queue ordering for fast multi-PR triage.
-    private enum QueueOrder: String, CaseIterable, Identifiable {
+    private nonisolated enum QueueOrder: String, CaseIterable, Identifiable {
         /// Prioritize actionable reviews and failing checks.
         case attention
         /// Show most recently updated pull requests first.
@@ -585,6 +585,7 @@ struct PullRequestReviewDeskView: View {
                 .font(.body)
                 .accessibilityLabel("Reply body")
                 .focused($replyEditorFocused)
+                .disabled(!store.actionState.allowsNewAction)
             HStack {
                 Button("Cancel", role: .cancel) {
                     selectedThreadID = nil
@@ -762,13 +763,17 @@ struct PullRequestReviewDeskView: View {
     }
 
     /// One compact status strip.
-    private func statusBar(_ text: String, systemImage: String) -> some View {
+    private func statusBar(
+        _ text: String,
+        systemImage: String,
+        isDismissible: Bool = true
+    ) -> some View {
         HStack(spacing: 8) {
             Label(text, systemImage: systemImage)
                 .font(.caption)
                 .lineLimit(2)
             Spacer()
-            if store.actionState.allowsNewAction {
+            if isDismissible, store.actionState.allowsNewAction {
                 Button {
                     store.clearActionNotice()
                 } label: {
@@ -878,9 +883,17 @@ struct PullRequestReviewDeskView: View {
     @ViewBuilder private func retainedSnapshotStatus(_ snapshot: PullRequestReviewSnapshot) -> some View {
         switch store.state {
         case .loading:
-            statusBar(String(localized: "Refreshing GitHub state..."), systemImage: "arrow.clockwise")
+            statusBar(
+                String(localized: "Refreshing GitHub state..."),
+                systemImage: "arrow.clockwise",
+                isDismissible: false
+            )
         case .failed(let message):
-            statusBar(message, systemImage: "exclamationmark.triangle.fill")
+            statusBar(
+                message,
+                systemImage: "exclamationmark.triangle.fill",
+                isDismissible: false
+            )
         case .loaded:
             HStack {
                 Label("Complete snapshot", systemImage: "checkmark.shield")

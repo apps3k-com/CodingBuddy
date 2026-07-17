@@ -8,7 +8,7 @@ import Testing
 @testable import CodingBuddy
 
 /// Tests the capability boundary and rotating credential lifecycle.
-struct GitHubCredentialCoordinatorTests {
+nonisolated struct GitHubCredentialCoordinatorTests {
     /// Verifies legacy PATs remain useful for reads while all writes fail closed.
     @Test func legacyPATIsReadOnly() async throws {
         let store = MemoryCredentialStore(credential: .personalAccessToken("legacy-pat"))
@@ -78,25 +78,20 @@ struct GitHubCredentialCoordinatorTests {
     @Test func concurrentCallersShareOneValidatedRefresh() async throws {
         let now = Date(timeIntervalSince1970: 1_000)
         let store = MemoryCredentialStore(credential: expiringCredential(at: now))
-        let transport = CoordinatorOAuthTransport()
-        let client = GitHubOAuthDeviceFlowClient(
-            configuration: GitHubOAuthConfiguration(
-                clientID: "Iv1TestClient",
-                deviceCodeEndpoint: URL(string: "https://github.com/login/device/code")!,
-                accessTokenEndpoint: URL(string: "https://github.com/login/oauth/access_token")!
-            ),
-            transport: transport,
-            now: { now }
-        )
-        let coordinator = GitHubCredentialCoordinator(tokenStore: store, oauthClient: client)
+        let transport = SuspendingCoordinatorOAuthTransport()
+        let coordinator = makeCoordinator(store: store, transport: transport, now: now)
+        let first = Task { try await coordinator.credential(for: .write, at: now) }
+        let second = Task { try await coordinator.credential(for: .write, at: now) }
 
-        async let first = coordinator.credential(for: .write, at: now)
-        async let second = coordinator.credential(for: .write, at: now)
-        let results = try await [first, second]
+        try await transport.waitUntilRequested()
+        try await store.waitUntilLoadCount(2)
+        let requestCountWhileBothCallersWereActive = transport.requestCount
+        transport.succeed()
+        let results = try await [first.value, second.value]
 
         #expect(results.allSatisfy { $0.accessToken == "new-access" })
         #expect(store.credential?.accessToken == "new-access")
-        #expect(transport.requestCount == 1)
+        #expect(requestCountWhileBothCallersWereActive == 1)
     }
 
     /// Verifies missing Keychain state never falls through to a network request.
@@ -118,12 +113,14 @@ struct GitHubCredentialCoordinatorTests {
         let transport = SuspendingCoordinatorOAuthTransport()
         let coordinator = makeCoordinator(store: store, transport: transport, now: now)
         let refresh = Task { try await coordinator.credential(for: .write, at: now) }
-        await transport.waitUntilRequested()
+        try await transport.waitUntilRequested()
 
         try await coordinator.deleteCredential()
         transport.succeed()
 
-        await #expect(throws: CancellationError.self) { try await refresh.value }
+        await #expect(throws: GitHubCredentialCoordinatorError.credentialChanged) {
+            try await refresh.value
+        }
         #expect(store.credential == nil)
     }
 
@@ -134,12 +131,14 @@ struct GitHubCredentialCoordinatorTests {
         let transport = SuspendingCoordinatorOAuthTransport()
         let coordinator = makeCoordinator(store: store, transport: transport, now: now)
         let refresh = Task { try await coordinator.credential(for: .write, at: now) }
-        await transport.waitUntilRequested()
+        try await transport.waitUntilRequested()
 
         try await coordinator.savePersonalAccessToken("replacement-pat")
         transport.succeed()
 
-        await #expect(throws: CancellationError.self) { try await refresh.value }
+        await #expect(throws: GitHubCredentialCoordinatorError.credentialChanged) {
+            try await refresh.value
+        }
         #expect(store.credential == .personalAccessToken("replacement-pat"))
     }
 
@@ -159,12 +158,14 @@ struct GitHubCredentialCoordinatorTests {
         let completion = Task {
             try await coordinator.completeDeviceAuthorization(authorization)
         }
-        await transport.waitUntilRequested()
+        try await transport.waitUntilRequested()
 
         try await coordinator.deleteCredential()
         transport.succeed()
 
-        await #expect(throws: CancellationError.self) { try await completion.value }
+        await #expect(throws: GitHubCredentialCoordinatorError.credentialChanged) {
+            try await completion.value
+        }
         #expect(store.credential == nil)
     }
 
@@ -200,11 +201,13 @@ struct GitHubCredentialCoordinatorTests {
 }
 
 /// Thread-safe credential store preserving complete OAuth metadata in tests.
-private final class MemoryCredentialStore: GitHubTokenStore, @unchecked Sendable {
+private nonisolated final class MemoryCredentialStore: GitHubTokenStore, @unchecked Sendable {
     /// Lock protecting the credential.
     private let lock = NSLock()
     /// Mutable stored credential.
     private var storedCredential: GitHubCredential?
+    /// Number of complete credential reads.
+    private var credentialLoadCount = 0
 
     /// Creates a store with optional state.
     init(credential: GitHubCredential?) {
@@ -214,6 +217,15 @@ private final class MemoryCredentialStore: GitHubTokenStore, @unchecked Sendable
     /// Current complete credential.
     var credential: GitHubCredential? {
         lock.withLock { storedCredential }
+    }
+
+    /// Waits until concurrent callers have both entered credential loading.
+    func waitUntilLoadCount(_ expectedCount: Int) async throws {
+        for _ in 0..<1_000 {
+            if lock.withLock({ credentialLoadCount >= expectedCount }) { return }
+            try await Task.sleep(for: .milliseconds(1))
+        }
+        throw CoordinatorCredentialTestError.timedOut
     }
 
     /// Returns only the access token for legacy clients.
@@ -233,7 +245,10 @@ private final class MemoryCredentialStore: GitHubTokenStore, @unchecked Sendable
 
     /// Returns the complete credential.
     func loadCredential() throws -> GitHubCredential? {
-        lock.withLock { storedCredential }
+        lock.withLock {
+            credentialLoadCount += 1
+            return storedCredential
+        }
     }
 
     /// Saves the complete credential.
@@ -243,7 +258,7 @@ private final class MemoryCredentialStore: GitHubTokenStore, @unchecked Sendable
 }
 
 /// OAuth transport returning one deterministic rotated credential.
-private final class CoordinatorOAuthTransport: GitHubTransport, @unchecked Sendable {
+private nonisolated final class CoordinatorOAuthTransport: GitHubTransport, @unchecked Sendable {
     /// Lock protecting request count.
     private let lock = NSLock()
     /// Number of refresh calls.
@@ -269,36 +284,41 @@ private final class CoordinatorOAuthTransport: GitHubTransport, @unchecked Senda
 }
 
 /// OAuth transport that exposes the exact suspension boundary used by race tests.
-private final class SuspendingCoordinatorOAuthTransport: GitHubTransport, @unchecked Sendable {
+private nonisolated final class SuspendingCoordinatorOAuthTransport: GitHubTransport, @unchecked Sendable {
     /// Lock protecting request state and the pending continuation.
     private let lock = NSLock()
-    /// Whether a request reached the transport.
-    private var requested = false
-    /// Suspended network continuation completed by the test.
-    private var continuation: CheckedContinuation<(Data, HTTPURLResponse), Error>?
+    /// Number of requests that reached the transport.
+    private var requests = 0
+    /// Suspended network continuations completed by the test.
+    private var continuations: [CheckedContinuation<(Data, HTTPURLResponse), Error>] = []
+
+    /// Current request count.
+    var requestCount: Int { lock.withLock { requests } }
 
     /// Suspends the request until `succeed()` provides a deterministic response.
     func data(for request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         try await withCheckedThrowingContinuation { continuation in
             lock.withLock {
-                requested = true
-                self.continuation = continuation
+                requests += 1
+                continuations.append(continuation)
             }
         }
     }
 
     /// Waits cooperatively until the production code reaches network I/O.
-    func waitUntilRequested() async {
-        while !lock.withLock({ requested }) {
-            await Task.yield()
+    func waitUntilRequested() async throws {
+        for _ in 0..<1_000 {
+            if requestCount > 0 { return }
+            try await Task.sleep(for: .milliseconds(1))
         }
+        throw CoordinatorCredentialTestError.timedOut
     }
 
     /// Completes the suspended request with one valid rotating credential.
     func succeed() {
-        let continuation = lock.withLock { () -> CheckedContinuation<(Data, HTTPURLResponse), Error>? in
-            defer { self.continuation = nil }
-            return self.continuation
+        let continuations = lock.withLock { () -> [CheckedContinuation<(Data, HTTPURLResponse), Error>] in
+            defer { self.continuations = [] }
+            return self.continuations
         }
         let data = Data(#"{"access_token":"new-access","token_type":"bearer","expires_in":28800,"refresh_token":"new-refresh","refresh_token_expires_in":15552000}"#.utf8)
         let response = HTTPURLResponse(
@@ -307,6 +327,13 @@ private final class SuspendingCoordinatorOAuthTransport: GitHubTransport, @unche
             httpVersion: "HTTP/1.1",
             headerFields: ["Content-Length": String(data.count)]
         )!
-        continuation?.resume(returning: (data, response))
+        for continuation in continuations {
+            continuation.resume(returning: (data, response))
+        }
     }
+}
+
+/// Timeout marker for deterministic credential concurrency barriers.
+private nonisolated enum CoordinatorCredentialTestError: Error {
+    case timedOut
 }

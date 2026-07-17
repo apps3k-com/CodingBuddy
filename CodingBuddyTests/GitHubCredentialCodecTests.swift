@@ -8,7 +8,7 @@ import Testing
 @testable import CodingBuddy
 
 /// Tests fail-closed migration and versioning for the secret-bearing Keychain payload.
-struct GitHubCredentialCodecTests {
+nonisolated struct GitHubCredentialCodecTests {
     /// Verifies a legacy raw PAT remains readable and is normalized during migration.
     @Test func decodesLegacyRawPAT() throws {
         let credential = try GitHubCredentialCodec.decode(Data("  legacy-pat\n".utf8))
