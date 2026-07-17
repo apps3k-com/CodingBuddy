@@ -390,9 +390,21 @@ nonisolated struct CapabilityHygieneFinding: Identifiable, Equatable, Hashable, 
 
     /// Stable finding identity.
     var id: String {
-        CapabilityStableID.encode(
-            namespace: "finding-v1",
-            components: [kind.rawValue] + itemIDs.sorted()
+        let evidenceComponents: [String]
+        if let shadowResolution {
+            evidenceComponents = [
+                shadowResolution.evidence.provider.rawValue,
+                shadowResolution.evidence.ruleIdentifier,
+                shadowResolution.evidence.evaluationScope,
+                shadowResolution.winnerItemID,
+                shadowResolution.loserItemID,
+            ]
+        } else {
+            evidenceComponents = []
+        }
+        return CapabilityStableID.encode(
+            namespace: "finding-v2",
+            components: [kind.rawValue] + itemIDs.sorted() + evidenceComponents
         )
     }
 }

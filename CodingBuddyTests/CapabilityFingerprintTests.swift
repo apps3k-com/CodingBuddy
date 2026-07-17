@@ -96,4 +96,48 @@ nonisolated struct CapabilityFingerprintTests {
 
         #expect(first.id != second.id)
     }
+
+    /// Distinct provider evidence cannot collapse shadow rows for the same winner and loser.
+    @Test func shadowFindingIDsIncludeProviderEvidence() {
+        let firstEvidence = CapabilityPrecedenceEvidence(
+            provider: .codex,
+            ruleIdentifier: "workspace-wins",
+            evaluationScope: "/workspace/one",
+            winnerItemID: "winner",
+            loserItemID: "loser"
+        )
+        let secondEvidence = CapabilityPrecedenceEvidence(
+            provider: .codex,
+            ruleIdentifier: "workspace-wins",
+            evaluationScope: "/workspace/two",
+            winnerItemID: "winner",
+            loserItemID: "loser"
+        )
+        let first = CapabilityHygieneFinding(
+            kind: .shadowing,
+            itemIDs: ["winner", "loser"],
+            explanation: "fixture",
+            recommendation: "fixture",
+            similarity: nil,
+            shadowResolution: CapabilityShadowResolution(
+                winnerItemID: "winner",
+                loserItemID: "loser",
+                evidence: firstEvidence
+            )
+        )
+        let second = CapabilityHygieneFinding(
+            kind: .shadowing,
+            itemIDs: ["winner", "loser"],
+            explanation: "fixture",
+            recommendation: "fixture",
+            similarity: nil,
+            shadowResolution: CapabilityShadowResolution(
+                winnerItemID: "winner",
+                loserItemID: "loser",
+                evidence: secondEvidence
+            )
+        )
+
+        #expect(first.id != second.id)
+    }
 }

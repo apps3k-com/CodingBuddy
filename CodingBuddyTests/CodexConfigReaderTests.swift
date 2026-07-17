@@ -108,4 +108,34 @@ struct CodexConfigReaderTests {
         #expect(scalarServer.enabledState == true)
         #expect(scalarServer.server.envVarAllowlist == [])
     }
+
+    /// A present root declaration must be a table rather than disappearing as a complete empty scan.
+    @Test func scalarMCPServersRootIsIncomplete() {
+        let result = CodexConfigReader.read("mcp_servers = \"invalid\"")
+
+        #expect(!result.isComplete)
+        #expect(result.serverResults.isEmpty)
+    }
+
+    /// Every consumed optional field distinguishes absence from a schema-invalid value.
+    @Test func invalidConsumedFieldTypesMarkServerIncompleteWithoutPartialValues() throws {
+        let result = CodexConfigReader.read("""
+        [mcp_servers.review]
+        url = 42
+        command = false
+        args = ["valid", 7]
+        bearer_token_env_var = ["TOKEN"]
+        env = { TOKEN = 42 }
+        """)
+        let serverResult = try #require(result.serverResults.first)
+
+        #expect(!result.isComplete)
+        #expect(!serverResult.isComplete)
+        #expect(serverResult.enabledState == true)
+        #expect(serverResult.server.url == nil)
+        #expect(serverResult.server.command == nil)
+        #expect(serverResult.server.args.isEmpty)
+        #expect(serverResult.server.bearerTokenEnvVar == nil)
+        #expect(serverResult.server.inlineEnvKeys.isEmpty)
+    }
 }

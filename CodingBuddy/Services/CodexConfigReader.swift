@@ -55,8 +55,14 @@ nonisolated enum CodexConfigReader {
 
     /// Validates supported Codex field types while retaining usable server metadata.
     static func read(in table: TOMLTable) -> CodexConfigReadResult {
-        guard let mcpServers = table.table(at: ["mcp_servers"]) else {
+        let mcpServers: [String: TOMLValue]
+        switch table.value(at: ["mcp_servers"]) {
+        case nil:
             return CodexConfigReadResult(serverResults: [], isComplete: true)
+        case .table(let values):
+            mcpServers = values
+        default:
+            return CodexConfigReadResult(serverResults: [], isComplete: false)
         }
 
         // Subtables like [mcp_servers.X.tools.Y] nest INSIDE their server's
@@ -99,15 +105,26 @@ nonisolated enum CodexConfigReader {
                 hasValidEnvVarAllowlist = false
             }
 
-            let serverIsComplete = enabled != nil && hasValidEnvVarAllowlist
+            let url = optionalString(in: server, at: ["url"])
+            let command = optionalString(in: server, at: ["command"])
+            let arguments = optionalStringArray(in: server, at: ["args"])
+            let bearerTokenEnvVar = optionalString(in: server, at: ["bearer_token_env_var"])
+            let inlineEnvironment = optionalStringTableKeys(in: server, at: ["env"])
+            let serverIsComplete = enabled != nil
+                && hasValidEnvVarAllowlist
+                && url.isValid
+                && command.isValid
+                && arguments.isValid
+                && bearerTokenEnvVar.isValid
+                && inlineEnvironment.isValid
             isComplete = isComplete && serverIsComplete
             let mappedServer = CodexMCPServer(
                 name: name,
-                url: server.string(at: ["url"]),
-                command: server.string(at: ["command"]),
-                args: server.stringArray(at: ["args"]) ?? [],
-                bearerTokenEnvVar: server.string(at: ["bearer_token_env_var"]),
-                inlineEnvKeys: (server.table(at: ["env"]) ?? [:]).keys.sorted(),
+                url: url.value,
+                command: command.value,
+                args: arguments.value ?? [],
+                bearerTokenEnvVar: bearerTokenEnvVar.value,
+                inlineEnvKeys: inlineEnvironment.value ?? [],
                 envVarAllowlist: envVarAllowlist,
                 isEnabled: enabled ?? false
             )
@@ -118,5 +135,57 @@ nonisolated enum CodexConfigReader {
             ))
         }
         return CodexConfigReadResult(serverResults: results, isComplete: isComplete)
+    }
+
+    /// Distinguishes an omitted optional string from a present value of the wrong type.
+    private static func optionalString(
+        in table: TOMLTable,
+        at path: [String]
+    ) -> (value: String?, isValid: Bool) {
+        switch table.value(at: path) {
+        case nil:
+            return (nil, true)
+        case .string(let value):
+            return (value, true)
+        default:
+            return (nil, false)
+        }
+    }
+
+    /// Distinguishes an omitted string array from malformed or mixed arrays.
+    private static func optionalStringArray(
+        in table: TOMLTable,
+        at path: [String]
+    ) -> (value: [String]?, isValid: Bool) {
+        switch table.value(at: path) {
+        case nil:
+            return (nil, true)
+        case .array:
+            guard let values = table.stringArray(at: path) else { return (nil, false) }
+            return (values, true)
+        default:
+            return (nil, false)
+        }
+    }
+
+    /// Returns inline environment names only when the table contains string values throughout.
+    private static func optionalStringTableKeys(
+        in table: TOMLTable,
+        at path: [String]
+    ) -> (value: [String]?, isValid: Bool) {
+        switch table.value(at: path) {
+        case nil:
+            return (nil, true)
+        case .table(let values):
+            guard values.values.allSatisfy({ value in
+                if case .string = value { return true }
+                return false
+            }) else {
+                return (nil, false)
+            }
+            return (values.keys.sorted(), true)
+        default:
+            return (nil, false)
+        }
     }
 }

@@ -111,6 +111,25 @@ struct TOMLReaderTests {
 
         #expect(!result.isComplete)
         #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "review")
+        #expect(result.table.value(at: ["mcp_servers", "review", "enabled"]) == nil)
+    }
+
+    /// Rejected headers suppress their body without preventing a later valid table from parsing.
+    @Test func diagnosticsSkipRejectedTableBodyUntilNextValidHeader() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [mcp_servers.review]
+        command = "review"
+
+        [mcp_servers.review]
+        leaked = "must-not-merge"
+
+        [mcp_servers.context]
+        command = "context"
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.value(at: ["mcp_servers", "review", "leaked"]) == nil)
+        #expect(result.table.string(at: ["mcp_servers", "context", "command"]) == "context")
     }
 
     @Test func diagnosticsRejectValueThenTablePathCollision() {

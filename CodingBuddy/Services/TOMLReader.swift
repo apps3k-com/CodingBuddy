@@ -164,9 +164,11 @@ nonisolated enum TOMLReader {
             if line.hasPrefix("["), line.hasSuffix("]") {
                 let inner = String(line.dropFirst().dropLast())
                 if let keys = parseKeyPath(inner) {
-                    currentPath = keys
-                    skippingTable = false
-                    if !claimTablePath(keys, in: &occupiedPaths) {
+                    if claimTablePath(keys, in: &occupiedPaths) {
+                        currentPath = keys
+                        skippingTable = false
+                    } else {
+                        skippingTable = true
                         isComplete = false
                     }
                 } else {
