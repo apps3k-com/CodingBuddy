@@ -1,7 +1,7 @@
 ---
 title: "Keep expensive work cancellable and off MainActor"
 scope: "file"
-path: ["**/*"]
+path: ["CodingBuddy/{Services,Stores}/**/*.swift"]
 severity_min: "high"
 buckets: ["performance"]
 enabled: true
@@ -10,14 +10,14 @@ enabled: true
 @kody-sync
 
 ## Instructions
-Network, filesystem, parsing, and subprocess work must run outside MainActor, propagate cancellation, and publish UI state on MainActor.
-
-Only report violations demonstrated by the diff and repository context; do not speculate.
+- Run network, filesystem, parsing, and subprocess work outside MainActor and propagate structured cancellation.
+- Publish observable UI state on MainActor and prevent cancelled work from restoring stale private data.
+- Avoid detached tasks without explicit ownership and cleanup.
 
 ## Examples
 
 ### Bad example
-The change bypasses the required boundary without an equivalent safeguard.
+A MainActor store synchronously scans the filesystem and an old task publishes after repository selection changes.
 
 ### Good example
-The change uses the canonical boundary and adds focused evidence for its failure behavior.
+The store owns a cancellable task, performs scanning off actor, checks cancellation, then publishes on MainActor.
