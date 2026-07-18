@@ -12538,6 +12538,16 @@
         "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub-Project-Board" } }
       }
     },
+    "GitHub Project lifecycle role done" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Erledigt" } }
+      }
+    },
+    "GitHub Project lifecycle role ready" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Bereit" } }
+      }
+    },
     "View" : {
       "localizations" : {
         "de" : { "stringUnit" : { "state" : "translated", "value" : "Ansicht" } }

@@ -8,7 +8,7 @@ import Testing
 @testable import CodingBuddy
 
 /// Focused regressions for lifecycle reason and persisted-policy drift.
-struct GitHubProjectDriftRegressionTests {
+nonisolated struct GitHubProjectDriftRegressionTests {
     /// Stable fixture timestamp.
     private let now = Date(timeIntervalSince1970: 1_784_282_400)
 

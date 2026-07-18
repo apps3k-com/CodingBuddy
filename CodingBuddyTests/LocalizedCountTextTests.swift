@@ -30,6 +30,7 @@ struct LocalizedCountTextTests {
         let localizations = try #require(entry["localizations"] as? [String: Any])
         let german = try #require(localizations["de"] as? [String: Any])
         let unit = try #require(german["stringUnit"] as? [String: Any])
+        #expect(unit["state"] as? String == "translated", "Untranslated catalog key: \(key)")
         return try #require(unit["value"] as? String)
     }
 

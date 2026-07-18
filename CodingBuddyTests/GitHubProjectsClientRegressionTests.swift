@@ -9,7 +9,7 @@ import Testing
 
 /// Focused regressions for cancellation, mutation correlation, and snapshot budgets.
 @Suite(.serialized)
-struct GitHubProjectsClientRegressionTests {
+nonisolated struct GitHubProjectsClientRegressionTests {
     /// A task cancellation must not become a retryable network failure.
     @Test func readPreservesTaskCancellation() async {
         let transport = RegressionGitHubTransport(responses: [.taskCancellation])

@@ -362,7 +362,7 @@ nonisolated struct GitHubProjectSnapshot: Codable, Equatable, Sendable {
             fields: fields,
             items: items,
             workflows: workflows,
-            coverage: coverage,
+            coverage: DigestCoverage(coverage),
             principalID: principalID
         )) else { return "" }
         return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
@@ -400,11 +400,13 @@ nonisolated enum GitHubProjectLifecycleRole: String, CaseIterable, Codable, Send
     var displayName: String {
         switch self {
         case .backlog: String(localized: "Backlog")
-        case .ready: String(localized: "Ready")
+        case .ready:
+            String(localized: "GitHub Project lifecycle role ready", defaultValue: "Ready")
         case .inProgress: String(localized: "In progress")
         case .review: String(localized: "In review")
         case .readyToMerge: String(localized: "Ready to merge")
-        case .done: String(localized: "Done")
+        case .done:
+            String(localized: "GitHub Project lifecycle role done", defaultValue: "Done")
         case .canceled: String(localized: "Canceled")
         }
     }
@@ -456,7 +458,7 @@ nonisolated struct GitHubProjectDriftPolicy: Codable, Equatable, Sendable {
 
     /// Stable digest binding a move confirmation to the exact local semantics.
     var digest: String {
-        stableGitHubProjectDigest(self)
+        stableGitHubProjectDigest(PolicyDigestPayload(self))
     }
 }
 
@@ -644,9 +646,61 @@ private nonisolated struct DigestPayload: Codable {
     /// Workflow metadata.
     let workflows: [GitHubProjectWorkflow]
     /// Snapshot coverage.
-    let coverage: GitHubProjectSnapshotCoverage
+    let coverage: DigestCoverage
     /// Viewer identity.
     let principalID: String
+}
+
+/// Canonical snapshot coverage used only for stable digest generation.
+private nonisolated struct DigestCoverage: Codable {
+    /// Whether every single-select field was fetched.
+    let fieldsComplete: Bool
+    /// Whether every non-archived project item was fetched.
+    let itemsComplete: Bool
+    /// Whether every project workflow was fetched.
+    let workflowsComplete: Bool
+    /// Canonically ordered item IDs with incomplete field values.
+    let incompleteFieldValueItemIDs: [String]
+    /// Canonically ordered item IDs with incomplete relationships.
+    let incompleteRelationshipItemIDs: [String]
+
+    /// Canonicalizes set-backed coverage without changing the runtime model.
+    init(_ coverage: GitHubProjectSnapshotCoverage) {
+        fieldsComplete = coverage.fieldsComplete
+        itemsComplete = coverage.itemsComplete
+        workflowsComplete = coverage.workflowsComplete
+        incompleteFieldValueItemIDs = coverage.incompleteFieldValueItemIDs.sorted()
+        incompleteRelationshipItemIDs = coverage.incompleteRelationshipItemIDs.sorted()
+    }
+}
+
+/// Canonical policy payload used only for stable digest generation.
+private nonisolated struct PolicyDigestPayload: Codable {
+    /// Project node ID.
+    let projectID: String
+    /// Lifecycle field node ID.
+    let fieldID: String
+    /// Option semantics keyed by stable provider ID.
+    let roleByOptionID: [String: GitHubProjectLifecycleRole]
+    /// Related-item membership convention.
+    let requiresRelatedItemsInProject: Bool
+    /// Pull-request closing-issue convention.
+    let requiresClosingIssueForPullRequest: Bool
+    /// Parent roll-up convention.
+    let completeParentWhenChildrenTerminal: Bool
+    /// Canonically ordered required workflow IDs.
+    let expectedWorkflowIDs: [String]
+
+    /// Canonicalizes set-backed policy evidence without changing persisted preferences.
+    init(_ policy: GitHubProjectDriftPolicy) {
+        projectID = policy.projectID
+        fieldID = policy.fieldID
+        roleByOptionID = policy.roleByOptionID
+        requiresRelatedItemsInProject = policy.requiresRelatedItemsInProject
+        requiresClosingIssueForPullRequest = policy.requiresClosingIssueForPullRequest
+        completeParentWhenChildrenTerminal = policy.completeParentWhenChildrenTerminal
+        expectedWorkflowIDs = policy.expectedWorkflowIDs.sorted()
+    }
 }
 
 /// Produces deterministic SHA-256 evidence for local and provider-backed Codable values.

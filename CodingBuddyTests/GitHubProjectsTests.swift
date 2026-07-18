@@ -9,7 +9,7 @@ import Testing
 
 /// Regression coverage for Project projection, drift evidence, and guarded provider boundaries.
 @Suite(.serialized)
-struct GitHubProjectsTests {
+nonisolated struct GitHubProjectsTests {
     /// Stable fixture timestamp.
     private let now = Date(timeIntervalSince1970: 1_784_282_400)
 
@@ -131,6 +131,36 @@ struct GitHubProjectsTests {
         )
         #expect(configured.findings.contains { $0.category == .rollUp })
         #expect(configured.findings.contains { $0.category == .linkage })
+    }
+
+    /// Missing related items are not classified as outside the Project until item pagination completes.
+    @Test func analyzerSuppressesAbsenceFindingsForIncompleteItemConnection() {
+        let field = makeField()
+        let child = GitHubProjectContentReference(
+            id: "ISSUE2",
+            repository: repository,
+            number: 2,
+            state: .closed
+        )
+        let parent = makeItem(id: "ITEM1", state: .open, optionID: "TODO", subIssues: [child])
+        let coverage = GitHubProjectSnapshotCoverage(
+            fieldsComplete: true,
+            itemsComplete: false,
+            workflowsComplete: true,
+            incompleteFieldValueItemIDs: [],
+            incompleteRelationshipItemIDs: []
+        )
+        var policy = classifiedPolicy(field: field)
+        policy.requiresRelatedItemsInProject = true
+
+        let assessment = GitHubProjectDriftAnalyzer().assess(
+            snapshot: makeSnapshot(field: field, items: [parent], coverage: coverage),
+            fieldID: field.id,
+            policy: policy
+        )
+
+        #expect(assessment.state == .partial)
+        #expect(!assessment.findings.contains { $0.category == .linkage })
     }
 
     /// Unknown issue completion reasons remain evidence gaps instead of becoming healthy state.
@@ -275,6 +305,37 @@ struct GitHubProjectsTests {
         #expect(field.definitionDigest.count == 64)
     }
 
+    /// Set insertion order cannot change snapshot or policy evidence digests.
+    @Test func evidenceDigestsCanonicalizeSetBackedValues() {
+        let field = makeField()
+        let item = makeItem(id: "ITEM1", state: .open, optionID: "TODO")
+        let firstCoverage = GitHubProjectSnapshotCoverage(
+            fieldsComplete: true,
+            itemsComplete: false,
+            workflowsComplete: true,
+            incompleteFieldValueItemIDs: Set(["ITEM2", "ITEM1"]),
+            incompleteRelationshipItemIDs: Set(["ITEM4", "ITEM3"])
+        )
+        let secondCoverage = GitHubProjectSnapshotCoverage(
+            fieldsComplete: true,
+            itemsComplete: false,
+            workflowsComplete: true,
+            incompleteFieldValueItemIDs: Set(["ITEM1", "ITEM2"]),
+            incompleteRelationshipItemIDs: Set(["ITEM3", "ITEM4"])
+        )
+        let firstSnapshot = makeSnapshot(field: field, items: [item], coverage: firstCoverage)
+        let secondSnapshot = makeSnapshot(field: field, items: [item], coverage: secondCoverage)
+        var firstPolicy = classifiedPolicy(field: field)
+        firstPolicy.expectedWorkflowIDs = Set(["WF2", "WF1"])
+        var secondPolicy = classifiedPolicy(field: field)
+        secondPolicy.expectedWorkflowIDs = Set(["WF1", "WF2"])
+
+        #expect(firstSnapshot.digest == secondSnapshot.digest)
+        #expect(firstPolicy.digest == secondPolicy.digest)
+        #expect(firstSnapshot.digest == "0f0414380381332b9675a6e3ed09fc0f35ee3ab99424f07c20772d760eabae46")
+        #expect(firstPolicy.digest == "1576912cf4a226382f5b9778a4b1f147d6f0f5c57893886ad86fcbbe8dc8fd96")
+    }
+
     /// A personal access token is rejected before a Project preflight can call the network.
     @Test func prepareMoveRejectsPATBeforeNetwork() async throws {
         let transport = GitHubProjectsRecordingTransport(responses: [])
@@ -361,6 +422,32 @@ struct GitHubProjectsTests {
         #expect(store.pendingPreflight == nil)
         #expect(store.moveState == .idle)
         #expect(store.movesAreEnabled)
+    }
+
+    /// Authorization invalidation before execution revokes the proof without attempting a mutation.
+    @MainActor
+    @Test func storeCanceledConfirmationCannotApplyMove() async throws {
+        let field = makeField()
+        let item = makeItem(id: "ITEM1", state: .open, optionID: "TODO")
+        let snapshot = makeSnapshot(field: field, items: [item])
+        let service = GitHubProjectsStoreService(
+            projectList: projectList(),
+            fetchSnapshots: [snapshot],
+            prepareSnapshot: snapshot,
+            prepareRisk: .terminal
+        )
+        let store = makeStore(service: service)
+        try await load(store: store)
+        store.updatePolicy(classifiedPolicy(field: field))
+        store.requestMove(itemID: item.id, destinationOptionID: "DONE")
+        try await waitUntil { store.pendingPreflight != nil }
+
+        store.confirmPendingMove()
+        store.handleGitHubAuthorizationChange(.removed)
+        try await waitUntil { await service.discardCount == 1 }
+
+        #expect(await service.applyCount == 0)
+        #expect(store.moveState == .idle)
     }
 
     /// Policy edits cannot invalidate a preflight while leaving its move lifecycle locked.
@@ -947,7 +1034,8 @@ struct GitHubProjectsTests {
         field: GitHubProjectSingleSelectField,
         items: [GitHubProjectItem],
         workflows: [GitHubProjectWorkflow] = [],
-        incompleteRelationshipItemIDs: Set<String> = []
+        incompleteRelationshipItemIDs: Set<String> = [],
+        coverage: GitHubProjectSnapshotCoverage? = nil
     ) -> GitHubProjectSnapshot {
         GitHubProjectSnapshot(
             organization: GitHubProjectOrganization(id: "ORG1", login: "apps3k-com"),
@@ -963,7 +1051,7 @@ struct GitHubProjectsTests {
             fields: [field],
             items: items,
             workflows: workflows,
-            coverage: GitHubProjectSnapshotCoverage(
+            coverage: coverage ?? GitHubProjectSnapshotCoverage(
                 fieldsComplete: true,
                 itemsComplete: true,
                 workflowsComplete: true,
@@ -984,7 +1072,7 @@ struct GitHubProjectsTests {
 }
 
 /// Localization and accessibility contracts for the GitHub Projects workspace.
-struct GitHubProjectsLocalizationTests {
+nonisolated struct GitHubProjectsLocalizationTests {
     /// Repository root derived without touching user configuration.
     private var repositoryRoot: URL {
         URL(fileURLWithPath: #filePath)

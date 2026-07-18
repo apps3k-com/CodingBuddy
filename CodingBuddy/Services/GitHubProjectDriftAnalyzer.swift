@@ -104,12 +104,14 @@ nonisolated struct GitHubProjectDriftAnalyzer: GitHubProjectDriftAnalyzing {
                     item: item,
                     role: role,
                     contentItemIDs: contentItemIDs,
+                    itemsComplete: snapshot.coverage.itemsComplete,
                     policy: policy
                 ))
             }
             findings.append(contentsOf: linkageFindings(
                 item: item,
                 contentItemIDs: contentItemIDs,
+                itemsComplete: snapshot.coverage.itemsComplete,
                 policy: policy
             ))
 
@@ -277,6 +279,7 @@ nonisolated struct GitHubProjectDriftAnalyzer: GitHubProjectDriftAnalyzing {
     private func linkageFindings(
         item: GitHubProjectItem,
         contentItemIDs: [String: String],
+        itemsComplete: Bool,
         policy: GitHubProjectDriftPolicy
     ) -> [GitHubProjectDriftFinding] {
         var findings: [GitHubProjectDriftFinding] = []
@@ -296,7 +299,7 @@ nonisolated struct GitHubProjectDriftAnalyzer: GitHubProjectDriftAnalyzing {
                 )
             ))
         }
-        guard policy.requiresRelatedItemsInProject else { return findings }
+        guard policy.requiresRelatedItemsInProject, itemsComplete else { return findings }
         var references = item.content.linkedContent
         if let parent = item.content.parent { references.append(parent) }
         var seen = Set<String>()
@@ -324,6 +327,7 @@ nonisolated struct GitHubProjectDriftAnalyzer: GitHubProjectDriftAnalyzing {
         item: GitHubProjectItem,
         role: GitHubProjectLifecycleRole,
         contentItemIDs: [String: String],
+        itemsComplete: Bool,
         policy: GitHubProjectDriftPolicy
     ) -> [GitHubProjectDriftFinding] {
         let children = item.content.subIssues
@@ -362,7 +366,7 @@ nonisolated struct GitHubProjectDriftAnalyzer: GitHubProjectDriftAnalyzing {
             ))
         }
 
-        guard policy.requiresRelatedItemsInProject else { return findings }
+        guard policy.requiresRelatedItemsInProject, itemsComplete else { return findings }
         let missingChildren = children.filter { contentItemIDs[$0.id] == nil }
         findings.append(contentsOf: missingChildren.prefix(1).map { child in
             finding(

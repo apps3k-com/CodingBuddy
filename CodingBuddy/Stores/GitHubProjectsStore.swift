@@ -486,6 +486,10 @@ final class GitHubProjectsStore {
         credential: GitHubCredential,
         generation: UUID
     ) async {
+        guard authorizationGeneration == generation, !Task.isCancelled else {
+            await client.discard(preflight: preflight)
+            return
+        }
         moveState = .executing
         replaceAmbiguousMove(AmbiguousMove(preflight: preflight))
         do {

@@ -8,7 +8,7 @@ import Testing
 @testable import CodingBuddy
 
 /// Source and String Catalog contracts for the GitHub Projects UX safety pass.
-struct GitHubProjectsUXRegressionTests {
+nonisolated struct GitHubProjectsUXRegressionTests {
     /// Repository root derived without reading user configuration or dotfiles.
     private var repositoryRoot: URL {
         URL(fileURLWithPath: #filePath)
@@ -89,7 +89,15 @@ struct GitHubProjectsUXRegressionTests {
         ]
 
         for key in try extractedKeys(from: source, patterns: patterns) where !key.contains(#"\("#) {
-            #expect(strings[key] != nil, "Missing catalog key extracted from GitHubProjectsView: \(key)")
+            let entry = try #require(
+                strings[key],
+                "Missing catalog key extracted from GitHubProjectsView: \(key)"
+            )
+            let localizations = try #require(entry["localizations"] as? [String: Any])
+            let german = try #require(localizations["de"] as? [String: Any])
+            let unit = try #require(german["stringUnit"] as? [String: Any])
+            #expect(unit["state"] as? String == "translated", "Untranslated catalog key: \(key)")
+            #expect((unit["value"] as? String)?.isEmpty == false, "Empty German value: \(key)")
         }
     }
 
