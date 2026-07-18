@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.11.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.10.0...v0.11.0) (2026-07-18)
+
+
+### Features
+
+* add a guarded GitHub pull request review desk for daily triage ([291af49](https://github.com/apps3k-com/CodingBuddy/commit/291af497990f093ceb3990708b70f1afc25857e8))
+* add a safe explainable local capability hygiene inventory ([9898019](https://github.com/apps3k-com/CodingBuddy/commit/989801950fc782078a55329f1df7d0e366081a8d))
+* add guarded GitHub Projects planning workspace ([1585336](https://github.com/apps3k-com/CodingBuddy/commit/158533679f23d49ad8931aac8e412d4a06635214))
+* add guarded pull request review desk ([#109](https://github.com/apps3k-com/CodingBuddy/issues/109)) ([234d342](https://github.com/apps3k-com/CodingBuddy/commit/234d342f3875a629d8fdb0bcda73146df05a1f99))
+* add safe capability hygiene inventory ([#111](https://github.com/apps3k-com/CodingBuddy/issues/111)) ([66f2717](https://github.com/apps3k-com/CodingBuddy/commit/66f2717042dc8c992fa1ecf18143c04e1acd62d4))
+* harden CodingBuddy security control center foundations ([#108](https://github.com/apps3k-com/CodingBuddy/issues/108)) ([f52d903](https://github.com/apps3k-com/CodingBuddy/commit/f52d9039e6d1f4eab4b42aad810aa8a8a14b970b))
+* **projects:** add guarded GitHub planning workspace ([4da67be](https://github.com/apps3k-com/CodingBuddy/commit/4da67be37e8468290f5f7c2aecff639d4efd96f2))
+
+
+### Bug Fixes
+
+* address review desk concurrency findings ([3d15ce5](https://github.com/apps3k-com/CodingBuddy/commit/3d15ce549329662e7fd3bf94af813e6bdaef31cd))
+* **capabilities:** harden scan integrity and analysis ([71913fb](https://github.com/apps3k-com/CodingBuddy/commit/71913fb1df37393cab0567d55a15f7305dce3c21))
+* **capabilities:** validate parsed capability evidence ([49604b4](https://github.com/apps3k-com/CodingBuddy/commit/49604b470fba546186029513f6d1e5c7d57f53ad))
+* **projects:** harden review evidence handling ([#110](https://github.com/apps3k-com/CodingBuddy/issues/110)) ([d736555](https://github.com/apps3k-com/CodingBuddy/commit/d736555bd59bf7741b98d065905c19b2ad1c3bee))
+* **settings:** mark pure helper enums nonisolated ([#109](https://github.com/apps3k-com/CodingBuddy/issues/109)) ([0d6f41f](https://github.com/apps3k-com/CodingBuddy/commit/0d6f41fc4685f16c0fcf613d424012fb934c557c))
+
 ## [0.10.0](https://github.com/apps3k-com/CodingBuddy/compare/v0.9.0...v0.10.0) (2026-07-16)
 
 
