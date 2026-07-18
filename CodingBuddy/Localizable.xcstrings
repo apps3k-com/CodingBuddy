@@ -6104,7 +6104,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bereit"
+            "value" : "Konfliktfrei"
           }
         }
       }
@@ -10674,6 +10674,1631 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "CodingBuddy hebt Homebrew-Paket-Fixierungen nicht auf."
+          }
+        }
+      }
+    },
+    "%@ #%lld" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ #%lld"
+          }
+        }
+      }
+    },
+    "%lld" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
+    },
+    "Action required" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktion erforderlich"
+          }
+        }
+      }
+    },
+    "Actions" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktionen"
+          }
+        }
+      }
+    },
+    "Add Read-only Token..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur-Lese-Token hinzufügen …"
+          }
+        }
+      }
+    },
+    "Approvals" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freigaben"
+          }
+        }
+      }
+    },
+    "Approved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freigegeben"
+          }
+        }
+      }
+    },
+    "Base" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basis"
+          }
+        }
+      }
+    },
+    "Behind base branch" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hinter dem Basis-Branch"
+          }
+        }
+      }
+    },
+    "Branches" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Branches"
+          }
+        }
+      }
+    },
+    "Checks" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checks"
+          }
+        }
+      }
+    },
+    "Checks pending" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checks ausstehend"
+          }
+        }
+      }
+    },
+    "Choose one pull request to inspect its full conversation and checks." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Pull Request aus, um die vollständige Konversation und alle Checks zu prüfen."
+          }
+        }
+      }
+    },
+    "Choose repositories in Agent PR Monitor, then refresh the Review Desk." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle Repositories im Agent PR Monitor aus und aktualisiere danach den Review Desk."
+          }
+        }
+      }
+    },
+    "Clean" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit"
+          }
+        }
+      }
+    },
+    "CodingBuddy could not complete the GitHub action." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte die GitHub-Aktion nicht abschließen."
+          }
+        }
+      }
+    },
+    "CodingBuddy could not update GitHub authorization in Keychain." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte die GitHub-Autorisierung im Schlüsselbund nicht aktualisieren."
+          }
+        }
+      }
+    },
+    "CodingBuddy could not verify the pull request state." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte den Pull-Request-Status nicht verifizieren."
+          }
+        }
+      }
+    },
+    "CodingBuddy will re-check approvals, threads, checks, merge state, and head %@ before merging." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy prüft Freigaben, Threads, Checks, Merge-Status und Head %@ vor dem Mergen erneut."
+          }
+        }
+      }
+    },
+    "CodingBuddy will re-check draft state and head %@ before changing the pull request." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy prüft Entwurfsstatus und Head %@ vor der Änderung des Pull Requests erneut."
+          }
+        }
+      }
+    },
+    "Commit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commit"
+          }
+        }
+      }
+    },
+    "Confirm" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bestätigen"
+          }
+        }
+      }
+    },
+    "Confirm GitHub action" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Aktion bestätigen"
+          }
+        }
+      }
+    },
+    "Conflicts" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konflikte"
+          }
+        }
+      }
+    },
+    "Conversation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konversation"
+          }
+        }
+      }
+    },
+    "Copy code" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code kopieren"
+          }
+        }
+      }
+    },
+    "Create Merge Commit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merge-Commit erstellen"
+          }
+        }
+      }
+    },
+    "Decision" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entscheidung"
+          }
+        }
+      }
+    },
+    "Dismiss status" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status ausblenden"
+          }
+        }
+      }
+    },
+    "Enter this one-time code on GitHub. CodingBuddy will continue when access is approved." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gib diesen Einmalcode auf GitHub ein. CodingBuddy fährt fort, sobald der Zugriff freigegeben wurde."
+          }
+        }
+      }
+    },
+    "GitHub App connected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub App verbunden"
+          }
+        }
+      }
+    },
+    "GitHub App sign-in enables Review Desk actions. A fine-grained token remains available for read-only monitoring." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Anmeldung mit der GitHub App aktiviert Aktionen im Review Desk. Ein Fine-grained Token bleibt für den Nur-Lese-Monitor verfügbar."
+          }
+        }
+      }
+    },
+    "GitHub App sign-in is unavailable for this CodingBuddy build." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Anmeldung mit der GitHub App ist für diesen CodingBuddy-Build nicht verfügbar."
+          }
+        }
+      }
+    },
+    "GitHub Settings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Einstellungen"
+          }
+        }
+      }
+    },
+    "GitHub authorization" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Autorisierung"
+          }
+        }
+      }
+    },
+    "GitHub authorization expired. Sign in again to continue." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die GitHub-Autorisierung ist abgelaufen. Melde dich erneut an, um fortzufahren."
+          }
+        }
+      }
+    },
+    "GitHub may have applied the action. Refresh before trying again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub hat die Aktion möglicherweise ausgeführt. Aktualisiere den Status, bevor du es erneut versuchst."
+          }
+        }
+      }
+    },
+    "GitHub rejected the saved authorization." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub hat die gespeicherte Autorisierung abgelehnt."
+          }
+        }
+      }
+    },
+    "GitHub returned an invalid sign-in response." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub hat eine ungültige Anmeldeantwort zurückgegeben."
+          }
+        }
+      }
+    },
+    "GitHub returned no checks for the current head commit." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub hat keine Checks für den aktuellen Head-Commit zurückgegeben."
+          }
+        }
+      }
+    },
+    "GitHub returned no comments or review threads for this pull request." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub hat keine Kommentare oder Review-Threads für diesen Pull Request zurückgegeben."
+          }
+        }
+      }
+    },
+    "GitHub sign-in could not be completed." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die GitHub-Anmeldung konnte nicht abgeschlossen werden."
+          }
+        }
+      }
+    },
+    "GitHub sign-in was canceled." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die GitHub-Anmeldung wurde abgebrochen."
+          }
+        }
+      }
+    },
+    "GitHub authorization changed. Try signing in again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die GitHub-Autorisierung wurde geändert. Versuche erneut, dich anzumelden."
+          }
+        }
+      }
+    },
+    "Head" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Head"
+          }
+        }
+      }
+    },
+    "Hooks pending" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hooks ausstehend"
+          }
+        }
+      }
+    },
+    "Inspector" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inspektor"
+          }
+        }
+      }
+    },
+    "Loading complete pull request state..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vollständiger Pull-Request-Status wird geladen …"
+          }
+        }
+      }
+    },
+    "Mark Ready" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als bereit markieren"
+          }
+        }
+      }
+    },
+    "Mark Ready for Review..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit zur Review markieren …"
+          }
+        }
+      }
+    },
+    "Mark pull request ready for review?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Request als bereit zur Review markieren?"
+          }
+        }
+      }
+    },
+    "Merge" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mergen"
+          }
+        }
+      }
+    },
+    "Merge Pull Request..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Request mergen …"
+          }
+        }
+      }
+    },
+    "Merge pull request?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Request mergen?"
+          }
+        }
+      }
+    },
+    "Merge remains unavailable until required checks are green, approval is satisfied, all threads are resolved, and GitHub reports a clean merge state." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mergen bleibt deaktiviert, bis alle erforderlichen Checks grün sind, die Freigabe erfüllt ist, alle Threads gelöst sind und GitHub einen konfliktfreien Merge-Status meldet."
+          }
+        }
+      }
+    },
+    "Merge state" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merge-Status"
+          }
+        }
+      }
+    },
+    "Neutral" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neutral"
+          }
+        }
+      }
+    },
+    "No checks" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Checks"
+          }
+        }
+      }
+    },
+    "No conversation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Konversation"
+          }
+        }
+      }
+    },
+    "No review requirement" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Review-Anforderung"
+          }
+        }
+      }
+    },
+    "No snapshot" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Snapshot"
+          }
+        }
+      }
+    },
+    "Open GitHub" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub öffnen"
+          }
+        }
+      }
+    },
+    "Open check details" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check-Details öffnen"
+          }
+        }
+      }
+    },
+    "Open pull request on GitHub" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Request auf GitHub öffnen"
+          }
+        }
+      }
+    },
+    "Open threads" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offene Threads"
+          }
+        }
+      }
+    },
+    "Outdated" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veraltet"
+          }
+        }
+      }
+    },
+    "Pending" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausstehend"
+          }
+        }
+      }
+    },
+    "Pull request is ready for review" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Request ist bereit zur Review"
+          }
+        }
+      }
+    },
+    "Pull request merged" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Request wurde gemergt"
+          }
+        }
+      }
+    },
+    "Pull request unavailable" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Request nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Read-only GitHub Token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Nur-Lese-Token"
+          }
+        }
+      }
+    },
+    "Read-only token saved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur-Lese-Token gespeichert"
+          }
+        }
+      }
+    },
+    "Rebase and Merge" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rebase und mergen"
+          }
+        }
+      }
+    },
+    "Refresh selected pull request" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewählten Pull Request aktualisieren"
+          }
+        }
+      }
+    },
+    "Replace Read-only Token..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur-Lese-Token ersetzen …"
+          }
+        }
+      }
+    },
+    "Reply" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antworten"
+          }
+        }
+      }
+    },
+    "Reply body" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antworttext"
+          }
+        }
+      }
+    },
+    "Reply sent" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antwort gesendet"
+          }
+        }
+      }
+    },
+    "Reply to review thread" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf Review-Thread antworten"
+          }
+        }
+      }
+    },
+    "Requesting a secure sign-in code..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sicherer Anmeldecode wird angefordert …"
+          }
+        }
+      }
+    },
+    "Required" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erforderlich"
+          }
+        }
+      }
+    },
+    "Resolve" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auflösen"
+          }
+        }
+      }
+    },
+    "Resolved and outdated (%lld)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelöst und veraltet (%lld)"
+          }
+        }
+      }
+    },
+    "Review Desk" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Desk"
+          }
+        }
+      }
+    },
+    "Review state" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review-Status"
+          }
+        }
+      }
+    },
+    "Review thread" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review-Thread"
+          }
+        }
+      }
+    },
+    "Send Reply" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antwort senden"
+          }
+        }
+      }
+    },
+    "Sign in to GitHub to continue." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melde dich bei GitHub an, um fortzufahren."
+          }
+        }
+      }
+    },
+    "Sign in with GitHub" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit GitHub anmelden"
+          }
+        }
+      }
+    },
+    "Sign in with GitHub..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit GitHub anmelden …"
+          }
+        }
+      }
+    },
+    "Sign in with the CodingBuddy GitHub App before changing pull requests." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melde dich mit der CodingBuddy GitHub App an, bevor du Pull Requests änderst."
+          }
+        }
+      }
+    },
+    "Skipped" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übersprungen"
+          }
+        }
+      }
+    },
+    "Squash and Merge" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Squash und mergen"
+          }
+        }
+      }
+    },
+    "Stale" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veraltet"
+          }
+        }
+      }
+    },
+    "Summary" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übersicht"
+          }
+        }
+      }
+    },
+    "The GitHub App is missing a required repository permission." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der GitHub App fehlt eine erforderliche Repository-Berechtigung."
+          }
+        }
+      }
+    },
+    "The GitHub sign-in code expired. Start again to request a new code." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der GitHub-Anmeldecode ist abgelaufen. Starte erneut, um einen neuen Code anzufordern."
+          }
+        }
+      }
+    },
+    "The pull request changed. Review the refreshed state before trying again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pull Request wurde geändert. Prüfe den aktualisierten Status, bevor du es erneut versuchst."
+          }
+        }
+      }
+    },
+    "This CodingBuddy build is not configured for GitHub App sign-in." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser CodingBuddy-Build ist nicht für die Anmeldung mit der GitHub App konfiguriert."
+          }
+        }
+      }
+    },
+    "This pull request does not satisfy every merge requirement." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Pull Request erfüllt nicht alle Merge-Anforderungen."
+          }
+        }
+      }
+    },
+    "This pull request is no longer available." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Pull Request ist nicht mehr verfügbar."
+          }
+        }
+      }
+    },
+    "Thread resolved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thread aufgelöst"
+          }
+        }
+      }
+    },
+    "Timed out" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeitüberschreitung"
+          }
+        }
+      }
+    },
+    "Unknown author" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unbekannter Autor"
+          }
+        }
+      }
+    },
+    "Unresolved threads" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offene Threads"
+          }
+        }
+      }
+    },
+    "For monitoring, use a fine-grained token with read-only Metadata, Pull requests, Issues, Checks, and Commit statuses. Read-only Review Desk inspection also requires Administration: read. CodingBuddy never uses this token for writes." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwende für das Monitoring einen Fine-grained Token mit Nur-Lese-Berechtigungen für Metadaten, Pull Requests, Issues, Checks und Commit-Status. Für die schreibgeschützte Review-Desk-Ansicht ist zusätzlich „Administration: read“ erforderlich. CodingBuddy verwendet diesen Token niemals für Schreibzugriffe."
+          }
+        }
+      }
+    },
+    "Waiting for GitHub approval..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warten auf GitHub-Freigabe …"
+          }
+        }
+      }
+    },
+    "Installation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installation"
+          }
+        }
+      }
+    },
+    "CodingBuddy will re-check approvals, threads, checks, merge state, and head %@ before %@ with %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy prüft Genehmigungen, Threads, Checks, Merge-Status und Head %@ erneut, bevor %@ mit %@ ausgeführt wird."
+          }
+        }
+      }
+    },
+    "CodingBuddy will re-check draft state and head %@ before changing %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy prüft Entwurfsstatus und Head %@ erneut, bevor %@ geändert wird."
+          }
+        }
+      }
+    },
+    "Complete snapshot" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vollständige Momentaufnahme"
+          }
+        }
+      }
+    },
+    "Disconnect" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbindung trennen"
+          }
+        }
+      }
+    },
+    "Disconnect GitHub App?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbindung zur GitHub App trennen?"
+          }
+        }
+      }
+    },
+    "Hide inspector" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informationsbereich ausblenden"
+          }
+        }
+      }
+    },
+    "Needs Attention First" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handlungsbedarf zuerst"
+          }
+        }
+      }
+    },
+    "Recently Updated" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zuletzt aktualisiert"
+          }
+        }
+      }
+    },
+    "Selected pull request" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewählter Pull Request"
+          }
+        }
+      }
+    },
+    "Show inspector" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informationsbereich einblenden"
+          }
+        }
+      }
+    },
+    "Sort" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sortieren"
+          }
+        }
+      }
+    },
+    "Sort pull requests" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Requests sortieren"
+          }
+        }
+      }
+    },
+    "This removes the GitHub App credential from Keychain. Review Desk actions and pull request monitoring will require another sign-in." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dadurch werden die Zugangsdaten der GitHub App aus dem Schlüsselbund entfernt. Für Review-Desk-Aktionen und die Pull-Request-Überwachung ist eine erneute Anmeldung erforderlich."
+          }
+        }
+      }
+    },
+    "This removes the read-only token from Keychain. Pull request monitoring will require another token or GitHub App sign-in." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dadurch wird das Nur-Lese-Token aus dem Schlüsselbund entfernt. Für die Pull-Request-Überwachung ist ein anderes Token oder eine Anmeldung über die GitHub App erforderlich."
+          }
+        }
+      }
+    },
+    "A successful GitHub App sign-in replaces the read-only token and enables Review Desk write actions." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine erfolgreiche Anmeldung über die GitHub App ersetzt das Nur-Lese-Token und aktiviert Schreibaktionen im Review Desk."
+          }
+        }
+      }
+    },
+    "Action verified on GitHub" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktion auf GitHub bestätigt"
+          }
+        }
+      }
+    },
+    "CodingBuddy could not prove whether the last action was applied. Continuing can duplicate that action unless you checked the pull request on GitHub." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CodingBuddy konnte nicht feststellen, ob die letzte Aktion angewendet wurde. Wenn du fortfährst, kann die Aktion doppelt ausgeführt werden, sofern du den Pull Request nicht auf GitHub geprüft hast."
+          }
+        }
+      }
+    },
+    "Continue after checking GitHub?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach Prüfung auf GitHub fortfahren?"
+          }
+        }
+      }
+    },
+    "Continue to GitHub Sign-in" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiter zur GitHub-Anmeldung"
+          }
+        }
+      }
+    },
+    "Continue to Token Entry" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiter zur Token-Eingabe"
+          }
+        }
+      }
+    },
+    "Copies the one-time code to the clipboard." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiert den einmaligen Code in die Zwischenablage."
+          }
+        }
+      }
+    },
+    "Copy GitHub sign-in code" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Anmeldecode kopieren"
+          }
+        }
+      }
+    },
+    "Disconnect GitHub App..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub App trennen …"
+          }
+        }
+      }
+    },
+    "Enforced by GitHub" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Von GitHub erzwungen"
+          }
+        }
+      }
+    },
+    "GitHub did not apply the action. Review the refreshed state before trying again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub hat die Aktion nicht angewendet. Prüfe den aktualisierten Stand, bevor du es erneut versuchst."
+          }
+        }
+      }
+    },
+    "GitHub sign-in code" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub-Anmeldecode"
+          }
+        }
+      }
+    },
+    "I Checked on GitHub" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ich habe auf GitHub geprüft"
+          }
+        }
+      }
+    },
+    "I Checked..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf GitHub geprüft …"
+          }
+        }
+      }
+    },
+    "Merge remains unavailable until GitHub-enforced branch protection has no bypasses, required checks are green, approval is satisfied, all threads are resolved, and GitHub reports a clean merge state." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mergen bleibt deaktiviert, bis die von GitHub erzwungene Branch Protection keine Ausnahmen zulässt, erforderliche Checks grün sind, die Freigabe vorliegt, alle Threads aufgelöst sind und GitHub einen sauberen Merge-Status meldet."
+          }
+        }
+      }
+    },
+    "Not proven" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht nachgewiesen"
+          }
+        }
+      }
+    },
+    "Opens the secure GitHub device authorization page." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet die sichere GitHub-Seite zur Geräteautorisierung."
+          }
+        }
+      }
+    },
+    "Partial queue: %lld repositories are not current" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilweise Fokusliste: %lld Repositories sind nicht aktuell"
+          }
+        }
+      }
+    },
+    "Queue unavailable for %lld repositories" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokusliste für %lld Repositories nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Reconnect GitHub App..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub App erneut verbinden …"
+          }
+        }
+      }
+    },
+    "Refresh queue and selected pull request" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokusliste und ausgewählten Pull Request aktualisieren"
+          }
+        }
+      }
+    },
+    "Saving a read-only token disconnects the GitHub App and disables Review Desk write actions." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Speichern eines Nur-Lese-Tokens trennt die GitHub App und deaktiviert Schreibaktionen im Review Desk."
+          }
+        }
+      }
+    },
+    "Server enforcement" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serverseitige Durchsetzung"
+          }
+        }
+      }
+    },
+    "Switch to GitHub App..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zur GitHub App wechseln …"
+          }
+        }
+      }
+    },
+    "Switch to Read-only Token..." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Nur-Lese-Token wechseln …"
+          }
+        }
+      }
+    },
+    "Switch to a read-only token?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu einem Nur-Lese-Token wechseln?"
+          }
+        }
+      }
+    },
+    "Switch to the GitHub App?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zur GitHub App wechseln?"
+          }
+        }
+      }
+    },
+    "The action result is uncertain. Verify again or check GitHub before continuing." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Ergebnis der Aktion ist unklar. Prüfe erneut oder kontrolliere GitHub, bevor du fortfährst."
+          }
+        }
+      }
+    },
+    "Verify Again" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut prüfen"
+          }
+        }
+      }
+    },
+    "Applying action on GitHub..." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Aktion auf GitHub anwenden …" } }
+      }
+    },
+    "Checking current GitHub state..." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Aktuellen GitHub-Status prüfen …" } }
+      }
+    },
+    "GitHub access unavailable" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub-Zugriff nicht verfügbar" } }
+      }
+    },
+    "GitHub sign-in code is ready. Copy it, then open GitHub to continue." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Der GitHub-Anmeldecode ist bereit. Kopiere ihn und öffne dann GitHub, um fortzufahren." } }
+      }
+    },
+    "No repository merge method is available." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Für dieses Repository ist keine Merge-Methode verfügbar." } }
+      }
+    },
+    "Not refreshed" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht aktualisiert" } }
+      }
+    },
+    "Partial queue" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Unvollständige Fokusliste" } }
+      }
+    },
+    "Queue current" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Fokusliste aktuell" } }
+      }
+    },
+    "Queue unavailable" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Fokusliste nicht verfügbar" } }
+      }
+    },
+    "Rate limited" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Rate-Limit erreicht" } }
+      }
+    },
+    "Refreshing" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Wird aktualisiert" } }
+      }
+    },
+    "Refreshing GitHub state..." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub-Status aktualisieren …" } }
+      }
+    },
+    "Refreshing queue..." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Fokusliste aktualisieren …" } }
+      }
+    },
+    "Repository unavailable" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Repository nicht verfügbar" } }
+      }
+    },
+    "Retry after %@" : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Erneut versuchen nach %@" } }
+      }
+    },
+    "The pull request changed. Review the refreshed state." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Der Pull Request hat sich geändert. Prüfe den aktualisierten Status." } }
+      }
+    },
+    "Verifying GitHub state..." : {
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "GitHub-Status verifizieren …" } }
+      }
+    },
+    "merge commit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merge-Commit"
+          }
+        }
+      }
+    },
+    "rebase merge" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rebase-Merge"
+          }
+        }
+      }
+    },
+    "squash merge" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Squash-Merge"
           }
         }
       }

@@ -21,6 +21,7 @@ struct SidebarNavigationStateTests {
             .mcpServerInventory,
             .capabilityHygiene,
             .agentPRMonitor,
+            .pullRequestReviewDesk,
             .backupBrowser,
             .packageMaintenance,
             .aiTool(.codex),

@@ -46,6 +46,20 @@ nonisolated enum AgentPRMonitorState: Equatable, Sendable {
     case refreshFailed(GitHubClientError)
 }
 
+/// Trust state for the aggregate multi-repository pull request queue.
+nonisolated enum AgentPRMonitorQueueCoverage: Equatable, Sendable {
+    /// No repository watchlist exists yet.
+    case notConfigured
+    /// A refresh is running while an older completion time may remain visible.
+    case refreshing(previouslyCompletedAt: Date?)
+    /// Every watched repository produced a known result in the latest refresh.
+    case complete(completedAt: Date)
+    /// Cached rows remain visible but one or more repositories are not current.
+    case partial(completedAt: Date?, repositories: [GitHubRepositoryRef])
+    /// No trustworthy queue exists and the listed repositories could not be loaded.
+    case unavailable(repositories: [GitHubRepositoryRef])
+}
+
 /// User-facing load state for the repository picker.
 nonisolated enum AgentPRRepositoryPickerState: Equatable, Sendable {
     /// The picker has not loaded repositories yet.
@@ -80,6 +94,8 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
     private(set) var state: AgentPRMonitorState = .idle
     /// Latest refresh state per watched repository.
     private(set) var repositoryRefreshStates: [GitHubRepositoryRef: AgentPRMonitorState] = [:]
+    /// Latest successful refresh completion per watched repository.
+    private(set) var repositoryLastSuccessfulRefreshAt: [GitHubRepositoryRef: Date] = [:]
 
     /// Latest rate-limit metadata returned by GitHub.
     private(set) var rateLimit: GitHubRateLimitState?
@@ -98,6 +114,8 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
 
     /// Whether a refresh request is currently running.
     private(set) var isRefreshing = false
+    /// Completion time of the latest refresh that loaded at least one watched repository.
+    private(set) var lastRefreshCompletedAt: Date?
 
     /// Token persistence used for setup actions.
     @ObservationIgnored private let tokenStore: any GitHubTokenStore
@@ -120,11 +138,15 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
     /// Creates the monitor store and restores the last selected repository.
     init(
         tokenStore: any GitHubTokenStore = KeychainGitHubTokenStore(),
+        credentialCoordinator: GitHubCredentialCoordinator? = nil,
         client: (any AgentPRMonitorFetching)? = nil,
         defaults: any AgentPRMonitorDefaultsStoring = UserDefaults.standard
     ) {
         self.tokenStore = tokenStore
-        self.client = client ?? GitHubClient(tokenStore: tokenStore)
+        self.client = client ?? GitHubClient(
+            credentialCoordinator: credentialCoordinator
+                ?? GitHubCredentialCoordinator(tokenStore: tokenStore)
+        )
         self.defaults = defaults
         if let saved = defaults.string(forKey: Self.watchedRepositoriesKey) {
             watchedRepositories = Self.repositoryList(from: saved)
@@ -149,6 +171,27 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         rows.filter { $0.readiness.state == .attentionNeeded || $0.readiness.state == .blocked }.count
     }
 
+    /// Aggregate queue coverage that prevents cached or partial rows from appearing complete.
+    var queueCoverage: AgentPRMonitorQueueCoverage {
+        guard !watchedRepositories.isEmpty else { return .notConfigured }
+        if isRefreshing {
+            return .refreshing(previouslyCompletedAt: lastRefreshCompletedAt)
+        }
+        let incomplete = watchedRepositories.filter { repository in
+            switch repositoryRefreshStates[repository] {
+            case .loaded?, .empty?: false
+            default: true
+            }
+        }
+        if incomplete.isEmpty, let lastRefreshCompletedAt {
+            return .complete(completedAt: lastRefreshCompletedAt)
+        }
+        if !rows.isEmpty || lastRefreshCompletedAt != nil {
+            return .partial(completedAt: lastRefreshCompletedAt, repositories: incomplete)
+        }
+        return .unavailable(repositories: incomplete)
+    }
+
     /// Debug text intentionally omits any token value.
     var debugDescription: String {
         "AgentPRMonitorStore(repository: \(selectedRepository?.displayName ?? "nil"), rows: \(rows.count), state: \(state))"
@@ -164,6 +207,8 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         rows = []
         rateLimit = nil
         repositoryRefreshStates = [:]
+        repositoryLastSuccessfulRefreshAt = [:]
+        lastRefreshCompletedAt = nil
         isRefreshing = false
         state = .idle
     }
@@ -193,6 +238,9 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         persistWatchedRepositories()
         repositorySnapshots = repositorySnapshots.filter { $0.key.canonicalID != repository.canonicalID }
         repositoryRefreshStates = repositoryRefreshStates.filter { $0.key.canonicalID != repository.canonicalID }
+        repositoryLastSuccessfulRefreshAt = repositoryLastSuccessfulRefreshAt.filter {
+            $0.key.canonicalID != repository.canonicalID
+        }
         rows = cachedRows(for: watchedRepositories)
         if watchedRepositories.isEmpty {
             rateLimit = nil
@@ -224,6 +272,8 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         rows = []
         rateLimit = nil
         repositoryRefreshStates = [:]
+        repositoryLastSuccessfulRefreshAt = [:]
+        lastRefreshCompletedAt = nil
         state = .needsRepository
         isRefreshing = false
         defaults.removeObject(forKey: Self.repositoryKey)
@@ -293,36 +343,6 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
         }
     }
 
-    /// Saves a replacement token through the injected token store.
-    @discardableResult
-    func saveToken(_ token: String) -> Bool {
-        let trimmedToken = token.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedToken.isEmpty else {
-            return false
-        }
-
-        do {
-            try tokenStore.saveToken(trimmedToken)
-            handleGitHubAuthorizationChange(.saved)
-            return true
-        } catch {
-            state = .refreshFailed(.tokenStorageFailed)
-            return false
-        }
-    }
-
-    /// Removes the saved token through the injected token store.
-    func deleteToken() {
-        refreshTask?.cancel()
-        do {
-            try tokenStore.deleteToken()
-            handleGitHubAuthorizationChange(.removed)
-        } catch {
-            isRefreshing = false
-            state = .refreshFailed(.tokenStorageFailed)
-        }
-    }
-
     /// Reacts to token changes made outside the monitor, such as in Settings.
     func handleGitHubAuthorizationChange(_ change: GitHubAuthorizationChange) {
         resetRepositoryChoices()
@@ -337,8 +357,10 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
             refreshTask?.cancel()
             repositorySnapshots = [:]
             repositoryRefreshStates = [:]
+            repositoryLastSuccessfulRefreshAt = [:]
             rows = []
             rateLimit = nil
+            lastRefreshCompletedAt = nil
             isRefreshing = false
             state = .needsToken
         }
@@ -406,6 +428,10 @@ final class AgentPRMonitorStore: CustomDebugStringConvertible {
             guard let self else { return }
             for (repository, rows) in refreshedSnapshots {
                 self.repositorySnapshots[repository] = rows
+                self.repositoryLastSuccessfulRefreshAt[repository] = Date()
+            }
+            if !refreshedSnapshots.isEmpty {
+                self.lastRefreshCompletedAt = Date()
             }
             let visibleRows = self.cachedRows(for: repositories)
             self.repositoryRefreshStates = repositoryStates

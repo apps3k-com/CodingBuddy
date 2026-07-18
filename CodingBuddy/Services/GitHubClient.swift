@@ -122,8 +122,8 @@ extension GitHubClientError {
 
 /// Native GitHub API client for the read-only Agent PR Monitor.
 nonisolated struct GitHubClient: AgentPRMonitorFetching {
-    /// Token source used to authorize GitHub calls.
-    let tokenStore: any GitHubTokenStore
+    /// Shared actor that returns a current read credential and rotates App tokens.
+    let credentialCoordinator: GitHubCredentialCoordinator
     /// Injectable HTTP transport.
     let transport: any GitHubTransport
     /// GitHub GraphQL endpoint.
@@ -140,6 +140,12 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
     let repositoryPageLimit: Int
     /// Maximum number of legacy commit-status pages read for one pull request.
     let statusPageLimit: Int
+    /// Maximum GraphQL pages accepted for one repository's open pull requests.
+    let pullRequestPageLimit: Int
+    /// Maximum pull request nodes accepted across one repository refresh.
+    let maximumPullRequestNodes: Int
+    /// Maximum aggregate GraphQL response bytes accepted across one repository refresh.
+    let maximumPullRequestBytes: Int
 
     /// Creates a GitHub client with injectable token and transport dependencies.
     init(
@@ -148,28 +154,78 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
         graphQLEndpoint: URL = URL(string: "https://api.github.com/graphql")!,
         restBaseURL: URL = URL(string: "https://api.github.com")!,
         repositoryPageLimit: Int = 10,
-        statusPageLimit: Int = 10
+        statusPageLimit: Int = 10,
+        pullRequestPageLimit: Int = 100,
+        maximumPullRequestNodes: Int = 5_000,
+        maximumPullRequestBytes: Int = 32 * 1_024 * 1_024
     ) {
-        self.tokenStore = tokenStore
+        self.credentialCoordinator = GitHubCredentialCoordinator(tokenStore: tokenStore)
         self.transport = transport
         self.graphQLEndpoint = graphQLEndpoint
         self.restBaseURL = restBaseURL
         self.repositoryPageLimit = max(1, repositoryPageLimit)
         self.statusPageLimit = max(1, statusPageLimit)
+        self.pullRequestPageLimit = max(1, pullRequestPageLimit)
+        self.maximumPullRequestNodes = max(1, maximumPullRequestNodes)
+        self.maximumPullRequestBytes = max(1_024, maximumPullRequestBytes)
+    }
+
+    /// Creates a GitHub client that shares one credential lifecycle with other app stores.
+    init(
+        credentialCoordinator: GitHubCredentialCoordinator,
+        transport: any GitHubTransport = URLSessionGitHubTransport(),
+        graphQLEndpoint: URL = URL(string: "https://api.github.com/graphql")!,
+        restBaseURL: URL = URL(string: "https://api.github.com")!,
+        repositoryPageLimit: Int = 10,
+        statusPageLimit: Int = 10,
+        pullRequestPageLimit: Int = 100,
+        maximumPullRequestNodes: Int = 5_000,
+        maximumPullRequestBytes: Int = 32 * 1_024 * 1_024
+    ) {
+        self.credentialCoordinator = credentialCoordinator
+        self.transport = transport
+        self.graphQLEndpoint = graphQLEndpoint
+        self.restBaseURL = restBaseURL
+        self.repositoryPageLimit = max(1, repositoryPageLimit)
+        self.statusPageLimit = max(1, statusPageLimit)
+        self.pullRequestPageLimit = max(1, pullRequestPageLimit)
+        self.maximumPullRequestNodes = max(1, maximumPullRequestNodes)
+        self.maximumPullRequestBytes = max(1_024, maximumPullRequestBytes)
     }
 
     /// Fetches open pull requests for one repository through GitHub GraphQL.
     func fetchOpenPullRequests(repository: GitHubRepositoryRef) async throws -> AgentPRMonitorSnapshot {
-        let token = try loadToken()
+        let token = try await loadToken()
 
         var after: String?
         var latestRateLimit: GitHubRateLimitState?
         var rows: [AgentPullRequest] = []
+        var pageCount = 0
+        var nodeCount = 0
+        var responseBytes = 0
+        var seenCursors = Set<String>()
+        var seenPullRequestNumbers = Set<Int>()
         repeat {
+            pageCount += 1
+            guard pageCount <= pullRequestPageLimit else {
+                throw GitHubClientError.decodingFailed
+            }
             let page = try await fetchGraphQLPage(repository: repository, token: token, after: after)
             latestRateLimit = page.rateLimit ?? latestRateLimit
+            let pageNodes = page.repository.pullRequests.nodes
+            guard pageNodes.count <= maximumPullRequestNodes,
+                  nodeCount <= maximumPullRequestNodes - pageNodes.count,
+                  page.responseBytes <= maximumPullRequestBytes,
+                  responseBytes <= maximumPullRequestBytes - page.responseBytes else {
+                throw GitHubClientError.decodingFailed
+            }
+            nodeCount += pageNodes.count
+            responseBytes += page.responseBytes
 
-            for node in page.repository.pullRequests.nodes {
+            for node in pageNodes {
+                guard seenPullRequestNumbers.insert(node.number).inserted else {
+                    throw GitHubClientError.decodingFailed
+                }
                 let contexts = node.statusContexts
                 if contexts.isEmpty, !node.normalizedHeadSHA.isEmpty {
                     let fallback = try await fetchRESTStatusContexts(
@@ -196,7 +252,8 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
 
             if page.repository.pullRequests.pageInfo?.hasNextPage == true {
                 guard let nextCursor = page.repository.pullRequests.pageInfo?.endCursor,
-                      nextCursor != after else {
+                      !nextCursor.isEmpty,
+                      seenCursors.insert(nextCursor).inserted else {
                     throw GitHubClientError.decodingFailed
                 }
                 after = nextCursor
@@ -210,7 +267,7 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
 
     /// Fetches repositories visible to the saved token through GitHub REST.
     func fetchAccessibleRepositories() async throws -> GitHubRepositoryList {
-        let token = try loadToken()
+        let token = try await loadToken()
 
         var page = 1
         var repositories: [GitHubRepositorySummary] = []
@@ -249,18 +306,32 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
     }
 
     /// Loads and normalizes the saved GitHub token before network requests.
-    private func loadToken() throws -> String {
-        let loadedToken: String?
+    private func loadToken() async throws -> String {
         do {
-            loadedToken = try tokenStore.loadToken()
+            let credential = try await credentialCoordinator.credential(for: .readOnly)
+            let token = credential.accessToken.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !token.isEmpty else { throw GitHubClientError.noToken }
+            return token
+        } catch GitHubCredentialCoordinatorError.missingCredential {
+            throw GitHubClientError.noToken
+        } catch GitHubCredentialCoordinatorError.credentialStorageFailed {
+            throw GitHubClientError.tokenLoadFailed
+        } catch GitHubCredentialCoordinatorError.missingConfiguration {
+            throw GitHubClientError.authenticationFailed
+        } catch let error as GitHubOAuthDeviceFlowError {
+            switch error {
+            case .networkUnavailable:
+                throw GitHubClientError.networkUnavailable
+            case .missingConfiguration, .responseTooLarge, .invalidResponse,
+                 .invalidApplication, .accessDenied, .expired,
+                 .reauthenticationRequired, .server:
+                throw GitHubClientError.authenticationFailed
+            }
+        } catch let error as GitHubClientError {
+            throw error
         } catch {
             throw GitHubClientError.tokenLoadFailed
         }
-        guard let token = loadedToken?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !token.isEmpty else {
-            throw GitHubClientError.noToken
-        }
-        return token
     }
 
     /// Fetches one page of open pull requests through GitHub GraphQL.
@@ -268,7 +339,7 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
         repository: GitHubRepositoryRef,
         token: String,
         after: String?
-    ) async throws -> (repository: RepositoryData, rateLimit: GitHubRateLimitState?) {
+    ) async throws -> (repository: RepositoryData, rateLimit: GitHubRateLimitState?, responseBytes: Int) {
         var request = URLRequest(url: graphQLEndpoint)
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -298,6 +369,9 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
         }
 
         let rateLimit = Self.rateLimit(from: response)
+        guard data.count <= maximumPullRequestBytes else {
+            throw GitHubClientError.decodingFailed
+        }
         try Self.validate(response: response, data: data, repository: repository, rateLimit: rateLimit)
 
         do {
@@ -308,7 +382,7 @@ nonisolated struct GitHubClient: AgentPRMonitorFetching {
             guard let repositoryData = decoded.data?.repository else {
                 throw GitHubClientError.repositoryDenied(repository)
             }
-            return (repositoryData, decoded.data?.rateLimit ?? rateLimit)
+            return (repositoryData, decoded.data?.rateLimit ?? rateLimit, data.count)
         } catch let error as GitHubClientError {
             throw error
         } catch {

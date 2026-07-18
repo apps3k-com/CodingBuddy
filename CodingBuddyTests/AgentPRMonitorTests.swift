@@ -213,6 +213,45 @@ struct AgentPRMonitorTests {
         #expect(snapshot.rows.first?.readiness.state == .ready)
     }
 
+    /// Verifies the monitor rotates an expired App credential through the shared coordinator.
+    @Test func clientUsesRotatedCredentialForMonitorRequest() async throws {
+        let oldCredential = GitHubCredential(
+            source: .githubAppDeviceFlow,
+            accessToken: "old-access",
+            refreshToken: "old-refresh",
+            accessTokenExpiresAt: .distantPast,
+            refreshTokenExpiresAt: .distantFuture
+        )
+        let credentialStore = MonitorCredentialStore(credential: oldCredential)
+        let oauthTransport = MonitorOAuthRefreshTransport()
+        let oauthClient = GitHubOAuthDeviceFlowClient(
+            configuration: GitHubOAuthConfiguration(
+                clientID: "Iv1TestClient",
+                deviceCodeEndpoint: URL(string: "https://github.com/login/device/code")!,
+                accessTokenEndpoint: URL(string: "https://github.com/login/oauth/access_token")!
+            ),
+            transport: oauthTransport
+        )
+        let coordinator = GitHubCredentialCoordinator(
+            tokenStore: credentialStore,
+            oauthClient: oauthClient
+        )
+        let apiTransport = RecordingGitHubTransport(
+            result: .response(Data(Self.graphQLReadyResponse.utf8), statusCode: 200, headers: [:])
+        )
+        let client = GitHubClient(
+            credentialCoordinator: coordinator,
+            transport: apiTransport
+        )
+
+        _ = try await client.fetchOpenPullRequests(repository: repository)
+
+        #expect(oauthTransport.requestCount == 1)
+        #expect(credentialStore.credential?.accessToken == "new-access")
+        #expect(apiTransport.requests.count == 1)
+        #expect(apiTransport.requests.first?.value(forHTTPHeaderField: "Authorization") == "Bearer new-access")
+    }
+
     /// Verifies open pull request pagination follows GraphQL cursors past the first page.
     @Test func clientPaginatesOpenPullRequestsPastFirstPage() async throws {
         let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
@@ -238,6 +277,97 @@ struct AgentPRMonitorTests {
         #expect(snapshot.rows.map(\.number) == [54, 55])
         #expect(transport.requests.count == 2)
         #expect(secondVariables["after"] as? String == "cursor-1")
+    }
+
+    /// Verifies a multi-page cursor cycle fails instead of refreshing forever.
+    @Test func clientRejectsOpenPullRequestCursorCycles() async {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let transport = RecordingGitHubTransport(results: [
+            .response(Data(Self.graphQLPageResponse(number: 54, hasNextPage: true, endCursor: "A").utf8), statusCode: 200, headers: [:]),
+            .response(Data(Self.graphQLPageResponse(number: 55, hasNextPage: true, endCursor: "B").utf8), statusCode: 200, headers: [:]),
+            .response(Data(Self.graphQLPageResponse(number: 56, hasNextPage: true, endCursor: "A").utf8), statusCode: 200, headers: [:]),
+        ])
+        let client = GitHubClient(tokenStore: tokenStore, transport: transport)
+
+        await #expect(throws: GitHubClientError.decodingFailed) {
+            try await client.fetchOpenPullRequests(repository: repository)
+        }
+        #expect(transport.requests.count == 3)
+    }
+
+    /// Verifies the same pull request cannot appear on shifted pagination pages.
+    @Test func clientRejectsDuplicatePullRequestsAcrossPages() async {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let transport = RecordingGitHubTransport(results: [
+            .response(Data(Self.graphQLPageResponse(number: 54, hasNextPage: true, endCursor: "A").utf8), statusCode: 200, headers: [:]),
+            .response(Data(Self.graphQLPageResponse(number: 54, hasNextPage: false, endCursor: nil).utf8), statusCode: 200, headers: [:]),
+        ])
+        let client = GitHubClient(tokenStore: tokenStore, transport: transport)
+
+        await #expect(throws: GitHubClientError.decodingFailed) {
+            try await client.fetchOpenPullRequests(repository: repository)
+        }
+        #expect(transport.requests.count == 2)
+    }
+
+    /// Verifies aggregate node budgets fail closed before publishing a partial queue.
+    @Test func clientEnforcesOpenPullRequestNodeBudget() async {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let transport = RecordingGitHubTransport(results: [
+            .response(Data(Self.graphQLPageResponse(number: 54, hasNextPage: true, endCursor: "A").utf8), statusCode: 200, headers: [:]),
+            .response(Data(Self.graphQLPageResponse(number: 55, hasNextPage: false, endCursor: nil).utf8), statusCode: 200, headers: [:]),
+        ])
+        let client = GitHubClient(
+            tokenStore: tokenStore,
+            transport: transport,
+            maximumPullRequestNodes: 1
+        )
+
+        await #expect(throws: GitHubClientError.decodingFailed) {
+            try await client.fetchOpenPullRequests(repository: repository)
+        }
+        #expect(transport.requests.count == 2)
+    }
+
+    /// Verifies page exhaustion stops before an additional GraphQL request.
+    @Test func clientEnforcesOpenPullRequestPageBudget() async {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let transport = RecordingGitHubTransport(
+            result: .response(
+                Data(Self.graphQLPageResponse(number: 54, hasNextPage: true, endCursor: "A").utf8),
+                statusCode: 200,
+                headers: [:]
+            )
+        )
+        let client = GitHubClient(
+            tokenStore: tokenStore,
+            transport: transport,
+            pullRequestPageLimit: 1
+        )
+
+        await #expect(throws: GitHubClientError.decodingFailed) {
+            try await client.fetchOpenPullRequests(repository: repository)
+        }
+        #expect(transport.requests.count == 1)
+    }
+
+    /// Verifies an oversized GraphQL page is rejected before JSON decoding.
+    @Test func clientEnforcesOpenPullRequestByteBudget() async {
+        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
+        let data = Data(Self.graphQLPageResponse(number: 54, hasNextPage: false, endCursor: nil).utf8)
+        let transport = RecordingGitHubTransport(
+            result: .response(data, statusCode: 200, headers: [:])
+        )
+        let client = GitHubClient(
+            tokenStore: tokenStore,
+            transport: transport,
+            maximumPullRequestBytes: max(1_024, data.count - 1)
+        )
+
+        await #expect(throws: GitHubClientError.decodingFailed) {
+            try await client.fetchOpenPullRequests(repository: repository)
+        }
+        #expect(transport.requests.count == 1)
     }
 
     /// Verifies truncated GraphQL review and check connections never appear merge-ready.
@@ -886,6 +1016,12 @@ struct AgentPRMonitorTests {
         #expect(store.rows.map(\.id) == ["apps3k-com/CodingBuddy#66"])
         #expect(store.repositoryRefreshStates[repository] == .loaded)
         #expect(store.repositoryRefreshStates[website] == .refreshFailed(.repositoryDenied(website)))
+        guard case .partial(let completedAt, let incompleteRepositories) = store.queueCoverage else {
+            Issue.record("Expected partial queue coverage after one repository failed")
+            return
+        }
+        #expect(completedAt != nil)
+        #expect(incompleteRepositories == [website])
     }
 
     /// Verifies partial refresh failures keep that repository's last visible rows.
@@ -940,6 +1076,11 @@ struct AgentPRMonitorTests {
         #expect(store.rows.map(\.id) == ["apps3k-com/CodingBuddy#66", "apps3k-com/Website#12"])
         #expect(store.repositoryRefreshStates[repository] == .loaded)
         #expect(store.repositoryRefreshStates[website] == .loaded)
+        guard case .complete(let completedAt) = store.queueCoverage else {
+            Issue.record("Expected complete queue coverage after every repository loaded")
+            return
+        }
+        #expect(completedAt <= Date())
     }
 
     /// Verifies removing a repository while refreshing resets loading states for remaining entries.
@@ -1033,61 +1174,6 @@ struct AgentPRMonitorTests {
         #expect(store.repositoryChoices == cachedChoices)
     }
 
-    /// Verifies token save success refreshes selected repositories and failures stay token-safe.
-    @Test func storeSaveTokenRefreshesSelectedRepositoryAndDoesNotLeakStorageFailures() async throws {
-        let tokenStore = MemoryGitHubTokenStore(token: nil)
-        let client = StubAgentPRMonitorClient(results: [
-            .success(AgentPRMonitorSnapshot(rows: [samplePullRequest(number: 56)], rateLimit: nil)),
-        ])
-        let store = AgentPRMonitorStore(
-            tokenStore: tokenStore,
-            client: client,
-            defaults: MemoryAgentPRMonitorDefaults()
-        )
-
-        store.selectRepository(repository)
-        store.saveToken("github_pat_secret")
-        try await waitForRefresh(in: store)
-
-        #expect(store.state == .loaded)
-        #expect(store.rows.map(\.number) == [56])
-        #expect(!store.debugDescription.contains("github_pat_secret"))
-
-        let failingStore = AgentPRMonitorStore(
-            tokenStore: FailingGitHubTokenStore(),
-            client: client,
-            defaults: MemoryAgentPRMonitorDefaults()
-        )
-        failingStore.selectRepository(repository)
-        let didSave = failingStore.saveToken("github_pat_secret")
-
-        #expect(!didSave)
-        #expect(failingStore.state == .refreshFailed(.tokenStorageFailed))
-        #expect(!(GitHubClientError.tokenStorageFailed.errorDescription ?? "").contains("github_pat_secret"))
-    }
-
-    /// Verifies legacy monitor token saves reject blank values before persistence.
-    @Test func storeSaveTokenRejectsBlankTokenWithoutPersisting() throws {
-        let tokenStore = MemoryGitHubTokenStore(token: nil)
-        let client = StubAgentPRMonitorClient(results: [
-            .success(AgentPRMonitorSnapshot(rows: [samplePullRequest(number: 57)], rateLimit: nil)),
-        ])
-        let store = AgentPRMonitorStore(
-            tokenStore: tokenStore,
-            client: client,
-            defaults: MemoryAgentPRMonitorDefaults()
-        )
-
-        store.selectRepository(repository)
-        let didSave = store.saveToken(" \n\t ")
-
-        #expect(!didSave)
-        #expect(try tokenStore.loadToken() == nil)
-        #expect(store.state == .idle)
-        #expect(store.rows.isEmpty)
-        #expect(!store.isRefreshing)
-    }
-
     /// Verifies a token saved in Settings refreshes the selected repository.
     @Test func storeSettingsTokenSaveRefreshesSelectedRepository() async throws {
         let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
@@ -1149,58 +1235,6 @@ struct AgentPRMonitorTests {
         #expect(queue.items.allSatisfy {
             $0.guidance.recommendedAction.id == AgentPRGuidanceRoute.openSettings.rawValue
         })
-    }
-
-    /// Verifies deleting the token clears private row data and refresh metadata.
-    @Test func storeDeleteTokenClearsPrivateRowsAndRefreshState() async throws {
-        let tokenStore = MemoryGitHubTokenStore(token: "github_pat_secret")
-        let client = StubAgentPRMonitorClient(results: [
-            .success(AgentPRMonitorSnapshot(
-                rows: [samplePullRequest(number: 57)],
-                rateLimit: GitHubRateLimitState(remaining: 10, resetAt: nil)
-            )),
-        ])
-        let store = AgentPRMonitorStore(
-            tokenStore: tokenStore,
-            client: client,
-            defaults: MemoryAgentPRMonitorDefaults()
-        )
-
-        store.selectRepository(repository)
-        store.refresh()
-        try await waitForRefresh(in: store)
-        store.deleteToken()
-
-        #expect(store.state == .needsToken)
-        #expect(store.rows.isEmpty)
-        #expect(store.rateLimit == nil)
-        #expect(!store.isRefreshing)
-        #expect(store.repositoryRefreshStates.isEmpty)
-    }
-
-    /// Verifies failed token deletion still stops any visible refresh state.
-    @Test func storeFailedTokenDeleteStopsInFlightRefreshState() async throws {
-        let staleSnapshot = AgentPRMonitorSnapshot(
-            rows: [samplePullRequest(number: 59)],
-            rateLimit: GitHubRateLimitState(remaining: 1, resetAt: nil)
-        )
-        let client = DelayedAgentPRMonitorClient(snapshot: staleSnapshot, delayNanoseconds: 200_000_000)
-        let store = AgentPRMonitorStore(
-            tokenStore: FailingGitHubTokenStore(),
-            client: client,
-            defaults: MemoryAgentPRMonitorDefaults()
-        )
-
-        store.selectRepository(repository)
-        store.refresh()
-        try await waitUntilRefreshStarted(in: store)
-        store.deleteToken()
-        try await waitUntilRefreshStopped(in: store)
-
-        #expect(store.state == .refreshFailed(.tokenStorageFailed))
-        #expect(store.rows.isEmpty)
-        #expect(store.rateLimit == nil)
-        #expect(!store.isRefreshing)
     }
 
     /// Builds a ready pull request fixture with a deterministic number.
@@ -1742,6 +1776,77 @@ private final class MemoryGitHubTokenStore: GitHubTokenStore, @unchecked Sendabl
     /// Removes the current in-memory token.
     func deleteToken() throws {
         token = nil
+    }
+}
+
+/// Complete credential store used to prove monitor-side rotating-token integration.
+private nonisolated final class MonitorCredentialStore: GitHubTokenStore, @unchecked Sendable {
+    /// Lock protecting the complete credential bundle.
+    private let lock = NSLock()
+    /// Current in-memory credential.
+    private var storedCredential: GitHubCredential?
+
+    /// Creates the store with one complete credential.
+    init(credential: GitHubCredential?) {
+        storedCredential = credential
+    }
+
+    /// Current credential for assertions.
+    var credential: GitHubCredential? {
+        lock.withLock { storedCredential }
+    }
+
+    /// Returns the access token for legacy protocol consumers.
+    func loadToken() throws -> String? {
+        lock.withLock { storedCredential?.accessToken }
+    }
+
+    /// Replaces the credential with a read-only PAT.
+    func saveToken(_ token: String) throws {
+        lock.withLock { storedCredential = .personalAccessToken(token) }
+    }
+
+    /// Removes the credential.
+    func deleteToken() throws {
+        lock.withLock { storedCredential = nil }
+    }
+
+    /// Returns the complete credential bundle.
+    func loadCredential() throws -> GitHubCredential? {
+        lock.withLock { storedCredential }
+    }
+
+    /// Persists the complete rotated credential bundle.
+    func saveCredential(_ credential: GitHubCredential) throws {
+        lock.withLock { storedCredential = credential }
+    }
+}
+
+/// OAuth transport returning one deterministic rotated credential for monitor tests.
+private nonisolated final class MonitorOAuthRefreshTransport: GitHubTransport, @unchecked Sendable {
+    /// Lock protecting the request count.
+    private let lock = NSLock()
+    /// Number of OAuth refresh calls.
+    private var count = 0
+
+    /// Current OAuth request count.
+    var requestCount: Int {
+        lock.withLock { count }
+    }
+
+    /// Returns one successful no-secret refresh-token response.
+    func data(for request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+        lock.withLock { count += 1 }
+        let data = Data(#"{"access_token":"new-access","token_type":"bearer","expires_in":28800,"refresh_token":"new-refresh","refresh_token_expires_in":15552000}"#.utf8)
+        return (
+            data,
+            HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: ["Content-Length": String(data.count)]
+            )!
+        )
     }
 }
 

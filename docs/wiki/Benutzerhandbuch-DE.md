@@ -306,8 +306,48 @@ Der Seitenleisten-Eintrag **Repositories → Agent PR Monitor** (Alpha) ist eine
 - GitHub-Review- und Legacy-Status-Sammlungen werden mit begrenzter Pagination gelesen. Meldet GitHub mehr Einträge, als CodingBuddy sicher laden kann, bleiben Review und CI **unbekannt/ausstehend**, statt als genehmigt oder grün zu erscheinen.
 - Mit **Aktualisieren** lädst du manuell neu, mit **PR öffnen** arbeitest du im Browser weiter. Der Monitor kommentiert nie, genehmigt nie, löst keine Threads auf und führt keine Merges aus.
 - Rate-Limits, fehlende Rechte, verweigerte Repositories und Offline-Fehler erscheinen als UI-sichere Zustände; der letzte erfolgreiche Snapshot bleibt möglichst sichtbar. Repository-spezifische Fehler sind abgegrenzt, sodass erfolgreiche Repositories sichtbar bleiben, wenn ein anderes überwachtes Repository fehlschlägt. Ein Fehler ohne zwischengespeicherte PR-Zeilen bleibt als einzelner Repository-Eintrag in der Fokusliste sichtbar.
+- Zwischengespeicherte Review-Desk-Zeilen nennen ihr veraltetes Repository, zeigen den sicheren Fehlergrund und behalten den Zeitpunkt der letzten erfolgreichen Aktualisierung, damit aktuelle und veraltete Zeilen unterscheidbar sind.
 
 v1-Grenzen: Agent PR Monitor liest nur GitHub.com, aktualisiert keine GitHub Projects und läuft nach dem Beenden von CodingBuddy nicht im Hintergrund weiter.
+
+### Pull-Request-Review-Desk
+
+Der Seitenleisten-Eintrag **Repositories → Review Desk** (Alpha) macht aus
+einem überwachten Pull Request eine fokussierte Arbeitsfläche. Wähle einen Pull
+Request und nutze im Inspektor **Übersicht**, **Konversation** und **Checks**.
+Offene Inline-Threads stehen zuerst; erledigte und veraltete Threads bleiben
+erreichbar, ohne die aktuelle Arbeit zu überlagern.
+
+Melde dich vor Änderungen unter **Einstellungen → Sicherheit → Mit GitHub
+anmelden** an. Die Browser-Anmeldung verbindet die CodingBuddy GitHub App und
+speichert das Ergebnis im Schlüsselbund. Kopiere den einmaligen Code und wähle
+dann **GitHub öffnen**; der Bedienungshilfen-Fokus bleibt auf dem Code, statt
+automatisch in den Browser zu wechseln. Ein bestehender Fine-grained Token
+bleibt mit `Administration: read` für den Nur-Lese-Monitor nutzbar, kann aber
+nicht antworten, Threads auflösen, einen Entwurf freigeben oder mergen.
+
+- Antworten sendet ohne zusätzliche Bestätigung genau eine Inline-Thread-Antwort.
+- Auflösen wirkt nur auf den gewählten offenen Thread und lädt den GitHub-Stand neu.
+- Bereit zur Review verlangt eine Bestätigung und prüft den Pull Request erneut.
+- Mergen zeigt eine strikte Bestätigung, wiederholt danach jede
+  Freigabeprüfung und bindet die Anfrage an den aktuellen Head-Commit. Die
+  Aktion ist nur verfügbar, wenn GitHub selbst freigebende Reviews, strikte
+  erforderliche Checks, aufgelöste Konversationen und Admin-Schutz ohne
+  Bypass-Ausnahmen erzwingt. Ein lokal grüner Pull Request ohne diesen
+  vollständigen Servernachweis bleibt gesperrt. Das Menü zeigt ausschließlich
+  Merge-Methoden, die im Repository aktiviert sind.
+
+Aktionen bleiben während einer Aktualisierung sowie bei partiellen, veralteten,
+unvollständig paginierten, unbekannten oder nach der Bestätigung geänderten
+Daten deaktiviert. CodingBuddy deutet einen Netzwerkfehler nach einer
+Schreibanfrage nicht automatisch als Fehlschlag, sondern lädt zuerst neu und
+meldet den Ausgang bis dahin als uneindeutig. Mit **Erneut prüfen** kann der
+exakte Zustandsübergang aus einem vollständigen Snapshot nachgewiesen werden;
+**Auf GitHub geprüft …** darf erst nach einer manuellen Kontrolle verwendet
+werden. Normale Aktualisierung und Zielwechsel bleiben gesperrt, solange der
+Ausgang der Schreibaktion ungeklärt ist.
+Bei Antworten beweist nur die exakte von GitHub zurückgegebene Kommentar-ID den
+Erfolg; zeitgleich von anderen geposteter identischer Text bleibt uneindeutig.
 
 ### Codex
 
