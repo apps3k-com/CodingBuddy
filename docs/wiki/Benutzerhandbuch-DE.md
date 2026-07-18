@@ -127,6 +127,74 @@ priorisiert noch keine Zustands-, Sicherheits- oder Paketsignale. Diese Quellen
 werden nach ihren Guidance-Verträgen in dieselbe deterministische Liste
 aufgenommen.
 
+## GitHub-Projects-Arbeitsbereich
+
+Der Eintrag **Repositories → Projects** (Alpha) macht ein Organisationsprojekt
+zu einem nativen Planungsarbeitsbereich, ohne dessen Issues nach CodingBuddy zu
+kopieren. Gib den Organisations-Login ein, wähle ein Project und ein
+Single-Select-Feld wie **Status** und wechsle anschließend zwischen **Tabelle**
+und **Board**. Beide Ansichten verwenden dieselben Zeilen und Filter für
+Repository, Suche und Planungsabweichungen. Einträge, deren Repository wegen
+GitHub-Berechtigungen verborgen ist, bleiben als unvollständige Evidenz sichtbar,
+statt unbemerkt zu verschwinden. Archivierte Einträge werden nur auf Wunsch
+eingeblendet. Leere Projects, Projects ohne Single-Select-Feld und Filter ohne
+Treffer haben getrennte Zustände; **Filter zurücksetzen** stellt die
+Standardansicht wieder her.
+
+Entfernt GitHub eine Option, die noch einem Eintrag zugewiesen ist, bewahrt
+CodingBuddy diesen Wert in einer eigenen Lane **Nicht verfügbarer Wert**, statt
+ihn als **Kein Wert** darzustellen. Dieselbe Warnung erscheint in Tabelle,
+Inspector und Move-Bestätigung. Eine Organisation ohne zugängliche Projects und
+ein für den aktuellen Viewer schreibgeschütztes Project zeigen jeweils eigene
+Berechtigungshinweise.
+
+Wähle einen Eintrag, um **Details**, **Abweichungen** und **Evidenz** zu prüfen.
+Die lokale Lifecycle-Policy weist stabilen Project-Options-IDs Rollen wie
+Backlog, Bereit, In Arbeit, Im Review, Merge-bereit, Erledigt oder Abgebrochen
+zu. Optionale Regeln verlangen verknüpfte Einträge im selben Project, ein
+schließendes Issue für Pull Requests, konsistente Eltern-Kind-Zustände oder
+ausdrücklich ausgewählte Project-Workflows. CodingBuddy leitet niemals Regeln
+aus Options- oder Workflow-Namen ab. Solange nicht jede Option eine Rolle hat,
+meldet der Arbeitsbereich die erforderliche Konfiguration und führt direkt zum
+Policy-Editor. Unvollständige Evidenz wird als partielle Bewertung angekündigt,
+niemals als „keine Abweichung“.
+Verweist eine gespeicherte Policy auf Optionen oder Workflows, die GitHub nicht
+mehr bereitstellt, listet der Editor diese nicht verfügbaren Referenzen. Sie
+können ausdrücklich entfernt werden und werden bereinigt, bevor die reparierte
+Policy gespeichert wird, sofern ein vollständiger Feld- oder Workflow-Read ihre
+Entfernung belegt. Ein begrenzter, unvollständiger Read bewahrt die gespeicherten
+IDs und zeigt stattdessen einen Evidenzhinweis.
+
+Nutze **Verschieben nach** in einer Tabellenzeile, Board-Karte oder im
+Inspector. Eine Bestätigung für riskante Moves nennt den exakten Eintrag, den
+aktuellen Wert und das Ziel, bevor sie das Risiko erklärt. Moves bleiben
+deaktiviert, solange Pagination, Feldwerte,
+Beziehungen, Workflows, Autorisierung oder Policy-Evidenz unvollständig sind.
+Nach der Bestätigung prüft CodingBuddy Viewer, Eintrag, Felddefinition und
+Policy nochmals gegen GitHub, sendet genau eine Mutation und liest den Eintrag
+zur Verifikation erneut. Ein unsicheres Ergebnis wird nie automatisch
+wiederholt. Wird die Anfrage oder der Readback nach Beginn der Mutation
+abgebrochen oder könnte GitHub die Anfrage anderweitig angenommen haben, ohne
+dass CodingBuddy das Ergebnis beweisen kann, bleiben alle Moves gesperrt, bis **Auf GitHub
+verifizieren** das Project erneut geladen hat.
+
+Nur die CodingBuddy GitHub App darf Projects verändern. Ein Fine-grained PAT
+kann den Arbeitsbereich weiterhin lesen, besteht aber keine Move-Prüfung. Lokal
+gespeichert werden nur Organisation, ausgewählte IDs, Filter, Ansichtsmodus und
+Policy; Project-Inhalte werden nicht auf der Festplatte zwischengespeichert.
+Kann ein Write nicht verifiziert werden, speichert CodingBuddy nur den minimalen
+ID- und Digest-basierten Recovery-Kontext, damit der Write-Lock einen App-Neustart
+übersteht und **Auf GitHub verifizieren** verfügbar bleibt.
+
+Die Aktualisierungsaktion nennt das relative Alter und den exakten
+Erfassungszeitpunkt des Snapshots. Schlägt eine Aktualisierung fehl, während
+geprüfte Daten sichtbar bleiben, benennt die Warnung auch diesen beibehaltenen
+Snapshot, damit veraltete und aktuelle Evidenz unterscheidbar sind.
+
+v1-Grenzen: kein Drag-and-drop, keine Sammelaktionen, keine Erstellung von
+Projects, keine Feld- oder beliebige Workflow-Bearbeitung, keine
+Hintergrundsynchronisierung und keine automatische Drift-Reparatur.
+
 ## Secrets bleiben maskiert
 
 Variablen, deren Namen nach Zugangsdaten aussehen (`GITHUB_TOKEN`, `AWS_SECRET_ACCESS_KEY`, alles mit `TOKEN`, `KEY`, `SECRET`, `PASSWORD`, `AUTH`, …), zeigen `••••••••` statt ihres Werts.

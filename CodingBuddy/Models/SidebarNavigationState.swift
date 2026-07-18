@@ -29,6 +29,8 @@ nonisolated enum SidebarScope: Hashable, Sendable {
     case agentPRMonitor
     /// Focused GitHub pull request conversation, checks, and action workbench.
     case pullRequestReviewDesk
+    /// GitHub Projects table, board, and planning drift workbench.
+    case githubProjects
     /// Local backup browser.
     case backupBrowser
     /// Global package inventory and controlled updates.
@@ -50,6 +52,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case .capabilityHygiene: "capabilityHygiene"
         case .agentPRMonitor: "agentPRMonitor"
         case .pullRequestReviewDesk: "pullRequestReviewDesk"
+        case .githubProjects: "githubProjects"
         case .backupBrowser: "backupBrowser"
         case .packageMaintenance: "packageMaintenance"
         case .aiTool(let tool): "aiTool:\(tool.rawValue)"
@@ -79,6 +82,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case "capabilityHygiene": self = .capabilityHygiene
         case "agentPRMonitor": self = .agentPRMonitor
         case "pullRequestReviewDesk": self = .pullRequestReviewDesk
+        case "githubProjects": self = .githubProjects
         case "backupBrowser": self = .backupBrowser
         case "packageMaintenance": self = .packageMaintenance
         default: return nil
@@ -111,6 +115,8 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case .pullRequestReviewDesk:
             FeatureFlag.pullRequestReviewDesk.isEnabled
                 && FeatureFlag.agentPRMonitor.isEnabled
+        case .githubProjects:
+            FeatureFlag.githubProjectsBoard.isEnabled
         case .backupBrowser:
             FeatureFlag.backupBrowser.isEnabled
         case .packageMaintenance:
@@ -140,6 +146,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case .capabilityHygiene: String(localized: "Capability Hygiene")
         case .agentPRMonitor: String(localized: "Agent PR Monitor")
         case .pullRequestReviewDesk: String(localized: "Review Desk")
+        case .githubProjects: String(localized: "Projects")
         case .backupBrowser: String(localized: "Backups")
         case .packageMaintenance: String(localized: "Software Updates")
         case .aiTool(let tool): tool.displayName

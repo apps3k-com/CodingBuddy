@@ -22,6 +22,7 @@ struct SidebarNavigationStateTests {
             .capabilityHygiene,
             .agentPRMonitor,
             .pullRequestReviewDesk,
+            .githubProjects,
             .backupBrowser,
             .packageMaintenance,
             .aiTool(.codex),

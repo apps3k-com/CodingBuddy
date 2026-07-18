@@ -30,6 +30,7 @@ struct LocalizedCountTextTests {
         let localizations = try #require(entry["localizations"] as? [String: Any])
         let german = try #require(localizations["de"] as? [String: Any])
         let unit = try #require(german["stringUnit"] as? [String: Any])
+        #expect(unit["state"] as? String == "translated", "Untranslated catalog key: \(key)")
         return try #require(unit["value"] as? String)
     }
 
@@ -41,6 +42,13 @@ struct LocalizedCountTextTests {
                 singular: "1 variable",
                 pluralFormat: "%lld variables"
             ) == "0 variables"
+        )
+        #expect(LocalizedCountText.items(1) == String(localized: "1 item"))
+        #expect(LocalizedCountText.items(2) == String(format: String(localized: "%lld items"), 2))
+        #expect(LocalizedCountText.driftFindings(1) == String(localized: "1 drift finding"))
+        #expect(
+            LocalizedCountText.driftFindings(2)
+                == String(format: String(localized: "%lld drift findings"), 2)
         )
         #expect(
             LocalizedCountText.countText(
@@ -68,6 +76,10 @@ struct LocalizedCountTextTests {
             "%lld servers",
             "1 file",
             "%lld files",
+            "1 item",
+            "%lld items",
+            "1 drift finding",
+            "%lld drift findings",
             "Import 1 Variable",
             "Import %lld Variables"
         ]

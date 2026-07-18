@@ -34,6 +34,24 @@ nonisolated enum LocalizedCountText {
         )
     }
 
+    /// Returns the localized GitHub Project item count for board lanes.
+    static func items(_ count: Int) -> String {
+        countText(
+            count,
+            singular: String(localized: "1 item"),
+            pluralFormat: String(localized: "%lld items")
+        )
+    }
+
+    /// Returns the localized planning-drift finding count for assistive technology.
+    static func driftFindings(_ count: Int) -> String {
+        countText(
+            count,
+            singular: String(localized: "1 drift finding"),
+            pluralFormat: String(localized: "%lld drift findings")
+        )
+    }
+
     /// Returns the localized import action for the selected variable count.
     static func importVariables(_ count: Int) -> String {
         countText(

@@ -125,6 +125,8 @@ struct ContentView: View {
     @State private var agentPRMonitorStore: AgentPRMonitorStore?
     /// Focused Review Desk store when the write-capable alpha feature is enabled.
     @State private var pullRequestReviewDeskStore: PullRequestReviewDeskStore?
+    /// GitHub Projects workspace when the alpha feature is enabled.
+    @State private var githubProjectsStore: GitHubProjectsStore?
     /// Backup Browser store when the feature flag is enabled.
     @State private var backupBrowserStore: BackupBrowserStore? =
         FeatureFlag.backupBrowser.isEnabled ? BackupBrowserStore() : nil
@@ -170,12 +172,15 @@ struct ContentView: View {
         _pullRequestReviewDeskStore = State(initialValue: SidebarScope.pullRequestReviewDesk.isEnabled
             ? PullRequestReviewDeskStore(credentialCoordinator: credentialCoordinator)
             : nil)
+        _githubProjectsStore = State(initialValue: SidebarScope.githubProjects.isEnabled
+            ? GitHubProjectsStore(credentialCoordinator: credentialCoordinator)
+            : nil)
     }
 
     /// Main app navigation and detail content.
     var body: some View {
         NavigationSplitView {
-            List(selection: $scope) {
+            AnyView(List(selection: $scope) {
                 if SidebarScope.attentionQueue.isEnabled, let agentPRMonitorStore {
                     sidebarSection(.focus) {
                         Text("Focus")
@@ -263,7 +268,8 @@ struct ContentView: View {
                     }
                 }
                 if agentContextInspectorStore != nil || repoReadinessStore != nil
-                    || agentPRMonitorStore != nil || pullRequestReviewDeskStore != nil {
+                    || agentPRMonitorStore != nil || pullRequestReviewDeskStore != nil
+                    || githubProjectsStore != nil {
                     sidebarSection(.repositories) {
                         Text("Repositories")
                     } content: {
@@ -286,6 +292,9 @@ struct ContentView: View {
                            pullRequestReviewDeskStore != nil {
                             Label("Review Desk", systemImage: "text.bubble")
                                 .tag(SidebarScope.pullRequestReviewDesk)
+                        }
+                        if githubProjectsStore != nil {
+                            githubProjectsSidebarDestination
                         }
                     }
                     .onAppear {
@@ -325,114 +334,9 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 210)
+            .navigationSplitViewColumnWidth(min: 180, ideal: 210))
         } detail: {
-            switch scope {
-            case .attentionQueue:
-                if let agentPRMonitorStore {
-                    PRAttentionQueueView(
-                        store: agentPRMonitorStore,
-                        openSettings: {
-                            requestedSettingsPane = .security
-                            showSettings = true
-                        },
-                        showPRMonitor: {
-                            scope = .agentPRMonitor
-                        }
-                    )
-                } else {
-                    VariableListView(store: store, secrets: secrets, scope: .all)
-                }
-            case .mcpAuth:
-                MCPAuthListView(store: mcpAuthStore, secrets: secrets)
-            case .agentDoctor:
-                if let agentDoctorStore {
-                    AgentDoctorView(store: agentDoctorStore) { tool in
-                        scope = SidebarScope.followUpScope(for: tool)
-                    }
-                } else {
-                    VariableListView(store: store, secrets: secrets, scope: .all)
-                }
-            case .agentContextInspector:
-                if let agentContextInspectorStore {
-                    AgentContextInspectorView(store: agentContextInspectorStore)
-                } else {
-                    VariableListView(store: store, secrets: secrets, scope: .all)
-                }
-            case .repoReadinessChecklist:
-                if let repoReadinessStore {
-                    RepoReadinessView(store: repoReadinessStore)
-                } else {
-                    VariableListView(store: store, secrets: secrets, scope: .all)
-                }
-            case .mcpServerInventory:
-                if let mcpServerInventoryStore {
-                    MCPServerInventoryView(store: mcpServerInventoryStore) { tool in
-                        scope = .aiTool(tool)
-                    }
-                } else {
-                    VariableListView(store: store, secrets: secrets, scope: .all)
-                }
-            case .capabilityHygiene:
-                if let capabilityHygieneStore {
-                    CapabilityHygieneView(store: capabilityHygieneStore)
-                } else {
-                    VariableListView(store: store, secrets: secrets, scope: .all)
-                }
-            case .agentPRMonitor:
-                if let agentPRMonitorStore {
-                    AgentPRMonitorView(store: agentPRMonitorStore) {
-                        requestedSettingsPane = .security
-                        showSettings = true
-                    }
-                } else {
-                    VariableListView(store: store, secrets: secrets, scope: .all)
-                }
-            case .pullRequestReviewDesk:
-                if let agentPRMonitorStore, let pullRequestReviewDeskStore {
-                    PullRequestReviewDeskView(
-                        monitorStore: agentPRMonitorStore,
-                        store: pullRequestReviewDeskStore
-                    ) {
-                        requestedSettingsPane = .security
-                        showSettings = true
-                    }
-                } else {
-                    VariableListView(store: store, secrets: secrets, scope: .all)
-                }
-            case .backupBrowser:
-                if let backupBrowserStore {
-                    BackupBrowserView(store: backupBrowserStore)
-                } else {
-                    VariableListView(store: store, secrets: secrets, scope: .all)
-                }
-            case .packageMaintenance:
-                if let packageMaintenanceStore {
-                    PackageMaintenanceView(store: packageMaintenanceStore) {
-                        requestedSettingsPane = .maintenance
-                        showSettings = true
-                    }
-                } else {
-                    VariableListView(store: store, secrets: secrets, scope: .all)
-                }
-            case .aiTool(.codex):
-                CodexView(store: codexStore, secrets: secrets)
-            case .aiTool(.claudeCode):
-                if let claudeCodeStore {
-                    ClaudeCodeView(store: claudeCodeStore, secrets: secrets)
-                } else {
-                    ProgressView("Loading Claude Code configuration...")
-                        .controlSize(.small)
-                        .accessibilityLabel("Loading Claude Code configuration...")
-                        .onAppear(perform: loadClaudeCodeStoreIfNeeded)
-                }
-            case .aiTool(.cursor):
-                CursorView(store: cursorStore, secrets: secrets)
-            case .aiTool(.craftAgents):
-                CraftAgentView(store: craftStore)
-            default:
-                VariableListView(store: store, secrets: secrets, scope: scope ?? .all)
-            }
+            detailView(for: scope)
         }
         .sheet(isPresented: $showSettings) {
             SettingsView(
@@ -441,6 +345,7 @@ struct ContentView: View {
             ) { change in
                 agentPRMonitorStore?.handleGitHubAuthorizationChange(change)
                 pullRequestReviewDeskStore?.refresh()
+                githubProjectsStore?.handleGitHubAuthorizationChange(change)
             }
         }
         .onChange(of: menuActions.settingsRequested, initial: true) {
@@ -502,6 +407,109 @@ struct ContentView: View {
             freshnessByRepository: freshnessByRepository,
             defaultFreshness: AgentPRMonitorView.guidanceFreshness(for: store.state)
         ).actNowCount
+    }
+
+    /// Type-erased sidebar destination keeps the large root list tractable for Swift's type checker.
+    private var githubProjectsSidebarDestination: some View {
+        Label("Projects", systemImage: "rectangle.3.group")
+            .tag(SidebarScope.githubProjects)
+    }
+
+    /// Type-erased destination router keeps each large feature view outside the root generic type.
+    private func detailView(for scope: SidebarScope?) -> AnyView {
+        switch scope {
+        case .attentionQueue:
+            guard let agentPRMonitorStore else { return fallbackDetail }
+            return AnyView(PRAttentionQueueView(
+                store: agentPRMonitorStore,
+                openSettings: {
+                    requestedSettingsPane = .security
+                    showSettings = true
+                },
+                showPRMonitor: { self.scope = .agentPRMonitor }
+            ))
+        case .mcpAuth:
+            return AnyView(MCPAuthListView(store: mcpAuthStore, secrets: secrets))
+        case .agentDoctor:
+            guard let agentDoctorStore else { return fallbackDetail }
+            return AnyView(AgentDoctorView(store: agentDoctorStore) { tool in
+                self.scope = SidebarScope.followUpScope(for: tool)
+            })
+        case .agentContextInspector:
+            guard let agentContextInspectorStore else { return fallbackDetail }
+            return AnyView(AgentContextInspectorView(store: agentContextInspectorStore))
+        case .repoReadinessChecklist:
+            guard let repoReadinessStore else { return fallbackDetail }
+            return AnyView(RepoReadinessView(store: repoReadinessStore))
+        case .mcpServerInventory:
+            guard let mcpServerInventoryStore else { return fallbackDetail }
+            return AnyView(MCPServerInventoryView(store: mcpServerInventoryStore) { tool in
+                self.scope = .aiTool(tool)
+            })
+        case .capabilityHygiene:
+            guard let capabilityHygieneStore else { return fallbackDetail }
+            return AnyView(CapabilityHygieneView(store: capabilityHygieneStore))
+        case .agentPRMonitor:
+            guard let agentPRMonitorStore else { return fallbackDetail }
+            return AnyView(AgentPRMonitorView(store: agentPRMonitorStore) {
+                requestedSettingsPane = .security
+                showSettings = true
+            })
+        case .pullRequestReviewDesk:
+            guard let agentPRMonitorStore, let pullRequestReviewDeskStore else { return fallbackDetail }
+            return AnyView(PullRequestReviewDeskView(
+                monitorStore: agentPRMonitorStore,
+                store: pullRequestReviewDeskStore
+            ) {
+                requestedSettingsPane = .security
+                showSettings = true
+            })
+        case .githubProjects:
+            return AnyView(githubProjectsDetail)
+        case .backupBrowser:
+            guard let backupBrowserStore else { return fallbackDetail }
+            return AnyView(BackupBrowserView(store: backupBrowserStore))
+        case .packageMaintenance:
+            guard let packageMaintenanceStore else { return fallbackDetail }
+            return AnyView(PackageMaintenanceView(store: packageMaintenanceStore) {
+                requestedSettingsPane = .maintenance
+                showSettings = true
+            })
+        case .aiTool(.codex):
+            return AnyView(CodexView(store: codexStore, secrets: secrets))
+        case .aiTool(.claudeCode):
+            guard let claudeCodeStore else {
+                return AnyView(ProgressView("Loading Claude Code configuration...")
+                    .controlSize(.small)
+                    .accessibilityLabel("Loading Claude Code configuration...")
+                    .onAppear(perform: loadClaudeCodeStoreIfNeeded))
+            }
+            return AnyView(ClaudeCodeView(store: claudeCodeStore, secrets: secrets))
+        case .aiTool(.cursor):
+            return AnyView(CursorView(store: cursorStore, secrets: secrets))
+        case .aiTool(.craftAgents):
+            return AnyView(CraftAgentView(store: craftStore))
+        default:
+            return fallbackDetail
+        }
+    }
+
+    /// Stable environment-variable fallback for unavailable destinations.
+    private var fallbackDetail: AnyView {
+        AnyView(VariableListView(store: store, secrets: secrets, scope: scope ?? .all))
+    }
+
+    /// Isolated Project destination avoids expanding its complete workspace into the root switch type.
+    @ViewBuilder
+    private var githubProjectsDetail: some View {
+        if let githubProjectsStore {
+            GitHubProjectsView(store: githubProjectsStore) {
+                requestedSettingsPane = .security
+                showSettings = true
+            }
+        } else {
+            VariableListView(store: store, secrets: secrets, scope: .all)
+        }
     }
 
     /// Wraps a sidebar group in native collapsible sections when the feature is enabled.
