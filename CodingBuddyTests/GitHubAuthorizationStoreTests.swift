@@ -40,11 +40,11 @@ struct GitHubAuthorizationStoreTests {
     }
 
     /// Verifies saved tokens are trimmed before storage.
-    @Test func authorizationStoreSavesTrimmedTokenAndReportsAuthorizedState() {
+    @Test func authorizationStoreSavesTrimmedTokenAndReportsAuthorizedState() async {
         let tokenStore = MemoryGitHubAuthorizationTokenStore(token: nil)
         let store = GitHubAuthorizationStore(tokenStore: tokenStore)
 
-        let didSave = store.saveToken("  github_pat_secret  ")
+        let didSave = await store.saveToken("  github_pat_secret  ")
 
         #expect(didSave)
         #expect(tokenStore.savedToken == "github_pat_secret")
@@ -54,11 +54,11 @@ struct GitHubAuthorizationStoreTests {
     }
 
     /// Verifies blank saves do not hide or overwrite an existing token.
-    @Test func authorizationStoreRejectsBlankSaveWithoutHidingExistingToken() {
+    @Test func authorizationStoreRejectsBlankSaveWithoutHidingExistingToken() async {
         let tokenStore = MemoryGitHubAuthorizationTokenStore(token: "github_pat_existing")
         let store = GitHubAuthorizationStore(tokenStore: tokenStore)
 
-        let didSave = store.saveToken(" \n\t ")
+        let didSave = await store.saveToken(" \n\t ")
 
         #expect(!didSave)
         #expect(tokenStore.savedToken == "github_pat_existing")
@@ -67,11 +67,11 @@ struct GitHubAuthorizationStoreTests {
     }
 
     /// Verifies deleting a token clears the visible authorization state.
-    @Test func authorizationStoreDeletesTokenAndReportsMissingState() {
+    @Test func authorizationStoreDeletesTokenAndReportsMissingState() async {
         let tokenStore = MemoryGitHubAuthorizationTokenStore(token: "github_pat_secret")
         let store = GitHubAuthorizationStore(tokenStore: tokenStore)
 
-        let didDelete = store.deleteToken()
+        let didDelete = await store.deleteToken()
 
         #expect(didDelete)
         #expect(tokenStore.savedToken == nil)
@@ -80,10 +80,10 @@ struct GitHubAuthorizationStoreTests {
     }
 
     /// Verifies storage failures never expose token-like text in debug output.
-    @Test func authorizationStoreFailureStateStaysTokenSafe() {
+    @Test func authorizationStoreFailureStateStaysTokenSafe() async {
         let store = GitHubAuthorizationStore(tokenStore: FailingGitHubAuthorizationTokenStore())
 
-        let didSave = store.saveToken("github_pat_secret")
+        let didSave = await store.saveToken("github_pat_secret")
 
         #expect(!didSave)
         #expect(store.state == .failed(.tokenStorageFailed))

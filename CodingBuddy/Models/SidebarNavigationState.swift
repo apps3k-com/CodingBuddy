@@ -25,6 +25,8 @@ nonisolated enum SidebarScope: Hashable, Sendable {
     case mcpServerInventory
     /// GitHub pull request monitor for agent follow-up.
     case agentPRMonitor
+    /// Focused GitHub pull request conversation, checks, and action workbench.
+    case pullRequestReviewDesk
     /// Local backup browser.
     case backupBrowser
     /// Global package inventory and controlled updates.
@@ -44,6 +46,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case .repoReadinessChecklist: "repoReadinessChecklist"
         case .mcpServerInventory: "mcpServerInventory"
         case .agentPRMonitor: "agentPRMonitor"
+        case .pullRequestReviewDesk: "pullRequestReviewDesk"
         case .backupBrowser: "backupBrowser"
         case .packageMaintenance: "packageMaintenance"
         case .aiTool(let tool): "aiTool:\(tool.rawValue)"
@@ -71,6 +74,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case "repoReadinessChecklist": self = .repoReadinessChecklist
         case "mcpServerInventory": self = .mcpServerInventory
         case "agentPRMonitor": self = .agentPRMonitor
+        case "pullRequestReviewDesk": self = .pullRequestReviewDesk
         case "backupBrowser": self = .backupBrowser
         case "packageMaintenance": self = .packageMaintenance
         default: return nil
@@ -98,6 +102,9 @@ nonisolated enum SidebarScope: Hashable, Sendable {
             FeatureFlag.mcpServerInventory.isEnabled
         case .agentPRMonitor:
             FeatureFlag.agentPRMonitor.isEnabled
+        case .pullRequestReviewDesk:
+            FeatureFlag.pullRequestReviewDesk.isEnabled
+                && FeatureFlag.agentPRMonitor.isEnabled
         case .backupBrowser:
             FeatureFlag.backupBrowser.isEnabled
         case .packageMaintenance:
@@ -125,6 +132,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case .repoReadinessChecklist: String(localized: "Repo Readiness")
         case .mcpServerInventory: String(localized: "MCP Inventory")
         case .agentPRMonitor: String(localized: "Agent PR Monitor")
+        case .pullRequestReviewDesk: String(localized: "Review Desk")
         case .backupBrowser: String(localized: "Backups")
         case .packageMaintenance: String(localized: "Software Updates")
         case .aiTool(let tool): tool.displayName

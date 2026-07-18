@@ -232,6 +232,19 @@ denied or rate-limited repository does not hide successful rows from other
 watched repositories. REST fallback is limited to missing status/check data
 when GraphQL does not return a status rollup.
 
+### `pullRequestReviewDesk` — maturity: alpha
+
+Enables the native GitHub pull request workbench for one focused review at a
+time. The Review Desk fully loads summary, checks, approvals, top-level
+conversation comments, and inline review threads before it enables actions.
+Replies and thread resolution use focused controls; Ready for Review and merge
+use fresh state-bound preflights and risk-based confirmation.
+
+GitHub App Device Flow is the only write-capable authorization source. Existing
+fine-grained personal access tokens remain read-only for migration and monitor
+compatibility. The destination is visible only while `agentPRMonitor` is also
+enabled.
+
 ### `backupBrowser` — maturity: alpha
 
 Safety section for browsing CodingBuddy's managed backup directory. It lists

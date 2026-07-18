@@ -30,6 +30,14 @@ struct SettingsView: View {
         case maintenance
     }
 
+    /// Credential source requested after an explicit cross-source confirmation.
+    nonisolated private enum GitHubCredentialDestination {
+        /// Rotating GitHub App user credential with Review Desk write capability.
+        case githubApp
+        /// User-managed fine-grained token restricted to read-only app behavior.
+        case readOnlyToken
+    }
+
     @Environment(\.dismiss) private var dismiss
     @State private var pane: Pane
     @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.auto.rawValue
@@ -47,8 +55,12 @@ struct SettingsView: View {
     var onGitHubAuthorizationChange: (GitHubAuthorizationChange) -> Void
     /// Whether the GitHub token replacement sheet is visible.
     @State private var showsGitHubTokenSheet = false
+    /// Whether GitHub App device-flow setup is visible.
+    @State private var showsGitHubAppSignInSheet = false
     /// Whether the GitHub token removal confirmation is visible.
     @State private var showsRemoveGitHubTokenConfirmation = false
+    /// Cross-source transition awaiting an explicit capability warning.
+    @State private var pendingCredentialDestination: GitHubCredentialDestination?
 
     /// Creates the settings sheet with an optional initial pane.
     init(
@@ -162,20 +174,19 @@ struct SettingsView: View {
                 Section {
                     VStack(alignment: .leading, spacing: 10) {
                         githubAuthorizationStatusLabel
-                        HStack(spacing: 8) {
-                            Button(githubAuthorizationStore.hasSavedToken ? "Replace Token..." : "Add Token...") {
-                                showsGitHubTokenSheet = true
+                        ViewThatFits(in: .horizontal) {
+                            HStack(spacing: 8) {
+                                githubAuthorizationButtons
                             }
-                            Button("Remove Token", role: .destructive) {
-                                showsRemoveGitHubTokenConfirmation = true
+                            VStack(alignment: .leading, spacing: 8) {
+                                githubAuthorizationButtons
                             }
-                            .disabled(!githubAuthorizationStore.hasSavedToken)
                         }
                     }
                 } header: {
-                    Text("GitHub token")
+                    Text("GitHub authorization")
                 } footer: {
-                    Text("Used by Agent PR Monitor to read pull request, issue, check, and review status from GitHub.")
+                    Text("GitHub App sign-in enables Review Desk actions. A fine-grained token remains available for read-only monitoring.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -203,15 +214,165 @@ struct SettingsView: View {
                 onGitHubAuthorizationChange(.saved)
             }
         }
-        .confirmationDialog("Remove GitHub token?", isPresented: $showsRemoveGitHubTokenConfirmation) {
-            Button("Remove Token", role: .destructive) {
-                if githubAuthorizationStore.deleteToken() {
-                    onGitHubAuthorizationChange(.removed)
+        .sheet(isPresented: $showsGitHubAppSignInSheet) {
+            GitHubAppSignInSheet(store: githubAuthorizationStore) {
+                onGitHubAuthorizationChange(.saved)
+            }
+        }
+        .confirmationDialog(removeCredentialTitle, isPresented: $showsRemoveGitHubTokenConfirmation) {
+            Button(role: .destructive) {
+                Task {
+                    if await githubAuthorizationStore.deleteToken() {
+                        onGitHubAuthorizationChange(.removed)
+                    }
                 }
+            } label: {
+                Text(verbatim: removeCredentialButtonTitle)
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This removes the token from Keychain. You will need to add a token again to use Agent PR Monitor.")
+            Text(verbatim: removeCredentialMessage)
+        }
+        .confirmationDialog(
+            credentialSwitchTitle,
+            isPresented: Binding(
+                get: { pendingCredentialDestination != nil },
+                set: { if !$0 { pendingCredentialDestination = nil } }
+            )
+        ) {
+            Button(credentialSwitchButtonTitle) { confirmCredentialSwitch() }
+            Button("Cancel", role: .cancel) { pendingCredentialDestination = nil }
+        } message: {
+            Text(verbatim: credentialSwitchMessage)
+        }
+    }
+
+    /// Authorization commands arranged by the parent layout without duplicating behavior.
+    @ViewBuilder private var githubAuthorizationButtons: some View {
+        Button(githubAppButtonTitle) {
+            requestCredentialDestination(.githubApp)
+        }
+        .buttonStyle(.borderedProminent)
+        Button(readOnlyTokenButtonTitle) {
+            requestCredentialDestination(.readOnlyToken)
+        }
+        Button(removeCredentialCommandTitle, role: .destructive) {
+            showsRemoveGitHubTokenConfirmation = true
+        }
+        .disabled(!githubAuthorizationStore.hasSavedToken)
+    }
+
+    /// Source-aware label for connecting, switching, or reconnecting the GitHub App.
+    private var githubAppButtonTitle: String {
+        switch githubAuthorizationStore.credentialSource {
+        case .githubAppDeviceFlow: String(localized: "Reconnect GitHub App...")
+        case .fineGrainedPersonalAccessToken: String(localized: "Switch to GitHub App...")
+        case nil: String(localized: "Sign in with GitHub...")
+        }
+    }
+
+    /// Source-aware label for adding, replacing, or switching to a read-only token.
+    private var readOnlyTokenButtonTitle: String {
+        switch githubAuthorizationStore.credentialSource {
+        case .githubAppDeviceFlow: String(localized: "Switch to Read-only Token...")
+        case .fineGrainedPersonalAccessToken: String(localized: "Replace Read-only Token...")
+        case nil: String(localized: "Add Read-only Token...")
+        }
+    }
+
+    /// Source-aware destructive command label.
+    private var removeCredentialCommandTitle: String {
+        githubAuthorizationStore.credentialSource == .githubAppDeviceFlow
+            ? String(localized: "Disconnect GitHub App...")
+            : String(localized: "Remove Token")
+    }
+
+    /// Opens a same-source flow immediately and confirms every capability-changing switch.
+    private func requestCredentialDestination(_ destination: GitHubCredentialDestination) {
+        let isCrossSource = switch (githubAuthorizationStore.credentialSource, destination) {
+        case (.githubAppDeviceFlow?, .readOnlyToken),
+             (.fineGrainedPersonalAccessToken?, .githubApp): true
+        default: false
+        }
+        if isCrossSource {
+            pendingCredentialDestination = destination
+        } else {
+            presentCredentialDestination(destination)
+        }
+    }
+
+    /// Consumes the source-switch warning before opening the destination flow.
+    private func confirmCredentialSwitch() {
+        guard let destination = pendingCredentialDestination else { return }
+        pendingCredentialDestination = nil
+        presentCredentialDestination(destination)
+    }
+
+    /// Presents one credential flow without mutating Keychain until that flow succeeds.
+    private func presentCredentialDestination(_ destination: GitHubCredentialDestination) {
+        switch destination {
+        case .githubApp:
+            githubAuthorizationStore.clearSignInError()
+            showsGitHubAppSignInSheet = true
+        case .readOnlyToken:
+            showsGitHubTokenSheet = true
+        }
+    }
+
+    /// Capability-specific title for a cross-source credential replacement.
+    private var credentialSwitchTitle: String {
+        switch pendingCredentialDestination {
+        case .githubApp: String(localized: "Switch to the GitHub App?")
+        case .readOnlyToken: String(localized: "Switch to a read-only token?")
+        case nil: ""
+        }
+    }
+
+    /// Capability-specific confirmation command.
+    private var credentialSwitchButtonTitle: String {
+        switch pendingCredentialDestination {
+        case .githubApp: String(localized: "Continue to GitHub Sign-in")
+        case .readOnlyToken: String(localized: "Continue to Token Entry")
+        case nil: ""
+        }
+    }
+
+    /// Explains the exact capability change before replacing the current source.
+    private var credentialSwitchMessage: String {
+        switch pendingCredentialDestination {
+        case .githubApp:
+            String(localized: "A successful GitHub App sign-in replaces the read-only token and enables Review Desk write actions.")
+        case .readOnlyToken:
+            String(localized: "Saving a read-only token disconnects the GitHub App and disables Review Desk write actions.")
+        case nil:
+            ""
+        }
+    }
+
+    /// Credential-specific confirmation title that does not mislabel a GitHub App connection.
+    private var removeCredentialTitle: String {
+        if githubAuthorizationStore.credentialSource == .githubAppDeviceFlow {
+            String(localized: "Disconnect GitHub App?")
+        } else {
+            String(localized: "Remove GitHub token?")
+        }
+    }
+
+    /// Credential-specific destructive button label.
+    private var removeCredentialButtonTitle: String {
+        if githubAuthorizationStore.credentialSource == .githubAppDeviceFlow {
+            String(localized: "Disconnect")
+        } else {
+            String(localized: "Remove Token")
+        }
+    }
+
+    /// Credential-specific impact description for the destructive confirmation.
+    private var removeCredentialMessage: String {
+        if githubAuthorizationStore.credentialSource == .githubAppDeviceFlow {
+            String(localized: "This removes the GitHub App credential from Keychain. Review Desk actions and pull request monitoring will require another sign-in.")
+        } else {
+            String(localized: "This removes the read-only token from Keychain. Pull request monitoring will require another token or GitHub App sign-in.")
         }
     }
 
@@ -219,7 +380,15 @@ struct SettingsView: View {
     @ViewBuilder private var githubAuthorizationStatusLabel: some View {
         switch githubAuthorizationStore.state {
         case .authorized:
-            Label("Token saved", systemImage: "checkmark.seal.fill")
+            Label {
+                Text(
+                    githubAuthorizationStore.credentialSource == .githubAppDeviceFlow
+                        ? String(localized: "GitHub App connected")
+                        : String(localized: "Read-only token saved")
+                )
+            } icon: {
+                Image(systemName: "checkmark.seal.fill")
+            }
                 .foregroundStyle(.green)
         case .missing:
             Label("No token saved", systemImage: "key")
@@ -388,11 +557,11 @@ private struct GitHubTokenSettingsSheet: View {
     /// Compact token setup form.
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("GitHub Token")
+            Text("Read-only GitHub Token")
                 .font(.title3)
                 .fontWeight(.semibold)
 
-            Text("Use a fine-grained personal access token with read-only Metadata, Pull requests, Issues, Checks, and Commit statuses permissions.")
+            Text("For monitoring, use a fine-grained token with read-only Metadata, Pull requests, Issues, Checks, and Commit statuses. Read-only Review Desk inspection also requires Administration: read. CodingBuddy never uses this token for writes.")
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -409,9 +578,11 @@ private struct GitHubTokenSettingsSheet: View {
                 Spacer()
                 Button("Cancel", role: .cancel) { dismiss() }
                 Button("Save Token") {
-                    if store.saveToken(token) {
-                        onSaved()
-                        dismiss()
+                    Task {
+                        if await store.saveToken(token) {
+                            onSaved()
+                            dismiss()
+                        }
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -420,6 +591,126 @@ private struct GitHubTokenSettingsSheet: View {
         }
         .padding(20)
         .frame(width: 460)
+    }
+}
+
+/// Native GitHub App device-flow sheet with a short-lived browser code.
+private struct GitHubAppSignInSheet: View {
+    /// Asynchronous device-flow element that VoiceOver should announce next.
+    nonisolated private enum AccessibilityTarget: Hashable {
+        /// One-time code and its copy action are ready.
+        case code
+        /// CodingBuddy is waiting for GitHub approval.
+        case waiting
+        /// A token-safe error requires attention.
+        case error
+    }
+
+    /// Authorization store that owns token-safe device-flow operations.
+    var store: GitHubAuthorizationStore
+    /// Called after the credential bundle reaches Keychain.
+    var onSaved: () -> Void
+
+    /// Dismisses the sheet after success or cancellation.
+    @Environment(\.dismiss) private var dismiss
+    /// Short-lived authorization retained only while this sheet exists.
+    @State private var authorization: GitHubDeviceAuthorization?
+    /// Whether the initial device-code request is running.
+    @State private var isRequesting = true
+    /// Whether CodingBuddy is polling for browser approval.
+    @State private var isWaiting = false
+    /// Stable task identity incremented only for an explicit retry.
+    @State private var signInAttempt = 0
+    /// VoiceOver follows code, waiting, and error transitions driven by async work.
+    @AccessibilityFocusState private var accessibilityTarget: AccessibilityTarget?
+
+    /// Device-flow status and browser actions.
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Sign in with GitHub")
+                .font(.title3)
+                .fontWeight(.semibold)
+
+            if isRequesting {
+                ProgressView("Requesting a secure sign-in code...")
+                    .controlSize(.small)
+            } else if let authorization {
+                Text("Enter this one-time code on GitHub. CodingBuddy will continue when access is approved.")
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 10) {
+                    Text(authorization.userCode)
+                        .font(.system(.title2, design: .monospaced, weight: .semibold))
+                        .textSelection(.enabled)
+                        .accessibilityLabel("GitHub sign-in code")
+                        .accessibilityValue(authorization.userCode)
+                        .accessibilityFocused($accessibilityTarget, equals: .code)
+                    Button {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(authorization.userCode, forType: .string)
+                    } label: {
+                        Image(systemName: "doc.on.doc")
+                    }
+                    .help("Copy code")
+                    .accessibilityLabel("Copy GitHub sign-in code")
+                    .accessibilityHint("Copies the one-time code to the clipboard.")
+                    Button("Open GitHub") {
+                        NSWorkspace.shared.open(authorization.verificationURL)
+                    }
+                    .accessibilityHint("Opens the secure GitHub device authorization page.")
+                }
+
+                if isWaiting {
+                    ProgressView("Waiting for GitHub approval...")
+                        .controlSize(.small)
+                }
+            }
+
+            if let error = store.signInError {
+                Label(error, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .accessibilityFocused($accessibilityTarget, equals: .error)
+            }
+
+            HStack {
+                Spacer()
+                Button("Cancel", role: .cancel) { dismiss() }
+                if store.signInError != nil {
+                    Button("Try Again") {
+                        store.clearSignInError()
+                        authorization = nil
+                        isRequesting = true
+                        signInAttempt += 1
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+        }
+        .padding(20)
+        .frame(width: 480)
+        .task(id: signInAttempt) {
+            guard let requested = await store.beginGitHubAppSignIn() else {
+                isRequesting = false
+                return
+            }
+            authorization = requested
+            isRequesting = false
+            accessibilityTarget = .code
+            isWaiting = true
+            AccessibilityNotification.Announcement(
+                String(localized: "GitHub sign-in code is ready. Copy it, then open GitHub to continue.")
+            ).post()
+            let saved = await store.completeGitHubAppSignIn(requested)
+            isWaiting = false
+            if saved {
+                onSaved()
+                dismiss()
+            } else if store.signInError != nil {
+                accessibilityTarget = .error
+            }
+        }
     }
 }
 
