@@ -31,7 +31,7 @@ struct SettingsView: View {
     }
 
     /// Credential source requested after an explicit cross-source confirmation.
-    private enum GitHubCredentialDestination {
+    nonisolated private enum GitHubCredentialDestination {
         /// Rotating GitHub App user credential with Review Desk write capability.
         case githubApp
         /// User-managed fine-grained token restricted to read-only app behavior.
@@ -597,7 +597,7 @@ private struct GitHubTokenSettingsSheet: View {
 /// Native GitHub App device-flow sheet with a short-lived browser code.
 private struct GitHubAppSignInSheet: View {
     /// Asynchronous device-flow element that VoiceOver should announce next.
-    private enum AccessibilityTarget: Hashable {
+    nonisolated private enum AccessibilityTarget: Hashable {
         /// One-time code and its copy action are ready.
         case code
         /// CodingBuddy is waiting for GitHub approval.
