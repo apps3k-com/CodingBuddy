@@ -23,6 +23,8 @@ nonisolated enum SidebarScope: Hashable, Sendable {
     case repoReadinessChecklist
     /// Cross-tool MCP server inventory.
     case mcpServerInventory
+    /// Unified inventory and hygiene findings for local agent capabilities.
+    case capabilityHygiene
     /// GitHub pull request monitor for agent follow-up.
     case agentPRMonitor
     /// Focused GitHub pull request conversation, checks, and action workbench.
@@ -45,6 +47,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case .agentContextInspector: "agentContextInspector"
         case .repoReadinessChecklist: "repoReadinessChecklist"
         case .mcpServerInventory: "mcpServerInventory"
+        case .capabilityHygiene: "capabilityHygiene"
         case .agentPRMonitor: "agentPRMonitor"
         case .pullRequestReviewDesk: "pullRequestReviewDesk"
         case .backupBrowser: "backupBrowser"
@@ -73,6 +76,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case "agentContextInspector": self = .agentContextInspector
         case "repoReadinessChecklist": self = .repoReadinessChecklist
         case "mcpServerInventory": self = .mcpServerInventory
+        case "capabilityHygiene": self = .capabilityHygiene
         case "agentPRMonitor": self = .agentPRMonitor
         case "pullRequestReviewDesk": self = .pullRequestReviewDesk
         case "backupBrowser": self = .backupBrowser
@@ -99,7 +103,9 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case .repoReadinessChecklist:
             FeatureFlag.repoReadinessChecklist.isEnabled
         case .mcpServerInventory:
-            FeatureFlag.mcpServerInventory.isEnabled
+            FeatureFlag.mcpServerInventory.isEnabled && !FeatureFlag.capabilityHygiene.isEnabled
+        case .capabilityHygiene:
+            FeatureFlag.capabilityHygiene.isEnabled
         case .agentPRMonitor:
             FeatureFlag.agentPRMonitor.isEnabled
         case .pullRequestReviewDesk:
@@ -131,6 +137,7 @@ nonisolated enum SidebarScope: Hashable, Sendable {
         case .agentContextInspector: String(localized: "Agent Context")
         case .repoReadinessChecklist: String(localized: "Repo Readiness")
         case .mcpServerInventory: String(localized: "MCP Inventory")
+        case .capabilityHygiene: String(localized: "Capability Hygiene")
         case .agentPRMonitor: String(localized: "Agent PR Monitor")
         case .pullRequestReviewDesk: String(localized: "Review Desk")
         case .backupBrowser: String(localized: "Backups")
@@ -165,6 +172,10 @@ nonisolated enum SidebarSelectionState {
 
     /// Returns the stored enabled destination, or the stable all-variables fallback.
     static func restoredScope(storageValue: String) -> SidebarScope {
+        if storageValue == SidebarScope.mcpServerInventory.storageID,
+           FeatureFlag.capabilityHygiene.isEnabled {
+            return .capabilityHygiene
+        }
         guard let scope = SidebarScope(storageID: storageValue), scope.isEnabled else {
             return .all
         }

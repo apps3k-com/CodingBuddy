@@ -121,6 +121,7 @@ struct CodingBuddyApp: App {
             }
             EnvironmentTransferCommands()
             CredentialCommands(menuActions: menuActions)
+            InspectorCommands()
             CommandGroup(replacing: .help) {
                 Button("CodingBuddy Help") {
                     NSWorkspace.shared.open(HelpDestination.userGuide.url)

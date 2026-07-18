@@ -89,4 +89,172 @@ struct TOMLReaderTests {
         #expect(table.string(at: ["key"]) == "value")
         #expect(table.int(at: ["other"]) == 1)
     }
+
+    @Test func diagnosticsRejectCanonicalDuplicateKeysWithoutOverwritingFirstValue() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        key = "first"
+        "key" = "second"
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["key"]) == "first")
+    }
+
+    @Test func diagnosticsRejectCanonicalDuplicateTablesWithTrailingComments() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [mcp_servers.review] # first declaration
+        command = "review"
+
+        [mcp_servers."review"] # duplicate canonical path
+        enabled = false
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "review")
+        #expect(result.table.value(at: ["mcp_servers", "review", "enabled"]) == nil)
+    }
+
+    /// Rejected headers suppress their body without preventing a later valid table from parsing.
+    @Test func diagnosticsSkipRejectedTableBodyUntilNextValidHeader() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [mcp_servers.review]
+        command = "review"
+
+        [mcp_servers.review]
+        leaked = "must-not-merge"
+
+        [mcp_servers.context]
+        command = "context"
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.value(at: ["mcp_servers", "review", "leaked"]) == nil)
+        #expect(result.table.string(at: ["mcp_servers", "context", "command"]) == "context")
+    }
+
+    @Test func diagnosticsRejectValueThenTablePathCollision() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        mcp_servers.review = { command = "first" }
+
+        [mcp_servers.review]
+        command = "second"
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "first")
+    }
+
+    @Test func diagnosticsRejectTableThenValuePathCollision() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [mcp_servers.review]
+        command = "first"
+
+        [mcp_servers]
+        review = { command = "second" }
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "first")
+    }
+
+    @Test func diagnosticsRejectDottedKeyParentReopenedAsTable() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        mcp_servers.review.command = "first"
+
+        [mcp_servers.review]
+        enabled = true
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "first")
+    }
+
+    @Test func deeperHeaderMayDeclareItsImplicitParentLater() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [mcp_servers.review.tools.inspect]
+        enabled = true
+
+        [mcp_servers.review]
+        command = "review"
+        """)
+
+        #expect(result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "review")
+        #expect(result.table.bool(at: ["mcp_servers", "review", "tools", "inspect", "enabled"]) == true)
+    }
+
+    @Test func dottedTraversalClosesAnImplicitHeaderParent() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [a.b.c]
+        x = 1
+
+        [a]
+        b.d = 2
+
+        [a.b]
+        e = 3
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.int(at: ["a", "b", "c", "x"]) == 1)
+        #expect(result.table.int(at: ["a", "b", "d"]) == 2)
+    }
+
+    @Test func diagnosticsRejectEmptyArrayAndInlineTableMembers() {
+        let arrayResult = TOMLReader.parseWithDiagnostics("values = [1,,2]")
+        let tableResult = TOMLReader.parseWithDiagnostics("values = { a = 1,, b = 2 }")
+
+        #expect(!arrayResult.isComplete)
+        #expect(arrayResult.table.value(at: ["values"]) == nil)
+        #expect(!tableResult.isComplete)
+        #expect(tableResult.table.value(at: ["values"]) == nil)
+    }
+
+    @Test func diagnosticsRejectDuplicateCanonicalInlineTableKeys() {
+        let result = TOMLReader.parseWithDiagnostics("values = { key = 1, \"key\" = 2 }")
+
+        #expect(!result.isComplete)
+        #expect(result.table.value(at: ["values"]) == nil)
+    }
+
+    @Test func emptyContainersAndTrailingArrayCommaRemainValid() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        empty_array = []
+        empty_table = {}
+        values = [1, 2,]
+        """)
+
+        #expect(result.isComplete)
+        #expect(result.table.value(at: ["empty_array"]) == .array([]))
+        #expect(result.table.value(at: ["empty_table"]) == .table([:]))
+        #expect(result.table.value(at: ["values"]) == .array([.int(1), .int(2)]))
+    }
+
+    /// Rejects trailing tokens after strings instead of accepting a misleading partial value.
+    @Test func diagnosticsRejectTrailingStringTokens() {
+        let result = TOMLReader.parseWithDiagnostics("""
+        [mcp_servers.review]
+        command = "review"
+        enabled = "false" trailing
+        """)
+
+        #expect(!result.isComplete)
+        #expect(result.table.string(at: ["mcp_servers", "review", "command"]) == "review")
+        #expect(result.table.value(at: ["mcp_servers", "review", "enabled"]) == nil)
+    }
+
+    /// Keeps bounded adversarial multiline arrays linear enough for an interactive scan.
+    @Test func largeMultilineArrayParsesWithinInteractiveBudget() {
+        let values = Array(repeating: "  \"argument\",", count: 12_000).joined(separator: "\n")
+        let input = "args = [\n\(values)\n]\n"
+        let clock = ContinuousClock()
+        let start = clock.now
+
+        let result = TOMLReader.parseWithDiagnostics(input)
+        let elapsed = clock.now - start
+
+        #expect(result.isComplete)
+        #expect(result.table.stringArray(at: ["args"])?.count == 12_000)
+        #expect(elapsed < .seconds(5))
+    }
 }

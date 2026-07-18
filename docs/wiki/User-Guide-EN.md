@@ -210,6 +210,62 @@ The **MCP Inventory** entry (alpha) is a read-only table of MCP servers discover
 
 v1 limits: MCP Inventory does not edit, install, network-test, or authenticate with servers. **Configured** means that the scan recognized the local definition and did not prove a missing variable; it does not prove that the definition is complete, the server is reachable, or authentication will succeed. Claude Code and Cursor rows show configured `env` and header keys only; they do not infer missing variables from command text.
 
+### Capability Hygiene
+
+With the alpha **Capability Hygiene** flag enabled, **Health & Security →
+Capabilities** broadens MCP Inventory into one read-only view of configured MCP
+servers, standalone skills, and plugins proven installed by a supported
+authoritative registry. v1 currently reads Claude Code's installed-plugin
+registry; Codex `plugins.*` configuration overrides do not prove installation.
+
+- The **Findings** view starts with exact duplicates, deterministic shadowing,
+  and clearly advisory possible overlaps. **Inventory** keeps every discovered occurrence
+  visible, including the source, consumer, effective scope, repository context,
+  registration and tri-state activation evidence, declared permission names, HTTP header names,
+  and secret-reference names.
+- Exact duplicates require the same kind and exact runtime identity plus a
+  complete versioned canonical behavior fingerprint. Public definitions use a
+  versioned hash. Secret-bearing definitions use a keyed equality token that is
+  valid only during the current scan; CodingBuddy does not retain a reusable
+  secret hash. Unsupported or unknown behavior makes exact matching unavailable.
+- Shadowing appears only when a typed provider rule identifies a winner and
+  loser for an explicit repository or working-directory evaluation context.
+  Their declaration scopes may differ. **Possible overlap** uses conservative,
+  provider-aware tokens from names only; descriptions and natural-language
+  analysis do not contribute.
+- Coverage details list partial, refused, and unsupported sources and their
+  value-free reasons. Files or trees that change during inspection, malformed
+  schemas, scanner byte/entry/depth/project limits, and possible-overlap analysis
+  caps all leave coverage incomplete. Verified rows remain visible, and an
+  incomplete scan never becomes an empty all-clear state.
+- Coverage details group matching reasons into collapsible sections with counts,
+  so a large failure set is not rendered up front as one unstructured list.
+- Only explicitly enabled occurrences participate in relation findings.
+  Disabled or context-dependent entries remain visible as **No** or **Unknown**.
+  Codex's `enabled` field and Claude's user plugin `enabledPlugins` setting are
+  explicit evidence. Claude and Cursor MCP definitions remain **Unknown** because
+  static configuration does not prove provider policy, approval, or UI
+  disablement. If Claude's exclusive system `managed-mcp.json` exists,
+  CodingBuddy marks the managed policy incomplete; v1 emits no Claude MCP
+  precedence claim without effective activation evidence.
+- Select a finding to inspect its relation evidence, including the similarity
+  signal or the provider rule, evaluation context, winner, and shadowed
+  occurrence. Select an inventory row to inspect repository usage, registration
+  and tri-state activation evidence, permission and secret-reference names, and HTTP header names.
+- The only actions are **Refresh** and **Copy Source Paths**. Capability Hygiene
+  never opens source files, deletes, disables, installs, updates, executes, or
+  rewrites a capability.
+- Secret values are never displayed or stored in findings. The inventory shows
+  only safe names such as referenced environment variables, header keys, or
+  declared permission identifiers. Runtime reachability, effective OAuth scopes,
+  trust, and whether a capability is actually used remain unknown unless a local
+  source proves them.
+
+v1 limits: Capability Hygiene does not launch servers, probe remote tools,
+calculate universal token savings, infer that a capability is unused, or assign
+a runtime-health or security score. Permission and scope interpretation remain
+owned by the MCP Risk Auditor and Token/Scope Map roadmap.
+
 ### Agent PR Monitor
 
 The **Repositories → Agent PR Monitor** entry (alpha) is a read-only table for open GitHub pull requests across a watched repository list. Each row is classified as likely agent, likely human or unknown.

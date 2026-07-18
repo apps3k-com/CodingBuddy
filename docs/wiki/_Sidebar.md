@@ -7,6 +7,7 @@
 **🔧 Technical (EN)**
 - [Architecture](Architecture)
 - [Agent PR Monitor Design](Agent-PR-Monitor)
+- [Capability Hygiene](Capability-Hygiene)
 - [Pull Request Review Desk](Review-Desk)
 - [Data Model & Safety](Data-Model)
 - [Development Setup](Development-Setup)

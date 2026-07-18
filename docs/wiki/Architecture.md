@@ -314,6 +314,64 @@ values are visible only when every item is in that set; all custom and otherwise
 unrecognized values are masked. The inventory never claims that a locally
 recognized definition is reachable or authenticated.
 
+### Capability hygiene evidence boundary
+
+Capability Hygiene builds a read-only occurrence graph from bounded local MCP,
+skill, and installed-plugin adapters. A plugin occurrence requires an
+authoritative installation registry supported by its adapter; a configuration
+override such as Codex `plugins.*` is not installation evidence. The current v1
+plugin registry adapter is Claude Code's installed-plugin registry. Every adapter
+reports source completeness independently. Missing, malformed, refused,
+unsupported, descriptor- or tree-changing, or resource-limit-truncated sources
+therefore cannot collapse a partial scan into an empty successful snapshot.
+Limits cover individual and aggregate bytes, entries, traversal and JSON depth,
+and provider/project roots. Schema-shape failures are partial evidence rather
+than silently empty collections. Discovered commands remain inert data and are
+never executed.
+
+Relations are evidence-tiered. Exact duplicates require the same capability
+kind, exact runtime identity, and complete versioned canonical behavior. Public,
+non-secret definitions use a domain-separated SHA-256 equality token.
+Secret-bearing complete definitions use HMAC-SHA-256 with a fresh scan-local key
+that is discarded after analysis. Digests and source bytes are opaque to UI,
+persistence, logging, and export. An unknown or unsupported behavior-bearing
+field makes exact matching unavailable instead of producing a weaker hash.
+
+Shadowing is independent from exact matching. It requires equal typed identity
+and kind plus an adapter-supplied provider rule that names the winner, loser, and
+explicit repository or working-directory evaluation context. Declaration scopes
+may differ as long as both occurrences apply in that context; differing
+fingerprints are not required. Possible overlap compares only conservative,
+provider-aware tokens from distinct capability names within the same kind,
+consumer, and effective scope. Provider namespaces do not count as shared
+purpose, and descriptions or natural-language analysis never contribute.
+Comparison and output caps make advisory analysis partial instead of allowing
+unbounded pair growth.
+
+The UI keeps verified rows visible alongside source and analysis coverage
+details. Relation inspectors expose the exact evidence tier, including
+similarity evidence or the typed shadowing rule, evaluation context, winner, and
+loser. Occurrence inspectors expose safe repository usage, registration and
+tri-state activation evidence, permission identifiers, secret-reference names, and HTTP header
+names. The only commands are rescan and copy value-free source paths. Capability
+Hygiene does not open sources, delete, disable, rewrite, execute, install, or
+update anything.
+
+Relation analysis admits only explicitly enabled occurrences. Provider settings
+may prove enabled or disabled only where their schema is authoritative: Codex's
+`enabled` field and Claude's user plugin `enabledPlugins` map. Claude and Cursor
+MCP configuration remains unknown because effective policy, approval, and UI
+disablement are not fully represented by those static definitions. Malformed
+Codex TOML also downgrades recovered occurrences to unknown. Claude's exclusive
+system `managed-mcp.json` is checked before lower-scope scanning; v1 records
+incomplete policy coverage and emits no Claude MCP precedence claim without
+effective activation evidence.
+
+These fields are facts, not risk conclusions. The feature does not infer runtime
+tool availability or health, trust, approval, effective OAuth grants, actual
+usage, or token savings. Those interpretations remain owned by the MCP Risk
+Auditor and Token/Scope Map roadmap.
+
 ## Sandbox
 
 The app is deliberately **not sandboxed**: its purpose is reading and writing dotfiles in `$HOME`, which the App Sandbox forbids. Hardened runtime stays enabled. See [ADRs](ADRs).

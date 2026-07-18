@@ -229,6 +229,71 @@ Der Seitenleisten-Eintrag **MCP Inventory** (Alpha) ist eine Nur-Lese-Tabelle de
 
 v1-Grenzen: MCP Inventory bearbeitet, installiert, prüft und authentifiziert keine Server. **Konfiguriert** bedeutet, dass der Scan die lokale Definition erkannt und keine sicher fehlende Variable festgestellt hat; es beweist weder die Vollständigkeit der Definition noch Erreichbarkeit oder erfolgreiche Authentifizierung. Claude-Code- und Cursor-Zeilen zeigen nur konfigurierte `env`- und Header-Keys; sie leiten keine fehlenden Variablen aus Command-Text ab.
 
+### Capability Hygiene
+
+Mit aktiviertem Alpha-Flag **Capability Hygiene** erweitert **Zustand &
+Sicherheit → Capabilities** die MCP Inventory zu einer gemeinsamen
+Nur-Lese-Ansicht für konfigurierte MCP-Server, eigenständige Skills und Plugins,
+deren Installation ein unterstütztes autoritatives Register belegt. v1 liest
+derzeit das Installationsregister von Claude Code; Codex-`plugins.*`-Overrides
+sind kein Installationsnachweis.
+
+- **Befunde** beginnt mit exakten Duplikaten, deterministischem Shadowing und
+  klar beratend gekennzeichneten möglichen Überschneidungen. **Inventar** zeigt
+  jedes gefundene Vorkommen mit Quelle, Consumer, wirksamem Scope,
+  Repository-Kontext, Registrierungs- und Aktivierungszustand, deklarierten
+  Berechtigungsnamen, HTTP-Header-Namen und Secret-Referenznamen.
+- Exakte Duplikate benötigen dieselbe Art und exakte Laufzeitidentität sowie
+  einen vollständigen, versionierten kanonischen Verhaltens-Fingerprint.
+  Öffentliche Definitionen verwenden einen versionierten Hash. Secret-haltige
+  Definitionen verwenden ein schlüsselgebundenes Gleichheits-Token, das nur
+  während des aktuellen Scans gültig ist; CodingBuddy speichert keinen
+  wiederverwendbaren Secret-Hash.
+  Bei unbekanntem oder nicht unterstütztem Verhalten ist exaktes Matching nicht
+  verfügbar.
+- Shadowing erscheint nur, wenn eine typisierte Provider-Regel Gewinner und
+  Verlierer für einen expliziten Repository- oder Arbeitsverzeichnis-Kontext
+  benennt. Ihre Deklarations-Scopes dürfen sich unterscheiden. **Mögliche
+  Überschneidung** nutzt ausschließlich konservative, Provider-bewusste Tokens
+  aus Namen; Beschreibungen und Natural-Language-Analyse fließen nicht ein.
+- Abdeckungsdetails listen teilweise, verweigerte und nicht unterstützte Quellen
+  mit wertfreien Gründen auf. Während der Prüfung veränderte Dateien oder Bäume,
+  fehlerhafte Schemas, Scanner-Limits für Bytes, Einträge, Tiefe oder Projekte
+  sowie Analyse-Caps für mögliche Überschneidungen lassen die Abdeckung
+  unvollständig. Geprüfte Zeilen bleiben sichtbar; ein unvollständiger Scan wird
+  niemals zu einem leeren Alles-in-Ordnung-Zustand.
+- Abdeckungsdetails gruppieren gleiche Gründe in aufklappbare Abschnitte mit
+  Anzahl, damit große Fehlermengen nicht als eine vollständig vorab erzeugte Flachliste
+  dargestellt werden.
+- Nur ausdrücklich aktivierte Vorkommen fließen in Beziehungsbefunde ein.
+  Deaktivierte oder kontextabhängige Einträge bleiben mit **Nein** oder
+  **Unbekannt** sichtbar. Codex' `enabled`-Feld und Claudes nutzerbezogene
+  Plugin-Einstellung `enabledPlugins` sind explizite Evidenz. Claude- und
+  Cursor-MCP-Definitionen bleiben **Unbekannt**, weil statische Konfiguration
+  Provider-Policy, Freigabe und UI-Deaktivierung nicht vollständig belegt.
+  Existiert Claudes exklusive systemweite `managed-mcp.json`, markiert
+  CodingBuddy die Managed Policy als unvollständige Evidenz; v1 erzeugt ohne
+  belegte effektive Aktivierung keine Claude-MCP-Precedence-Aussage.
+- Wähle einen Befund, um seine Relationsevidenz einschließlich Ähnlichkeitssignal
+  oder Provider-Regel, Auswertungskontext, Gewinner und das verdrängte Vorkommen
+  zu prüfen. Eine Inventarzeile zeigt Repository-Nutzung, Registrierungs- und
+  Aktivierungszustand, Berechtigungs- und Secret-Referenznamen sowie
+  HTTP-Header-Namen.
+- Die einzigen Aktionen sind **Aktualisieren** und **Quellpfade kopieren**.
+  Capability Hygiene öffnet keine Quelldateien und löscht, deaktiviert,
+  installiert, aktualisiert, startet oder überschreibt keine Capability.
+- Secret-Werte werden weder angezeigt noch in Befunden gespeichert. Das Inventar
+  zeigt nur sichere Namen wie referenzierte Environment-Variablen, Header-Keys
+  oder deklarierte Berechtigungskennungen. Laufzeit-Erreichbarkeit, wirksame
+  OAuth-Scopes, Vertrauen und tatsächliche Nutzung bleiben unbekannt, sofern
+  keine lokale Quelle sie belegt.
+
+v1-Grenzen: Capability Hygiene startet keine Server, prüft keine Remote-Tools,
+berechnet keine universellen Token-Einsparungen, erklärt keine Capability für
+ungenutzt und vergibt weder einen Laufzeit-Health- noch einen Sicherheits-Score.
+Die Interpretation von Berechtigungen und Scopes bleibt Aufgabe der Roadmap für
+MCP Risk Auditor und Token/Scope Map.
+
 ### Agent PR Monitor
 
 Der Seitenleisten-Eintrag **Repositories → Agent PR Monitor** (Alpha) ist eine Nur-Lese-Tabelle für offene GitHub-Pull-Requests über eine überwachte Repository-Liste hinweg. Jede Zeile wird als vermutlich Agent, vermutlich Mensch oder unbekannt klassifiziert.

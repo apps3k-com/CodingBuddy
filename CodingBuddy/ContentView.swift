@@ -113,7 +113,12 @@ struct ContentView: View {
         FeatureFlag.repoReadinessChecklist.isEnabled ? RepoReadinessStore() : nil
     /// MCP Inventory store when the feature flag is enabled.
     @State private var mcpServerInventoryStore: MCPServerInventoryStore? =
-        FeatureFlag.mcpServerInventory.isEnabled ? MCPServerInventoryStore() : nil
+        FeatureFlag.mcpServerInventory.isEnabled && !FeatureFlag.capabilityHygiene.isEnabled
+            ? MCPServerInventoryStore()
+            : nil
+    /// Capability Hygiene store when the feature flag is enabled.
+    @State private var capabilityHygieneStore: CapabilityHygieneStore? =
+        FeatureFlag.capabilityHygiene.isEnabled ? CapabilityHygieneStore() : nil
     /// GitHub authorization state shared between Settings and Agent PR Monitor.
     @State private var githubAuthorizationStore: GitHubAuthorizationStore
     /// Agent PR Monitor store when the feature flag is enabled.
@@ -213,7 +218,8 @@ struct ContentView: View {
                         }
                     }
                 }
-                if FeatureFlag.mcpAuthManager.isEnabled || agentDoctorStore != nil || mcpServerInventoryStore != nil {
+                if FeatureFlag.mcpAuthManager.isEnabled || agentDoctorStore != nil
+                    || mcpServerInventoryStore != nil || capabilityHygieneStore != nil {
                     sidebarSection(.healthSecurity) {
                         Text("Health & Security")
                     } content: {
@@ -238,7 +244,11 @@ struct ContentView: View {
                                 .badge(agentDoctorStore.problemCount)
                                 .tag(SidebarScope.agentDoctor)
                         }
-                        if let mcpServerInventoryStore {
+                        if let capabilityHygieneStore {
+                            Label("Capabilities", systemImage: "wrench.and.screwdriver")
+                                .badge(capabilityHygieneStore.findingCount)
+                                .tag(SidebarScope.capabilityHygiene)
+                        } else if let mcpServerInventoryStore {
                             Label("MCP Inventory", systemImage: "server.rack")
                                 .badge(mcpServerInventoryStore.count)
                                 .tag(SidebarScope.mcpServerInventory)
@@ -247,6 +257,9 @@ struct ContentView: View {
                     .onAppear {
                         agentDoctorStore?.reload()
                         mcpServerInventoryStore?.reload()
+                        if capabilityHygieneStore?.phase == .idle {
+                            capabilityHygieneStore?.reload()
+                        }
                     }
                 }
                 if agentContextInspectorStore != nil || repoReadinessStore != nil
@@ -357,6 +370,12 @@ struct ContentView: View {
                     MCPServerInventoryView(store: mcpServerInventoryStore) { tool in
                         scope = .aiTool(tool)
                     }
+                } else {
+                    VariableListView(store: store, secrets: secrets, scope: .all)
+                }
+            case .capabilityHygiene:
+                if let capabilityHygieneStore {
+                    CapabilityHygieneView(store: capabilityHygieneStore)
                 } else {
                     VariableListView(store: store, secrets: secrets, scope: .all)
                 }

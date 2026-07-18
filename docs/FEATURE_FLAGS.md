@@ -213,6 +213,36 @@ v1 does not edit, install, or probe MCP servers and never displays secret
 values from environment blocks, URL credentials, query strings, or token-like
 command arguments.
 
+### `capabilityHygiene` — maturity: alpha
+
+Adds **Health & Security → Capabilities**, a read-only local inventory of
+configured MCP servers, standalone agent skills, and plugins proven installed by
+a supported authoritative registry (currently Claude Code). Codex `plugins.*`
+configuration overrides are not treated as installation evidence. The inventory
+normalizes consumer, effective scope, source, repository usage, registration and
+tri-state activation evidence, declared permission names, HTTP header names, and secret-reference
+names without displaying secret values.
+
+Exact matching is available only for complete supported behavior definitions:
+versioned public hashes cover non-secret content and scan-local keyed HMAC covers
+secret-bearing content without retaining a reusable secret hash. Shadowing needs
+a typed provider rule and explicit evaluation context; declaration scopes may
+differ. Possible overlap is conservative provider-aware name-token similarity,
+not description or natural-language analysis. Changing sources, malformed or
+unsupported schemas, scanner limits, and analyzer caps remain visible as partial
+coverage. v1 only rescans and copies source paths; it never opens, deletes,
+disables, rewrites, executes, installs, or updates a capability. Permission and
+secret interpretation is explicitly deferred to the separate MCP Risk Auditor
+and Token/Scope Map roadmap instead of claiming a complete security verdict.
+Only explicitly enabled occurrences enter relation analysis. Disabled or
+context-dependent occurrences stay visible as disabled or unknown. Codex's
+`enabled` field and Claude's user plugin `enabledPlugins` map are the supported
+explicit activation sources. Claude and Cursor MCP definitions remain unknown
+because static configuration does not include every provider policy or UI
+disablement. Claude's exclusive system `managed-mcp.json` is detected and
+reported as incomplete policy evidence; v1 emits no Claude MCP precedence claim
+without effective activation evidence.
+
 ### `agentPRMonitor` — maturity: alpha
 
 Read-only monitor for open GitHub pull requests across a watched repository
